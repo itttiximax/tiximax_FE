@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
 import { login } from "../Services/authService";
-import toast from "react-hot-toast"; // 👈 import toast
+import toast from "react-hot-toast";
 
 const SignIn = () => {
   const [username, setUsername] = useState("");
