@@ -2,6 +2,7 @@ import React from "react";
 import About from "./About";
 import DowApp from "./DowApp";
 import SideMenu from "./SideMenu"; // 👈 import SideMenu
+import ServicePage from "./ServicePage";
 
 const steps = [
   {
@@ -64,7 +65,9 @@ const Home = () => {
           ))}
         </div>
       </section>
-
+      <section className="py-24">
+        <ServicePage />
+      </section>
       {/* DowApp section */}
       <section className="py-24">
         <DowApp />

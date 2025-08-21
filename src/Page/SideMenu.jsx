@@ -1,11 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { ChevronRight, DollarSign, Tag, Truck, Home } from "lucide-react";
 
 const SideMenu = () => {
-  // nút nào đang được mở rộng (hiện text). null = không cái nào mở
-  const [activeIdx, setActiveIdx] = useState(null);
-  // còn giữ toggle tổng nếu bạn muốn ẩn/hiện cả cụm
-  const [isOpen, setIsOpen] = useState(true);
+  const [menuOpen, setMenuOpen] = React.useState(true);
 
   const items = [
     { icon: Home, label: "Trang chủ" },
@@ -15,54 +12,43 @@ const SideMenu = () => {
   ];
 
   return (
-    <div className="fixed top-1/2 left-0 -translate-y-1/2 z-50 flex flex-col items-start">
-      {/* Nút Toggle tổng (giữ lại nếu cần) */}
+    <div className="fixed top-1/2 left-0 -translate-y-1/2 z-50 flex flex-col items-start font-sans">
+      {/* Toggle button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="bg-gradient-to-r from-green-700 to-green-800 text-white p-3 rounded-r-md shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+        onClick={() => setMenuOpen(!menuOpen)}
+        className="bg-gray-800 text-white px-3 py-3 rounded-r-lg shadow-lg hover:bg-gray-900 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500"
+        aria-label="Toggle menu"
       >
         <ChevronRight
-          className={`transition-transform duration-300 ${
-            isOpen ? "rotate-180" : ""
-          }`}
           size={20}
+          className={`transition-transform duration-300 ease-in-out ${
+            menuOpen ? "rotate-180" : ""
+          }`}
         />
       </button>
 
-      {/* Danh mục Menu: luôn chỉ hiện icon; click để mở rộng riêng từng nút */}
+      {/* Menu items */}
       <div
-        className={`flex flex-col gap-2 mt-2 transition-all duration-300 ease-in-out ${
-          isOpen ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
+        className={`mt-2 flex flex-col gap-2 transition-all duration-300 ease-in-out ${
+          menuOpen
+            ? "opacity-100 translate-x-0"
+            : "opacity-0 -translate-x-4 pointer-events-none"
         }`}
       >
-        {items.map((item, idx) => {
+        {items.map((item) => {
           const Icon = item.icon;
-          const isActive = activeIdx === idx;
-
           return (
             <button
               key={item.label}
-              onClick={() => setActiveIdx(isActive ? null : idx)}
-              aria-label={item.label}
-              className={[
-                "group flex items-center bg-gradient-to-r from-green-600 to-green-700",
-                "hover:from-green-700 hover:to-green-800 text-white rounded-r-md",
-                "shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden",
-              ].join(" ")}
-              // dùng inline width để anim mượt across browsers
-              style={{
-                width: isActive ? 224 : 48, // ~ w-56 khi mở, ~ w-12 khi đóng
-                padding: isActive ? "12px 16px" : "12px", // px-4 py-3 vs p-3
-                justifyContent: isActive ? "flex-start" : "center",
-              }}
+              className="group flex items-center bg-green-600 text-white rounded-r-lg shadow-md overflow-hidden transition-all duration-300 ease-in-out hover:bg-green-700 hover:shadow-xl w-12 hover:w-60 h-12 focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              <Icon size={22} className="shrink-0" />
-              {/* Label: chỉ hiện khi active, có transition mượt */}
-              <span
-                className={`ml-3 whitespace-nowrap transition-opacity duration-200 ${
-                  isActive ? "opacity-100" : "opacity-0"
-                }`}
-              >
+              {/* Icon container: fixed width, shifted right */}
+              <div className="flex items-center justify-start w-12 h-full pl-2">
+                <Icon size={22} className="transition-none" />
+              </div>
+
+              {/* Text: appears on hover */}
+              <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pl-2 pr-4 text-sm font-medium">
                 {item.label}
               </span>
             </button>

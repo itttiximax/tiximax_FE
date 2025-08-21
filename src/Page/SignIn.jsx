@@ -31,7 +31,7 @@ const SignIn = () => {
       {/* Left side - Image */}
       <div className="w-full md:w-1/2 flex items-center justify-center bg-yellow-50">
         <img
-          src="https://i.ibb.co/8c7HptR/running.png"
+          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9O2t4AtqBhGCl3yzaihimlwX_etS2JRJ87A&s"
           alt="illustration"
           className="max-h-[80%] object-contain"
         />
