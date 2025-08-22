@@ -1,30 +1,46 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
-const ManagerSidebar = () => {
+const LeadSaleSideBar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // hoặc role nếu bạn có lưu
+    localStorage.removeItem("token");
     navigate("/signin");
   };
 
+  const isActive = (path) => location.pathname === path;
+
+  const menuItems = [
+    { path: "/leadsale/dashboard", label: "Dashboard", activeColor: "blue" },
+    { path: "/leadsale/team", label: "Quản lý Team", activeColor: "blue" },
+    {
+      path: "/leadsale/sales-report",
+      label: "Báo cáo doanh số",
+      activeColor: "blue",
+    },
+    { path: "/manager/team", label: "Manager Team", activeColor: "green" },
+  ];
+
   return (
     <div className="w-64 h-screen bg-gray-900 text-white flex flex-col p-4">
-      <h2 className="text-2xl font-bold mb-6">Manager Panel</h2>
+      <h2 className="text-2xl font-bold mb-6">Lead Sale Panel</h2>
+
       <nav className="flex flex-col gap-4">
-        <Link to="/manager/dashboard" className="hover:text-yellow-400">
-          Dashboard
-        </Link>
-        <Link to="/manager/team" className="hover:text-yellow-400">
-          Team Management
-        </Link>
-        <Link to="/manager/reports" className="hover:text-yellow-400">
-          Reports
-        </Link>
-        <Link to="/manager/settings" className="hover:text-yellow-400">
-          Settings
-        </Link>
+        {menuItems.map((item) => (
+          <Link
+            key={item.path}
+            to={item.path}
+            className={
+              isActive(item.path)
+                ? `bg-${item.activeColor}-600 p-2 rounded`
+                : `hover:text-${item.activeColor}-300`
+            }
+          >
+            {item.label}
+          </Link>
+        ))}
       </nav>
 
       <div className="mt-auto">
@@ -39,4 +55,4 @@ const ManagerSidebar = () => {
   );
 };
 
-export default ManagerSidebar;
+export default LeadSaleSideBar;

@@ -8,6 +8,7 @@ import Home from "../Page/Home";
 import AdminLayout from "../components/Admin/AdminLayout";
 import AdminPage from "../components/Admin/AdminPage";
 import LeadSaleLayout from "../components/LeadSale/LeadSaleLayout";
+import DashboradLeadSale from "../components/LeadSale/DashboardLeadSale";
 import StaffWarehouseForeignLayout from "../components/WarehouseForeign/StaffWarehouseForeignLayout";
 import StaffWarehouseDomesticLayout from "../components/WarehouseDomestic/StaffWarehouseDomesticLayout";
 // import UserList from "../components/Admin/UserList";
@@ -69,6 +70,7 @@ const Router = createBrowserRouter([
         index: true,
         element: <LeadSalePage />,
       },
+      { path: "dashboard", element: <DashboradLeadSale /> },
     ],
   },
   {
