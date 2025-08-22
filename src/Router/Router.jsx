@@ -8,6 +8,8 @@ import Home from "../Page/Home";
 import AdminLayout from "../components/Admin/AdminLayout";
 import AdminPage from "../components/Admin/AdminPage";
 import LeadSaleLayout from "../components/LeadSale/LeadSaleLayout";
+import StaffWarehouseForeignLayout from "../components/WarehouseForeign/StaffWarehouseForeignLayout";
+import StaffWarehouseDomesticLayout from "../components/WarehouseDomestic/StaffWarehouseDomesticLayout";
 // import UserList from "../components/Admin/UserList";
 import ManagerPage from "../components/Manager/ManagerPage";
 import LeadSalePage from "../components/LeadSale/LeadSalePage";
@@ -85,17 +87,19 @@ const Router = createBrowserRouter([
     path: "/staff-warehouse-foreign",
     element: (
       <ProtectedRoute allowedRoles={[ROLES.STAFF_WAREHOUSE_FOREIGN]}>
-        <StaffWarehouseForeignPage />
+        <StaffWarehouseForeignLayout />
       </ProtectedRoute>
     ),
+    children: [{ index: true, element: <StaffWarehouseForeignPage /> }],
   },
   {
     path: "/staff-warehouse-domestic",
     element: (
       <ProtectedRoute allowedRoles={[ROLES.STAFF_WAREHOUSE_DOMESTIC]}>
-        <StaffWarehouseDomesticPage />
+        <StaffWarehouseDomesticLayout />
       </ProtectedRoute>
     ),
+    children: [{ index: true, element: <StaffWarehouseDomesticPage /> }],
   },
 ]);
 
