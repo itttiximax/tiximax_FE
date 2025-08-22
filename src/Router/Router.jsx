@@ -19,6 +19,7 @@ import StaffWarehouseForeignPage from "../components/WarehouseForeign/StaffWareh
 import StaffWarehouseDomesticPage from "../components/WarehouseDomestic/StaffWarehouseDomesticPage";
 import ManagerLayout from "../components/Manager/ManagerLayout";
 import ProtectedRoute from "../Router/ProtectedRoute";
+import ManagerTeam from "../components/LeadSale/ManagerTeam";
 import { ROLES } from "../Services/authService";
 
 const Router = createBrowserRouter([
@@ -51,7 +52,10 @@ const Router = createBrowserRouter([
         <ManagerLayout />
       </ProtectedRoute>
     ),
-    children: [{ index: true, element: <ManagerPage /> }],
+    children: [
+      { index: true, element: <ManagerPage /> },
+      { path: "team", element: <ManagerTeam /> },
+    ],
   },
   {
     path: "/lead-sale",
