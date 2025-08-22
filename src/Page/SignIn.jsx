@@ -49,7 +49,7 @@ const SignIn = () => {
           navigate("/home");
           break;
         default:
-          navigate("/home"); // fallback nếu role không xác định
+          navigate("/home");
           break;
       }
     } catch {
