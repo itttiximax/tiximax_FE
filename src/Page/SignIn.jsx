@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
-import { login } from "../Services/authService";
+import { login, getRole, ROLES } from "../Services/authService";
 import toast from "react-hot-toast";
 
 const SignIn = () => {
@@ -18,7 +18,40 @@ const SignIn = () => {
       console.log("Login success:", userData);
 
       toast.success(`Xin chào ${userData.name || username}! 🎉`);
-      navigate("/home");
+
+      // Lấy role hiện tại
+      const role = getRole();
+
+      // Điều hướng theo role
+      switch (role) {
+        case ROLES.ADMIN:
+          navigate("/admin");
+          break;
+        case ROLES.MANAGER:
+          navigate("/manager");
+          break;
+        case ROLES.LEAD_SALE:
+          navigate("/lead-sale");
+          break;
+        case ROLES.STAFF_SALE:
+          navigate("/staff-sale");
+          break;
+        case ROLES.STAFF_PURCHASER:
+          navigate("/staff-purchaser");
+          break;
+        case ROLES.STAFF_WAREHOUSE_FOREIGN:
+          navigate("/staff-warehouse-foreign");
+          break;
+        case ROLES.STAFF_WAREHOUSE_DOMESTIC:
+          navigate("/staff-warehouse-domestic");
+          break;
+        case ROLES.CUSTOMER:
+          navigate("/home");
+          break;
+        default:
+          navigate("/home"); // fallback nếu role không xác định
+          break;
+      }
     } catch {
       toast.error("Đăng nhập thất bại! Vui lòng thử lại.");
     } finally {
@@ -31,7 +64,7 @@ const SignIn = () => {
       {/* Left side - Image */}
       <div className="w-full md:w-1/2 flex items-center justify-center bg-yellow-50">
         <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9O2t4AtqBhGCl3yzaihimlwX_etS2JRJ87A&s"
+          src="https://i.ibb.co/8c7HptR/running.png"
           alt="illustration"
           className="max-h-[80%] object-contain"
         />

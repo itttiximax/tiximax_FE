@@ -28,19 +28,25 @@ const Header = () => {
             to="/mua-hang"
             className="hover:text-blue-600 transition duration-200"
           >
-            Mua hàng
+            Về chúng tôi
           </Link>
           <Link
             to="/ship-hang"
             className="hover:text-blue-600 transition duration-200"
           >
-            Ship hàng
+            Dịch vụ
           </Link>
           <Link
             to="/blog"
             className="hover:text-blue-600 transition duration-200"
           >
             Blog
+          </Link>
+          <Link
+            to="/blog"
+            className="hover:text-blue-600 transition duration-200"
+          >
+            Liên hệ
           </Link>
         </nav>
 
