@@ -1,85 +1,63 @@
-import React, { useState } from "react";
-import {
-  Drawer,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Toolbar,
-  Typography,
-  IconButton,
-} from "@mui/material";
-import {
-  Dashboard,
-  People,
-  Settings,
-  ExitToApp,
-  Menu,
-} from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
-
-const drawerWidth = 240;
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 const AdminSidebar = () => {
-  const [open, setOpen] = useState(true);
   const navigate = useNavigate();
 
-  const menuItems = [
-    { text: "Dashboard", icon: <Dashboard />, path: "/admin/dashboard" },
-    { text: "Users", icon: <People />, path: "/admin/users" },
-    { text: "Settings", icon: <Settings />, path: "/admin/settings" },
-    { text: "Logout", icon: <ExitToApp />, path: "/signin" },
-  ];
+  const handleLogout = () => {
+    // Xoá token/role nếu có lưu trong localStorage
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+
+    // Điều hướng về trang signin
+    navigate("/signin");
+  };
 
   return (
-    <>
-      {/* Nút toggle */}
-      <IconButton
-        color="inherit"
-        onClick={() => setOpen(!open)}
-        sx={{ position: "fixed", top: 10, left: 10, zIndex: 1300 }}
-      >
-        <Menu />
-      </IconButton>
+    <div className="w-64 h-screen bg-gray-800 text-white flex flex-col">
+      {/* Logo */}
+      <div className="p-4 text-2xl font-bold text-center border-b border-gray-700">
+        Admin Panel
+      </div>
 
-      {/* Sidebar */}
-      <Drawer
-        variant="persistent"
-        anchor="left"
-        open={open}
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          "& .MuiDrawer-paper": {
-            width: drawerWidth,
-            boxSizing: "border-box",
-            backgroundColor: "#1e293b",
-            color: "white",
-          },
-        }}
-      >
-        <Toolbar>
-          <Typography variant="h6" noWrap component="div">
-            Admin Panel
-          </Typography>
-        </Toolbar>
+      {/* Menu */}
+      <nav className="flex-1 p-4 space-y-3">
+        <Link
+          to="/admin/dashboard"
+          className="block px-3 py-2 rounded hover:bg-gray-700"
+        >
+          Dashboard
+        </Link>
+        <Link
+          to="/admin/orders"
+          className="block px-3 py-2 rounded hover:bg-gray-700"
+        >
+          Orders
+        </Link>
+        <Link
+          to="/admin/staff"
+          className="block px-3 py-2 rounded hover:bg-gray-700"
+        >
+          Staff
+        </Link>
+        <Link
+          to="/admin/customers"
+          className="block px-3 py-2 rounded hover:bg-gray-700"
+        >
+          Customers
+        </Link>
+      </nav>
 
-        <List>
-          {menuItems.map((item) => (
-            <ListItemButton
-              key={item.text}
-              onClick={() => navigate(item.path)}
-              sx={{
-                "&:hover": { backgroundColor: "#334155" },
-              }}
-            >
-              <ListItemIcon sx={{ color: "white" }}>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          ))}
-        </List>
-      </Drawer>
-    </>
+      {/* Logout */}
+      <div className="p-4 border-t border-gray-700">
+        <button
+          onClick={handleLogout}
+          className="w-full text-left px-3 py-2 rounded hover:bg-red-600"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
   );
 };
 
