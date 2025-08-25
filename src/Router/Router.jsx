@@ -8,9 +8,12 @@ import Home from "../Page/Home";
 import AdminLayout from "../components/Admin/AdminLayout";
 import AdminPage from "../components/Admin/AdminPage";
 import LeadSaleLayout from "../components/LeadSale/LeadSaleLayout";
+import RouteInput from "../components/LeadSale/routesInput";
+import CreateOrder from "../components/LeadSale/CreateOrder";
 import DashboardLeadSale from "../components/LeadSale/DashboardLeadSale";
 import StaffWarehouseForeignLayout from "../components/WarehouseForeign/StaffWarehouseForeignLayout";
 import StaffWarehouseDomesticLayout from "../components/WarehouseDomestic/StaffWarehouseDomesticLayout";
+
 // import UserList from "../components/Admin/UserList";
 import ManagerPage from "../components/Manager/ManagerPage";
 import LeadSalePage from "../components/LeadSale/LeadSalePage";
@@ -23,6 +26,7 @@ import ProtectedRoute from "../Router/ProtectedRoute";
 import ManagerTeam from "../components/LeadSale/ManagerTeam";
 import { ROLES } from "../Services/authService";
 import NotFound from "../Page/NotFound";
+import ManagerRoutes from "../components/Manager/ManagerRoutes";
 
 const Router = createBrowserRouter([
   {
@@ -57,6 +61,7 @@ const Router = createBrowserRouter([
     children: [
       { index: true, element: <ManagerPage /> },
       { path: "team", element: <ManagerTeam /> },
+      { path: "routes", element: <ManagerRoutes /> },
     ],
   },
   {
@@ -72,6 +77,8 @@ const Router = createBrowserRouter([
         element: <LeadSalePage />,
       },
       { path: "dashboard", element: <DashboardLeadSale /> },
+      { path: "createorder", element: <CreateOrder /> },
+      { path: "route", element: <RouteInput /> },
     ],
   },
   {

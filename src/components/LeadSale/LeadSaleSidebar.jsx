@@ -57,6 +57,26 @@ const LeadSaleSideBar = () => {
         >
           Manager Team
         </Link>
+        <Link
+          to="/lead-sale/createorder"
+          className={
+            isActive("/manager/team")
+              ? "bg-green-600 p-2 rounded"
+              : "hover:text-green-300"
+          }
+        >
+          Manager Team
+        </Link>
+        <Link
+          to="/lead-sale/route"
+          className={
+            isActive("/manager/team")
+              ? "bg-green-600 p-2 rounded"
+              : "hover:text-green-300"
+          }
+        >
+          Route
+        </Link>
       </nav>
 
       <div className="mt-auto">
