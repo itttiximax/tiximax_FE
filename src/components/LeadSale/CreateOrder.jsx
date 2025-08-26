@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import createOrderService from "../../Services/LeadSale/createOrderService";
-import routesService from "../../Services/LeadSale/routesService"; // Import routesService
+import routesService from "../../Services/LeadSale/routesService";
+import destinationService from "../../Services/LeadSale/destinationService";
 
 const CreateOrder = () => {
   const [preliminary, setPreliminary] = useState({
@@ -9,8 +10,8 @@ const CreateOrder = () => {
   });
   const [form, setForm] = useState({
     orderType: "MUA_HO",
-    destination: "HA_NOI",
-    exchangeRate: 190,
+    destinationId: 1, // Changed from destination to destinationId
+    exchangeRate: 185, // Updated default value
     checkRequired: true,
     note: "",
     orderLinkRequests: [
@@ -28,21 +29,50 @@ const CreateOrder = () => {
       },
     ],
   });
-  const [routes, setRoutes] = useState([]); // State for routes
+  const [routes, setRoutes] = useState([]);
+  const [destinations, setDestinations] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Fetch routes on component mount
+  // Fetch routes and destinations on component mount
   useEffect(() => {
-    const fetchRoutes = async () => {
+    const fetchData = async () => {
       try {
-        const token =
-          "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJzYWxlIiwiaWF0IjoxNzU2MTA2MjAzLCJleHAiOjE3NTYxOTI2MDN9.h9r_mVrOp_LcLAvseZMSGfe95Kbyn7E2Brjw6a7YGJ1pdZUslrQVET8R_ejSkPQW";
-        const data = await routesService.getRoutes(token);
-        setRoutes(data);
+        setLoading(true);
+        setError(null);
+
+        // Get token from localStorage instead of hardcoding
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          setError("Không tìm thấy token. Vui lòng đăng nhập lại.");
+          return;
+        }
+
+        // Fetch routes and destinations concurrently
+        const [routesData, destinationsData] = await Promise.all([
+          routesService.getRoutes(token),
+          destinationService.getDestinations(token),
+        ]);
+
+        setRoutes(routesData);
+        setDestinations(destinationsData);
       } catch (error) {
-        console.error("Error fetching routes:", error);
+        console.error("Error fetching data:", error);
+
+        if (error.response?.status === 401) {
+          setError("Token đã hết hạn. Vui lòng đăng nhập lại.");
+        } else if (error.response?.status === 404) {
+          setError("Không tìm thấy API. Kiểm tra cấu hình server.");
+        } else {
+          setError("Lỗi khi tải dữ liệu.");
+        }
+      } finally {
+        setLoading(false);
       }
     };
-    fetchRoutes();
+
+    fetchData();
   }, []);
 
   const handlePreliminaryChange = (e) => {
@@ -54,7 +84,12 @@ const CreateOrder = () => {
     const { name, value, type, checked } = e.target;
     setForm({
       ...form,
-      [name]: type === "checkbox" ? checked : value,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : name === "destinationId"
+          ? Number(value)
+          : value,
     });
   };
 
@@ -103,8 +138,16 @@ const CreateOrder = () => {
       console.log("✅ Order created:", result);
       alert("Tạo đơn hàng thành công!");
     } catch (error) {
-      console.error(error);
-      alert("❌ Tạo đơn hàng thất bại");
+      console.error("Error creating order:", error);
+
+      // Hiển thị lỗi cụ thể từ server
+      const errorMessage =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        error.message ||
+        "Tạo đơn hàng thất bại";
+
+      alert(`❌ ${errorMessage}`);
     }
   };
 
@@ -114,6 +157,20 @@ const CreateOrder = () => {
     <div className="p-6">
       <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
         <h2 className="text-2xl font-bold mb-4">Create New Order</h2>
+
+        {/* Error Display */}
+        {error && (
+          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+
+        {/* Loading Display */}
+        {loading && (
+          <div className="mb-4 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded">
+            Đang tải dữ liệu tuyến đường và điểm đến...
+          </div>
+        )}
 
         {/* Preliminary Inputs */}
         <div className="grid grid-cols-2 gap-4 mb-6">
@@ -138,8 +195,15 @@ const CreateOrder = () => {
               onChange={handlePreliminaryChange}
               className="w-full border rounded px-3 py-2"
               required
+              disabled={loading || error}
             >
-              <option value="">Chọn tuyến</option>
+              <option value="">
+                {loading
+                  ? "Đang tải..."
+                  : error
+                  ? "Không thể tải tuyến đường"
+                  : "Chọn tuyến"}
+              </option>
               {routes.map((route) => (
                 <option key={route.routeId} value={route.routeId}>
                   {route.name} ({route.shipTime} ngày,{" "}
@@ -151,7 +215,7 @@ const CreateOrder = () => {
         </div>
 
         {/* Order Info */}
-        <div className="grid grid-cols-2 gap-4" disabled={!isFormEnabled}>
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block font-semibold">Order Type</label>
             <p className="text-sm text-gray-500 mb-1">
@@ -175,14 +239,27 @@ const CreateOrder = () => {
               Điểm đến cuối cùng của đơn hàng
             </p>
             <select
-              name="destination"
-              value={form.destination}
+              name="destinationId"
+              value={form.destinationId}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
-              disabled={!isFormEnabled}
+              disabled={!isFormEnabled || loading}
             >
-              <option value="HA_NOI">HA_NOI</option>
-              <option value="HCM">HCM</option>
+              <option value="">
+                {loading
+                  ? "Đang tải..."
+                  : error
+                  ? "Không thể tải điểm đến"
+                  : "Chọn điểm đến"}
+              </option>
+              {destinations.map((destination) => (
+                <option
+                  key={destination.destinationId}
+                  value={destination.destinationId}
+                >
+                  {destination.destinationName}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -229,17 +306,11 @@ const CreateOrder = () => {
         </div>
 
         {/* Products */}
-        <h3
-          className="text-xl font-semibold mt-6 mb-3"
-          disabled={!isFormEnabled}
-        >
-          Products
-        </h3>
+        <h3 className="text-xl font-semibold mt-6 mb-3">Products</h3>
         {form.orderLinkRequests.map((product, index) => (
           <div
             key={index}
             className="border rounded-lg p-4 mb-4 bg-gray-50 shadow-sm"
-            disabled={!isFormEnabled}
           >
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -401,7 +472,7 @@ const CreateOrder = () => {
 
         <button
           onClick={addProduct}
-          className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
+          className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 disabled:opacity-50"
           disabled={!isFormEnabled}
         >
           + Add Product
@@ -411,7 +482,7 @@ const CreateOrder = () => {
         <div className="mt-6 text-right">
           <button
             onClick={handleSubmit}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
             disabled={!isFormEnabled}
           >
             Submit Order

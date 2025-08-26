@@ -4,28 +4,49 @@ import Layout from "../Page/Layout";
 import SignIn from "../Page/SignIn";
 import SignUp from "../Page/SignUp";
 import ForgotPassword from "../Page/ForgotPassword";
+
+// Customer components
 import Home from "../Page/Home";
+
+//Admin compoenents
 import AdminLayout from "../components/Admin/AdminLayout";
 import AdminPage from "../components/Admin/AdminPage";
+
+//LeadSale components
 import LeadSaleLayout from "../components/LeadSale/LeadSaleLayout";
-import RouteInput from "../components/LeadSale/routesInput";
+import LeadSalePage from "../components/LeadSale/LeadSalePage";
 import CreateOrder from "../components/LeadSale/CreateOrder";
 import DashboardLeadSale from "../components/LeadSale/DashboardLeadSale";
+import CreatePayment from "../components/LeadSale/CreatePayment";
+
+//StaffWarehouseForeign components
 import StaffWarehouseForeignLayout from "../components/WarehouseForeign/StaffWarehouseForeignLayout";
+import StaffWarehouseForeignPage from "../components/WarehouseForeign/StaffWarehouseForeignPage";
+
+//StaffWarehouseDomestic components
 import StaffWarehouseDomesticLayout from "../components/WarehouseDomestic/StaffWarehouseDomesticLayout";
+import StaffWarehouseDomesticPage from "../components/WarehouseDomestic/StaffWarehouseDomesticPage";
+
+//Manager components
 import ManagerPage from "../components/Manager/ManagerPage";
 import ManagerDashboard from "../components/Manager/ManagerDashboard";
-import LeadSalePage from "../components/LeadSale/LeadSalePage";
+
+//StaffSale components
 import StaffSalePage from "../components/StaffSale/StaffSalePage";
+
+//StaffPurchaser components
 import StaffPurchaserPage from "../components/StaffPurchaser/StaffPurchaserPage";
-import StaffWarehouseForeignPage from "../components/WarehouseForeign/StaffWarehouseForeignPage";
-import StaffWarehouseDomesticPage from "../components/WarehouseDomestic/StaffWarehouseDomesticPage";
+
+//Manager components
 import ManagerLayout from "../components/Manager/ManagerLayout";
-import ProtectedRoute from "../Router/ProtectedRoute";
 import ManagerTeam from "../components/LeadSale/ManagerTeam";
+import ManagerRoutes from "../components/Manager/ManagerRoutes";
+import ManagerDestination from "../components/Manager/ManagerDestination";
+
+//Protected Route
+import ProtectedRoute from "../Router/ProtectedRoute";
 import { ROLES } from "../Services/authService";
 import NotFound from "../Page/NotFound";
-import ManagerRoutes from "../components/Manager/ManagerRoutes";
 
 const Router = createBrowserRouter([
   {
@@ -61,6 +82,7 @@ const Router = createBrowserRouter([
       { index: true, element: <ManagerPage /> },
       { path: "team", element: <ManagerTeam /> },
       { path: "routes", element: <ManagerRoutes /> },
+      { path: "transfer", element: <ManagerDestination /> },
       { path: "dashboard", element: <ManagerDashboard /> },
     ],
   },
@@ -78,7 +100,7 @@ const Router = createBrowserRouter([
       },
       { path: "dashboard", element: <DashboardLeadSale /> },
       { path: "createorder", element: <CreateOrder /> },
-      { path: "route", element: <RouteInput /> },
+      { path: "createpayment", element: <CreatePayment /> },
     ],
   },
   {
