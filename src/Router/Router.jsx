@@ -13,9 +13,8 @@ import CreateOrder from "../components/LeadSale/CreateOrder";
 import DashboardLeadSale from "../components/LeadSale/DashboardLeadSale";
 import StaffWarehouseForeignLayout from "../components/WarehouseForeign/StaffWarehouseForeignLayout";
 import StaffWarehouseDomesticLayout from "../components/WarehouseDomestic/StaffWarehouseDomesticLayout";
-
-// import UserList from "../components/Admin/UserList";
 import ManagerPage from "../components/Manager/ManagerPage";
+import ManagerDashboard from "../components/Manager/ManagerDashboard";
 import LeadSalePage from "../components/LeadSale/LeadSalePage";
 import StaffSalePage from "../components/StaffSale/StaffSalePage";
 import StaffPurchaserPage from "../components/StaffPurchaser/StaffPurchaserPage";
@@ -33,10 +32,10 @@ const Router = createBrowserRouter([
     path: "/",
     element: <Layout />,
     children: [
+      { path: "", element: <Home /> },
       { path: "signin", element: <SignIn /> },
       { path: "signup", element: <SignUp /> },
       { path: "forgot-password", element: <ForgotPassword /> },
-      { path: "home", element: <Home /> },
     ],
   },
   {
@@ -62,6 +61,7 @@ const Router = createBrowserRouter([
       { index: true, element: <ManagerPage /> },
       { path: "team", element: <ManagerTeam /> },
       { path: "routes", element: <ManagerRoutes /> },
+      { path: "dashboard", element: <ManagerDashboard /> },
     ],
   },
   {

@@ -46,7 +46,7 @@ const SignIn = () => {
           navigate("/staff-warehouse-domestic");
           break;
         case ROLES.CUSTOMER:
-          navigate("/home");
+          navigate("/");
           break;
         default:
           navigate("/home");
