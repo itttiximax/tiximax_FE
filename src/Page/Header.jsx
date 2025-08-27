@@ -13,7 +13,6 @@ import {
   Menu,
   X,
 } from "lucide-react";
-// import { getCurrentUser, logout } from "../Services/authService";
 import { getCurrentUser, logout } from "../Services/Auth/authService";
 
 const Header = () => {
