@@ -5,4 +5,15 @@ export default {
     extend: {},
   },
   plugins: [],
+  corePlugins: {
+    // Ngăn Tailwind tạo ra overflow issues
+    container: false,
+  },
+  // Thêm base styles để fix layout shifting
+  base: {
+    "html, body": {
+      "overflow-x": "hidden",
+      "max-width": "100vw",
+    },
+  },
 };

@@ -42,7 +42,7 @@ import ManagerLayout from "../components/Manager/ManagerLayout";
 import ManagerTeam from "../components/LeadSale/ManagerTeam";
 import ManagerRoutes from "../components/Manager/ManagerRoutes";
 import ManagerDestination from "../components/Manager/ManagerDestination";
-
+import ManagerProductType from "../components/Manager/ManagerProductType";
 //Protected Route
 import ProtectedRoute from "../Router/ProtectedRoute";
 import { ROLES } from "../Services/authService";
@@ -101,6 +101,7 @@ const Router = createBrowserRouter([
       { path: "dashboard", element: <DashboardLeadSale /> },
       { path: "createorder", element: <CreateOrder /> },
       { path: "createpayment", element: <CreatePayment /> },
+      { path: "product", element: <ManagerProductType /> },
     ],
   },
   {
