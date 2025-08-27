@@ -108,11 +108,11 @@ const CreateOrder = () => {
       const productTypeId = Number(value);
       const hasFee = getProductTypeFee(productTypeId);
 
-      // If product type doesn't have fee, set purchaseFee to 0
+      // If product type doesn't have fee, set extraCharge to 0
       updatedProducts[index] = {
         ...updatedProducts[index],
         [name]: productTypeId,
-        purchaseFee: hasFee ? updatedProducts[index].purchaseFee : 0,
+        extraCharge: hasFee ? updatedProducts[index].extraCharge : 0,
       };
     } else {
       updatedProducts[index][name] = [
@@ -242,19 +242,15 @@ const CreateOrder = () => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block font-semibold">Order Type</label>
-            <p className="text-sm text-gray-500 mb-1">
-              Kiểu đơn hàng (VD: MUA_HO, ký gửi…)
-            </p>
-            <select
-              name="orderType"
-              value={form.orderType}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
-              disabled={!isFormEnabled}
-            >
-              <option value="MUA_HO">MUA_HO</option>
-              <option value="KHAC">KHÁC</option>
-            </select>
+            <p className="text-sm text-gray-500 mb-1">Mua hộ</p>
+
+            {/* Input hidden để giữ giá trị trong form */}
+            <input type="hidden" name="orderType" value="MUA_HO" />
+
+            {/* Hiển thị text cố định */}
+            <div className="w-full border rounded px-3 py-2 bg-gray-100">
+              Mua hộ
+            </div>
           </div>
 
           <div>
@@ -289,13 +285,11 @@ const CreateOrder = () => {
 
           <div>
             <label className="block font-semibold">Exchange Rate</label>
-            <p className="text-sm text-gray-500 mb-1">
-              Tỷ giá áp dụng (VD: 190)
-            </p>
+            <p className="text-sm text-gray-500 mb-1">Tỷ giá áp dụng</p>
             <input
               type="number"
               name="exchangeRate"
-              value={form.exchangeRate}
+              // value={form.exchangeRate}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
               disabled={!isFormEnabled}
@@ -375,7 +369,7 @@ const CreateOrder = () => {
                 <input
                   type="number"
                   name="quantity"
-                  value={product.quantity}
+                  // value={product.quantity}
                   onChange={(e) => handleProductChange(index, e)}
                   className="border rounded px-3 py-2 w-full"
                   disabled={!isFormEnabled}
@@ -390,7 +384,7 @@ const CreateOrder = () => {
                 <input
                   type="number"
                   name="priceWeb"
-                  value={product.priceWeb}
+                  // value={product.priceWeb}
                   onChange={(e) => handleProductChange(index, e)}
                   className="border rounded px-3 py-2 w-full"
                   disabled={!isFormEnabled}
@@ -405,7 +399,7 @@ const CreateOrder = () => {
                 <input
                   type="number"
                   name="shipWeb"
-                  value={product.shipWeb}
+                  // value={product.shipWeb}
                   onChange={(e) => handleProductChange(index, e)}
                   className="border rounded px-3 py-2 w-full"
                   disabled={!isFormEnabled}
@@ -420,7 +414,7 @@ const CreateOrder = () => {
                 <input
                   type="number"
                   name="purchaseFee"
-                  value={product.purchaseFee}
+                  // value={product.purchaseFee}
                   onChange={(e) => handleProductChange(index, e)}
                   className="border rounded px-3 py-2 w-full"
                   disabled={!isFormEnabled}
@@ -458,7 +452,7 @@ const CreateOrder = () => {
                   <input
                     type="number"
                     name="extraCharge"
-                    value={product.extraCharge}
+                    // value={product.extraCharge}
                     onChange={(e) => handleProductChange(index, e)}
                     className="border rounded px-3 py-2 w-full"
                     disabled={!isFormEnabled}
@@ -478,7 +472,7 @@ const CreateOrder = () => {
                 <input
                   type="text"
                   name="purchaseImage"
-                  value={product.purchaseImage}
+                  // value={product.purchaseImage}
                   onChange={(e) => handleProductChange(index, e)}
                   className="border rounded px-3 py-2 w-full"
                   disabled={!isFormEnabled}
@@ -493,7 +487,7 @@ const CreateOrder = () => {
                 <input
                   type="text"
                   name="website"
-                  value={product.website}
+                  // value={product.website}
                   onChange={(e) => handleProductChange(index, e)}
                   className="border rounded px-3 py-2 w-full"
                   placeholder="VD: AMAZON, EBAY, SHOPEE..."
@@ -504,12 +498,13 @@ const CreateOrder = () => {
               <div>
                 <label className="font-semibold">Group Tag</label>
                 <p className="text-sm text-gray-500 mb-1">
-                  Nhóm sản phẩm (A, B… để gom đơn)
+                  Nhóm sản phẩm (Gom đơn)
                 </p>
                 <input
                   type="text"
                   name="groupTag"
-                  value={product.groupTag}
+                  // value={product.groupTag}
+                  placeholder="A, B, C..."
                   onChange={(e) => handleProductChange(index, e)}
                   className="border rounded px-3 py-2 w-full"
                   disabled={!isFormEnabled}
@@ -524,7 +519,7 @@ const CreateOrder = () => {
           className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 disabled:opacity-50"
           disabled={!isFormEnabled}
         >
-          + Add Product
+          Add Product
         </button>
 
         {/* Submit */}
@@ -534,7 +529,7 @@ const CreateOrder = () => {
             className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
             disabled={!isFormEnabled}
           >
-            Submit Order
+            Hoàn tất đơn hàng
           </button>
         </div>
       </div>
