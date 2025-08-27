@@ -13,7 +13,8 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { getCurrentUser, logout } from "../services/authService";
+// import { getCurrentUser, logout } from "../Services/authService";
+import { getCurrentUser, logout } from "../Services/authService";
 
 const Header = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
