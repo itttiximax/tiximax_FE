@@ -1,5 +1,5 @@
 import api from "../../config/api.js";
-import { getToken } from "../authService.js";
+import { getToken } from "../../Services/Auth/authService.js";
 
 export const getAllProductTypes = async () => {
   try {

@@ -1,4 +1,4 @@
-import api from "../config/api.js"; // ← CHỈ THÊM DÒNG NÀY
+import api from "../../config/api.js"; // ← CHỈ THÊM DÒNG NÀY
 
 // Định nghĩa roles chung để dễ quản lý
 export const ROLES = {
@@ -14,7 +14,7 @@ export const ROLES = {
 
 export const login = async (username, password) => {
   try {
-    const response = await api.post("/accounts/login", { username, password }); // ← SỬA: dùng api thay vì axios
+    const response = await api.post("/accounts/login", { username, password });
     const userData = response.data;
 
     // Lưu token và user info vào localStorage
