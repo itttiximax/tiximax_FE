@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import createOrderService from "../../Services/LeadSale/createOrderService";
+
+import orderService from "../../Services/LeadSale/orderService";
 import routesService from "../../Services/LeadSale/routesService";
 import destinationService from "../../Services/LeadSale/destinationService";
 
@@ -10,8 +11,8 @@ const CreateOrder = () => {
   });
   const [form, setForm] = useState({
     orderType: "MUA_HO",
-    destinationId: 1, // Changed from destination to destinationId
-    exchangeRate: 185, // Updated default value
+    destinationId: 1,
+    exchangeRate: 185,
     checkRequired: true,
     note: "",
     orderLinkRequests: [
@@ -41,18 +42,10 @@ const CreateOrder = () => {
         setLoading(true);
         setError(null);
 
-        // Get token from localStorage instead of hardcoding
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-          setError("Không tìm thấy token. Vui lòng đăng nhập lại.");
-          return;
-        }
-
-        // Fetch routes and destinations concurrently
+        // Services handle auth automatically
         const [routesData, destinationsData] = await Promise.all([
-          routesService.getRoutes(token),
-          destinationService.getDestinations(token),
+          routesService.getRoutes(),
+          destinationService.getDestinations(),
         ]);
 
         setRoutes(routesData);
@@ -130,12 +123,13 @@ const CreateOrder = () => {
 
   const handleSubmit = async () => {
     try {
-      const result = await createOrderService(
+      // FIXED: Use correct variable name (orderService, not OrderService)
+      const result = await orderService.createOrder(
         preliminary.customerCode,
         preliminary.routeId,
         form
       );
-      console.log("✅ Order created:", result);
+      console.log("Order created:", result);
       alert("Tạo đơn hàng thành công!");
     } catch (error) {
       console.error("Error creating order:", error);
@@ -147,7 +141,7 @@ const CreateOrder = () => {
         error.message ||
         "Tạo đơn hàng thất bại";
 
-      alert(`❌ ${errorMessage}`);
+      alert(`${errorMessage}`);
     }
   };
 
