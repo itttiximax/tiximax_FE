@@ -45,7 +45,7 @@ import ManagerDestination from "../components/Manager/ManagerDestination";
 import ManagerProductType from "../components/Manager/ManagerProductType";
 //Protected Route
 import ProtectedRoute from "../Router/ProtectedRoute";
-import { ROLES } from "../Services/authService";
+import { ROLES } from "../Services/Auth/authService";
 import NotFound from "../Page/NotFound";
 
 const Router = createBrowserRouter([
