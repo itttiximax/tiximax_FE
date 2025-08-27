@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import orderService from "../../Services/LeadSale/orderService";
 import routesService from "../../Services/LeadSale/routesService";
 import destinationService from "../../Services/LeadSale/destinationService";
+import { getAllProductTypes } from "../../Services/LeadSale/productTypeService";
 
 const CreateOrder = () => {
   const [preliminary, setPreliminary] = useState({
@@ -23,19 +24,21 @@ const CreateOrder = () => {
         shipWeb: 0,
         productName: "",
         purchaseFee: 0,
+        extraCharge: 0,
         purchaseImage: "",
         website: "AMAZON",
-        productType: "DO_DIEN_TU",
+        productTypeId: 1,
         groupTag: "A",
       },
     ],
   });
   const [routes, setRoutes] = useState([]);
   const [destinations, setDestinations] = useState([]);
+  const [productTypes, setProductTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch routes and destinations on component mount
+  // Fetch routes, destinations and product types on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -43,13 +46,16 @@ const CreateOrder = () => {
         setError(null);
 
         // Services handle auth automatically
-        const [routesData, destinationsData] = await Promise.all([
-          routesService.getRoutes(),
-          destinationService.getDestinations(),
-        ]);
+        const [routesData, destinationsData, productTypesData] =
+          await Promise.all([
+            routesService.getRoutes(),
+            destinationService.getDestinations(),
+            getAllProductTypes(),
+          ]);
 
         setRoutes(routesData);
         setDestinations(destinationsData);
+        setProductTypes(productTypesData);
       } catch (error) {
         console.error("Error fetching data:", error);
 
@@ -67,6 +73,14 @@ const CreateOrder = () => {
 
     fetchData();
   }, []);
+
+  // Check if product type has fee
+  const getProductTypeFee = (productTypeId) => {
+    const productType = productTypes.find(
+      (p) => p.productTypeId === productTypeId
+    );
+    return productType?.fee || false;
+  };
 
   const handlePreliminaryChange = (e) => {
     const { name, value } = e.target;
@@ -89,14 +103,29 @@ const CreateOrder = () => {
   const handleProductChange = (index, e) => {
     const { name, value } = e.target;
     const updatedProducts = [...form.orderLinkRequests];
-    updatedProducts[index][name] = [
-      "quantity",
-      "priceWeb",
-      "shipWeb",
-      "purchaseFee",
-    ].includes(name)
-      ? Number(value)
-      : value;
+
+    if (name === "productTypeId") {
+      const productTypeId = Number(value);
+      const hasFee = getProductTypeFee(productTypeId);
+
+      // If product type doesn't have fee, set purchaseFee to 0
+      updatedProducts[index] = {
+        ...updatedProducts[index],
+        [name]: productTypeId,
+        purchaseFee: hasFee ? updatedProducts[index].purchaseFee : 0,
+      };
+    } else {
+      updatedProducts[index][name] = [
+        "quantity",
+        "priceWeb",
+        "shipWeb",
+        "purchaseFee",
+        "extraCharge",
+      ].includes(name)
+        ? Number(value)
+        : value;
+    }
+
     setForm({ ...form, orderLinkRequests: updatedProducts });
   };
 
@@ -112,9 +141,10 @@ const CreateOrder = () => {
           shipWeb: 0,
           productName: "",
           purchaseFee: 0,
+          extraCharge: 0,
           purchaseImage: "",
           website: "AMAZON",
-          productType: "DO_DIEN_TU",
+          productTypeId: 1,
           groupTag: "A",
         },
       ],
@@ -398,6 +428,49 @@ const CreateOrder = () => {
               </div>
 
               <div>
+                <label className="font-semibold">Product Type</label>
+                <p className="text-sm text-gray-500 mb-1">Loại sản phẩm</p>
+                <select
+                  name="productTypeId"
+                  value={product.productTypeId}
+                  onChange={(e) => handleProductChange(index, e)}
+                  className="border rounded px-3 py-2 w-full"
+                  disabled={!isFormEnabled || loading}
+                >
+                  <option value="">
+                    {loading ? "Đang tải..." : "Chọn loại sản phẩm"}
+                  </option>
+                  {productTypes.map((type) => (
+                    <option key={type.productTypeId} value={type.productTypeId}>
+                      {type.productTypeName}{" "}
+                      {type.fee ? "(Có phí)" : "(Miễn phí)"}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="font-semibold">Extra Charge</label>
+                <p className="text-sm text-gray-500 mb-1">
+                  Phí phụ thu khác (nếu có)
+                </p>
+                {getProductTypeFee(product.productTypeId) ? (
+                  <input
+                    type="number"
+                    name="extraCharge"
+                    value={product.extraCharge}
+                    onChange={(e) => handleProductChange(index, e)}
+                    className="border rounded px-3 py-2 w-full"
+                    disabled={!isFormEnabled}
+                  />
+                ) : (
+                  <div className="border rounded px-3 py-2 w-full bg-gray-100 text-gray-500">
+                    Miễn phí (0 VND)
+                  </div>
+                )}
+              </div>
+
+              <div>
                 <label className="font-semibold">Purchase Image</label>
                 <p className="text-sm text-gray-500 mb-1">
                   Link ảnh sản phẩm (tùy chọn)
@@ -415,35 +488,17 @@ const CreateOrder = () => {
               <div>
                 <label className="font-semibold">Website</label>
                 <p className="text-sm text-gray-500 mb-1">
-                  Website mua hàng (AMAZON, EBAY…)
+                  Website mua hàng (nhập tự do)
                 </p>
-                <select
+                <input
+                  type="text"
                   name="website"
                   value={product.website}
                   onChange={(e) => handleProductChange(index, e)}
                   className="border rounded px-3 py-2 w-full"
+                  placeholder="VD: AMAZON, EBAY, SHOPEE..."
                   disabled={!isFormEnabled}
-                >
-                  <option value="AMAZON">AMAZON</option>
-                  <option value="EBAY">EBAY</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="font-semibold">Product Type</label>
-                <p className="text-sm text-gray-500 mb-1">
-                  Loại sản phẩm (ĐỒ ĐIỆN TỬ, THỜI TRANG…)
-                </p>
-                <select
-                  name="productType"
-                  value={product.productType}
-                  onChange={(e) => handleProductChange(index, e)}
-                  className="border rounded px-3 py-2 w-full"
-                  disabled={!isFormEnabled}
-                >
-                  <option value="DO_DIEN_TU">ĐỒ ĐIỆN TỬ</option>
-                  <option value="THOI_TRANG">THỜI TRANG</option>
-                </select>
+                />
               </div>
 
               <div>

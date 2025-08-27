@@ -69,7 +69,12 @@ const LeadSaleSideBar = () => {
           label: "Tạo đơn thanh toán",
           color: "emerald",
         },
-
+        {
+          to: "/lead-sale/product",
+          icon: Settings,
+          label: "Điểm đến",
+          color: "emerald",
+        },
         {
           to: "/lead-sale/destination",
           icon: MapPin,

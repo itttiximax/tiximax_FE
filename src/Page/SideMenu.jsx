@@ -1,14 +1,34 @@
 import React from "react";
-import { ChevronRight, DollarSign, Tag, Truck, Home } from "lucide-react";
+import {
+  ChevronRight,
+  DollarSign,
+  Tag,
+  Truck,
+  Home,
+  Calculator,
+  Gift,
+} from "lucide-react";
 
 const SideMenu = () => {
   const [menuOpen, setMenuOpen] = React.useState(true);
 
   const items = [
-    { icon: Home, label: "Trang chủ" },
-    { icon: DollarSign, label: "Tra cứu tỉ giá" },
-    { icon: Tag, label: "Mã giảm giá" },
-    { icon: Truck, label: "Theo dõi vận chuyển" },
+    { icon: Home, label: "Trang chủ", color: "from-blue-500 to-blue-600" },
+    {
+      icon: Calculator,
+      label: "Tra cứu tỉ giá",
+      color: "from-green-500 to-green-600",
+    },
+    {
+      icon: Gift,
+      label: "Mã giảm giá",
+      color: "from-purple-500 to-purple-600",
+    },
+    {
+      icon: Truck,
+      label: "Theo dõi vận chuyển",
+      color: "from-orange-500 to-orange-600",
+    },
   ];
 
   return (
@@ -16,12 +36,12 @@ const SideMenu = () => {
       {/* Toggle button */}
       <button
         onClick={() => setMenuOpen(!menuOpen)}
-        className="bg-gray-800 text-white px-3 py-3 rounded-r-lg shadow-lg hover:bg-gray-900 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500"
+        className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-2 rounded-r-xl shadow-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-yellow-300 group"
         aria-label="Toggle menu"
       >
         <ChevronRight
-          size={20}
-          className={`transition-transform duration-300 ease-in-out ${
+          size={18}
+          className={`transition-transform duration-300 ease-in-out group-hover:scale-110 ${
             menuOpen ? "rotate-180" : ""
           }`}
         />
@@ -35,25 +55,41 @@ const SideMenu = () => {
             : "opacity-0 -translate-x-4 pointer-events-none"
         }`}
       >
-        {items.map((item) => {
+        {items.map((item, index) => {
           const Icon = item.icon;
           return (
             <button
               key={item.label}
-              className="group flex items-center bg-green-600 text-white rounded-r-lg shadow-md overflow-hidden transition-all duration-300 ease-in-out hover:bg-green-700 hover:shadow-xl w-12 hover:w-60 h-12 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className={`group flex items-center bg-gradient-to-r ${item.color} hover:scale-105 text-white rounded-r-xl shadow-md overflow-hidden transition-all duration-300 ease-in-out hover:shadow-xl w-10 hover:w-52 h-10 focus:outline-none focus:ring-2 focus:ring-white/50 relative`}
+              style={{
+                transitionDelay: menuOpen ? `${index * 50}ms` : "0ms",
+              }}
             >
-              {/* Icon container: fixed width, shifted right */}
-              <div className="flex items-center justify-start w-12 h-full pl-2">
-                <Icon size={22} className="transition-none" />
+              {/* Icon container */}
+              <div className="flex items-center justify-center w-10 h-full">
+                <Icon
+                  size={18}
+                  className="transition-transform duration-300 group-hover:scale-110"
+                />
               </div>
 
               {/* Text: appears on hover */}
-              <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pl-2 pr-4 text-sm font-medium">
+              <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 pl-2 pr-4 text-sm font-medium transform translate-x-2 group-hover:translate-x-0">
                 {item.label}
               </span>
+
+              {/* Subtle glow effect */}
+              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-r-xl"></div>
             </button>
           );
         })}
+      </div>
+
+      {/* Quick access badge */}
+      <div className="mt-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
+        <div className="bg-white/90 backdrop-blur-sm text-gray-700 px-3 py-1 rounded-r-lg shadow-sm text-xs font-medium border-l-2 border-yellow-400">
+          Quick Access
+        </div>
       </div>
     </div>
   );
