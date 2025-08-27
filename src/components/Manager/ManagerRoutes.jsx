@@ -36,7 +36,7 @@ const ManagerRoutes = () => {
     if (!token) return;
     setLoading(true);
     try {
-      const data = await routesService.getRoutes(token);
+      const data = await routesService.getRoutes(); // ← FIXED: Bỏ token parameter
       setRoutes(data);
       toast.success("Đã tải danh sách tuyến vận chuyển");
     } catch (error) {
@@ -74,7 +74,7 @@ const ManagerRoutes = () => {
                 toast.dismiss(t.id);
                 setLoading(true);
                 try {
-                  await routesService.deleteRoute(token, id);
+                  await routesService.deleteRoute(id); // ← FIXED: Bỏ token parameter
                   await fetchRoutes();
                   toast.success(`Đã xóa tuyến "${routeName}"`);
                 } catch (error) {
@@ -99,7 +99,7 @@ const ManagerRoutes = () => {
     if (!token) return;
     setLoading(true);
     try {
-      const detail = await routesService.getRouteById(token, id);
+      const detail = await routesService.getRouteById(id); // ← FIXED: Bỏ token parameter
       setSelectedRoute(detail);
       setDialogMode("view");
       setShowDialog(true);
@@ -147,13 +147,14 @@ const ManagerRoutes = () => {
     setLoading(true);
     try {
       if (dialogMode === "create") {
-        await routesService.createRoute(token, {
+        await routesService.createRoute({
+          // ← FIXED: Bỏ token parameter
           ...formData,
           unitShippingPrice: Number(formData.unitShippingPrice),
         });
         toast.success("Tạo tuyến mới thành công!", { id: loadingToast });
       } else {
-        await routesService.updateRoute(token, editRoute.routeId, formData);
+        await routesService.updateRoute(editRoute.routeId, formData); // ← FIXED: Bỏ token parameter
         toast.success("Cập nhật tuyến thành công!", { id: loadingToast });
       }
 

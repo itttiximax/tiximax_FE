@@ -1,46 +1,33 @@
-import axios from "axios";
-
-const API_BASE_URL = "https://t-6cn5.onrender.com";
+import api from "../../config/api"; // ← THAY ĐỔI: import api thay vì axios
 
 const routesService = {
-  getRoutes: async (token) => {
-    const res = await axios.get(`${API_BASE_URL}/routes`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  getRoutes: async () => {
+    // ← THAY ĐỔI: bỏ token parameter
+    const res = await api.get("/routes"); // ← THAY ĐỔI: bỏ headers (tự động thêm)
     return res.data;
   },
 
-  getRouteById: async (token, id) => {
-    const res = await axios.get(`${API_BASE_URL}/routes/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  getRouteById: async (id) => {
+    // ← THAY ĐỔI: bỏ token parameter
+    const res = await api.get(`/routes/${id}`); // ← THAY ĐỔI: bỏ headers
     return res.data;
   },
 
-  createRoute: async (token, data) => {
-    const res = await axios.post(`${API_BASE_URL}/routes`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+  createRoute: async (data) => {
+    // ← THAY ĐỔI: bỏ token parameter
+    const res = await api.post("/routes", data); // ← THAY ĐỔI: bỏ headers
     return res.data;
   },
 
-  updateRoute: async (token, id, data) => {
-    const res = await axios.put(`${API_BASE_URL}/routes/${id}`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+  updateRoute: async (id, data) => {
+    // ← THAY ĐỔI: bỏ token parameter
+    const res = await api.put(`/routes/${id}`, data); // ← THAY ĐỔI: bỏ headers
     return res.data;
   },
 
-  deleteRoute: async (token, id) => {
-    const res = await axios.delete(`${API_BASE_URL}/routes/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  deleteRoute: async (id) => {
+    // ← THAY ĐỔI: bỏ token parameter
+    const res = await api.delete(`/routes/${id}`); // ← THAY ĐỔI: bỏ headers
     return res.data;
   },
 };

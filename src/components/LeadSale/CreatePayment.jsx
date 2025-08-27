@@ -8,7 +8,8 @@ import {
   Loader,
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
-import createPaymentService from "../../Services/LeadSale/createPaymentService";
+// FIXED: Import updated payment service
+import paymentService from "../../Services/LeadSale/paymentService"; // ← CHANGED: new service path
 
 const CreatePayment = () => {
   const [orderCode, setOrderCode] = useState("");
@@ -29,7 +30,8 @@ const CreatePayment = () => {
     setResult(null);
 
     try {
-      const response = await createPaymentService(orderCode.trim());
+      // FIXED: Use new service method call
+      const response = await paymentService.createPayment(orderCode.trim()); // ← CHANGED: method call
       setResult(response);
       toast.success("Tạo thanh toán thành công!");
     } catch (error) {

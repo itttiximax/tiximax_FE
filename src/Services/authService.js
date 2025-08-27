@@ -1,15 +1,4 @@
-// src/services/authService.jsx
-import axios from "axios";
-
-const API_BASE_URL = "https://t-6cn5.onrender.com";
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-    Accept: "*/*",
-  },
-});
+import api from "../config/api.js"; // ← CHỈ THÊM DÒNG NÀY
 
 // Định nghĩa roles chung để dễ quản lý
 export const ROLES = {
@@ -25,8 +14,7 @@ export const ROLES = {
 
 export const login = async (username, password) => {
   try {
-    const response = await api.post("/accounts/login", { username, password });
-
+    const response = await api.post("/accounts/login", { username, password }); // ← SỬA: dùng api thay vì axios
     const userData = response.data;
 
     // Lưu token và user info vào localStorage
@@ -34,7 +22,6 @@ export const login = async (username, password) => {
       localStorage.setItem("token", userData.token);
       localStorage.setItem("user", JSON.stringify(userData));
     }
-
     return userData;
   } catch (error) {
     console.error("Login failed:", error.response?.data || error.message);
