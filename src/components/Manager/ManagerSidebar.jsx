@@ -209,7 +209,6 @@ const ManagerSidebar = () => {
             <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-xl shadow-indigo-200/50">
               <FaUserCircle className="w-10 h-10 text-white" />
             </div>
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-400 rounded-full border-3 border-white shadow-sm"></div>
           </div>
           <h3 className="mt-4 text-xl font-bold text-gray-800">Manager</h3>
         </div>
