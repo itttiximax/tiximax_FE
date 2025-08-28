@@ -202,6 +202,14 @@ const Header = () => {
                           <History size={14} className="mr-2" />
                           Lịch sử
                         </Link>
+                        <Link
+                          to="/order-history"
+                          className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 transition duration-150"
+                          onClick={() => setIsProfileDropdownOpen(false)}
+                        >
+                          <History size={14} className="mr-2" />
+                          Theo dõi đơn hàng
+                        </Link>
                       </div>
 
                       <div className="border-t border-gray-100 py-1">
@@ -225,7 +233,7 @@ const Header = () => {
                     Đăng nhập
                   </Link>
                   <Link
-                    to="/dang-ky"
+                    to="/signup"
                     className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:from-yellow-500 hover:to-yellow-600 transition duration-200"
                   >
                     Đăng ký

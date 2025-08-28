@@ -13,30 +13,32 @@ import {
   FaBullhorn,
   FaUserCircle,
   FaChevronDown,
+  FaMapMarkerAlt,
 } from "react-icons/fa";
 
 const ManagerSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [openCost, setOpenCost] = useState(false);
+  // const [openSales, setOpenSales] = useState(true);
 
-  // Cấu hình menu items theo cấu trúc dễ đọc
+  // Cấu hình menu items theo cấu trúc hiện đại
   const menuSections = [
     {
-      title: "Báo cáo",
+      title: "Analytics",
       items: [
         {
-          text: "Doanh thu",
+          text: "Dashboard",
           icon: <FaChartLine />,
           path: "/manager/dashboard",
         },
         {
-          text: "Nhóm bán hàng",
+          text: "Teams",
           icon: <FaUserTie />,
           path: "/manager/team",
         },
         {
-          text: "Khách hàng",
+          text: "Customers",
           icon: <FaUsers />,
           path: "/manager/customers",
         },
@@ -46,12 +48,12 @@ const ManagerSidebar = () => {
       title: "Pages",
       items: [
         {
-          text: "Báo giá",
+          text: "Quotes",
           icon: <FaFileInvoiceDollar />,
           path: "/pages/quote",
         },
         {
-          text: "Quảng cáo",
+          text: "Marketing",
           icon: <FaBullhorn />,
           path: "/pages/ads",
         },
@@ -61,36 +63,36 @@ const ManagerSidebar = () => {
       title: "Sales Management",
       items: [
         {
-          text: "Chi phí",
+          text: "Payments",
           icon: <FaMoneyCheck />,
           hasSubmenu: true,
           isOpen: openCost,
           onToggle: () => setOpenCost(!openCost),
           submenuItems: [
             {
-              text: "Thanh toán sau",
+              text: "Pay Later",
               path: "/manager/cost/pay-later",
             },
             {
-              text: "Thanh toán trước",
+              text: "Pre-payment",
               path: "/manager/cost/pay-before",
             },
           ],
         },
         {
-          text: "Chuyến bay",
+          text: "Routes",
           icon: <FaPlaneDeparture />,
           path: "/manager/routes",
         },
         {
-          text: "Vận chuyển",
+          text: "Logistics",
           icon: <FaTruckMoving />,
           path: "/manager/transfer",
         },
         {
-          text: "Quốc gia",
+          text: "Product Types",
           icon: <FaGlobeAmericas />,
-          path: "/manager/countries",
+          path: "/manager/producttype",
         },
       ],
     },
@@ -106,43 +108,45 @@ const ManagerSidebar = () => {
   const renderMenuItem = (item) => {
     if (item.hasSubmenu) {
       return (
-        <div key={item.text}>
+        <div key={item.text} className="relative">
           <button
             onClick={item.onToggle}
-            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ${
+            className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group ${
               item.isOpen
-                ? "bg-indigo-50 text-indigo-700 shadow-sm"
-                : "hover:bg-gray-50 text-gray-700 hover:text-indigo-600"
+                ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-700 shadow-sm border border-indigo-100"
+                : "hover:bg-gray-50 text-gray-700 hover:text-indigo-600 hover:shadow-sm"
             }`}
           >
-            <div className="flex items-center gap-3">
-              <span
-                className={`text-lg ${
-                  item.isOpen ? "text-indigo-600" : "text-gray-500"
+            <div className="flex items-center gap-4">
+              <div
+                className={`p-2 rounded-xl transition-all duration-300 ${
+                  item.isOpen
+                    ? "bg-indigo-100 text-indigo-600"
+                    : "bg-gray-100 text-gray-500 group-hover:bg-indigo-50 group-hover:text-indigo-500"
                 }`}
               >
                 {item.icon}
-              </span>
-              <span className="text-sm font-medium">{item.text}</span>
+              </div>
+              <span className="font-medium">{item.text}</span>
             </div>
             <FaChevronDown
-              className={`text-sm transition-transform duration-200 ${
-                item.isOpen ? "rotate-180" : ""
+              className={`text-sm transition-all duration-300 ${
+                item.isOpen ? "rotate-180 text-indigo-600" : "text-gray-400"
               }`}
             />
           </button>
 
-          {/* Submenu */}
+          {/* Submenu with improved styling */}
           {item.isOpen && (
-            <div className="ml-8 mt-2 space-y-1 animate-slideDown">
+            <div className="ml-4 mt-2 space-y-1 animate-slideDown">
               {item.submenuItems.map((subItem) => (
                 <Link
                   key={subItem.path}
                   to={subItem.path}
-                  className={`block px-4 py-2 text-sm rounded-lg transition-all duration-200 ${
+                  className={`block px-6 py-2.5 ml-8 text-sm rounded-xl transition-all duration-200 relative ${
                     isActive(subItem.path)
-                      ? "text-indigo-600 bg-indigo-50 font-medium"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-indigo-600"
+                      ? "text-indigo-600 bg-indigo-50 font-medium shadow-sm border-l-2 border-indigo-400"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-indigo-600 border-l-2 border-transparent hover:border-gray-200"
                   }`}
                 >
                   {subItem.text}
@@ -158,59 +162,72 @@ const ManagerSidebar = () => {
       <Link
         key={item.path}
         to={item.path}
-        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+        className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative ${
           isActive(item.path)
-            ? "bg-indigo-50 text-indigo-700 shadow-sm font-medium"
-            : "hover:bg-gray-50 text-gray-700 hover:text-indigo-600"
+            ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-700 shadow-sm font-medium border border-indigo-100"
+            : "hover:bg-gray-50 text-gray-700 hover:text-indigo-600 hover:shadow-sm"
         }`}
       >
-        <span
-          className={`text-lg ${
-            isActive(item.path) ? "text-indigo-600" : "text-gray-500"
+        <div
+          className={`p-2 rounded-xl transition-all duration-300 ${
+            isActive(item.path)
+              ? "bg-indigo-100 text-indigo-600"
+              : "bg-gray-100 text-gray-500 group-hover:bg-indigo-50 group-hover:text-indigo-500"
           }`}
         >
           {item.icon}
-        </span>
-        <span className="text-sm font-medium">{item.text}</span>
+        </div>
+        <span className="font-medium">{item.text}</span>
+
+        {/* Active indicator */}
+        {isActive(item.path) && (
+          <div className="absolute right-2 w-2 h-2 bg-indigo-500 rounded-full"></div>
+        )}
       </Link>
     );
   };
 
   const renderMenuSection = (section) => (
     <div key={section.title} className="mb-8">
-      <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 px-4">
+      <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 px-4 relative">
         {section.title}
+        <div className="absolute -bottom-2 left-4 w-8 h-0.5 bg-gradient-to-r from-indigo-400 to-blue-400 rounded-full"></div>
       </h2>
-      <div className="space-y-1">{section.items.map(renderMenuItem)}</div>
+      <div className="space-y-2">{section.items.map(renderMenuItem)}</div>
     </div>
   );
 
   return (
-    <div className="w-64 h-screen bg-white border-r border-gray-200 shadow-sm flex flex-col">
+    <div className="w-72 h-screen bg-white border-r border-gray-100 shadow-xl flex flex-col relative overflow-hidden">
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white via-gray-50/30 to-blue-50/20 pointer-events-none"></div>
+
       {/* Profile Section */}
-      <div className="p-6 border-b border-gray-100">
+      <div className="relative p-8 border-b border-gray-100">
         <div className="flex flex-col items-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
-            <FaUserCircle className="w-8 h-8 text-white" />
+          <div className="relative">
+            <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-xl shadow-indigo-200/50">
+              <FaUserCircle className="w-10 h-10 text-white" />
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-400 rounded-full border-3 border-white shadow-sm"></div>
           </div>
-          <h3 className="mt-3 text-lg font-semibold text-gray-800">Manager</h3>
-          <span className="text-sm text-gray-500">Quản lý hệ thống</span>
+          <h3 className="mt-4 text-xl font-bold text-gray-800">Manager</h3>
         </div>
       </div>
 
       {/* Menu Sections */}
-      <div className="flex-1 overflow-y-auto py-6">
+      <div className="relative flex-1 overflow-y-auto py-8 px-4 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
         {menuSections.map(renderMenuSection)}
       </div>
 
       {/* Logout Button */}
-      <div className="p-4 border-t border-gray-100">
+      <div className="relative p-6 border-t border-gray-100">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg font-medium"
+          className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-4 px-6 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl font-semibold transform hover:scale-[1.02] active:scale-[0.98]"
         >
           <FaSignOutAlt className="text-sm" />
-          <span>Đăng xuất</span>
+          <span>Sign Out</span>
         </button>
       </div>
 
@@ -219,7 +236,7 @@ const ManagerSidebar = () => {
         @keyframes slideDown {
           from {
             opacity: 0;
-            transform: translateY(-8px);
+            transform: translateY(-12px);
           }
           to {
             opacity: 1;
@@ -228,7 +245,20 @@ const ManagerSidebar = () => {
         }
 
         .animate-slideDown {
-          animation: slideDown 0.2s ease-out;
+          animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .scrollbar-thin::-webkit-scrollbar {
+          width: 4px;
+        }
+
+        .scrollbar-thumb-gray-200::-webkit-scrollbar-thumb {
+          background-color: #e5e7eb;
+          border-radius: 9999px;
+        }
+
+        .scrollbar-track-transparent::-webkit-scrollbar-track {
+          background: transparent;
         }
       `}</style>
     </div>

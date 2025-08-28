@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { getAllProductTypes } from "../../Services/LeadSale/productTypeService";
+import toast, { Toaster } from "react-hot-toast";
 import {
-  Package,
-  DollarSign,
-  XCircle,
-  RefreshCw,
-  AlertCircle,
-} from "lucide-react";
+  getAllProductTypes,
+  createProductType,
+  updateProductType,
+  deleteProductType,
+} from "../../Services/LeadSale/productTypeService";
 
 const ManagerProductType = () => {
   const [productTypes, setProductTypes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [formData, setFormData] = useState({
+    productTypeName: "",
+    fee: false,
+  });
 
-  // Fetch data khi component mount
   useEffect(() => {
     fetchProductTypes();
   }, []);
@@ -21,187 +24,235 @@ const ManagerProductType = () => {
   const fetchProductTypes = async () => {
     try {
       setLoading(true);
-      setError(null);
       const data = await getAllProductTypes();
       setProductTypes(data);
     } catch (err) {
-      setError("Không thể tải danh sách loại sản phẩm. Vui lòng thử lại!");
-      console.error("Error fetching product types:", err);
+      console.error("Error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRefresh = () => {
-    fetchProductTypes();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const loadingToast = toast.loading(
+      editingId ? "Đang cập nhật..." : "Đang tạo mới..."
+    );
+
+    try {
+      if (editingId) {
+        const updatedData = {
+          productTypeId: editingId,
+          ...formData,
+        };
+
+        // Optimistic update
+        setProductTypes((prev) =>
+          prev.map((item) =>
+            item.productTypeId === editingId ? { ...item, ...formData } : item
+          )
+        );
+
+        await updateProductType(editingId, updatedData);
+        toast.success("Cập nhật thành công!", { id: loadingToast });
+      } else {
+        const newItem = await createProductType(formData);
+
+        // Add to list immediately
+        setProductTypes((prev) => [...prev, newItem]);
+        toast.success("Tạo mới thành công!", { id: loadingToast });
+      }
+
+      setFormData({ productTypeName: "", fee: false });
+      setShowForm(false);
+      setEditingId(null);
+    } catch (err) {
+      console.error("Error:", err);
+      toast.error("Có lỗi xảy ra!", { id: loadingToast });
+
+      // Revert optimistic update if needed
+      if (editingId) {
+        fetchProductTypes();
+      }
+    }
   };
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <div className="flex items-center justify-center">
-            <RefreshCw className="animate-spin h-8 w-8 text-blue-600 mr-3" />
-            <span className="text-lg text-gray-600">Đang tải dữ liệu...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleEdit = (item) => {
+    setFormData({
+      productTypeName: item.productTypeName,
+      fee: item.fee,
+    });
+    setEditingId(item.productTypeId);
+    setShowForm(true);
+  };
 
-  // Error state
-  if (error) {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <div className="text-center">
-            <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Có lỗi xảy ra
-            </h3>
-            <p className="text-gray-600 mb-6">{error}</p>
-            <button
-              onClick={handleRefresh}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center mx-auto"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Thử lại
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleCancel = () => {
+    setFormData({ productTypeName: "", fee: false });
+    setShowForm(false);
+    setEditingId(null);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa loại sản phẩm này?")) {
+      const loadingToast = toast.loading("Đang xóa...");
+
+      try {
+        // Optimistic delete - remove from UI immediately
+        setProductTypes((prev) =>
+          prev.filter((item) => item.productTypeId !== id)
+        );
+
+        await deleteProductType(id);
+        toast.success("Xóa thành công!", { id: loadingToast });
+      } catch (err) {
+        console.error("Error deleting:", err);
+        toast.error("Có lỗi xảy ra khi xóa!", { id: loadingToast });
+
+        // Revert optimistic delete
+        fetchProductTypes();
+      }
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  if (loading) return <div>Đang tải...</div>;
 
   return (
-    <div className="container mx-auto p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Quản lý loại sản phẩm
-            </h1>
-            <p className="text-gray-600">
-              Danh sách các loại sản phẩm trong hệ thống
-            </p>
-          </div>
-          <button
-            onClick={handleRefresh}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Làm mới
-          </button>
-        </div>
-      </div>
+    <div className="p-4">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: "#363636",
+            color: "#fff",
+          },
+          success: {
+            style: {
+              background: "#10b981",
+            },
+          },
+          error: {
+            style: {
+              background: "#ef4444",
+            },
+          },
+        }}
+      />
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center">
-            <Package className="h-8 w-8 text-blue-600 mr-3" />
-            <div>
-              <p className="text-sm text-gray-600">Tổng loại sản phẩm</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {productTypes.length}
-              </p>
-            </div>
-          </div>
-        </div>
+      <h1 className="text-2xl font-bold mb-4">Quản lý loại sản phẩm</h1>
 
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center">
-            <DollarSign className="h-8 w-8 text-green-600 mr-3" />
-            <div>
-              <p className="text-sm text-gray-600">Có phí</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {productTypes.filter((type) => type.fee).length}
-              </p>
-            </div>
-          </div>
-        </div>
+      {/* Add button */}
+      <button
+        onClick={() => setShowForm(!showForm)}
+        className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
+      >
+        {showForm ? "Hủy" : "Thêm mới"}
+      </button>
 
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center">
-            <XCircle className="h-8 w-8 text-red-600 mr-3" />
-            <div>
-              <p className="text-sm text-gray-600">Miễn phí</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {productTypes.filter((type) => !type.fee).length}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Form */}
+      {showForm && (
+        <form onSubmit={handleSubmit} className="bg-gray-100 p-4 rounded mb-4">
+          <h3 className="text-lg font-medium mb-3">
+            {editingId ? "Sửa loại sản phẩm" : "Thêm mới loại sản phẩm"}
+          </h3>
 
-      {/* Product Types Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Danh sách loại sản phẩm
-          </h2>
-        </div>
-
-        {productTypes.length === 0 ? (
-          <div className="text-center py-12">
-            <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <p className="text-gray-600 text-lg">Không có loại sản phẩm nào</p>
+          <div className="mb-3">
+            <label className="block text-sm font-medium mb-1">
+              Tên loại sản phẩm:
+            </label>
+            <input
+              type="text"
+              name="productTypeName"
+              value={formData.productTypeName}
+              onChange={handleInputChange}
+              className="w-full border rounded px-3 py-2"
+              required
+            />
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tên loại sản phẩm
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Trạng thái phí
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {productTypes.map((productType) => (
-                  <tr
-                    key={productType.productTypeId}
-                    className="hover:bg-gray-50 transition duration-150"
+
+          <div className="mb-3">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                name="fee"
+                checked={formData.fee}
+                onChange={handleInputChange}
+                className="mr-2"
+              />
+              Có phí
+            </label>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              className="bg-green-500 text-white px-4 py-2 rounded"
+            >
+              {editingId ? "Cập nhật" : "Lưu"}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="bg-gray-500 text-white px-4 py-2 rounded"
+            >
+              Hủy
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Table */}
+      <table className="w-full border-collapse border border-gray-300">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="border border-gray-300 px-4 py-2">ID</th>
+            <th className="border border-gray-300 px-4 py-2">Tên</th>
+            <th className="border border-gray-300 px-4 py-2">Phí</th>
+            <th className="border border-gray-300 px-4 py-2">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          {productTypes.map((item) => (
+            <tr key={item.productTypeId}>
+              <td className="border border-gray-300 px-4 py-2">
+                {item.productTypeId}
+              </td>
+              <td className="border border-gray-300 px-4 py-2">
+                {item.productTypeName}
+              </td>
+              <td className="border border-gray-300 px-4 py-2">
+                {item.fee ? "Có phí" : "Miễn phí"}
+              </td>
+              <td className="border border-gray-300 px-4 py-2">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEdit(item)}
+                    className="bg-yellow-500 text-white px-3 py-1 rounded text-sm"
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      #{productType.productTypeId}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <Package className="h-5 w-5 text-gray-400 mr-3" />
-                        <span className="text-sm font-medium text-gray-900">
-                          {productType.productTypeName}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      {productType.fee ? (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          <DollarSign className="h-3 w-3 mr-1" />
-                          Có phí
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          <XCircle className="h-3 w-3 mr-1" />
-                          Miễn phí
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                    Sửa
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.productTypeId)}
+                    className="bg-red-500 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Xóa
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };

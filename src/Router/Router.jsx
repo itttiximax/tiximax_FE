@@ -85,6 +85,7 @@ const Router = createBrowserRouter([
       { path: "routes", element: <ManagerRoutes /> },
       { path: "transfer", element: <ManagerDestination /> },
       { path: "dashboard", element: <ManagerDashboard /> },
+      { path: "producttype", element: <ManagerProductType /> },
     ],
   },
   {
@@ -102,7 +103,6 @@ const Router = createBrowserRouter([
       { path: "dashboard", element: <DashboardLeadSale /> },
       { path: "createorder", element: <CreateOrder /> },
       { path: "createpayment", element: <CreatePayment /> },
-      { path: "product", element: <ManagerProductType /> },
     ],
   },
   {
