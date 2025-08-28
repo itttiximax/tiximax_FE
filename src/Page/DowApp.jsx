@@ -1,185 +1,254 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import {
-  FaShoppingCart,
-  FaClipboardList,
-  FaBell,
-  FaShippingFast,
-  FaApple,
-  FaGooglePlay,
-  FaMobile,
-  FaStar,
-  FaTruck,
-  FaMapMarkerAlt,
-} from "react-icons/fa";
+  ShoppingCart,
+  ClipboardList,
+  Bell,
+  Truck,
+  Smartphone,
+  Star,
+  MapPin,
+  Download,
+  Play,
+  QrCode,
+  CheckCircle,
+} from "lucide-react";
 
 const DowApp = () => {
+  const features = [
+    {
+      icon: ShoppingCart,
+      title: "Đặt dịch vụ nhanh chóng",
+      description: "Đặt dịch vụ vận chuyển chỉ với vài thao tác đơn giản",
+      color: "from-blue-500 to-blue-600",
+      bgColor: "bg-blue-50",
+      iconColor: "text-blue-600",
+    },
+    {
+      icon: ClipboardList,
+      title: "Quản lý đơn hàng",
+      description: "Theo dõi và quản lý tất cả đơn hàng một cách thông minh",
+      color: "from-emerald-500 to-emerald-600",
+      bgColor: "bg-emerald-50",
+      iconColor: "text-emerald-600",
+    },
+    {
+      icon: Bell,
+      title: "Thông báo real-time",
+      description: "Nhận cập nhật trạng thái đơn hàng ngay lập tức",
+      color: "from-purple-500 to-purple-600",
+      bgColor: "bg-purple-50",
+      iconColor: "text-purple-600",
+    },
+    {
+      icon: Truck,
+      title: "Tracking GPS chính xác",
+      description: "Theo dõi hành trình giao hàng với độ chính xác cao",
+      color: "from-orange-500 to-orange-600",
+      bgColor: "bg-orange-50",
+      iconColor: "text-orange-600",
+    },
+  ];
+
   return (
-    <section className="bg-gradient-to-br from-gray-50 via-white to-gray-100 py-10 relative overflow-hidden">
-      {/* Decorative elements */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-5 right-5 w-20 h-20 bg-yellow-400 rounded-full"></div>
-        <div className="absolute bottom-10 left-5 w-16 h-16 bg-yellow-300 rounded-lg rotate-45"></div>
+    <section className="relative py-16 bg-gradient-to-br from-slate-50 via-white to-blue-50 overflow-hidden flex items-center justify-center min-h-screen">
+      {/* Enhanced Background Decorations */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-10 right-10 w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full opacity-10 animate-pulse"></div>
+        <div className="absolute top-1/2 right-20 w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-500 rounded-full opacity-8"></div>
+        <div className="absolute bottom-20 left-10 w-14 h-14 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-lg rotate-45 opacity-10"></div>
+        <div className="absolute bottom-1/2 left-5 w-8 h-8 bg-gradient-to-br from-purple-400 to-purple-500 rounded-full opacity-8"></div>
+
+        {/* Floating dots pattern */}
+        <div className="absolute top-1/4 left-1/4 grid grid-cols-3 gap-2 opacity-5">
+          {[...Array(9)].map((_, i) => (
+            <div key={i} className="w-1 h-1 bg-gray-400 rounded-full"></div>
+          ))}
+        </div>
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="max-w-5xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-8">
-          {/* Text Content */}
+          {/* Enhanced Text Content */}
           <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="inline-flex items-center space-x-2 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-medium">
-                <FaMobile className="w-3 h-3" />
+            {/* Header Section */}
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold shadow-sm border border-yellow-200">
+                <Smartphone className="w-3 h-3" />
                 <span>Ứng dụng di động</span>
               </div>
 
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
-                <span className="bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
-                  TixiMax
-                </span>
-                <br />
-                <span className="text-gray-800">Mobile App</span>
-              </h2>
+              <div className="space-y-2">
+                <h1 className="text-2xl lg:text-3xl font-bold leading-tight">
+                  <span className="bg-gradient-to-r from-yellow-500 via-yellow-600 to-orange-500 bg-clip-text text-transparent">
+                    TixiMax
+                  </span>
+                  <br />
+                  <span className="text-gray-800">Mobile App</span>
+                </h1>
 
-              <p className="text-base text-gray-600 leading-relaxed max-w-lg">
-                Quản lý logistics dễ dàng ngay trên điện thoại. Theo dõi đơn
-                hàng, đặt dịch vụ và nhận thông báo real-time.
-              </p>
+                <p className="text-sm text-gray-600 leading-relaxed max-w-md font-medium">
+                  Quản lý logistics dễ dàng ngay trên điện thoại. Theo dõi đơn
+                  hàng, đặt dịch vụ và nhận thông báo real-time với trải nghiệm
+                  tuyệt vời.
+                </p>
+              </div>
             </div>
 
-            {/* Features List */}
-            <div className="space-y-3">
-              {[
-                {
-                  icon: FaShoppingCart,
-                  text: "Đặt dịch vụ vận chuyển nhanh chóng",
-                  color: "text-blue-500",
-                },
-                {
-                  icon: FaClipboardList,
-                  text: "Quản lý đơn hàng thông minh",
-                  color: "text-green-500",
-                },
-                {
-                  icon: FaBell,
-                  text: "Nhận thông báo real-time về trạng thái đơn hàng",
-                  color: "text-purple-500",
-                },
-                {
-                  icon: FaShippingFast,
-                  text: "Tracking GPS chính xác, giao hàng toàn quốc",
-                  color: "text-orange-500",
-                },
-              ].map((feature, index) => (
-                <div key={index} className="flex items-start space-x-3 group">
+            {/* Enhanced Features List */}
+            <div className="space-y-2">
+              {features.map((feature, index) => (
+                <div
+                  key={index}
+                  className="group flex items-start gap-3 p-2 rounded-xl bg-white/70 backdrop-blur-sm border border-gray-100 hover:bg-white hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+                >
                   <div
-                    className={`w-8 h-8 rounded-lg bg-white shadow-md flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+                    className={`w-8 h-8 rounded-lg ${feature.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm`}
                   >
-                    <feature.icon className={`w-3 h-3 ${feature.color}`} />
+                    <feature.icon className={`w-4 h-4 ${feature.iconColor}`} />
                   </div>
-                  <div className="flex-1 pt-1">
-                    <p className="text-gray-700 text-sm leading-relaxed font-medium">
-                      {feature.text}
+                  <div className="flex-1 space-y-1">
+                    <h3 className="font-semibold text-gray-800 text-sm">
+                      {feature.title}
+                    </h3>
+                    <p className="text-gray-600 text-xs leading-relaxed">
+                      {feature.description}
                     </p>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* App Rating */}
-            <div className="flex items-center space-x-4 py-2">
-              <div className="flex items-center space-x-2">
-                <div className="flex space-x-1">
+            {/* Enhanced App Rating */}
+            <div className="flex items-center gap-4 p-3 bg-white/60 backdrop-blur-sm rounded-xl border border-gray-100">
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1">
                   {[...Array(5)].map((_, i) => (
-                    <FaStar key={i} className="w-3 h-3 text-yellow-400" />
+                    <Star
+                      key={i}
+                      className="w-3 h-3 text-yellow-400 fill-current"
+                    />
                   ))}
                 </div>
-                <span className="text-gray-600 text-sm font-medium">4.8/5</span>
+                <span className="text-gray-700 font-semibold text-sm">
+                  4.8/5
+                </span>
               </div>
               <div className="h-6 w-px bg-gray-300"></div>
-              <p className="text-gray-600 text-sm">
-                <span className="font-bold text-gray-800">50K+</span> lượt tải
-              </p>
-            </div>
-
-            {/* Download Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link
-                to="/download/ios"
-                className="group flex items-center justify-center space-x-2 bg-black hover:bg-gray-800 text-white px-4 py-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1"
-              >
-                <FaApple className="w-4 h-4" />
-                <div className="text-left">
-                  <p className="text-xs text-gray-300">Tải về từ</p>
-                  <p className="text-sm font-semibold">App Store</p>
-                </div>
-              </Link>
-
-              <Link
-                to="/download/android"
-                className="group flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1"
-              >
-                <FaGooglePlay className="w-4 h-4" />
-                <div className="text-left">
-                  <p className="text-xs text-green-100">Tải về từ</p>
-                  <p className="text-sm font-semibold">Google Play</p>
-                </div>
-              </Link>
-            </div>
-
-            {/* QR Code hint */}
-            <div className="flex items-center space-x-2 text-gray-500 text-xs">
-              <div className="w-6 h-6 border border-gray-300 rounded flex items-center justify-center">
-                <div className="w-3 h-3 bg-gray-300 rounded-sm"></div>
+              <div className="text-gray-600 text-sm">
+                <span className="font-bold text-gray-800">50K+</span>
+                <span className="ml-1">lượt tải</span>
               </div>
-              <span>Quét mã QR để tải app nhanh chóng</span>
+            </div>
+
+            {/* Enhanced Download Buttons */}
+            <div className="space-y-3">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button className="group flex items-center justify-center gap-2 bg-black hover:bg-gray-800 text-white px-4 py-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 min-w-[140px]">
+                  <div className="w-6 h-6 bg-white rounded-md flex items-center justify-center">
+                    <span className="text-black font-bold text-sm">🍎</span>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs text-gray-300">Tải về từ</p>
+                    <p className="text-sm font-semibold">App Store</p>
+                  </div>
+                </button>
+
+                <button className="group flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white px-4 py-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 min-w-[140px]">
+                  <Play className="w-5 h-5 fill-current" />
+                  <div className="text-left">
+                    <p className="text-xs text-green-100">Tải về từ</p>
+                    <p className="text-sm font-semibold">Google Play</p>
+                  </div>
+                </button>
+              </div>
+
+              {/* QR Code Section */}
+              <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="w-8 h-8 bg-white rounded-md border-2 border-gray-300 flex items-center justify-center">
+                  <QrCode className="w-4 h-4 text-gray-600" />
+                </div>
+                <span className="text-gray-600 font-medium text-sm">
+                  Quét mã QR để tải app nhanh chóng
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Image/Phone Mockup */}
+          {/* Enhanced Phone Mockup */}
           <div className="flex justify-center lg:justify-end">
             <div className="relative">
-              {/* Phone mockup container */}
-              <div className="relative w-48 h-64 bg-gradient-to-b from-gray-800 to-gray-900 rounded-2xl p-1 shadow-xl transform hover:rotate-3 transition-transform duration-500">
-                {/* Screen */}
-                <div className="w-full h-full bg-gradient-to-b from-yellow-400 via-yellow-500 to-yellow-600 rounded-xl relative overflow-hidden">
-                  {/* Status bar */}
-                  <div className="absolute top-0 left-0 right-0 h-6 bg-black bg-opacity-20 flex items-center justify-between px-3 text-white text-xs">
-                    <span>9:41</span>
-                    <span>100%</span>
+              {/* Phone mockup with enhanced design */}
+              <div className="relative w-32 h-40 bg-gradient-to-b from-gray-900 to-black rounded-2xl p-1 shadow-xl transform hover:rotate-2 transition-all duration-500">
+                {/* Screen with realistic bezels */}
+                <div className="w-full h-full bg-gradient-to-b from-yellow-400 via-yellow-500 to-orange-500 rounded-xl relative overflow-hidden shadow-inner">
+                  {/* Realistic status bar */}
+                  <div className="absolute top-0 left-0 right-0 h-4 bg-black/20 backdrop-blur-sm flex items-center justify-between px-2 text-white text-xs font-medium">
+                    <span className="text-xs">9:41</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs">5G</span>
+                      <div className="flex gap-px">
+                        {[...Array(4)].map((_, i) => (
+                          <div
+                            key={i}
+                            className="w-0.5 h-2 bg-white rounded-full opacity-80"
+                          ></div>
+                        ))}
+                      </div>
+                      <span className="text-xs">100%</span>
+                    </div>
                   </div>
 
-                  {/* App content mockup */}
-                  <div className="pt-8 px-3 text-white">
-                    <h3 className="text-lg font-bold mb-1">TixiMax</h3>
-                    <p className="text-xs opacity-90 mb-4">
-                      Logistics Made Simple
-                    </p>
+                  {/* App interface mockup */}
+                  <div className="pt-6 px-2 text-white">
+                    <div className="text-center mb-3">
+                      <h3 className="text-lg font-bold mb-1">TixiMax</h3>
+                      <p className="text-xs opacity-90">
+                        Logistics Made Simple
+                      </p>
+                    </div>
 
-                    {/* Mock interface elements */}
+                    {/* Enhanced mock interface */}
                     <div className="space-y-2">
-                      <div className="bg-white bg-opacity-20 rounded-lg p-2">
-                        <div className="flex items-center space-x-2">
-                          <FaTruck className="w-3 h-3" />
+                      <div className="bg-white/25 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-white/20 rounded-md flex items-center justify-center">
+                            <Truck className="w-3 h-3" />
+                          </div>
                           <div className="flex-1">
-                            <p className="text-xs font-medium">
+                            <p className="font-semibold text-xs">
                               Đơn hàng #TXM001
                             </p>
-                            <p className="text-xs opacity-80">
+                            <p className="text-xs opacity-90">
                               Đang vận chuyển
                             </p>
                           </div>
+                          <CheckCircle className="w-3 h-3 text-green-300" />
                         </div>
                       </div>
 
-                      <div className="bg-white bg-opacity-20 rounded-lg p-2">
-                        <div className="flex items-center space-x-2">
-                          <FaMapMarkerAlt className="w-3 h-3" />
+                      <div className="bg-white/25 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-white/20 rounded-md flex items-center justify-center">
+                            <MapPin className="w-3 h-3" />
+                          </div>
                           <div className="flex-1">
-                            <p className="text-xs font-medium">Tracking Live</p>
-                            <p className="text-xs opacity-80">
+                            <p className="font-semibold text-xs">
+                              GPS Tracking
+                            </p>
+                            <p className="text-xs opacity-90">
                               Cập nhật real-time
                             </p>
                           </div>
+                          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        </div>
+                      </div>
+
+                      <div className="bg-white/15 rounded-lg p-2">
+                        <div className="text-center">
+                          <p className="text-xs opacity-80">
+                            Thời gian giao hàng dự kiến
+                          </p>
+                          <p className="font-bold text-xs">15:30 - 16:00</p>
                         </div>
                       </div>
                     </div>
@@ -187,13 +256,17 @@ const DowApp = () => {
                 </div>
               </div>
 
-              {/* Floating elements */}
-              <div className="absolute -top-2 -right-2 w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                <FaBell className="w-4 h-4 text-white" />
+              {/* Enhanced floating elements */}
+              <div className="absolute -top-2 -right-2 w-7 h-7 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                <Bell className="w-3 h-3 text-white" />
               </div>
 
-              <div className="absolute -bottom-2 -left-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-                <FaShippingFast className="w-3 h-3 text-white" />
+              <div className="absolute -bottom-2 -left-2 w-6 h-6 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                <Download className="w-3 h-3 text-white" />
+              </div>
+
+              <div className="absolute top-1/2 -left-3 w-4 h-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                <Star className="w-2 h-2 text-white" />
               </div>
             </div>
           </div>
