@@ -3,101 +3,182 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   FaChartLine,
   FaUsers,
-  FaUserTie,
-  FaMoneyCheck,
-  FaPlaneDeparture,
-  FaTruckMoving,
-  FaGlobeAmericas,
+  FaBoxOpen,
+  FaMoneyBillWave,
+  FaShippingFast,
+  FaTruck,
+  FaMapMarkedAlt,
   FaSignOutAlt,
   FaFileInvoiceDollar,
-  FaBullhorn,
+  FaPhoneAlt,
   FaUserCircle,
   FaChevronDown,
-  FaMapMarkerAlt,
+  FaClipboardList,
+  FaCalculator,
+  FaWarehouse,
+  FaCreditCard,
+  FaRoute,
+  FaUserTie,
 } from "react-icons/fa";
 
-const ManagerSidebar = () => {
+const StaffSaleSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [openCost, setOpenCost] = useState(false);
-  // const [openSales, setOpenSales] = useState(true);
+  const [openOrders, setOpenOrders] = useState(false);
+  const [openPayments, setOpenPayments] = useState(false);
+  const [openLogistics, setOpenLogistics] = useState(false);
 
-  // Cấu hình menu items theo cấu trúc hiện đại
+  // Cấu hình menu items cho Staff Sale trong công ty logistics
   const menuSections = [
     {
-      title: "Analytics",
+      title: "Dashboard",
       items: [
         {
-          text: "Dashboard",
+          text: "Overview",
           icon: <FaChartLine />,
-          path: "/manager/dashboard",
+          path: "/staff-sale/dashboard",
         },
         {
-          text: "Teams",
-          icon: <FaUserTie />,
-          path: "/manager/team",
+          text: "Daily Reports",
+          icon: <FaClipboardList />,
+          path: "/staff-sale/reports",
         },
+      ],
+    },
+    {
+      title: "Customer Management",
+      items: [
         {
-          text: "Customers",
+          text: "Customer List",
           icon: <FaUsers />,
-          path: "/manager/customers",
+          path: "/staff-sale/customers",
+        },
+        {
+          text: "Customer Support",
+          icon: <FaPhoneAlt />,
+          path: "/staff-sale/support",
+        },
+        {
+          text: "Lead Management",
+          icon: <FaUserTie />,
+          path: "/staff-sale/leads",
         },
       ],
     },
     {
-      title: "Pages",
+      title: "Order Management",
       items: [
         {
-          text: "Quotes",
-          icon: <FaFileInvoiceDollar />,
-          path: "/pages/quote",
-        },
-        {
-          text: "Marketing",
-          icon: <FaBullhorn />,
-          path: "/pages/ads",
-        },
-      ],
-    },
-    {
-      title: "Sales Management",
-      items: [
-        {
-          text: "Payments",
-          icon: <FaMoneyCheck />,
+          text: "Orders",
+          icon: <FaBoxOpen />,
           hasSubmenu: true,
-          isOpen: openCost,
-          onToggle: () => setOpenCost(!openCost),
+          isOpen: openOrders,
+          onToggle: () => setOpenOrders(!openOrders),
           submenuItems: [
             {
-              text: "Pay Later",
-              path: "/manager/cost/pay-later",
+              text: "All Orders",
+              path: "/staff-sale/orders",
             },
             {
-              text: "Pre-payment",
-              path: "/manager/cost/pay-before",
+              text: "Pending Orders",
+              path: "/staff-sale/orders/pending",
+            },
+            {
+              text: "In Transit",
+              path: "/staff-sale/orders/transit",
+            },
+            {
+              text: "Delivered",
+              path: "/staff-sale/orders/delivered",
             },
           ],
         },
         {
-          text: "Routes",
-          icon: <FaPlaneDeparture />,
-          path: "/manager/routes",
+          text: "Quotations",
+          icon: <FaFileInvoiceDollar />,
+          path: "/staff-sale/quotations",
         },
         {
-          text: "Logistics",
-          icon: <FaTruckMoving />,
-          path: "/manager/transfer",
+          text: "Price Calculator",
+          icon: <FaCalculator />,
+          path: "/staff-sale/calculator",
+        },
+      ],
+    },
+    {
+      title: "Payment & Finance",
+      items: [
+        {
+          text: "Payments",
+          icon: <FaMoneyBillWave />,
+          hasSubmenu: true,
+          isOpen: openPayments,
+          onToggle: () => setOpenPayments(!openPayments),
+          submenuItems: [
+            {
+              text: "Payment Tracking",
+              path: "/staff-sale/payments/tracking",
+            },
+            {
+              text: "COD Orders",
+              path: "/staff-sale/payments/cod",
+            },
+            {
+              text: "Prepaid Orders",
+              path: "/staff-sale/payments/prepaid",
+            },
+          ],
         },
         {
-          text: "Product Types",
-          icon: <FaGlobeAmericas />,
-          path: "/manager/producttype",
+          text: "Invoices",
+          icon: <FaCreditCard />,
+          path: "/staff-sale/invoices",
+        },
+      ],
+    },
+    {
+      title: "Logistics Operations",
+      items: [
+        {
+          text: "Shipping",
+          icon: <FaShippingFast />,
+          hasSubmenu: true,
+          isOpen: openLogistics,
+          onToggle: () => setOpenLogistics(!openLogistics),
+          submenuItems: [
+            {
+              text: "Domestic Shipping",
+              path: "/staff-sale/shipping/domestic",
+            },
+            {
+              text: "International Shipping",
+              path: "/staff-sale/shipping/international",
+            },
+            {
+              text: "Express Delivery",
+              path: "/staff-sale/shipping/express",
+            },
+          ],
         },
         {
-          text: "Product Types",
-          icon: <FaGlobeAmericas />,
-          path: "/manager/order",
+          text: "Routes & Tracking",
+          icon: <FaRoute />,
+          path: "/staff-sale/routes",
+        },
+        {
+          text: "Fleet Management",
+          icon: <FaTruck />,
+          path: "/staff-sale/fleet",
+        },
+        {
+          text: "Warehouses",
+          icon: <FaWarehouse />,
+          path: "/staff-sale/warehouses",
+        },
+        {
+          text: "Service Areas",
+          icon: <FaMapMarkedAlt />,
+          path: "/staff-sale/service-areas",
         },
       ],
     },
@@ -214,8 +295,12 @@ const ManagerSidebar = () => {
             <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-xl shadow-indigo-200/50">
               <FaUserCircle className="w-10 h-10 text-white" />
             </div>
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-white rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+            </div>
           </div>
-          <h3 className="mt-4 text-xl font-bold text-gray-800">Manager</h3>
+          <h3 className="mt-4 text-xl font-bold text-gray-800">Sales Staff</h3>
+          <p className="text-sm text-gray-500 mt-1">Logistics Team</p>
         </div>
       </div>
 
@@ -269,4 +354,4 @@ const ManagerSidebar = () => {
   );
 };
 
-export default ManagerSidebar;
+export default StaffSaleSidebar;

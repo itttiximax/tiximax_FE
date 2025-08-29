@@ -34,7 +34,7 @@ import ManagerDashboard from "../components/Manager/ManagerDashboard";
 
 //StaffSale components
 import StaffSalePage from "../components/StaffSale/StaffSalePage";
-
+import StaffSaleLayout from "../components/StaffSale/StaffSaleLayout";
 //StaffPurchaser components
 import StaffPurchaserPage from "../components/StaffPurchaser/StaffPurchaserPage";
 
@@ -48,6 +48,7 @@ import ManagerProductType from "../components/Manager/ManagerProductType";
 import ProtectedRoute from "../Router/ProtectedRoute";
 import { ROLES } from "../Services/Auth/authService";
 import NotFound from "../Page/NotFound";
+import ManagerOrder from "../components/Manager/ManagerOrder";
 
 const Router = createBrowserRouter([
   {
@@ -86,6 +87,7 @@ const Router = createBrowserRouter([
       { path: "transfer", element: <ManagerDestination /> },
       { path: "dashboard", element: <ManagerDashboard /> },
       { path: "producttype", element: <ManagerProductType /> },
+      { path: "order", element: <ManagerOrder /> },
     ],
   },
   {
@@ -109,10 +111,16 @@ const Router = createBrowserRouter([
     path: "/staff-sale",
     element: (
       <ProtectedRoute allowedRoles={[ROLES.STAFF_SALE]}>
-        <StaffSalePage />
+        <StaffSaleLayout />
       </ProtectedRoute>
     ),
-    children: [],
+    children: [
+      {
+        index: true,
+        element: <StaffSalePage />,
+      },
+      { path: "dashboard", element: <ManagerOrder /> },
+    ],
   },
   {
     path: "/staff-purchaser",
