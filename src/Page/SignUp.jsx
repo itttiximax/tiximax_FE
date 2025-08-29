@@ -408,17 +408,6 @@ const Signup = () => {
           <FcGoogle className="mr-2 text-xl" />
           <span className="text-gray-200">Đăng ký bằng Google</span>
         </button>
-
-        {/* Sign In link */}
-        <p className="text-sm text-gray-300 text-center mt-6">
-          Đã có tài khoản?{" "}
-          <Link
-            to="/signin"
-            className="text-yellow-400 font-semibold hover:underline"
-          >
-            Đăng nhập
-          </Link>
-        </p>
       </div>
     </div>
   );
