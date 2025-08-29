@@ -9,7 +9,7 @@ function Layout() {
   // Những path không hiển thị Header/Footer
   const hiddenPaths = new Set([
     "/signin",
-    "/register",
+    "/signup",
     "/forgot-password",
     "/verification",
     "/reset-password",
