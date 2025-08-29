@@ -1,4 +1,4 @@
-import api from "../../config/api.js"; // ← CHỈ THÊM DÒNG NÀY
+import api from "../../config/api.js";
 
 // Định nghĩa roles chung để dễ quản lý
 export const ROLES = {
