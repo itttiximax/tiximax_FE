@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-
 import orderService from "../../Services/LeadSale/orderService";
-import routesService from "../../Services/LeadSale/routesService";
-import destinationService from "../../Services/LeadSale/destinationService";
-import { getAllProductTypes } from "../../Services/LeadSale/productTypeService";
+import routesService from "../..//Services/StaffSale/routeService";
+import managerDestinationService from "../../Services/Manager/managerDestinationService";
+import { getAllProductTypes } from "../../Services/Manager/managerProductTypeService";
 
 const CreateOrder = () => {
   const [preliminary, setPreliminary] = useState({
@@ -38,18 +37,19 @@ const CreateOrder = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch routes, destinations and product types on component mount
+  // Fetch data
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Services handle auth automatically
+        const token = localStorage.getItem("token"); // token từ localStorage
+
         const [routesData, destinationsData, productTypesData] =
           await Promise.all([
-            routesService.getRoutes(),
-            destinationService.getDestinations(),
+            routesService.getRoutesByAccount(token),
+            managerDestinationService.getDestinations(),
             getAllProductTypes(),
           ]);
 
@@ -58,7 +58,6 @@ const CreateOrder = () => {
         setProductTypes(productTypesData);
       } catch (error) {
         console.error("Error fetching data:", error);
-
         if (error.response?.status === 401) {
           setError("Token đã hết hạn. Vui lòng đăng nhập lại.");
         } else if (error.response?.status === 404) {
@@ -74,7 +73,6 @@ const CreateOrder = () => {
     fetchData();
   }, []);
 
-  // Check if product type has fee
   const getProductTypeFee = (productTypeId) => {
     const productType = productTypes.find(
       (p) => p.productTypeId === productTypeId
@@ -107,8 +105,6 @@ const CreateOrder = () => {
     if (name === "productTypeId") {
       const productTypeId = Number(value);
       const hasFee = getProductTypeFee(productTypeId);
-
-      // If product type doesn't have fee, set extraCharge to 0
       updatedProducts[index] = {
         ...updatedProducts[index],
         [name]: productTypeId,
@@ -153,7 +149,6 @@ const CreateOrder = () => {
 
   const handleSubmit = async () => {
     try {
-      // FIXED: Use correct variable name (orderService, not OrderService)
       const result = await orderService.createOrder(
         preliminary.customerCode,
         preliminary.routeId,
@@ -163,14 +158,11 @@ const CreateOrder = () => {
       alert("Tạo đơn hàng thành công!");
     } catch (error) {
       console.error("Error creating order:", error);
-
-      // Hiển thị lỗi cụ thể từ server
       const errorMessage =
         error.response?.data?.error ||
         error.response?.data?.message ||
         error.message ||
         "Tạo đơn hàng thất bại";
-
       alert(`${errorMessage}`);
     }
   };
@@ -182,14 +174,12 @@ const CreateOrder = () => {
       <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
         <h2 className="text-2xl font-bold mb-4">Create New Order</h2>
 
-        {/* Error Display */}
         {error && (
           <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
             {error}
           </div>
         )}
 
-        {/* Loading Display */}
         {loading && (
           <div className="mb-4 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded">
             Đang tải dữ liệu tuyến đường và điểm đến...
@@ -200,7 +190,6 @@ const CreateOrder = () => {
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div>
             <label className="block font-semibold">Customer Code *</label>
-            <p className="text-sm text-gray-500 mb-1">Mã khách hàng</p>
             <input
               type="text"
               name="customerCode"
@@ -212,7 +201,6 @@ const CreateOrder = () => {
           </div>
           <div>
             <label className="block font-semibold">Route *</label>
-            <p className="text-sm text-gray-500 mb-1">Chọn tuyến đường</p>
             <select
               name="routeId"
               value={preliminary.routeId}
@@ -242,12 +230,6 @@ const CreateOrder = () => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block font-semibold">Order Type</label>
-            <p className="text-sm text-gray-500 mb-1">Mua hộ</p>
-
-            {/* Input hidden để giữ giá trị trong form */}
-            <input type="hidden" name="orderType" value="MUA_HO" />
-
-            {/* Hiển thị text cố định */}
             <div className="w-full border rounded px-3 py-2 bg-gray-100">
               Mua hộ
             </div>
@@ -255,9 +237,6 @@ const CreateOrder = () => {
 
           <div>
             <label className="block font-semibold">Destination</label>
-            <p className="text-sm text-gray-500 mb-1">
-              Điểm đến cuối cùng của đơn hàng
-            </p>
             <select
               name="destinationId"
               value={form.destinationId}
@@ -285,11 +264,10 @@ const CreateOrder = () => {
 
           <div>
             <label className="block font-semibold">Exchange Rate</label>
-            <p className="text-sm text-gray-500 mb-1">Tỷ giá áp dụng</p>
             <input
               type="number"
               name="exchangeRate"
-              // value={form.exchangeRate}
+              value={form.exchangeRate}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
               disabled={!isFormEnabled}
@@ -310,9 +288,6 @@ const CreateOrder = () => {
 
           <div className="col-span-2">
             <label className="block font-semibold">Note</label>
-            <p className="text-sm text-gray-500 mb-1">
-              Ghi chú thêm cho đơn hàng
-            </p>
             <textarea
               name="note"
               value={form.note}
@@ -331,11 +306,9 @@ const CreateOrder = () => {
             className="border rounded-lg p-4 mb-4 bg-gray-50 shadow-sm"
           >
             <div className="grid grid-cols-2 gap-4">
+              {/* Product Name */}
               <div>
                 <label className="font-semibold">Product Name</label>
-                <p className="text-sm text-gray-500 mb-1">
-                  Tên sản phẩm để dễ nhận diện
-                </p>
                 <input
                   type="text"
                   name="productName"
@@ -346,11 +319,9 @@ const CreateOrder = () => {
                 />
               </div>
 
+              {/* Product Link */}
               <div>
                 <label className="font-semibold">Product Link</label>
-                <p className="text-sm text-gray-500 mb-1">
-                  Link sản phẩm trên website
-                </p>
                 <input
                   type="text"
                   name="productLink"
@@ -361,69 +332,61 @@ const CreateOrder = () => {
                 />
               </div>
 
+              {/* Quantity */}
               <div>
                 <label className="font-semibold">Quantity</label>
-                <p className="text-sm text-gray-500 mb-1">
-                  Số lượng sản phẩm cần mua
-                </p>
                 <input
                   type="number"
                   name="quantity"
-                  // value={product.quantity}
+                  value={product.quantity}
                   onChange={(e) => handleProductChange(index, e)}
                   className="border rounded px-3 py-2 w-full"
                   disabled={!isFormEnabled}
                 />
               </div>
 
+              {/* Price Web */}
               <div>
                 <label className="font-semibold">Price Web</label>
-                <p className="text-sm text-gray-500 mb-1">
-                  Giá sản phẩm trên website
-                </p>
                 <input
                   type="number"
                   name="priceWeb"
-                  // value={product.priceWeb}
+                  value={product.priceWeb}
                   onChange={(e) => handleProductChange(index, e)}
                   className="border rounded px-3 py-2 w-full"
                   disabled={!isFormEnabled}
                 />
               </div>
 
+              {/* Ship Web */}
               <div>
                 <label className="font-semibold">Ship Web</label>
-                <p className="text-sm text-gray-500 mb-1">
-                  Phí ship nội bộ trên website
-                </p>
                 <input
                   type="number"
                   name="shipWeb"
-                  // value={product.shipWeb}
+                  value={product.shipWeb}
                   onChange={(e) => handleProductChange(index, e)}
                   className="border rounded px-3 py-2 w-full"
                   disabled={!isFormEnabled}
                 />
               </div>
 
+              {/* Purchase Fee */}
               <div>
                 <label className="font-semibold">Purchase Fee</label>
-                <p className="text-sm text-gray-500 mb-1">
-                  Phí dịch vụ mua hộ (nếu có)
-                </p>
                 <input
                   type="number"
                   name="purchaseFee"
-                  // value={product.purchaseFee}
+                  value={product.purchaseFee}
                   onChange={(e) => handleProductChange(index, e)}
                   className="border rounded px-3 py-2 w-full"
                   disabled={!isFormEnabled}
                 />
               </div>
 
+              {/* Product Type */}
               <div>
                 <label className="font-semibold">Product Type</label>
-                <p className="text-sm text-gray-500 mb-1">Loại sản phẩm</p>
                 <select
                   name="productTypeId"
                   value={product.productTypeId}
@@ -443,16 +406,14 @@ const CreateOrder = () => {
                 </select>
               </div>
 
+              {/* Extra Charge */}
               <div>
                 <label className="font-semibold">Extra Charge</label>
-                <p className="text-sm text-gray-500 mb-1">
-                  Phí phụ thu khác (nếu có)
-                </p>
                 {getProductTypeFee(product.productTypeId) ? (
                   <input
                     type="number"
                     name="extraCharge"
-                    // value={product.extraCharge}
+                    value={product.extraCharge}
                     onChange={(e) => handleProductChange(index, e)}
                     className="border rounded px-3 py-2 w-full"
                     disabled={!isFormEnabled}
@@ -464,30 +425,26 @@ const CreateOrder = () => {
                 )}
               </div>
 
+              {/* Purchase Image */}
               <div>
                 <label className="font-semibold">Purchase Image</label>
-                <p className="text-sm text-gray-500 mb-1">
-                  Link ảnh sản phẩm (tùy chọn)
-                </p>
                 <input
                   type="text"
                   name="purchaseImage"
-                  // value={product.purchaseImage}
+                  value={product.purchaseImage}
                   onChange={(e) => handleProductChange(index, e)}
                   className="border rounded px-3 py-2 w-full"
                   disabled={!isFormEnabled}
                 />
               </div>
 
+              {/* Website */}
               <div>
                 <label className="font-semibold">Website</label>
-                <p className="text-sm text-gray-500 mb-1">
-                  Website mua hàng (nhập tự do)
-                </p>
                 <input
                   type="text"
                   name="website"
-                  // value={product.website}
+                  value={product.website}
                   onChange={(e) => handleProductChange(index, e)}
                   className="border rounded px-3 py-2 w-full"
                   placeholder="VD: AMAZON, EBAY, SHOPEE..."
@@ -495,18 +452,16 @@ const CreateOrder = () => {
                 />
               </div>
 
+              {/* Group Tag */}
               <div>
                 <label className="font-semibold">Group Tag</label>
-                <p className="text-sm text-gray-500 mb-1">
-                  Nhóm sản phẩm (Gom đơn)
-                </p>
                 <input
                   type="text"
                   name="groupTag"
-                  // value={product.groupTag}
-                  placeholder="A, B, C..."
+                  value={product.groupTag}
                   onChange={(e) => handleProductChange(index, e)}
                   className="border rounded px-3 py-2 w-full"
+                  placeholder="A, B, C..."
                   disabled={!isFormEnabled}
                 />
               </div>
@@ -522,7 +477,6 @@ const CreateOrder = () => {
           Add Product
         </button>
 
-        {/* Submit */}
         <div className="mt-6 text-right">
           <button
             onClick={handleSubmit}

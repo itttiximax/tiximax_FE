@@ -63,7 +63,7 @@ const ManagerSidebar = () => {
       title: "Sales Management",
       items: [
         {
-          text: "Payments",
+          text: "Thanh toán",
           icon: <FaMoneyCheck />,
           hasSubmenu: true,
           isOpen: openCost,
@@ -80,22 +80,22 @@ const ManagerSidebar = () => {
           ],
         },
         {
-          text: "Routes",
+          text: "Tuyến đường",
           icon: <FaPlaneDeparture />,
           path: "/manager/routes",
         },
         {
-          text: "Logistics",
+          text: "Vận chuyển",
           icon: <FaTruckMoving />,
           path: "/manager/transfer",
         },
         {
-          text: "Product Types",
+          text: "Loại sản phẩm",
           icon: <FaGlobeAmericas />,
           path: "/manager/producttype",
         },
         {
-          text: "Product Types",
+          text: "Quản Lí đơn hàng",
           icon: <FaGlobeAmericas />,
           path: "/manager/order",
         },

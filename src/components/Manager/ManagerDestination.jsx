@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import destinationService from "../../Services/LeadSale/destinationService";
-
+import managerDestinationService from "../../Services/Manager/managerDestinationService";
 const ManagerDestination = () => {
   const [destinations, setDestinations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +17,7 @@ const ManagerDestination = () => {
   const fetchDestinations = async () => {
     try {
       setLoading(true);
-      const data = await destinationService.getDestinations();
+      const data = await managerDestinationService.getDestinations();
       setDestinations(data);
     } catch (err) {
       console.error("Error:", err);
@@ -44,10 +43,12 @@ const ManagerDestination = () => {
           )
         );
 
-        await destinationService.updateDestination(editingId, formData);
+        await managerDestinationService.updateDestination(editingId, formData);
         toast.success("Cập nhật thành công!", { id: loadingToast });
       } else {
-        const newItem = await destinationService.createDestination(formData);
+        const newItem = await managerDestinationService.createDestination(
+          formData
+        );
 
         // Add to list immediately
         setDestinations((prev) => [...prev, newItem]);
@@ -86,7 +87,7 @@ const ManagerDestination = () => {
           prev.filter((item) => item.destinationId !== id)
         );
 
-        await destinationService.deleteDestination(id);
+        await managerDestinationService.deleteDestination(id);
         toast.success("Xóa thành công!", { id: loadingToast });
       } catch (err) {
         console.error("Error deleting:", err);
