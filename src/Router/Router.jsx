@@ -49,6 +49,7 @@ import ProtectedRoute from "../Router/ProtectedRoute";
 import { ROLES } from "../Services/Auth/authService";
 import NotFound from "../Page/NotFound";
 import ManagerOrder from "../components/Manager/ManagerOrder";
+import UploadImage from "../components/UploadImage";
 
 const Router = createBrowserRouter([
   {
@@ -105,6 +106,7 @@ const Router = createBrowserRouter([
       { path: "dashboard", element: <DashboardLeadSale /> },
       { path: "createorder", element: <CreateOrder /> },
       { path: "createpayment", element: <CreatePayment /> },
+      { path: "img", element: <UploadImage /> },
     ],
   },
   {
