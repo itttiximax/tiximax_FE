@@ -99,6 +99,12 @@ const LeadSaleSideBar = () => {
           label: "Điểm đến",
           color: "brown",
         },
+        {
+          to: "/lead-sale/img",
+          icon: MapPin,
+          label: "Upload Ảnh",
+          color: "brown",
+        },
       ],
     },
   ];
