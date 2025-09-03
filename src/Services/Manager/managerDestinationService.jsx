@@ -1,6 +1,6 @@
 import api from "../../config/api.js"; // ← THAY ĐỔI: import api thay vì axios
 
-const destinationService = {
+const managerDestinationService = {
   // Get all destinations
   getDestinations: async () => {
     // ← THAY ĐỔI: bỏ token parameter
@@ -63,4 +63,4 @@ const destinationService = {
   },
 };
 
-export default destinationService;
+export default managerDestinationService;

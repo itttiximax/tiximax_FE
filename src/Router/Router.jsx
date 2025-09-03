@@ -122,6 +122,7 @@ const Router = createBrowserRouter([
         element: <StaffSalePage />,
       },
       { path: "dashboard", element: <ManagerOrder /> },
+      { path: "sale", element: <CreateOrder /> },
     ],
   },
   {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import routesService from "../../Services/LeadSale/routesService";
+import managerRoutesService from "../../Services/Manager/managerRoutesService";
 
 const ManagerRoutes = () => {
   const [routes, setRoutes] = useState([]);
@@ -21,7 +21,7 @@ const ManagerRoutes = () => {
   const fetchRoutes = async () => {
     try {
       setLoading(true);
-      const data = await routesService.getRoutes();
+      const data = await managerRoutesService.getRoutes();
       setRoutes(data);
     } catch (err) {
       console.error("Error:", err);
@@ -52,7 +52,7 @@ const ManagerRoutes = () => {
           )
         );
 
-        await routesService.updateRoute(editingId, updatedData);
+        await managerRoutesService.updateRoute(editingId, updatedData);
         toast.success("Cập nhật thành công!", { id: loadingToast });
       } else {
         const newItemData = {
@@ -61,7 +61,7 @@ const ManagerRoutes = () => {
           unitShippingPrice: Number(formData.unitShippingPrice),
         };
 
-        const newItem = await routesService.createRoute(newItemData);
+        const newItem = await managerRoutesService.createRoute(newItemData);
 
         // Add to list immediately
         setRoutes((prev) => [...prev, newItem]);
@@ -101,7 +101,7 @@ const ManagerRoutes = () => {
         // Optimistic delete
         setRoutes((prev) => prev.filter((item) => item.routeId !== id));
 
-        await routesService.deleteRoute(id);
+        await managerRoutesService.deleteRoute(id);
         toast.success("Xóa thành công!", { id: loadingToast });
       } catch (err) {
         console.error("Error deleting:", err);

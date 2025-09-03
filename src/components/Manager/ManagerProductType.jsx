@@ -5,7 +5,7 @@ import {
   createProductType,
   updateProductType,
   deleteProductType,
-} from "../../Services/LeadSale/productTypeService";
+} from "../../Services/Manager/managerProductTypeService";
 
 const ManagerProductType = () => {
   const [productTypes, setProductTypes] = useState([]);

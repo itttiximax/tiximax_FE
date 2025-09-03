@@ -180,6 +180,11 @@ const StaffSaleSidebar = () => {
           icon: <FaMapMarkedAlt />,
           path: "/staff-sale/service-areas",
         },
+        {
+          text: "Service Areas",
+          icon: <FaMapMarkedAlt />,
+          path: "/staff-sale/sale",
+        },
       ],
     },
   ];
