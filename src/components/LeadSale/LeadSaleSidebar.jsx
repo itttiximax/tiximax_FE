@@ -30,26 +30,26 @@ const LeadSaleSideBar = () => {
 
   const menuItems = [
     {
-      section: "Lead Sale",
+      section: "LEADER SALE",
       highlighted: true,
       items: [
         {
           to: "/lead-sale/dashboard",
           icon: LayoutDashboard,
-          label: "Dashboard",
-          color: "navy",
+          label: "Báo cáo",
+          color: "blue",
         },
         {
           to: "/lead-sale/team",
           icon: Users,
           label: "Quản lý Team",
-          color: "navy",
+          color: "blue",
         },
         {
-          to: "/lead-sale/sales-report",
+          to: "/lead-sale/salesreport",
           icon: BarChart3,
-          label: "Báo cáo doanh số",
-          color: "navy",
+          label: "Thống kê",
+          color: "blue",
         },
       ],
     },
