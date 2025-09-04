@@ -12,7 +12,10 @@ import Home from "../Page/Home";
 //Admin compoenents
 import AdminLayout from "../components/Admin/AdminLayout";
 import AdminPage from "../components/Admin/AdminPage";
-
+import AdminDashboard from "../components/Admin/AdminDashboard";
+import OrderList from "../components/Admin/OrderList";
+import StaffList from "../components/Admin/StaffList";
+import CustomerList from "../components/Admin/CustomerList";
 //LeadSale components
 import LeadSaleLayout from "../components/LeadSale/LeadSaleLayout";
 import LeadSalePage from "../components/LeadSale/LeadSalePage";
@@ -35,7 +38,7 @@ import ManagerDashboard from "../components/Manager/ManagerDashboard";
 //StaffSale components
 import StaffSalePage from "../components/StaffSale/StaffSalePage";
 import StaffSaleLayout from "../components/StaffSale/StaffSaleLayout";
-import CustomerList from "../components/StaffSale/CustomerList";
+
 //StaffPurchaser components
 import StaffPurchaserPage from "../components/StaffPurchaser/StaffPurchaserPage";
 
@@ -71,8 +74,11 @@ const Router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <AdminPage /> }, // index route cho /admin
-      // { path: "users", element: <UserList /> },
+      { index: true, element: <AdminPage /> },
+      { path: "dashboard", element: <AdminDashboard /> },
+      { path: "orders", element: <OrderList /> },
+      { path: "staff", element: <StaffList /> },
+      { path: "customers", element: <CustomerList /> },
     ],
   },
   {
