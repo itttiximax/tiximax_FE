@@ -1,6 +1,6 @@
 import React from "react";
 
-const CustomerList = () => {
+const Customer = () => {
   // Fake customer data
   const customers = [
     {
@@ -105,4 +105,4 @@ const CustomerList = () => {
   );
 };
 
-export default CustomerList;
+export default Customer;
