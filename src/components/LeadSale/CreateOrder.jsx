@@ -667,25 +667,19 @@ const CreateOrder = () => {
                       className="max-w-xs h-32 object-cover border rounded-lg"
                     />
                     {product.purchaseImage && (
-                      <div className="text-xs text-gray-500 mt-1 break-all">
-                        URL: {product.purchaseImage}
+                      <div className="text-xs text-gray-500 mt-1 break-all bg-gray-100 p-2 rounded">
+                        <strong>URL:</strong> {product.purchaseImage}
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* Manual URL Input (backup option) */}
-                <div className="mt-2">
-                  <input
-                    type="text"
-                    name="purchaseImage"
-                    value={product.purchaseImage}
-                    onChange={(e) => handleProductChange(index, e)}
-                    className="border rounded px-3 py-2 w-full text-sm"
-                    placeholder="Hoặc nhập URL ảnh trực tiếp..."
-                    disabled={!isFormEnabled || isUploading}
-                  />
-                </div>
+                {/* Status message when no image */}
+                {!product.purchaseImage && !preview && !isUploading && (
+                  <div className="mt-2 text-sm text-gray-500 italic">
+                    Chưa có ảnh sản phẩm. Click "Chọn ảnh" để upload.
+                  </div>
+                )}
               </div>
             </div>
           );
