@@ -35,6 +35,7 @@ import ManagerDashboard from "../components/Manager/ManagerDashboard";
 //StaffSale components
 import StaffSalePage from "../components/StaffSale/StaffSalePage";
 import StaffSaleLayout from "../components/StaffSale/StaffSaleLayout";
+import CustomerList from "../components/StaffSale/CustomerList";
 //StaffPurchaser components
 import StaffPurchaserPage from "../components/StaffPurchaser/StaffPurchaserPage";
 
@@ -104,6 +105,8 @@ const Router = createBrowserRouter([
         element: <LeadSalePage />,
       },
       { path: "dashboard", element: <DashboardLeadSale /> },
+      { path: "team", element: <DashboardLeadSale /> },
+      { path: "salesreport", element: <DashboardLeadSale /> },
       { path: "createorder", element: <CreateOrder /> },
       { path: "createpayment", element: <CreatePayment /> },
       { path: "img", element: <UploadImage /> },
@@ -123,6 +126,8 @@ const Router = createBrowserRouter([
       },
       { path: "dashboard", element: <ManagerOrder /> },
       { path: "sale", element: <CreateOrder /> },
+      { path: "customers", element: <CustomerList /> },
+      { path: "support", element: <CustomerList /> },
     ],
   },
   {
