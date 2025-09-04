@@ -188,7 +188,7 @@ import {
   Box,
   LinearProgress,
 } from "@mui/material";
-import uploadImageService from "../services/uploadImageService";
+import uploadImageService from "../Services/uploadImageService";
 import imageCompression from "browser-image-compression";
 
 const MAX_FILE_SIZE_MB = 1; // max file size 1MB
