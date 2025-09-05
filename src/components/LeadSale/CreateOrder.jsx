@@ -16,23 +16,23 @@ const CreateOrder = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null); // Thêm state để lưu customer được chọn
   const [form, setForm] = useState({
     orderType: "MUA_HO",
-    destinationId: 1,
-    exchangeRate: 185,
-    checkRequired: true,
+    destinationId: "",
+    exchangeRate: "",
+    checkRequired: false,
     note: "",
     orderLinkRequests: [
       {
         productLink: "",
         quantity: 1,
-        priceWeb: 0,
-        shipWeb: 0,
+        priceWeb: "",
+        shipWeb: "",
         productName: "",
-        purchaseFee: 0,
-        extraCharge: 0,
+        purchaseFee: "",
+        extraCharge: "",
         purchaseImage: "",
-        website: "AMAZON",
-        productTypeId: 1,
-        groupTag: "A",
+        website: "",
+        productTypeId: "",
+        groupTag: "",
       },
     ],
   });
@@ -253,7 +253,7 @@ const CreateOrder = () => {
       console.log("==================");
 
       if (!imageUrl) {
-        console.error("❌ Không tìm thấy URL trong response:", response);
+        console.error("Không tìm thấy URL trong response:", response);
         toast.error("Upload thành công nhưng không lấy được URL ảnh");
         return;
       }
@@ -263,10 +263,10 @@ const CreateOrder = () => {
       updatedProducts[index].purchaseImage = imageUrl;
       setForm({ ...form, orderLinkRequests: updatedProducts });
 
-      toast.success(`✅ Upload ảnh sản phẩm ${index + 1} thành công!`);
-      console.log("✅ Upload thành công, URL đã được set:", imageUrl);
+      toast.success(` Upload ảnh sản phẩm ${index + 1} thành công!`);
+      console.log(" Upload thành công, URL đã được set:", imageUrl);
       console.log(
-        "✅ Form updated, purchaseImage:",
+        "Form updated, purchaseImage:",
         updatedProducts[index].purchaseImage
       );
     } catch (error) {
@@ -313,16 +313,16 @@ const CreateOrder = () => {
         ...form.orderLinkRequests,
         {
           productLink: "",
-          quantity: 1,
-          priceWeb: 0,
-          shipWeb: 0,
+          quantity: "",
+          priceWeb: "",
+          shipWeb: "",
           productName: "",
-          purchaseFee: 0,
-          extraCharge: 0,
+          purchaseFee: "",
+          extraCharge: "",
           purchaseImage: "",
-          website: "AMAZON",
-          productTypeId: 1,
-          groupTag: "A",
+          website: "",
+          productTypeId: "",
+          groupTag: "",
         },
       ],
     });
@@ -343,23 +343,23 @@ const CreateOrder = () => {
       setSelectedCustomer(null);
       setForm({
         orderType: "MUA_HO",
-        destinationId: 1,
-        exchangeRate: 185,
+        destinationId: "",
+        exchangeRate: "",
         checkRequired: true,
         note: "",
         orderLinkRequests: [
           {
             productLink: "",
-            quantity: 1,
-            priceWeb: 0,
-            shipWeb: 0,
+            quantity: "",
+            priceWeb: "",
+            shipWeb: "",
             productName: "",
-            purchaseFee: 0,
-            extraCharge: 0,
+            purchaseFee: "",
+            extraCharge: "",
             purchaseImage: "",
-            website: "AMAZON",
-            productTypeId: 1,
-            groupTag: "A",
+            website: "",
+            productTypeId: "",
+            groupTag: "",
           },
         ],
       });
@@ -398,7 +398,7 @@ const CreateOrder = () => {
           {/* Customer Search - Unified Input */}
           <div className="space-y-3">
             <label className="block text-sm font-semibold text-gray-700">
-              Tìm kiếm khách hàng *
+              Tìm kiếm khách hàng
             </label>
 
             {/* Unified AccountSearch Component với Clear Button */}
@@ -461,7 +461,7 @@ const CreateOrder = () => {
           {/* Route Selection */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-3">
-              Route *
+              Tuyến
             </label>
             <select
               name="routeId"
@@ -492,16 +492,16 @@ const CreateOrder = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Order Type
+              Loại đơn hàng
             </label>
-            <div className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 bg-gray-50 text-gray-600">
+            <div className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 bg-gray-50 text-green-500 font-bold">
               Mua hộ
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Destination
+              Điểm đến
             </label>
             <select
               name="destinationId"
@@ -530,7 +530,7 @@ const CreateOrder = () => {
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Exchange Rate
+              Tỷ giá (Exchange Rate)
             </label>
             <input
               type="number"
@@ -538,27 +538,46 @@ const CreateOrder = () => {
               value={form.exchangeRate}
               onChange={handleChange}
               className="w-full px-4 py-3 text-gray-700 bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+              placeholder="Viet Nam Dong (VND)"
               disabled={!isFormEnabled}
             />
           </div>
 
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              name="checkRequired"
-              checked={form.checkRequired}
-              onChange={handleChange}
-              className="w-4 h-4 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500"
-              disabled={!isFormEnabled}
-            />
-            <span className="ml-3 text-sm font-semibold text-gray-700">
-              Check Required
-            </span>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Kiểm hàng
+            </label>
+            <div
+              className={`flex items-center px-4 py-3 bg-white border-2 rounded-lg transition-all duration-200
+      ${
+        form.checkRequired
+          ? "border-blue-500 ring-2 ring-blue-200"
+          : "border-gray-200"
+      }
+      ${
+        !isFormEnabled
+          ? "opacity-60 cursor-not-allowed"
+          : "hover:border-blue-400"
+      }
+    `}
+            >
+              <input
+                type="checkbox"
+                name="checkRequired"
+                checked={form.checkRequired}
+                onChange={handleChange}
+                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                disabled={!isFormEnabled}
+              />
+              <span className="ml-3 text-gray-700 font-medium">
+                Kiểm hàng trước khi giao
+              </span>
+            </div>
           </div>
 
           <div className="md:col-span-2">
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Note
+              Ghi chú đơn hàng
             </label>
             <textarea
               name="note"
@@ -628,7 +647,7 @@ const CreateOrder = () => {
                   {/* Product Name */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Product Name
+                      Tên sản phẩm
                     </label>
                     <input
                       type="text"
@@ -644,7 +663,7 @@ const CreateOrder = () => {
                   {/* Product Link */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Product Link
+                      Link sản phẩm
                     </label>
                     <input
                       type="text"
@@ -660,7 +679,7 @@ const CreateOrder = () => {
                   {/* Quantity */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Quantity
+                      Số lượng
                     </label>
                     <input
                       type="number"
@@ -676,7 +695,7 @@ const CreateOrder = () => {
                   {/* Price Web */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Price Web
+                      Giá sản phẩm (Price Web)
                     </label>
                     <input
                       type="number"
@@ -684,6 +703,7 @@ const CreateOrder = () => {
                       value={product.priceWeb}
                       onChange={(e) => handleProductChange(index, e)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Giá ngoại tệ"
                       disabled={!isFormEnabled}
                       min="0"
                       step="0.01"
@@ -693,7 +713,7 @@ const CreateOrder = () => {
                   {/* Ship Web */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Ship Web
+                      Phí nhận hàng (Ship Web)
                     </label>
                     <input
                       type="number"
@@ -701,6 +721,7 @@ const CreateOrder = () => {
                       value={product.shipWeb}
                       onChange={(e) => handleProductChange(index, e)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Giá ngoại tệ"
                       disabled={!isFormEnabled}
                       min="0"
                       step="0.01"
@@ -710,7 +731,7 @@ const CreateOrder = () => {
                   {/* Purchase Fee */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Purchase Fee
+                      Phí mua hộ
                     </label>
                     <input
                       type="number"
@@ -718,6 +739,7 @@ const CreateOrder = () => {
                       value={product.purchaseFee}
                       onChange={(e) => handleProductChange(index, e)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Giá ngoại tệ"
                       disabled={!isFormEnabled}
                       min="0"
                       step="0.01"
@@ -727,7 +749,7 @@ const CreateOrder = () => {
                   {/* Product Type */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Product Type
+                      Loại sản phẩm
                     </label>
                     <select
                       name="productTypeId"
@@ -754,7 +776,7 @@ const CreateOrder = () => {
                   {/* Extra Charge */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Extra Charge
+                      Phụ phí
                     </label>
                     {getProductTypeFee(product.productTypeId) ? (
                       <input
@@ -777,7 +799,7 @@ const CreateOrder = () => {
                   {/* Website */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Website
+                      Website mua hàng
                     </label>
                     <input
                       type="text"
@@ -785,7 +807,7 @@ const CreateOrder = () => {
                       value={product.website}
                       onChange={(e) => handleProductChange(index, e)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="VD: AMAZON, EBAY, SHOPEE..."
+                      placeholder="VD: AMAZON, SHOPEE..."
                       disabled={!isFormEnabled}
                     />
                   </div>
@@ -810,7 +832,7 @@ const CreateOrder = () => {
                 {/* Purchase Image Upload Section */}
                 <div className="mt-6 border-t border-gray-200 pt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Purchase Image
+                    Ảnh sản phẩm
                   </label>
 
                   <div className="flex gap-4 items-start">
@@ -912,7 +934,7 @@ const CreateOrder = () => {
             <div className="text-sm text-gray-600">
               {!isFormEnabled && (
                 <p className="text-amber-600">
-                  ⚠️ Vui lòng chọn Customer Code và Route để tiếp tục
+                  Vui lòng chọn Mã khách hàng và Tuyến để tiếp tục
                 </p>
               )}
             </div>
