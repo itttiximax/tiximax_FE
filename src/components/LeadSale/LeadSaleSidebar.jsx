@@ -87,9 +87,9 @@ const LeadSaleSideBar = () => {
               label: "Nhân viên kho",
             },
             {
-              to: "/lead-sale/sales-staff",
+              to: "/lead-sale/search",
               icon: UserCheck,
-              label: "Nhân viên sale",
+              label: "Tìm kiếm khách hàng",
             },
           ],
         },

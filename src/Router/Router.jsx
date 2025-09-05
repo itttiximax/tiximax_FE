@@ -38,7 +38,7 @@ import ManagerDashboard from "../components/Manager/ManagerDashboard";
 //StaffSale components
 import StaffSalePage from "../components/StaffSale/StaffSalePage";
 import StaffSaleLayout from "../components/StaffSale/StaffSaleLayout";
-
+import Tracking from "../components/StaffSale/Tracking";
 //StaffPurchaser components
 import StaffPurchaserPage from "../components/StaffPurchaser/StaffPurchaserPage";
 
@@ -54,6 +54,8 @@ import { ROLES } from "../Services/Auth/authService";
 import NotFound from "../Page/NotFound";
 import ManagerOrder from "../components/Manager/ManagerOrder";
 import UploadImage from "../components/UploadImage";
+import Customer from "../components/StaffSale/Customer";
+import AccountSearch from "../components/LeadSale/AccountSearch";
 
 const Router = createBrowserRouter([
   {
@@ -91,6 +93,7 @@ const Router = createBrowserRouter([
     children: [
       { index: true, element: <ManagerPage /> },
       { path: "team", element: <ManagerTeam /> },
+      { path: "customers", element: <ManagerTeam /> },
       { path: "routes", element: <ManagerRoutes /> },
       { path: "transfer", element: <ManagerDestination /> },
       { path: "dashboard", element: <ManagerDashboard /> },
@@ -116,6 +119,7 @@ const Router = createBrowserRouter([
       { path: "createorder", element: <CreateOrder /> },
       { path: "createpayment", element: <CreatePayment /> },
       { path: "img", element: <UploadImage /> },
+      { path: "search", element: <AccountSearch /> },
     ],
   },
   {
@@ -130,10 +134,13 @@ const Router = createBrowserRouter([
         index: true,
         element: <StaffSalePage />,
       },
+      { path: "create-invoice", element: <CreateOrder /> },
       { path: "dashboard", element: <ManagerOrder /> },
       { path: "sale", element: <CreateOrder /> },
-      { path: "customers", element: <CustomerList /> },
-      { path: "support", element: <CustomerList /> },
+      { path: "customers", element: <Customer /> },
+      { path: "support", element: <Customer /> },
+      { path: "tracking", element: <Tracking /> },
+      { path: "warehouses", element: <Tracking /> },
     ],
   },
   {
