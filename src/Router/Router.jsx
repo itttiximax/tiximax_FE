@@ -41,22 +41,20 @@ import StaffSaleLayout from "../components/StaffSale/StaffSaleLayout";
 import Tracking from "../components/StaffSale/Tracking";
 //StaffPurchaser components
 import StaffPurchaserPage from "../components/StaffPurchaser/StaffPurchaserPage";
+import StaffPurchaserLayout from "../components/StaffPurchaser/StaffPurchaserLayout";
 
 //Manager components
 import ManagerLayout from "../components/Manager/ManagerLayout";
-import ManagerTeam from "../components/LeadSale/ManagerTeam";
 import ManagerRoutes from "../components/Manager/ManagerRoutes";
 import ManagerDestination from "../components/Manager/ManagerDestination";
 import ManagerProductType from "../components/Manager/ManagerProductType";
 //Protected Route
 import ProtectedRoute from "../Router/ProtectedRoute";
 import { ROLES } from "../Services/Auth/authService";
-import NotFound from "../Page/NotFound";
 import ManagerOrder from "../components/Manager/ManagerOrder";
 import UploadImage from "../components/UploadImage";
-import Customer from "../components/StaffSale/Customer";
 import AccountSearch from "../components/LeadSale/AccountSearch";
-
+import NotFound from "../Page/NotFound";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -92,8 +90,12 @@ const Router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <ManagerPage /> },
-      { path: "team", element: <ManagerTeam /> },
-      { path: "customers", element: <ManagerTeam /> },
+      { path: "team", element: <NotFound /> },
+      { path: "customers", element: <NotFound /> },
+      { path: "quote", element: <NotFound /> },
+      { path: "ads", element: <NotFound /> },
+      { path: "cost/paylater", element: <NotFound /> },
+      { path: "cost/paybefore", element: <NotFound /> },
       { path: "routes", element: <ManagerRoutes /> },
       { path: "transfer", element: <ManagerDestination /> },
       { path: "dashboard", element: <ManagerDashboard /> },
@@ -114,12 +116,14 @@ const Router = createBrowserRouter([
         element: <LeadSalePage />,
       },
       { path: "dashboard", element: <DashboardLeadSale /> },
-      { path: "team", element: <DashboardLeadSale /> },
-      { path: "salesreport", element: <DashboardLeadSale /> },
+      { path: "team", element: <NotFound /> },
+      { path: "salesreport", element: <NotFound /> },
       { path: "createorder", element: <CreateOrder /> },
       { path: "createpayment", element: <CreatePayment /> },
       { path: "img", element: <UploadImage /> },
       { path: "search", element: <AccountSearch /> },
+      { path: "warehouse-staff", element: <NotFound /> },
+      { path: "destination", element: <NotFound /> },
     ],
   },
   {
@@ -136,9 +140,14 @@ const Router = createBrowserRouter([
       },
       { path: "create-invoice", element: <CreateOrder /> },
       { path: "dashboard", element: <ManagerOrder /> },
-      { path: "sale", element: <CreateOrder /> },
-      { path: "customers", element: <Customer /> },
-      { path: "support", element: <Customer /> },
+      { path: "sale", element: <NotFound /> },
+      { path: "customers", element: <NotFound /> },
+      { path: "support", element: <NotFound /> },
+      { path: "quotations", element: <NotFound /> },
+      { path: "orders", element: <NotFound /> },
+      { path: "orders/pending", element: <NotFound /> },
+      { path: "shipping/domestic", element: <NotFound /> },
+      { path: "shipping/international", element: <NotFound /> },
       { path: "tracking", element: <Tracking /> },
       { path: "warehouses", element: <Tracking /> },
     ],
@@ -147,10 +156,19 @@ const Router = createBrowserRouter([
     path: "/staff-purchaser",
     element: (
       <ProtectedRoute allowedRoles={[ROLES.STAFF_PURCHASER]}>
-        <StaffPurchaserPage />
+        <StaffPurchaserLayout />
       </ProtectedRoute>
     ),
-    children: [],
+    children: [
+      {
+        index: true,
+        element: <StaffPurchaserPage />,
+      },
+      { path: "dashboard", element: <NotFound /> },
+      { path: "orders", element: <NotFound /> },
+      { path: "suppliers", element: <NotFound /> },
+      { path: "inventory", element: <NotFound /> },
+    ],
   },
   {
     path: "/staff-warehouse-foreign",
@@ -159,7 +177,13 @@ const Router = createBrowserRouter([
         <StaffWarehouseForeignLayout />
       </ProtectedRoute>
     ),
-    children: [{ index: true, element: <StaffWarehouseForeignPage /> }],
+    children: [
+      { index: true, element: <StaffWarehouseForeignPage /> },
+      { path: "dashboard", element: <NotFound /> },
+      { path: "inventory", element: <NotFound /> },
+      { path: "import", element: <NotFound /> },
+      { path: "export", element: <NotFound /> },
+    ],
   },
   {
     path: "/staff-warehouse-domestic",
@@ -168,7 +192,13 @@ const Router = createBrowserRouter([
         <StaffWarehouseDomesticLayout />
       </ProtectedRoute>
     ),
-    children: [{ index: true, element: <StaffWarehouseDomesticPage /> }],
+    children: [
+      { index: true, element: <StaffWarehouseDomesticPage /> },
+      { path: "dashboard", element: <NotFound /> },
+      { path: "inventory", element: <NotFound /> },
+      { path: "imports", element: <NotFound /> },
+      { path: "exports", element: <NotFound /> },
+    ],
   },
   {
     path: "*",

@@ -198,7 +198,7 @@ const ManagerDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
+    <div className="min-h-screenp-6">
       {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between bg-white rounded-2xl shadow-xl p-6 backdrop-blur-sm bg-opacity-80">

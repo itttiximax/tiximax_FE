@@ -50,12 +50,12 @@ const ManagerSidebar = () => {
         {
           text: "Quotes",
           icon: <FaFileInvoiceDollar />,
-          path: "/pages/quote",
+          path: "/manager/quote",
         },
         {
           text: "Marketing",
           icon: <FaBullhorn />,
-          path: "/pages/ads",
+          path: "/manager/ads",
         },
       ],
     },
@@ -71,11 +71,11 @@ const ManagerSidebar = () => {
           submenuItems: [
             {
               text: "Pay Later",
-              path: "/manager/cost/pay-later",
+              path: "/manager/cost/paylater",
             },
             {
               text: "Pre-payment",
-              path: "/manager/cost/pay-before",
+              path: "/manager/cost/paybefore",
             },
           ],
         },

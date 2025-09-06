@@ -73,7 +73,7 @@ const Header = () => {
           {/* Left Section - Logo */}
           <div className="flex-shrink-0">
             <Link
-              to="/home"
+              to="/"
               className="text-xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent"
             >
               TixiMax
@@ -83,31 +83,31 @@ const Header = () => {
           {/* Center Section - Navigation (Desktop only) */}
           <nav className="hidden lg:flex items-center space-x-8">
             <Link
-              to="/home"
+              to="/"
               className="text-sm text-gray-700 hover:text-yellow-600 transition duration-200 py-2"
             >
               Trang chủ
             </Link>
             <Link
-              to="/about"
+              to="/"
               className="text-sm text-gray-700 hover:text-yellow-600 transition duration-200 py-2"
             >
               Về chúng tôi
             </Link>
             <Link
-              to="/services"
+              to="/"
               className="text-sm text-gray-700 hover:text-yellow-600 transition duration-200 py-2"
             >
               Dịch vụ
             </Link>
             <Link
-              to="/blog"
+              to="/"
               className="text-sm text-gray-700 hover:text-yellow-600 transition duration-200 py-2"
             >
               Blog
             </Link>
             <Link
-              to="/contact"
+              to="/"
               className="text-sm text-gray-700 hover:text-yellow-600 transition duration-200 py-2"
             >
               Liên hệ
