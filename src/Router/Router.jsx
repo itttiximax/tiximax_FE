@@ -144,7 +144,7 @@ const Router = createBrowserRouter([
       { path: "sale", element: <NotFound /> },
       { path: "customers", element: <NotFound /> },
       { path: "support", element: <NotFound /> },
-      { path: "quotations", element: <NotFound /> },
+      { path: "quotations", element: <CreatePayment /> },
       { path: "orders", element: <NotFound /> },
       { path: "orders/pending", element: <NotFound /> },
       { path: "shipping/domestic", element: <NotFound /> },

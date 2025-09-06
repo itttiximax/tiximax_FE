@@ -31,8 +31,14 @@ const StaffSaleSidebar = () => {
           icon: <FaBoxOpen />,
           path: "/staff-sale/create-invoice",
         },
+        {
+          text: "Báo giá",
+          icon: <FaCalculator />,
+          path: "/staff-sale/quotations",
+        },
       ],
     },
+
     {
       title: "Báo cáo",
       items: [
