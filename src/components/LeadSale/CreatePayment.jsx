@@ -46,30 +46,34 @@ const CreatePayment = () => {
     setError(null);
   };
 
+  const isValidQrCode = (qrCode) => {
+    return qrCode && qrCode !== "Mã QR" && qrCode.startsWith("http");
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+    <div className="py-4 px-2 bg-gray-50">
       <Toaster />
-      <div className="bg-white shadow-md rounded-xl p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+      <div className="max-w-5xl mx-auto bg-white rounded p-4">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">
           Tạo Thanh Toán
         </h2>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 mb-4">
           <input
             type="text"
             value={orderCode}
             onChange={(e) => setOrderCode(e.target.value)}
             placeholder="Nhập mã đơn hàng (VD: MH-1BF7EB)"
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
           />
 
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               type="submit"
               disabled={loading || !orderCode.trim()}
-              className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="flex-1 bg-blue-600 text-white py-2 rounded text-sm disabled:opacity-50"
             >
               {loading ? "Đang xử lý..." : "Tạo Thanh Toán"}
             </button>
@@ -78,7 +82,7 @@ const CreatePayment = () => {
               type="button"
               onClick={handleClear}
               disabled={loading}
-              className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              className="flex-1 bg-gray-200 text-gray-800 py-2 rounded text-sm disabled:opacity-50"
             >
               Xóa
             </button>
@@ -87,32 +91,127 @@ const CreatePayment = () => {
 
         {/* Success */}
         {result && (
-          <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4 text-sm">
-            <h3 className="font-semibold text-green-700 mb-2">
-              Kết quả thành công
-            </h3>
-            <p>Mã GD: {result.paymentCode}</p>
-            <p>Đơn hàng: {result.content}</p>
-            <p>Loại: {result.paymentType}</p>
-            <p>Số tiền: {result.amount?.toLocaleString()} đ</p>
-            <p>Đã thu: {result.collectedAmount?.toLocaleString()} đ</p>
-            <p>Trạng thái: {result.status}</p>
-            {result.qrCode && result.qrCode !== "Mã QR" && (
-              <p>Mã QR: {result.qrCode}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-green-50 border border-green-200 rounded p-4">
+            {/* QR Code Display */}
+            {isValidQrCode(result.qrCode) && (
+              <div className="text-center">
+                <div className="bg-white p-3 rounded border inline-block">
+                  <img
+                    src={result.qrCode}
+                    alt="QR Code thanh toán"
+                    className="w-[640px] h-[640px] object-contain mx-auto cursor-pointer"
+                    onClick={() => window.open(result.qrCode, "_blank")}
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                    }}
+                    title="Click để xem full size"
+                  />
+                </div>
+                <div className="mt-2 flex justify-center gap-2">
+                  <button
+                    onClick={() => window.open(result.qrCode, "_blank")}
+                    className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
+                  >
+                    Xem to hơn
+                  </button>
+                  <button
+                    onClick={() => {
+                      const link = document.createElement("a");
+                      link.href = result.qrCode;
+                      link.download = `QR-${result.paymentCode}.png`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      toast.success("Đang tải QR code...");
+                    }}
+                    className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded"
+                  >
+                    Tải về
+                  </button>
+                </div>
+                <p className="text-xs text-gray-600 mt-2">
+                  Quét mã QR để thanh toán
+                </p>
+              </div>
             )}
-            {result.actionAt && (
-              <p>
-                Thời gian tạo:{" "}
-                {new Date(result.actionAt).toLocaleString("vi-VN")}
-              </p>
-            )}
+
+            {/* Payment Details */}
+            <div className="space-y-2 text-sm">
+              <h3 className="font-semibold text-green-700 text-center">
+                Thanh toán được tạo thành công!
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className="font-semibold text-gray-700">Mã GD:</span>
+                  <p className="font-mono text-blue-600">
+                    {result.paymentCode}
+                  </p>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-700">Đơn hàng:</span>
+                  <p className="font-mono">{result.content}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className="font-semibold text-gray-700">Loại:</span>
+                  <p>{result.paymentType}</p>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-700">
+                    Trạng thái:
+                  </span>
+                  <p className="text-orange-600 font-semibold">
+                    {result.status}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className="font-semibold text-gray-700">Số tiền:</span>
+                  <p className="font-bold text-green-600">
+                    {result.amount?.toLocaleString()} đ
+                  </p>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-700">Đã thu:</span>
+                  <p className="font-bold text-blue-600">
+                    {result.collectedAmount?.toLocaleString()} đ
+                  </p>
+                </div>
+              </div>
+
+              {result.actionAt && (
+                <div>
+                  <span className="font-semibold text-gray-700">
+                    Thời gian tạo:
+                  </span>
+                  <p>{new Date(result.actionAt).toLocaleString("vi-VN")}</p>
+                </div>
+              )}
+
+              {isValidQrCode(result.qrCode) && (
+                <div className="mt-2 pt-2 border-t">
+                  <details className="text-xs">
+                    <summary className="cursor-pointer text-gray-500">
+                      QR Code URL
+                    </summary>
+                    <p className="mt-1 break-all text-gray-600 bg-gray-100 p-1 rounded">
+                      {result.qrCode}
+                    </p>
+                  </details>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {/* Error */}
         {error && (
-          <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4 text-sm">
-            <h3 className="font-semibold text-red-700 mb-2">
+          <div className="mt-4 bg-red-100 border border-red-200 rounded p-3 text-sm">
+            <h3 className="font-semibold text-red-700 mb-1">
               Lỗi tạo thanh toán
             </h3>
             <p>{error}</p>

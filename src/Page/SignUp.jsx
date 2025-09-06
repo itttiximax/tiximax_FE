@@ -18,9 +18,7 @@ const Signup = () => {
     phone: "",
     name: "",
     role: "CUSTOMER",
-    type: "KHACH_LE",
     address: "",
-    taxCode: "",
     source: "",
   });
 
@@ -72,13 +70,7 @@ const Signup = () => {
           "phone",
           "name",
           "role",
-          "type",
         ];
-
-        // Include address and taxCode if customer type requires them
-        if (formData.type === "DAI_LY") {
-          requiredFields.push("address", "taxCode");
-        }
 
         // Include field if it's required or has a non-empty value
         if (requiredFields.includes(key) || (value && value.trim() !== "")) {
@@ -119,8 +111,6 @@ const Signup = () => {
       setLoading(false);
     }
   };
-
-  const customerTypes = registrationService.getCustomerTypes();
 
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row bg-white">
@@ -236,7 +226,7 @@ const Signup = () => {
               name="phone"
               value={formData.phone}
               onChange={handleInputChange}
-              placeholder="Nhập số điện thoại"
+              placeholder="Nhập số điện thoại (VD: 0901234567)"
               className={`w-full border rounded-lg px-4 py-3 bg-gray-800 text-white focus:outline-none focus:ring-2 transition ${
                 errors.phone
                   ? "border-red-500 focus:ring-red-400"
@@ -247,25 +237,6 @@ const Signup = () => {
             {errors.phone && (
               <p className="text-red-400 text-sm mt-1">{errors.phone}</p>
             )}
-          </div>
-
-          {/* Customer Type */}
-          <div>
-            <label className="block text-gray-200 mb-2 text-sm font-semibold">
-              Loại khách hàng
-            </label>
-            <select
-              name="type"
-              value={formData.type}
-              onChange={handleInputChange}
-              className="w-full border border-gray-600 rounded-lg px-4 py-3 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
-            >
-              {customerTypes.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
           </div>
 
           {/* Password */}
@@ -334,57 +305,35 @@ const Signup = () => {
             )}
           </div>
 
-          {/* Address */}
+          {/* Address (Optional) */}
           <div>
             <label className="block text-gray-200 mb-2 text-sm font-semibold">
-              Địa chỉ {formData.type === "DAI_LY" && "*"}
+              Địa chỉ (không bắt buộc)
             </label>
             <textarea
               name="address"
               value={formData.address}
               onChange={handleInputChange}
-              placeholder={
-                formData.type === "KHACH_LE"
-                  ? "Nhập địa chỉ (không bắt buộc)"
-                  : "Nhập địa chỉ"
-              }
+              placeholder="Nhập địa chỉ của bạn"
               rows={3}
-              className={`w-full border rounded-lg px-4 py-3 bg-gray-800 text-white focus:outline-none focus:ring-2 transition resize-none ${
-                errors.address
-                  ? "border-red-500 focus:ring-red-400"
-                  : "border-gray-600 focus:ring-yellow-400"
-              }`}
-              required={formData.type === "DAI_LY"}
+              className="w-full border border-gray-600 rounded-lg px-4 py-3 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 transition resize-none"
             />
-            {errors.address && (
-              <p className="text-red-400 text-sm mt-1">{errors.address}</p>
-            )}
           </div>
 
-          {/* Tax Code (for agents only) */}
-          {formData.type === "DAI_LY" && (
-            <div>
-              <label className="block text-gray-200 mb-2 text-sm font-semibold">
-                Mã số thuế *
-              </label>
-              <input
-                type="text"
-                name="taxCode"
-                value={formData.taxCode}
-                onChange={handleInputChange}
-                placeholder="Nhập mã số thuế"
-                className={`w-full border rounded-lg px-4 py-3 bg-gray-800 text-white focus:outline-none focus:ring-2 transition ${
-                  errors.taxCode
-                    ? "border-red-500 focus:ring-red-400"
-                    : "border-gray-600 focus:ring-yellow-400"
-                }`}
-                required
-              />
-              {errors.taxCode && (
-                <p className="text-red-400 text-sm mt-1">{errors.taxCode}</p>
-              )}
-            </div>
-          )}
+          {/* Source (Optional) */}
+          <div>
+            <label className="block text-gray-200 mb-2 text-sm font-semibold">
+              Nguồn giới thiệu (không bắt buộc)
+            </label>
+            <input
+              type="text"
+              name="source"
+              value={formData.source}
+              onChange={handleInputChange}
+              placeholder="Bạn biết đến chúng tôi qua đâu?"
+              className="w-full border border-gray-600 rounded-lg px-4 py-3 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+            />
+          </div>
 
           {/* Sign Up button */}
           <button
@@ -408,6 +357,17 @@ const Signup = () => {
           <FcGoogle className="mr-2 text-xl" />
           <span className="text-gray-200">Đăng ký bằng Google</span>
         </button>
+
+        {/* Sign in link */}
+        <p className="text-sm text-gray-300 text-center mt-6">
+          Đã có tài khoản?{" "}
+          <Link
+            to="/signin"
+            className="text-yellow-400 font-semibold hover:underline"
+          >
+            Đăng nhập ngay!
+          </Link>
+        </p>
       </div>
     </div>
   );

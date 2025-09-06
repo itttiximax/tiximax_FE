@@ -1,15 +1,20 @@
 import api from "../../config/api";
 
-const registrationService = {
-  // Register customer
-  registerCustomer: async (registrationData) => {
+const registrationByStaffService = {
+  // Register customer by staff
+  registerCustomerByStaff: async (registrationData, token) => {
     try {
       // Input validation
       if (!registrationData) {
         throw new Error("Registration data is required");
       }
 
-      const requiredFields = ["username", "password", "email", "phone", "name"];
+      if (!token) {
+        throw new Error("Authorization token is required");
+      }
+
+      // Required fields - username and password can be empty (auto-generated)
+      const requiredFields = ["email", "phone", "name"];
       for (const field of requiredFields) {
         if (!registrationData[field]) {
           throw new Error(`${field} is required`);
@@ -19,58 +24,47 @@ const registrationService = {
       // Set default values if not provided
       const dataWithDefaults = {
         role: "CUSTOMER",
+        username: "", // Can be empty - will be auto-generated
+        password: "", // Can be empty - will be auto-generated
         ...registrationData,
       };
 
-      // Clean up data - remove empty strings for optional fields
+      // Clean up data - remove null/undefined values
       const cleanedData = Object.keys(dataWithDefaults).reduce((acc, key) => {
         const value = dataWithDefaults[key];
-        // Only include non-empty values or required fields
-        if (value !== "" && value !== null && value !== undefined) {
+        // Include all fields, even empty strings for username/password
+        if (value !== null && value !== undefined) {
           acc[key] = value;
         }
         return acc;
       }, {});
 
-      console.log("Sending registration data:", cleanedData); // Debug log
+      console.log("Sending staff registration data:", cleanedData);
 
       const response = await api.post(
-        "/accounts/register/customer",
-        cleanedData
+        "/accounts/register/customer/by-staff",
+        cleanedData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       return response.data;
     } catch (error) {
-      console.error("Error registering customer:", error.response || error);
+      console.error(
+        "Error registering customer by staff:",
+        error.response || error
+      );
       throw error;
     }
   },
 
-  // Validate registration data
-  validateRegistrationData: (data) => {
+  // Validate registration data for staff
+  validateStaffRegistrationData: (data) => {
     const errors = {};
 
-    // Username validation
-    if (!data.username) {
-      errors.username = "Tên đăng nhập là bắt buộc";
-    } else if (data.username.length < 3) {
-      errors.username = "Tên đăng nhập phải có ít nhất 3 ký tự";
-    }
-
-    // Password validation
-    if (!data.password) {
-      errors.password = "Mật khẩu là bắt buộc";
-    } else if (data.password.length < 6) {
-      errors.password = "Mật khẩu phải có ít nhất 6 ký tự";
-    }
-
-    // Confirm password validation
-    if (!data.confirmPassword) {
-      errors.confirmPassword = "Vui lòng xác nhận mật khẩu";
-    } else if (data.password !== data.confirmPassword) {
-      errors.confirmPassword = "Mật khẩu không khớp";
-    }
-
-    // Email validation
+    // Email validation (required)
     if (!data.email) {
       errors.email = "Email là bắt buộc";
     } else {
@@ -80,7 +74,7 @@ const registrationService = {
       }
     }
 
-    // Phone validation
+    // Phone validation (required)
     if (!data.phone) {
       errors.phone = "Số điện thoại là bắt buộc";
     } else {
@@ -91,23 +85,32 @@ const registrationService = {
       }
     }
 
-    // Name validation
+    // Name validation (required)
     if (!data.name) {
       errors.name = "Họ và tên là bắt buộc";
     } else if (data.name.trim().length < 2) {
       errors.name = "Họ và tên phải có ít nhất 2 ký tự";
     }
 
+    // Note: Username and password are auto-generated, no validation needed
+
     return {
       isValid: Object.keys(errors).length === 0,
       errors,
     };
   },
+
+  // Get customer roles available for staff to create
+  getAvailableRoles: () => {
+    return [{ value: "CUSTOMER", label: "Khách hàng" }];
+  },
 };
 
-export default registrationService;
+export default registrationByStaffService;
 
 // Export individual functions for backward compatibility
-export const registerCustomer = registrationService.registerCustomer;
-export const validateRegistrationData =
-  registrationService.validateRegistrationData;
+export const registerCustomerByStaff =
+  registrationByStaffService.registerCustomerByStaff;
+export const validateStaffRegistrationData =
+  registrationByStaffService.validateStaffRegistrationData;
+export const getAvailableRoles = registrationByStaffService.getAvailableRoles;

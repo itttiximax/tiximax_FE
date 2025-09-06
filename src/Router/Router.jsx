@@ -55,6 +55,7 @@ import ManagerOrder from "../components/Manager/ManagerOrder";
 import UploadImage from "../components/UploadImage";
 import AccountSearch from "../components/LeadSale/AccountSearch";
 import NotFound from "../Page/NotFound";
+import CreateAccountUser from "../components/StaffSale/CreateAccountUser";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -150,6 +151,7 @@ const Router = createBrowserRouter([
       { path: "shipping/international", element: <NotFound /> },
       { path: "tracking", element: <Tracking /> },
       { path: "warehouses", element: <Tracking /> },
+      { path: "createaccountuser", element: <CreateAccountUser /> },
     ],
   },
   {

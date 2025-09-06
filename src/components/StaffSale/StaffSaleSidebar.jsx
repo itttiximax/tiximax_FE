@@ -107,6 +107,11 @@ const StaffSaleSidebar = () => {
           icon: <FaWarehouse />,
           path: "/staff-sale/warehouses",
         },
+        {
+          text: "Tạo tài khoản khách hàng",
+          icon: <FaWarehouse />,
+          path: "/staff-sale/createaccountuser",
+        },
         // {
         //   text: " Đội xe",
         //   icon: <FaTruck />,

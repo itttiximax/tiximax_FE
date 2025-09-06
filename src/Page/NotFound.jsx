@@ -13,9 +13,11 @@ const NotFound = () => {
     <div className="min-h-screen flex items-center justify-center  ">
       <div className="text-center max-w-md mx-auto">
         {/* Tiêu đề */}
-        <h1 className="text-6xl font-bold text-gray-800 mb-4">404</h1>
+        <h1 className="text-6xl font-bold text-gray-800 mb-4">
+          Đang trong giai đoạn triển khai
+        </h1>
         <h2 className="text-2xl font-semibold text-gray-700 mb-6">
-          Trang không tồn tại
+          Tính năng chưa được phát triển
         </h2>
 
         {/* Nội dung */}
