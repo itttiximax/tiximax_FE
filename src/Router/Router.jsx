@@ -13,7 +13,6 @@ import Home from "../Page/Home";
 import AdminLayout from "../components/Admin/AdminLayout";
 import AdminPage from "../components/Admin/AdminPage";
 import AdminDashboard from "../components/Admin/AdminDashboard";
-import OrderList from "../components/Admin/OrderList";
 import StaffList from "../components/Admin/StaffList";
 import CustomerList from "../components/Admin/CustomerList";
 //LeadSale components
@@ -39,6 +38,7 @@ import ManagerDashboard from "../components/Manager/ManagerDashboard";
 import StaffSalePage from "../components/StaffSale/StaffSalePage";
 import StaffSaleLayout from "../components/StaffSale/StaffSaleLayout";
 import Tracking from "../components/StaffSale/Tracking";
+import OrderList from "../components/StaffSale/OrderList";
 //StaffPurchaser components
 import StaffPurchaserPage from "../components/StaffPurchaser/StaffPurchaserPage";
 import StaffPurchaserLayout from "../components/StaffPurchaser/StaffPurchaserLayout";
@@ -122,6 +122,7 @@ const Router = createBrowserRouter([
       { path: "createorder", element: <CreateOrder /> },
       { path: "createpayment", element: <CreatePayment /> },
       { path: "img", element: <UploadImage /> },
+      { path: "order", element: <OrderList /> },
       { path: "search", element: <AccountSearch /> },
       { path: "warehouse-staff", element: <NotFound /> },
       { path: "destination", element: <NotFound /> },
@@ -143,7 +144,7 @@ const Router = createBrowserRouter([
       { path: "dashboard", element: <ManagerOrder /> },
       { path: "sale", element: <NotFound /> },
       { path: "customers", element: <NotFound /> },
-      { path: "support", element: <NotFound /> },
+      { path: "support", element: <OrderList /> },
       { path: "quotations", element: <CreatePayment /> },
       { path: "orders", element: <NotFound /> },
       { path: "orders/pending", element: <NotFound /> },
