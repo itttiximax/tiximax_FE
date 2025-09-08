@@ -152,7 +152,7 @@ const ManagerOrder = () => {
 
       {/* Status Filter Tabs */}
       <div className="mb-6">
-        <div className="border-b border-gray-200">
+        <div className="border-b border-green-200">
           <nav className="-mb-px flex space-x-8 overflow-x-auto">
             {availableStatuses.map((status) => (
               <button
@@ -160,7 +160,7 @@ const ManagerOrder = () => {
                 onClick={() => handleStatusChange(status.key)}
                 disabled={tableLoading}
                 className={`
-                  whitespace-nowrap py-2 px-3 border-b-2 font-medium text-sm rounded-t-lg transition-all duration-200
+                  whitespace-nowrap py-2 px-3 border-b-2 font-medium text-sm rounded-t-lg transition-all duration-200 
                   ${tableLoading ? "opacity-50 cursor-not-allowed" : ""}
                   ${
                     activeStatus === status.key

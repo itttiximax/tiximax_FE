@@ -13,54 +13,35 @@ import {
   FaBullhorn,
   FaUserCircle,
   FaChevronDown,
-  FaMapMarkerAlt,
 } from "react-icons/fa";
 
 const ManagerSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [openCost, setOpenCost] = useState(false);
-  // const [openSales, setOpenSales] = useState(true);
 
-  // Cấu hình menu items theo cấu trúc hiện đại
   const menuSections = [
     {
-      title: "Analytics",
+      title: "Phân tích",
       items: [
-        {
-          text: "Dashboard",
-          icon: <FaChartLine />,
-          path: "/manager/dashboard",
-        },
-        {
-          text: "Teams",
-          icon: <FaUserTie />,
-          path: "/manager/team",
-        },
-        {
-          text: "Customers",
-          icon: <FaUsers />,
-          path: "/manager/customers",
-        },
+        { text: "Thống kê", icon: <FaChartLine />, path: "/manager/dashboard" },
+        { text: "Nhóm", icon: <FaUserTie />, path: "/manager/team" },
+        { text: "Khách hàng", icon: <FaUsers />, path: "/manager/customers" },
       ],
     },
     {
-      title: "Pages",
+      title: "Trang",
       items: [
         {
-          text: "Quotes",
+          text: "Báo giá",
           icon: <FaFileInvoiceDollar />,
           path: "/manager/quote",
         },
-        {
-          text: "Marketing",
-          icon: <FaBullhorn />,
-          path: "/manager/ads",
-        },
+        { text: "Marketing", icon: <FaBullhorn />, path: "/manager/ads" },
       ],
     },
     {
-      title: "Sales Management",
+      title: "Quản lý",
       items: [
         {
           text: "Thanh toán",
@@ -69,14 +50,8 @@ const ManagerSidebar = () => {
           isOpen: openCost,
           onToggle: () => setOpenCost(!openCost),
           submenuItems: [
-            {
-              text: "Pay Later",
-              path: "/manager/cost/paylater",
-            },
-            {
-              text: "Pre-payment",
-              path: "/manager/cost/paybefore",
-            },
+            { text: "Thanh toán sau", path: "/manager/cost/paylater" },
+            { text: "Thanh toán trước", path: "/manager/cost/paybefore" },
           ],
         },
         {
@@ -94,11 +69,7 @@ const ManagerSidebar = () => {
           icon: <FaGlobeAmericas />,
           path: "/manager/producttype",
         },
-        {
-          text: "Quản Lí đơn hàng",
-          icon: <FaGlobeAmericas />,
-          path: "/manager/order",
-        },
+        { text: "Đơn hàng", icon: <FaGlobeAmericas />, path: "/manager/order" },
       ],
     },
   ];
@@ -113,52 +84,42 @@ const ManagerSidebar = () => {
   const renderMenuItem = (item) => {
     if (item.hasSubmenu) {
       return (
-        <div key={item.text} className="relative">
+        <div key={item.text}>
           <button
             onClick={item.onToggle}
-            className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group ${
-              item.isOpen
-                ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-700 shadow-sm border border-indigo-100"
-                : "hover:bg-gray-50 text-gray-700 hover:text-indigo-600 hover:shadow-sm"
+            className={`flex items-center justify-between w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-150 ${
+              item.isOpen ? "bg-gray-100" : ""
             }`}
           >
-            <div className="flex items-center gap-4">
-              <div
-                className={`p-2 rounded-xl transition-all duration-300 ${
-                  item.isOpen
-                    ? "bg-indigo-100 text-indigo-600"
-                    : "bg-gray-100 text-gray-500 group-hover:bg-indigo-50 group-hover:text-indigo-500"
-                }`}
-              >
-                {item.icon}
-              </div>
-              <span className="font-medium">{item.text}</span>
+            <div className="flex items-center gap-3">
+              <span className="text-gray-500">{item.icon}</span>
+              <span className="text-sm font-medium">{item.text}</span>
             </div>
             <FaChevronDown
-              className={`text-sm transition-all duration-300 ${
-                item.isOpen ? "rotate-180 text-indigo-600" : "text-gray-400"
+              className={`text-xs transition-transform duration-150 ${
+                item.isOpen ? "rotate-180" : ""
               }`}
             />
           </button>
-
-          {/* Submenu with improved styling */}
-          {item.isOpen && (
-            <div className="ml-4 mt-2 space-y-1 animate-slideDown">
-              {item.submenuItems.map((subItem) => (
-                <Link
-                  key={subItem.path}
-                  to={subItem.path}
-                  className={`block px-6 py-2.5 ml-8 text-sm rounded-xl transition-all duration-200 relative ${
-                    isActive(subItem.path)
-                      ? "text-indigo-600 bg-indigo-50 font-medium shadow-sm border-l-2 border-indigo-400"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-indigo-600 border-l-2 border-transparent hover:border-gray-200"
-                  }`}
-                >
-                  {subItem.text}
-                </Link>
-              ))}
-            </div>
-          )}
+          <div
+            className={`ml-8 mt-1 space-y-1 transition-all duration-200 ease-in-out ${
+              item.isOpen
+                ? "max-h-96 opacity-100"
+                : "max-h-0 opacity-0 overflow-hidden"
+            }`}
+          >
+            {item.submenuItems.map((subItem) => (
+              <Link
+                key={subItem.path}
+                to={subItem.path}
+                className={`block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg ${
+                  isActive(subItem.path) ? "bg-blue-50 text-blue-700" : ""
+                }`}
+              >
+                {subItem.text}
+              </Link>
+            ))}
+          </div>
         </div>
       );
     }
@@ -167,104 +128,45 @@ const ManagerSidebar = () => {
       <Link
         key={item.path}
         to={item.path}
-        className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative ${
-          isActive(item.path)
-            ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-700 shadow-sm font-medium border border-indigo-100"
-            : "hover:bg-gray-50 text-gray-700 hover:text-indigo-600 hover:shadow-sm"
+        className={`flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-150 ${
+          isActive(item.path) ? "bg-blue-50 text-blue-700" : ""
         }`}
       >
-        <div
-          className={`p-2 rounded-xl transition-all duration-300 ${
-            isActive(item.path)
-              ? "bg-indigo-100 text-indigo-600"
-              : "bg-gray-100 text-gray-500 group-hover:bg-indigo-50 group-hover:text-indigo-500"
-          }`}
-        >
-          {item.icon}
-        </div>
-        <span className="font-medium">{item.text}</span>
-
-        {/* Active indicator */}
-        {isActive(item.path) && (
-          <div className="absolute right-2 w-2 h-2 bg-indigo-500 rounded-full"></div>
-        )}
+        <span className="text-gray-500">{item.icon}</span>
+        <span className="text-sm font-medium">{item.text}</span>
       </Link>
     );
   };
 
-  const renderMenuSection = (section) => (
-    <div key={section.title} className="mb-8">
-      <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 px-4 relative">
-        {section.title}
-        <div className="absolute -bottom-2 left-4 w-8 h-0.5 bg-gradient-to-r from-indigo-400 to-blue-400 rounded-full"></div>
-      </h2>
-      <div className="space-y-2">{section.items.map(renderMenuItem)}</div>
-    </div>
-  );
-
   return (
-    <div className="w-72 h-screen bg-white border-r border-gray-100 shadow-xl flex flex-col relative overflow-hidden">
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white via-gray-50/30 to-blue-50/20 pointer-events-none"></div>
-
-      {/* Profile Section */}
-      <div className="relative p-8 border-b border-gray-100">
-        <div className="flex flex-col items-center">
-          <div className="relative">
-            <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-xl shadow-indigo-200/50">
-              <FaUserCircle className="w-10 h-10 text-white" />
-            </div>
-          </div>
-          <h3 className="mt-4 text-xl font-bold text-gray-800">Manager</h3>
+    <div className="w-64 h-screen bg-white shadow-md flex flex-col">
+      <div className="p-4 border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <FaUserCircle className="w-8 h-8 text-blue-600" />
+          <span className="text-sm font-semibold text-gray-800">Manager</span>
         </div>
       </div>
 
-      {/* Menu Sections */}
-      <div className="relative flex-1 overflow-y-auto py-8 px-4 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
-        {menuSections.map(renderMenuSection)}
+      <div className="flex-1 overflow-y-auto p-3 space-y-4">
+        {menuSections.map((section) => (
+          <div key={section.title}>
+            <h2 className="px-4 py-1 text-xs font-semibold text-gray-500 uppercase">
+              {section.title}
+            </h2>
+            <div className="space-y-1">{section.items.map(renderMenuItem)}</div>
+          </div>
+        ))}
       </div>
 
-      {/* Logout Button */}
-      <div className="relative p-6 border-t border-gray-100">
+      <div className="p-3 border-t border-gray-100">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-4 px-6 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl font-semibold transform hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-150"
         >
-          <FaSignOutAlt className="text-sm" />
-          <span>Sign Out</span>
+          <FaSignOutAlt className="text-xs" />
+          <span className="text-sm font-medium">Đăng xuất</span>
         </button>
       </div>
-
-      {/* Custom Styles */}
-      <style>{`
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-12px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-slideDown {
-          animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .scrollbar-thin::-webkit-scrollbar {
-          width: 4px;
-        }
-
-        .scrollbar-thumb-gray-200::-webkit-scrollbar-thumb {
-          background-color: #e5e7eb;
-          border-radius: 9999px;
-        }
-
-        .scrollbar-track-transparent::-webkit-scrollbar-track {
-          background: transparent;
-        }
-      `}</style>
     </div>
   );
 };
