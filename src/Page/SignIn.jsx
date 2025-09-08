@@ -5,152 +5,168 @@ import { login, getRole, ROLES } from "../Services/Auth/authService";
 import toast from "react-hot-toast";
 
 const SignIn = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+    rememberMe: false,
+  });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const roleRoutes = {
+    [ROLES.ADMIN]: "/admin",
+    [ROLES.MANAGER]: "/manager",
+    [ROLES.LEAD_SALE]: "/lead-sale",
+    [ROLES.STAFF_SALE]: "/staff-sale",
+    [ROLES.STAFF_PURCHASER]: "/staff-purchaser",
+    [ROLES.STAFF_WAREHOUSE_FOREIGN]: "/staff-warehouse-foreign",
+    [ROLES.STAFF_WAREHOUSE_DOMESTIC]: "/staff-warehouse-domestic",
+    [ROLES.CUSTOMER]: "/",
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      const userData = await login(username, password);
+      const userData = await login(formData.username, formData.password);
       console.log("Login success:", userData);
 
-      toast.success(`Xin chào ${userData.name || username}! 🎉`);
+      toast.success(`Xin chào ${userData.name || formData.username}! 🎉`);
 
-      // Lấy role hiện tại
       const role = getRole();
-
-      // Điều hướng theo role
-      switch (role) {
-        case ROLES.ADMIN:
-          navigate("/admin");
-          break;
-        case ROLES.MANAGER:
-          navigate("/manager");
-          break;
-        case ROLES.LEAD_SALE:
-          navigate("/lead-sale");
-          break;
-        case ROLES.STAFF_SALE:
-          navigate("/staff-sale");
-          break;
-        case ROLES.STAFF_PURCHASER:
-          navigate("/staff-purchaser");
-          break;
-        case ROLES.STAFF_WAREHOUSE_FOREIGN:
-          navigate("/staff-warehouse-foreign");
-          break;
-        case ROLES.STAFF_WAREHOUSE_DOMESTIC:
-          navigate("/staff-warehouse-domestic");
-          break;
-        case ROLES.CUSTOMER:
-          navigate("/");
-          break;
-        default:
-          navigate("/home");
-          break;
-      }
-    } catch {
+      const route = roleRoutes[role] || "/home";
+      navigate(route);
+    } catch (error) {
+      console.error("Login error:", error);
       toast.error("Đăng nhập thất bại! Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleGoogleLogin = () => {
+    // Implement Google login logic here
+    toast.info("Tính năng đăng nhập Google đang được phát triển.");
+  };
+
   return (
-    <div className="min-h-screen w-full flex flex-col md:flex-row bg-white">
-      {/* Left side - Image */}
-      <div className="w-full md:w-1/2 flex items-center justify-center bg-yellow-50">
-        <img
-          src="https://i.ibb.co/8c7HptR/running.png"
-          alt="illustration"
-          className="max-h-[80%] object-contain"
-        />
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-xl p-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Đăng Nhập</h1>
+          <p className="text-gray-600">Chào mừng bạn trở lại</p>
+        </div>
 
-      {/* Right side - Form */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center p-8 md:p-16 bg-black text-white">
-        <h1 className="text-4xl font-bold mb-3 text-yellow-400">
-          Chào Mừng Trở Lại
-        </h1>
-        <p className="text-gray-300 mb-8">
-          Đăng nhập để tiếp tục hành trình của bạn.
-        </p>
-
-        <form onSubmit={handleLogin}>
-          {/* Username */}
-          <div className="mb-6">
-            <label className="block text-gray-200 mb-2 text-sm font-semibold">
+        {/* Form */}
+        <div className="space-y-6">
+          {/* Username Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Tên đăng nhập
             </label>
             <input
               type="text"
+              name="username"
               placeholder="Nhập tên đăng nhập"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={formData.username}
+              onChange={handleInputChange}
               required
-              className="w-full border border-gray-600 rounded-lg px-4 py-3 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
             />
           </div>
 
-          {/* Password */}
-          <div className="mb-6">
-            <label className="block text-gray-200 mb-2 text-sm font-semibold">
+          {/* Password Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Mật khẩu
             </label>
             <input
               type="password"
-              placeholder="********"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password"
+              placeholder="Nhập mật khẩu"
+              value={formData.password}
+              onChange={handleInputChange}
               required
-              className="w-full border border-gray-600 rounded-lg px-4 py-3 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
             />
           </div>
 
-          {/* Remember me + Forgot password */}
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-            <label className="flex items-center">
+          {/* Remember Me & Forgot Password */}
+          <div className="flex items-center justify-between">
+            <label className="flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                className="mr-2 text-yellow-400 focus:ring-yellow-400"
+                name="rememberMe"
+                checked={formData.rememberMe}
+                onChange={handleInputChange}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
               />
-              <span className="text-gray-300 text-sm">Ghi nhớ tôi</span>
+              <span className="ml-2 text-sm text-gray-600">Ghi nhớ tôi</span>
             </label>
             <a
               href="/forgot-password"
-              className="text-yellow-400 text-sm hover:underline"
+              className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors"
             >
               Quên mật khẩu?
             </a>
           </div>
 
-          {/* Sign in button */}
+          {/* Login Button */}
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-yellow-400 text-black font-semibold py-3 rounded-lg hover:bg-yellow-500 transition mb-4"
+            onClick={handleLogin}
+            disabled={loading || !formData.username || !formData.password}
+            className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
-            {loading ? "Đang đăng nhập..." : "Đăng Nhập"}
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                Đang đăng nhập...
+              </div>
+            ) : (
+              "Đăng Nhập"
+            )}
           </button>
-        </form>
+        </div>
 
-        {/* Google button */}
-        <button className="w-full flex justify-center items-center border border-gray-600 py-3 rounded-lg hover:bg-gray-700 transition mb-6">
-          <FcGoogle className="mr-2 text-xl" />
-          <span className="text-gray-200">Đăng nhập bằng Google</span>
+        {/* Divider */}
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300" />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">Hoặc</span>
+          </div>
+        </div>
+
+        {/* Google Login */}
+        <button
+          onClick={handleGoogleLogin}
+          className="w-full flex items-center justify-center gap-3 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+        >
+          <FcGoogle className="text-xl" />
+          <span className="text-gray-700 font-medium">
+            Đăng nhập bằng Google
+          </span>
         </button>
 
-        {/* Sign up */}
-        <p className="text-sm text-gray-300 text-center">
+        {/* Sign Up Link */}
+        <p className="text-center text-sm text-gray-600 mt-6">
           Chưa có tài khoản?{" "}
           <a
             href="/signup"
-            className="text-yellow-400 font-semibold hover:underline"
+            className="text-blue-600 font-semibold hover:text-blue-800 hover:underline transition-colors"
           >
-            Đăng ký miễn phí!
+            Đăng ký ngay
           </a>
         </p>
       </div>
