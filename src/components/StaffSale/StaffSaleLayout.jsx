@@ -27,7 +27,7 @@ const StaffSaleLayout = () => {
             </div>
 
             {/* Right Side - Date & Status */}
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-6 ">
               {/* Current Date with Icon */}
               <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-2.5 rounded-xl border border-blue-100">
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
