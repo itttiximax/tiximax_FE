@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import orderListService from "../../Services/SharedService/orderlistService";
+import createOrderPaymentService from "../../Services/SharedService/createorderpayment";
 import paymentService from "../../Services/LeadSale/paymentService";
 
-const OrderList = () => {
+const CreateOrderPayment = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("DA_XAC_NHAN");
@@ -22,7 +22,7 @@ const OrderList = () => {
   const fetchOrders = async (status, page = 0) => {
     setLoading(true);
     try {
-      const response = await orderListService.getOrdersByStatus(
+      const response = await createOrderPaymentService.getOrdersByStatus(
         status,
         page,
         10
@@ -622,4 +622,4 @@ const OrderList = () => {
   );
 };
 
-export default OrderList;
+export default CreateOrderPayment;

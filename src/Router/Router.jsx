@@ -38,7 +38,7 @@ import ManagerDashboard from "../components/Manager/ManagerDashboard";
 import StaffSalePage from "../components/StaffSale/StaffSalePage";
 import StaffSaleLayout from "../components/StaffSale/StaffSaleLayout";
 import Tracking from "../components/StaffSale/Tracking";
-import OrderList from "../components/StaffSale/OrderList";
+import CreateOrderPayment from "../components/StaffSale/CreateOrderPayment";
 //StaffPurchaser components
 import StaffPurchaserPage from "../components/StaffPurchaser/StaffPurchaserPage";
 import StaffPurchaserLayout from "../components/StaffPurchaser/StaffPurchaserLayout";
@@ -122,7 +122,7 @@ const Router = createBrowserRouter([
       { path: "createorder", element: <CreateOrder /> },
       { path: "createpayment", element: <CreatePayment /> },
       { path: "img", element: <UploadImage /> },
-      { path: "order", element: <OrderList /> },
+      { path: "order", element: <CreateOrderPayment /> },
       { path: "search", element: <AccountSearch /> },
       { path: "warehouse-staff", element: <NotFound /> },
       { path: "destination", element: <NotFound /> },
