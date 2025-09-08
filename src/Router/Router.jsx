@@ -77,7 +77,7 @@ const Router = createBrowserRouter([
     children: [
       { index: true, element: <AdminPage /> },
       { path: "dashboard", element: <AdminDashboard /> },
-      { path: "orders", element: <OrderList /> },
+      { path: "orders", element: <CreateOrderPayment /> },
       { path: "staff", element: <StaffList /> },
       { path: "customers", element: <CustomerList /> },
     ],
@@ -126,6 +126,7 @@ const Router = createBrowserRouter([
       { path: "search", element: <AccountSearch /> },
       { path: "warehouse-staff", element: <NotFound /> },
       { path: "destination", element: <NotFound /> },
+      { path: "or", element: <ManagerOrder /> },
     ],
   },
   {
@@ -144,7 +145,7 @@ const Router = createBrowserRouter([
       { path: "dashboard", element: <ManagerOrder /> },
       { path: "sale", element: <NotFound /> },
       { path: "customers", element: <NotFound /> },
-      { path: "support", element: <OrderList /> },
+      { path: "support", element: <CreateOrderPayment /> },
       { path: "quotations", element: <CreatePayment /> },
       { path: "orders", element: <NotFound /> },
       { path: "orders/pending", element: <NotFound /> },

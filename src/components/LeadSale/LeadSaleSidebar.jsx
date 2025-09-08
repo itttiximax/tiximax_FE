@@ -111,6 +111,12 @@ const LeadSaleSideBar = () => {
           label: "Danh sách đơn hàng",
           color: "brown",
         },
+        {
+          to: "/lead-sale/or",
+          icon: MapPin,
+          label: "Danh sách đơn hàng",
+          color: "brown",
+        },
       ],
     },
   ];
