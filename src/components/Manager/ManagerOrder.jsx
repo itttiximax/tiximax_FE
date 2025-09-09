@@ -4,8 +4,8 @@ import DetailOrder from "./DetailOrder";
 
 const ManagerOrder = () => {
   const [orders, setOrders] = useState([]);
-  const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [activeStatus, setActiveStatus] = useState("DA_XAC_NHAN");
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -18,8 +18,7 @@ const ManagerOrder = () => {
   // Detail modal states
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [loadingOrderId, setLoadingOrderId] = useState(null); // Track specific order loading
-  const [detailError, setDetailError] = useState(null);
+  const [setDetailError] = useState(null);
 
   const availableStatuses = useMemo(
     () => managerOrderService.getAvailableStatuses(),
@@ -29,8 +28,8 @@ const ManagerOrder = () => {
   // Fetch orders data
   const fetchOrders = useCallback(
     async (page = 1, status = activeStatus) => {
-      setTableLoading(true);
       setError(null);
+      setLoading(true);
 
       try {
         const response = await managerOrderService.getOrdersPaging(
@@ -50,7 +49,7 @@ const ManagerOrder = () => {
       } catch (err) {
         setError(err.message || "Failed to fetch orders");
       } finally {
-        setTableLoading(false);
+        setLoading(false);
       }
     },
     [activeStatus]
@@ -58,7 +57,6 @@ const ManagerOrder = () => {
 
   // Fetch order detail
   const fetchOrderDetail = useCallback(async (orderId) => {
-    setLoadingOrderId(orderId); // Set loading for specific order
     setDetailError(null);
 
     try {
@@ -67,10 +65,7 @@ const ManagerOrder = () => {
       setShowDetailModal(true);
     } catch (err) {
       setDetailError(err.message || "Failed to fetch order detail");
-      // Show error in a toast or alert instead of modal
       alert("Không thể tải chi tiết đơn hàng: " + err.message);
-    } finally {
-      setLoadingOrderId(null); // Clear loading state
     }
   }, []);
 
@@ -96,10 +91,11 @@ const ManagerOrder = () => {
   // Status change handler
   const handleStatusChange = useCallback(
     (status) => {
+      if (status === activeStatus) return;
       setActiveStatus(status);
       fetchOrders(1, status);
     },
-    [fetchOrders]
+    [activeStatus, fetchOrders]
   );
 
   // Pagination handlers
@@ -181,6 +177,14 @@ const ManagerOrder = () => {
     [availableStatuses, activeStatus]
   );
 
+  // Loading spinner component
+  const LoadingSpinner = () => (
+    <div className="flex justify-center items-center py-8">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <span className="ml-2 text-gray-600">Đang tải...</span>
+    </div>
+  );
+
   return (
     <div className="p-6">
       {/* Header */}
@@ -199,10 +203,9 @@ const ManagerOrder = () => {
               <button
                 key={status.key}
                 onClick={() => handleStatusChange(status.key)}
-                disabled={tableLoading}
+                disabled={loading}
                 className={`
                   whitespace-nowrap py-2 px-3 border-b-2 font-medium text-sm rounded-t-lg transition-all duration-200 
-                  ${tableLoading ? "opacity-50 cursor-not-allowed" : ""}
                   ${
                     activeStatus === status.key
                       ? `${getTabColor(status.color, true)} border-current`
@@ -211,53 +214,16 @@ const ManagerOrder = () => {
                           false
                         )} border-transparent hover:border-gray-300`
                   }
+                  ${loading ? "opacity-50 cursor-not-allowed" : ""}
                 `}
               >
                 {status.label}
-                {tableLoading && activeStatus === status.key && (
-                  <span className="ml-2 inline-block w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></span>
+                {loading && activeStatus === status.key && (
+                  <div className="inline-block ml-2 animate-spin rounded-full h-3 w-3 border-b border-white"></div>
                 )}
               </button>
             ))}
           </nav>
-        </div>
-      </div>
-
-      {/* Loading indicator for table area only */}
-      {tableLoading && (
-        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-md p-3">
-          <div className="flex items-center">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-3"></div>
-            <p className="text-sm text-blue-700">Đang tải dữ liệu...</p>
-          </div>
-        </div>
-      )}
-
-      {/* Current Status Info */}
-      <div className="mb-4">
-        <div
-          className={`bg-white p-4 rounded-lg shadow-sm border transition-opacity duration-200 ${
-            tableLoading ? "opacity-50" : ""
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {currentStatus?.label}
-              </h3>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-gray-900">
-                {pagination.totalElements}
-              </div>
-              <div className="text-sm text-gray-500">đơn hàng</div>
-            </div>
-          </div>
-          {pagination.totalPages > 0 && (
-            <div className="mt-2 text-sm text-gray-500">
-              Trang {pagination.currentPage}/{pagination.totalPages}
-            </div>
-          )}
         </div>
       </div>
 
@@ -277,10 +243,10 @@ const ManagerOrder = () => {
                   onClick={() =>
                     fetchOrders(pagination.currentPage, activeStatus)
                   }
-                  disabled={tableLoading}
-                  className="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-2 rounded-md text-sm disabled:opacity-50"
+                  disabled={loading}
+                  className="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-2 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Thử lại
+                  {loading ? "Đang tải..." : "Thử lại"}
                 </button>
               </div>
             </div>
@@ -288,115 +254,101 @@ const ManagerOrder = () => {
         </div>
       )}
 
+      {/* Loading State */}
+      {loading && (
+        <div className="bg-white rounded-lg shadow-sm">
+          <LoadingSpinner />
+        </div>
+      )}
+
       {/* Orders Table */}
-      <div
-        className={`bg-white shadow-sm rounded-lg overflow-hidden relative transition-opacity duration-200 ${
-          tableLoading ? "opacity-70" : ""
-        }`}
-      >
-        {/* Table loading overlay */}
-        {tableLoading && (
-          <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-10">
-            <div className="flex items-center space-x-3">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-              <span className="text-sm text-gray-600">Đang tải...</span>
-            </div>
-          </div>
-        )}
+      {!loading && (
+        <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Mã đơn hàng
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Loại đơn
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Trạng thái
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tỷ giá
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tổng tiền
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Ngày tạo
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Thao tác
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {orders.map((order) => {
+                const orderStatus = availableStatuses.find(
+                  (s) => s.key === order.status
+                );
 
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Mã đơn hàng
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Loại đơn
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Trạng thái
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Tỷ giá
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Tổng tiền
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Ngày tạo
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Thao tác
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {orders.map((order) => {
-              const orderStatus = availableStatuses.find(
-                (s) => s.key === order.status
-              );
-              const isLoading = loadingOrderId === order.orderId;
-
-              return (
-                <tr key={order.orderId} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {order.orderCode}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      ID: {order.orderId}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {getOrderTypeText(order.orderType)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        orderStatus
-                          ? getStatusColor(orderStatus.color)
-                          : getStatusColor("gray")
-                      }`}
-                    >
-                      {orderStatus ? orderStatus.label : order.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {order.exchangeRate
-                      ? `${order.exchangeRate.toLocaleString("vi-VN")} VNĐ`
-                      : "-"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatPrice(order.finalPriceOrder)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatDate(order.createdAt)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <button
-                      onClick={() => handleViewDetail(order.orderId)}
-                      disabled={isLoading}
-                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isLoading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500 mr-1"></div>
-                          Đang tải...
-                        </>
-                      ) : (
-                        "Xem chi tiết"
-                      )}
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                return (
+                  <tr key={order.orderId} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {order.orderCode}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        ID: {order.orderId}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {getOrderTypeText(order.orderType)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          orderStatus
+                            ? getStatusColor(orderStatus.color)
+                            : getStatusColor("gray")
+                        }`}
+                      >
+                        {orderStatus ? orderStatus.label : order.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {order.exchangeRate
+                        ? `${order.exchangeRate.toLocaleString("vi-VN")} VNĐ`
+                        : "-"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {formatPrice(order.finalPriceOrder)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {formatDate(order.createdAt)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <button
+                        onClick={() => handleViewDetail(order.orderId)}
+                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        Xem chi tiết
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Empty State */}
-      {orders.length === 0 && !tableLoading && !error && (
+      {!loading && orders.length === 0 && !error && (
         <div className="text-center py-12 bg-white rounded-lg">
           <div className="text-gray-500">
             <svg
@@ -423,12 +375,8 @@ const ManagerOrder = () => {
       )}
 
       {/* Pagination */}
-      {pagination.totalPages > 1 && (
-        <div
-          className={`bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4 transition-opacity duration-200 ${
-            tableLoading ? "opacity-50" : ""
-          }`}
-        >
+      {!loading && pagination.totalPages > 1 && (
+        <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4">
           <div className="flex-1 flex justify-between items-center">
             <div>
               <p className="text-sm text-gray-700">
@@ -451,7 +399,7 @@ const ManagerOrder = () => {
             <div className="flex items-center space-x-2">
               <button
                 onClick={handlePrevPage}
-                disabled={pagination.first || tableLoading}
+                disabled={pagination.first || loading}
                 className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 ← Trang trước
@@ -461,7 +409,7 @@ const ManagerOrder = () => {
               </span>
               <button
                 onClick={handleNextPage}
-                disabled={pagination.last || tableLoading}
+                disabled={pagination.last || loading}
                 className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Trang sau →

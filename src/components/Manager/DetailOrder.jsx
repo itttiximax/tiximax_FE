@@ -3,18 +3,6 @@ import React from "react";
 const DetailOrder = ({ orderData, onClose, availableStatuses = [] }) => {
   if (!orderData) return null;
 
-  // Utility functions
-  const formatDate = (dateString) => {
-    if (!dateString) return "-";
-    return new Date(dateString).toLocaleString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   const formatPrice = (price) => {
     if (!price) return "-";
     return new Intl.NumberFormat("vi-VN", {
@@ -76,10 +64,6 @@ const DetailOrder = ({ orderData, onClose, availableStatuses = [] }) => {
             <h2 className="text-2xl font-bold text-gray-900">
               Chi tiết đơn hàng #{orderData.orderCode}
             </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              ID: {orderData.orderId} • Tạo lúc:{" "}
-              {formatDate(orderData.createdAt)}
-            </p>
           </div>
           <button
             onClick={onClose}
@@ -425,3 +409,5 @@ const DetailOrder = ({ orderData, onClose, availableStatuses = [] }) => {
 };
 
 export default DetailOrder;
+
+///
