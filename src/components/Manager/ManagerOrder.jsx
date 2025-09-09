@@ -18,7 +18,7 @@ const ManagerOrder = () => {
   // Detail modal states
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [setDetailError] = useState(null);
+  const [detailError, setDetailError] = useState(null);
 
   const availableStatuses = useMemo(
     () => managerOrderService.getAvailableStatuses(),
