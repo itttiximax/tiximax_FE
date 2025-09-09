@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import managerOrderService from "../../Services/Manager/managerOrderService";
+import DetailOrder from "./DetailOrder";
 
 const ManagerOrder = () => {
   const [orders, setOrders] = useState([]);
-  const [tableLoading, setTableLoading] = useState(false); // Chỉ loading cho table
+  const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeStatus, setActiveStatus] = useState("DA_XAC_NHAN");
   const [pagination, setPagination] = useState({
@@ -14,12 +15,18 @@ const ManagerOrder = () => {
     last: false,
   });
 
+  // Detail modal states
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [loadingOrderId, setLoadingOrderId] = useState(null); // Track specific order loading
+  const [detailError, setDetailError] = useState(null);
+
   const availableStatuses = useMemo(
     () => managerOrderService.getAvailableStatuses(),
     []
   );
 
-  // Fetch orders data chỉ dùng tableLoading
+  // Fetch orders data
   const fetchOrders = useCallback(
     async (page = 1, status = activeStatus) => {
       setTableLoading(true);
@@ -49,9 +56,41 @@ const ManagerOrder = () => {
     [activeStatus]
   );
 
+  // Fetch order detail
+  const fetchOrderDetail = useCallback(async (orderId) => {
+    setLoadingOrderId(orderId); // Set loading for specific order
+    setDetailError(null);
+
+    try {
+      const orderDetail = await managerOrderService.getOrderDetail(orderId);
+      setSelectedOrder(orderDetail);
+      setShowDetailModal(true);
+    } catch (err) {
+      setDetailError(err.message || "Failed to fetch order detail");
+      // Show error in a toast or alert instead of modal
+      alert("Không thể tải chi tiết đơn hàng: " + err.message);
+    } finally {
+      setLoadingOrderId(null); // Clear loading state
+    }
+  }, []);
+
+  // Handle view detail
+  const handleViewDetail = useCallback(
+    (orderId) => {
+      fetchOrderDetail(orderId);
+    },
+    [fetchOrderDetail]
+  );
+
+  // Close detail modal
+  const handleCloseDetail = useCallback(() => {
+    setShowDetailModal(false);
+    setSelectedOrder(null);
+    setDetailError(null);
+  }, []);
+
   useEffect(() => {
-    fetchOrders(1, activeStatus); // Initial load
-    // eslint-disable-next-line
+    fetchOrders(1, activeStatus);
   }, [activeStatus]);
 
   // Status change handler
@@ -97,6 +136,7 @@ const ManagerOrder = () => {
       orange: "bg-orange-100 text-orange-800",
       blue: "bg-blue-100 text-blue-800",
       indigo: "bg-indigo-100 text-indigo-800",
+      slate: "bg-slate-100 text-slate-800",
       purple: "bg-purple-100 text-purple-800",
       yellow: "bg-yellow-100 text-yellow-800",
       cyan: "bg-cyan-100 text-cyan-800",
@@ -115,6 +155,7 @@ const ManagerOrder = () => {
         orange: "bg-orange-600 text-white",
         blue: "bg-blue-600 text-white",
         indigo: "bg-indigo-600 text-white",
+        slate: "bg-slate-600 text-white",
         purple: "bg-purple-600 text-white",
         yellow: "bg-yellow-600 text-white",
         cyan: "bg-cyan-600 text-white",
@@ -284,6 +325,9 @@ const ManagerOrder = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Ngày tạo
               </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Thao tác
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -291,6 +335,8 @@ const ManagerOrder = () => {
               const orderStatus = availableStatuses.find(
                 (s) => s.key === order.status
               );
+              const isLoading = loadingOrderId === order.orderId;
+
               return (
                 <tr key={order.orderId} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -325,6 +371,22 @@ const ManagerOrder = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatDate(order.createdAt)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <button
+                      onClick={() => handleViewDetail(order.orderId)}
+                      disabled={isLoading}
+                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500 mr-1"></div>
+                          Đang tải...
+                        </>
+                      ) : (
+                        "Xem chi tiết"
+                      )}
+                    </button>
                   </td>
                 </tr>
               );
@@ -407,6 +469,15 @@ const ManagerOrder = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Detail Order Modal */}
+      {showDetailModal && selectedOrder && (
+        <DetailOrder
+          orderData={selectedOrder}
+          onClose={handleCloseDetail}
+          availableStatuses={availableStatuses}
+        />
       )}
     </div>
   );

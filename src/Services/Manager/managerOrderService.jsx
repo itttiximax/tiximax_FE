@@ -16,6 +16,7 @@ const managerOrderService = {
         "CHO_THANH_TOAN",
         "CHO_MUA",
         "CHO_NHAP_KHO_VN",
+        "CHO_NHAP_KHO_NN",
         "CHO_DONG_GOI",
         "CHO_THANH_TOAN_SHIP",
         "CHO_NHAP_KHO_HN",
@@ -48,6 +49,33 @@ const managerOrderService = {
     }
   },
 
+  // Get order detail by ID
+  getOrderDetail: async (orderId) => {
+    try {
+      // Validate order ID
+      if (!orderId || isNaN(orderId) || orderId <= 0) {
+        throw new Error("Invalid order ID");
+      }
+
+      const response = await api.get(`/orders/detail/${orderId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching order detail for ID ${orderId}:`, error);
+
+      if (error.response?.status === 404) {
+        throw new Error("Order not found");
+      } else if (error.response?.status === 400) {
+        throw new Error("Invalid order ID");
+      } else if (error.response?.status === 403) {
+        throw new Error("Access denied");
+      } else if (error.response?.status === 500) {
+        throw new Error("Server error");
+      }
+
+      throw error;
+    }
+  },
+
   // Get orders by specific status
   getOrdersByStatus: async (status, page = 0, size = 20) => {
     return await managerOrderService.getOrdersPaging(page, size, status);
@@ -60,6 +88,7 @@ const managerOrderService = {
     { key: "CHO_THANH_TOAN", label: "Chờ thanh toán", color: "orange" },
     { key: "CHO_MUA", label: "Chờ mua", color: "blue" },
     { key: "CHO_NHAP_KHO_VN", label: "Chờ nhập kho VN", color: "indigo" },
+    { key: "CHO_NHAP_KHO_NN", label: "Chờ nhập kho NN", color: "slate" },
     { key: "CHO_DONG_GOI", label: "Chờ đóng gói", color: "purple" },
     {
       key: "CHO_THANH_TOAN_SHIP",
