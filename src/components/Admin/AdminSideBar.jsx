@@ -47,6 +47,11 @@ const AdminSidebar = () => {
           icon: <FaUsers />,
           path: "/admin/customers",
         },
+        {
+          text: "Customers",
+          icon: <FaUsers />,
+          path: "/admin/createaccount",
+        },
       ],
     },
   ];

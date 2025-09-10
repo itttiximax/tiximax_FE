@@ -53,9 +53,13 @@ import ProtectedRoute from "../Router/ProtectedRoute";
 import { ROLES } from "../Services/Auth/authService";
 import ManagerOrder from "../components/Manager/ManagerOrder";
 import UploadImage from "../components/UploadImage";
-import AccountSearch from "../components/LeadSale/AccountSearch";
+// import AccountSearch from "../components/LeadSale/AccountSearch";
 import NotFound from "../Page/NotFound";
 import CreateAccountUser from "../components/StaffSale/CreateAccountUser";
+import ProfilePage from "../Page/ProfilePage";
+import OrderLinkList from "../components/StaffPurchaser/OrderLinkList";
+import CreateAccountStaff from "../components/Admin/CreateAccountStaff";
+
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -65,6 +69,7 @@ const Router = createBrowserRouter([
       { path: "signin", element: <SignIn /> },
       { path: "signup", element: <SignUp /> },
       { path: "forgot-password", element: <ForgotPassword /> },
+      { path: "profile", element: <ProfilePage /> },
     ],
   },
   {
@@ -80,6 +85,7 @@ const Router = createBrowserRouter([
       { path: "orders", element: <CreateOrderPayment /> },
       { path: "staff", element: <StaffList /> },
       { path: "customers", element: <CustomerList /> },
+      { path: "createaccount", element: <CreateAccountStaff /> },
     ],
   },
   {
@@ -178,7 +184,7 @@ const Router = createBrowserRouter([
         element: <StaffPurchaserPage />,
       },
       { path: "dashboard", element: <NotFound /> },
-      { path: "orders", element: <NotFound /> },
+      { path: "orders", element: <OrderLinkList /> },
       { path: "suppliers", element: <NotFound /> },
       { path: "inventory", element: <NotFound /> },
     ],
