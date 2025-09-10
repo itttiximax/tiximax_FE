@@ -10,7 +10,9 @@ const ManagerRoutes = () => {
   const [formData, setFormData] = useState({
     name: "",
     shipTime: "",
-    unitShippingPrice: "",
+    unitBuyingPrice: "",
+    unitDepositPrice: "",
+    exchangeRate: "",
     note: "",
   });
 
@@ -25,6 +27,7 @@ const ManagerRoutes = () => {
       setRoutes(data);
     } catch (err) {
       console.error("Error:", err);
+      toast.error("Có lỗi khi tải dữ liệu!");
     } finally {
       setLoading(false);
     }
@@ -38,39 +41,34 @@ const ManagerRoutes = () => {
     );
 
     try {
-      if (editingId) {
-        const updatedData = {
-          ...formData,
-          shipTime: Number(formData.shipTime),
-          unitShippingPrice: Number(formData.unitShippingPrice),
-        };
+      const submitData = {
+        name: formData.name,
+        shipTime: formData.shipTime,
+        unitBuyingPrice: Number(formData.unitBuyingPrice) || 0,
+        unitDepositPrice: Number(formData.unitDepositPrice) || 0,
+        exchangeRate: Number(formData.exchangeRate) || 0,
+        note: formData.note,
+      };
 
+      if (editingId) {
         // Optimistic update
         setRoutes((prev) =>
           prev.map((item) =>
-            item.routeId === editingId ? { ...item, ...updatedData } : item
+            item.routeId === editingId ? { ...item, ...submitData } : item
           )
         );
 
-        await managerRoutesService.updateRoute(editingId, updatedData);
+        await managerRoutesService.updateRoute(editingId, submitData);
         toast.success("Cập nhật thành công!", { id: loadingToast });
       } else {
-        const newItemData = {
-          ...formData,
-          shipTime: Number(formData.shipTime),
-          unitShippingPrice: Number(formData.unitShippingPrice),
-        };
-
-        const newItem = await managerRoutesService.createRoute(newItemData);
+        const newItem = await managerRoutesService.createRoute(submitData);
 
         // Add to list immediately
         setRoutes((prev) => [...prev, newItem]);
         toast.success("Tạo mới thành công!", { id: loadingToast });
       }
 
-      setFormData({ name: "", shipTime: "", unitShippingPrice: "", note: "" });
-      setShowForm(false);
-      setEditingId(null);
+      resetForm();
     } catch (err) {
       console.error("Error:", err);
       toast.error("Có lỗi xảy ra!", { id: loadingToast });
@@ -82,11 +80,26 @@ const ManagerRoutes = () => {
     }
   };
 
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      shipTime: "",
+      unitBuyingPrice: "",
+      unitDepositPrice: "",
+      exchangeRate: "",
+      note: "",
+    });
+    setShowForm(false);
+    setEditingId(null);
+  };
+
   const handleEdit = (item) => {
     setFormData({
       name: item.name,
       shipTime: item.shipTime,
-      unitShippingPrice: item.unitShippingPrice,
+      unitBuyingPrice: item.unitBuyingPrice || "",
+      unitDepositPrice: item.unitDepositPrice || "",
+      exchangeRate: item.exchangeRate || "",
       note: item.note || "",
     });
     setEditingId(item.routeId);
@@ -113,12 +126,6 @@ const ManagerRoutes = () => {
     }
   };
 
-  const handleCancel = () => {
-    setFormData({ name: "", shipTime: "", unitShippingPrice: "", note: "" });
-    setShowForm(false);
-    setEditingId(null);
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -127,7 +134,16 @@ const ManagerRoutes = () => {
     }));
   };
 
-  if (loading) return <div>Đang tải...</div>;
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("vi-VN").format(amount);
+  };
+
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg">Đang tải...</div>
+      </div>
+    );
 
   return (
     <div className="p-4">
@@ -157,7 +173,7 @@ const ManagerRoutes = () => {
       {/* Add button */}
       <button
         onClick={() => setShowForm(!showForm)}
-        className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
+        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mb-4 transition-colors"
       >
         {showForm ? "Hủy" : "Thêm mới"}
       </button>
@@ -169,46 +185,78 @@ const ManagerRoutes = () => {
             {editingId ? "Sửa tuyến vận chuyển" : "Thêm mới tuyến vận chuyển"}
           </h3>
 
-          <div className="mb-3">
-            <label className="block text-sm font-medium mb-1">Tên tuyến:</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              className="w-full border rounded px-3 py-2"
-              required
-            />
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="mb-3">
+              <label className="block text-sm font-medium mb-1">
+                Tên tuyến: *
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
 
-          <div className="mb-3">
-            <label className="block text-sm font-medium mb-1">
-              Thời gian vận chuyển (ngày):
-            </label>
-            <input
-              type="number"
-              name="shipTime"
-              value={formData.shipTime}
-              onChange={handleInputChange}
-              className="w-full border rounded px-3 py-2"
-              required
-              min="1"
-            />
-          </div>
+            <div className="mb-3">
+              <label className="block text-sm font-medium mb-1">
+                Thời gian vận chuyển: *
+              </label>
+              <input
+                type="text"
+                name="shipTime"
+                value={formData.shipTime}
+                onChange={handleInputChange}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="VD: 7-10 ngày"
+                required
+              />
+            </div>
 
-          <div className="mb-3">
-            <label className="block text-sm font-medium mb-1">
-              Đơn giá vận chuyển (đ):
-            </label>
-            <input
-              type="number"
-              name="unitShippingPrice"
-              value={formData.unitShippingPrice}
-              onChange={handleInputChange}
-              className="w-full border rounded px-3 py-2"
-              required
-              min="0"
-            />
+            <div className="mb-3">
+              <label className="block text-sm font-medium mb-1">
+                Đơn giá mua (đ):
+              </label>
+              <input
+                type="number"
+                name="unitBuyingPrice"
+                value={formData.unitBuyingPrice}
+                onChange={handleInputChange}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="0"
+                step="0.01"
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="block text-sm font-medium mb-1">
+                Đơn giá đặt cọc (đ):
+              </label>
+              <input
+                type="number"
+                name="unitDepositPrice"
+                value={formData.unitDepositPrice}
+                onChange={handleInputChange}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="0"
+                step="0.01"
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="block text-sm font-medium mb-1">Tỷ giá:</label>
+              <input
+                type="number"
+                name="exchangeRate"
+                value={formData.exchangeRate}
+                onChange={handleInputChange}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="0"
+                step="0.01"
+              />
+            </div>
           </div>
 
           <div className="mb-3">
@@ -217,23 +265,24 @@ const ManagerRoutes = () => {
               name="note"
               value={formData.note}
               onChange={handleInputChange}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows="3"
+              placeholder="Nhập ghi chú..."
             />
           </div>
 
           <div className="flex gap-2">
             <button
               type="submit"
-              className="bg-green-500 text-white px-4 py-2 rounded"
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition-colors"
             >
               {editingId ? "Cập nhật" : "Lưu"}
             </button>
 
             <button
               type="button"
-              onClick={handleCancel}
-              className="bg-gray-500 text-white px-4 py-2 rounded"
+              onClick={resetForm}
+              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition-colors"
             >
               Hủy
             </button>
@@ -242,55 +291,84 @@ const ManagerRoutes = () => {
       )}
 
       {/* Table */}
-      <table className="w-full border-collapse border border-gray-300">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border border-gray-300 px-4 py-2">ID</th>
-            <th className="border border-gray-300 px-4 py-2">Tên tuyến</th>
-            <th className="border border-gray-300 px-4 py-2">
-              Thời gian (ngày)
-            </th>
-            <th className="border border-gray-300 px-4 py-2">Đơn giá (đ)</th>
-            <th className="border border-gray-300 px-4 py-2">Ghi chú</th>
-            <th className="border border-gray-300 px-4 py-2">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody>
-          {routes.map((item) => (
-            <tr key={item.routeId}>
-              <td className="border border-gray-300 px-4 py-2">
-                {item.routeId}
-              </td>
-              <td className="border border-gray-300 px-4 py-2">{item.name}</td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                {item.shipTime}
-              </td>
-              <td className="border border-gray-300 px-4 py-2 text-right">
-                {item.unitShippingPrice.toLocaleString()}
-              </td>
-              <td className="border border-gray-300 px-4 py-2">
-                {item.note || "Không có"}
-              </td>
-              <td className="border border-gray-300 px-4 py-2">
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEdit(item)}
-                    className="bg-yellow-500 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Sửa
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item.routeId)}
-                    className="bg-red-500 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Xóa
-                  </button>
-                </div>
-              </td>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse border border-gray-300">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border border-gray-300 px-4 py-2">ID</th>
+              <th className="border border-gray-300 px-4 py-2">Tên tuyến</th>
+              <th className="border border-gray-300 px-4 py-2">Thời gian</th>
+              <th className="border border-gray-300 px-4 py-2">Đơn giá mua</th>
+              <th className="border border-gray-300 px-4 py-2">
+                Đơn giá đặt cọc
+              </th>
+              <th className="border border-gray-300 px-4 py-2">Tỷ giá</th>
+              <th className="border border-gray-300 px-4 py-2">Ghi chú</th>
+              <th className="border border-gray-300 px-4 py-2">Thao tác</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {routes.length === 0 ? (
+              <tr>
+                <td
+                  colSpan="8"
+                  className="border border-gray-300 px-4 py-8 text-center text-gray-500"
+                >
+                  Chưa có dữ liệu
+                </td>
+              </tr>
+            ) : (
+              routes.map((item) => (
+                <tr key={item.routeId} className="hover:bg-gray-50">
+                  <td className="border border-gray-300 px-4 py-2 text-center">
+                    {item.routeId}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 font-medium">
+                    {item.name}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">
+                    {item.shipTime}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-right">
+                    {item.unitBuyingPrice
+                      ? formatCurrency(item.unitBuyingPrice)
+                      : "-"}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-right">
+                    {item.unitDepositPrice
+                      ? formatCurrency(item.unitDepositPrice)
+                      : "-"}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-right">
+                    {item.exchangeRate
+                      ? formatCurrency(item.exchangeRate)
+                      : "-"}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {item.note || "Không có"}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    <div className="flex gap-2 justify-center">
+                      <button
+                        onClick={() => handleEdit(item)}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm transition-colors"
+                      >
+                        Sửa
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item.routeId)}
+                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors"
+                      >
+                        Xóa
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

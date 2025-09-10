@@ -1,33 +1,48 @@
-import api from "../../config/api"; // ← THAY ĐỔI: import api thay vì axios
+import api from "../../config/api";
 
 const routesService = {
   getRoutes: async () => {
-    // ← THAY ĐỔI: bỏ token parameter
-    const res = await api.get("/routes"); // ← THAY ĐỔI: bỏ headers (tự động thêm)
+    const res = await api.get("/routes");
     return res.data;
   },
 
   getRouteById: async (id) => {
-    // ← THAY ĐỔI: bỏ token parameter
-    const res = await api.get(`/routes/${id}`); // ← THAY ĐỔI: bỏ headers
+    const res = await api.get(`/routes/${id}`);
     return res.data;
   },
 
   createRoute: async (data) => {
-    // ← THAY ĐỔI: bỏ token parameter
-    const res = await api.post("/routes", data); // ← THAY ĐỔI: bỏ headers
+    // Transform frontend data to match API structure
+    const apiData = {
+      name: data.name,
+      shipTime: data.shipTime.toString(), // API expects string
+      unitBuyingPrice: data.unitBuyingPrice || 0,
+      unitDepositPrice: data.unitDepositPrice || 0,
+      exchangeRate: data.exchangeRate || 0,
+      note: data.note || "",
+    };
+
+    const res = await api.post("/routes", apiData);
     return res.data;
   },
 
   updateRoute: async (id, data) => {
-    // ← THAY ĐỔI: bỏ token parameter
-    const res = await api.put(`/routes/${id}`, data); // ← THAY ĐỔI: bỏ headers
+    // Transform frontend data to match API structure
+    const apiData = {
+      name: data.name,
+      shipTime: data.shipTime.toString(), // API expects string
+      unitBuyingPrice: data.unitBuyingPrice || 0,
+      unitDepositPrice: data.unitDepositPrice || 0,
+      exchangeRate: data.exchangeRate || 0,
+      note: data.note || "",
+    };
+
+    const res = await api.put(`/routes/${id}`, apiData);
     return res.data;
   },
 
   deleteRoute: async (id) => {
-    // ← THAY ĐỔI: bỏ token parameter
-    const res = await api.delete(`/routes/${id}`); // ← THAY ĐỔI: bỏ headers
+    const res = await api.delete(`/routes/${id}`);
     return res.data;
   },
 };

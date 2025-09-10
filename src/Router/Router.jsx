@@ -116,17 +116,22 @@ const Router = createBrowserRouter([
         index: true,
         element: <LeadSalePage />,
       },
+      { path: "createorder", element: <CreateOrder /> },
       { path: "dashboard", element: <DashboardLeadSale /> },
       { path: "team", element: <NotFound /> },
       { path: "salesreport", element: <NotFound /> },
-      { path: "createorder", element: <CreateOrder /> },
-      { path: "createpayment", element: <CreatePayment /> },
-      { path: "img", element: <UploadImage /> },
-      { path: "order", element: <CreateOrderPayment /> },
-      { path: "search", element: <AccountSearch /> },
+      { path: "team-performance", element: <NotFound /> },
+      { path: "customers", element: <NotFound /> },
+      { path: "orders", element: <ManagerOrder /> },
+      { path: "orders/tracking", element: <ManagerOrder /> },
+      { path: "createpayment", element: <CreateOrderPayment /> },
       { path: "warehouse-staff", element: <NotFound /> },
+      { path: "sales-staff", element: <NotFound /> },
+      { path: "schedule", element: <NotFound /> },
       { path: "destination", element: <NotFound /> },
-      { path: "or", element: <ManagerOrder /> },
+      { path: "img", element: <UploadImage /> },
+      // { path: "trackingpayment", element: <CreateOrderPayment /> },
+      // { path: "search", element: <AccountSearch /> },
     ],
   },
   {
@@ -142,17 +147,21 @@ const Router = createBrowserRouter([
         element: <StaffSalePage />,
       },
       { path: "create-invoice", element: <CreateOrder /> },
+      { path: "quotations", element: <CreateOrderPayment /> },
       { path: "dashboard", element: <ManagerOrder /> },
-      { path: "sale", element: <NotFound /> },
-      { path: "customers", element: <NotFound /> },
-      { path: "support", element: <CreateOrderPayment /> },
-      { path: "quotations", element: <CreatePayment /> },
-      { path: "orders", element: <NotFound /> },
-      { path: "orders/pending", element: <NotFound /> },
-      { path: "shipping/domestic", element: <NotFound /> },
-      { path: "shipping/international", element: <NotFound /> },
+      { path: "performance", element: <NotFound /> }, // Chưa triển khai
+      { path: "customers", element: <NotFound /> }, // Chưa triển khai
+      { path: "prospects", element: <NotFound /> }, // Chưa triển khai
+      { path: "createaccountuser", element: <CreateAccountUser /> },
+      { path: "orders", element: <NotFound /> }, // Chưa triển khai
+      { path: "orders/pending", element: <NotFound /> }, // Chưa triển khai
+      { path: "shipping/domestic", element: <NotFound /> }, // Chưa triển khai
+      { path: "shipping/international", element: <NotFound /> }, // Chưa triển khai
       { path: "tracking", element: <Tracking /> },
       { path: "warehouses", element: <Tracking /> },
+      { path: "telesale", element: <NotFound /> }, // Chưa triển khai
+      { path: "knowledge", element: <NotFound /> }, // Chưa triển khai
+      { path: "schedule", element: <NotFound /> }, // Chưa triển khai
       { path: "createaccountuser", element: <CreateAccountUser /> },
     ],
   },

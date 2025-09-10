@@ -133,9 +133,34 @@ const CreateOrder = () => {
     return productType?.fee || false;
   };
 
+  // Updated handlePreliminaryChange function with auto-fill exchangeRate
   const handlePreliminaryChange = (e) => {
     const { name, value } = e.target;
-    setPreliminary({ ...preliminary, [name]: value });
+
+    if (name === "routeId") {
+      // Tìm route được chọn
+      const selectedRoute = routes.find(
+        (route) => route.routeId === Number(value)
+      );
+
+      // Update preliminary state
+      setPreliminary({ ...preliminary, [name]: value });
+
+      // Auto-fill exchangeRate nếu route có exchangeRate
+      if (selectedRoute && selectedRoute.exchangeRate) {
+        setForm({
+          ...form,
+          exchangeRate: selectedRoute.exchangeRate,
+        });
+
+        // Thêm toast notification
+        toast.success(
+          `Tỷ giá hôm nay: ${selectedRoute.exchangeRate.toLocaleString()} VND`
+        );
+      }
+    } else {
+      setPreliminary({ ...preliminary, [name]: value });
+    }
   };
 
   const handleChange = (e) => {
@@ -384,7 +409,7 @@ const CreateOrder = () => {
   const isFormEnabled = preliminary.customerCode && preliminary.routeId;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-3">
+    <div className="min-h-screen bg-gray-10 p-3">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
@@ -519,7 +544,7 @@ const CreateOrder = () => {
                 {routes.map((route) => (
                   <option key={route.routeId} value={route.routeId}>
                     {route.name} ({route.shipTime} ngày,{" "}
-                    {route.unitShippingPrice.toLocaleString()} đ)
+                    {route.unitBuyingPrice.toLocaleString()} đ)
                   </option>
                 ))}
               </select>

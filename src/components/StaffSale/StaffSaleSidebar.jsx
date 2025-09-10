@@ -11,6 +11,11 @@ import {
   FaSignOutAlt,
   FaUserCircle,
   FaChevronDown,
+  FaPhone,
+  FaBook,
+  FaCalendarAlt,
+  FaChartBar,
+  FaGlobe,
 } from "react-icons/fa";
 
 const StaffSaleSidebar = () => {
@@ -18,6 +23,7 @@ const StaffSaleSidebar = () => {
   const location = useLocation();
   const [openOrders, setOpenOrders] = useState(false);
   const [openLogistics, setOpenLogistics] = useState(false);
+  const [openCustomers, setOpenCustomers] = useState(false);
 
   const menuSections = [
     {
@@ -43,15 +49,27 @@ const StaffSaleSidebar = () => {
           icon: <FaChartLine />,
           path: "/staff-sale/dashboard",
         },
+        {
+          text: "Hiệu suất cá nhân",
+          icon: <FaChartBar />,
+          path: "/staff-sale/performance",
+        },
       ],
     },
     {
       title: "Khách hàng",
       items: [
         {
-          text: "Danh sách khách hàng",
+          text: "Quản lý khách hàng",
           icon: <FaUsers />,
-          path: "/staff-sale/customers",
+          hasSubmenu: true,
+          isOpen: openCustomers,
+          onToggle: () => setOpenCustomers(!openCustomers),
+          submenuItems: [
+            { text: "Tạo khách hàng", path: "/staff-sale/createaccountuser" },
+            { text: "Danh sách khách hàng", path: "/staff-sale/customers" },
+            { text: "Khách hàng tiềm năng", path: "/staff-sale/prospects" },
+          ],
         },
       ],
     },
@@ -93,6 +111,36 @@ const StaffSaleSidebar = () => {
           text: "Kho hàng",
           icon: <FaWarehouse />,
           path: "/staff-sale/warehouses",
+        },
+      ],
+    },
+    {
+      title: "Telesale",
+      items: [
+        {
+          text: "Công cụ liên lạc",
+          icon: <FaPhone />,
+          path: "/staff-sale/telesale",
+        },
+      ],
+    },
+    {
+      title: "Kiến thức Logistics",
+      items: [
+        {
+          text: "Hướng dẫn & Tài liệu",
+          icon: <FaBook />,
+          path: "/staff-sale/knowledge",
+        },
+      ],
+    },
+    {
+      title: "Lịch hẹn",
+      items: [
+        {
+          text: "Quản lý lịch hẹn",
+          icon: <FaCalendarAlt />,
+          path: "/staff-sale/schedule",
         },
       ],
     },

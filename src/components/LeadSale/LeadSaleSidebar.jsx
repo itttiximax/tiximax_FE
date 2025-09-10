@@ -14,14 +14,19 @@ import {
   User,
   Package,
   Search,
-  Image,
+  Calendar,
+  Book,
+  Megaphone,
   List,
+  TrendingUp,
 } from "lucide-react";
 
 const LeadSaleSideBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isStaffDropdownOpen, setIsStaffDropdownOpen] = useState(false);
+  const [isCustomerDropdownOpen, setIsCustomerDropdownOpen] = useState(false);
+  const [isOrderDropdownOpen, setIsOrderDropdownOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -32,55 +37,97 @@ const LeadSaleSideBar = () => {
 
   const menuItems = [
     {
+      section: "Bán hàng",
+      highlighted: true,
+      items: [
+        {
+          to: "/lead-sale/createorder",
+          icon: LayoutDashboard,
+          label: "Bán hàng",
+          color: "blue",
+        },
+        {
+          to: "/lead-sale/createpayment",
+          icon: CreditCard,
+          label: "Phê duyệt thanh toán",
+          color: "indigo",
+        },
+      ],
+    },
+    {
       section: "LEADER SALE",
       highlighted: true,
       items: [
         {
           to: "/lead-sale/dashboard",
           icon: LayoutDashboard,
-          label: "Báo cáo",
+          label: "Tổng quan",
           color: "blue",
         },
         {
           to: "/lead-sale/team",
           icon: Users,
-          label: "Quản lý Team",
+          label: "Quản lý đội nhóm",
           color: "blue",
         },
         {
           to: "/lead-sale/salesreport",
           icon: BarChart3,
-          label: "Thống kê",
+          label: "Thống kê bán hàng",
+          color: "blue",
+        },
+        {
+          to: "/lead-sale/team-performance",
+          icon: TrendingUp,
+          label: "Hiệu suất đội nhóm",
           color: "blue",
         },
       ],
     },
     {
-      section: "Manager",
+      section: "QUẢN LÝ",
       highlighted: true,
       items: [
         {
-          to: "/lead-sale/team",
+          type: "dropdown",
           icon: Users2,
-          label: "Manager Team",
+          label: "Quản lý khách hàng",
           color: "indigo",
-        },
-        {
-          to: "/lead-sale/createorder",
-          icon: ShoppingCart,
-          label: "Tạo đơn hàng",
-          color: "indigo",
-        },
-        {
-          to: "/lead-sale/createpayment",
-          icon: CreditCard,
-          label: "Tạo đơn thanh toán",
-          color: "indigo",
+          dropdownItems: [
+            {
+              to: "/lead-sale/customers",
+              icon: Users,
+              label: "Danh sách khách hàng",
+            },
+          ],
+          isOpen: isCustomerDropdownOpen,
+          onToggle: () => setIsCustomerDropdownOpen(!isCustomerDropdownOpen),
         },
         {
           type: "dropdown",
+          icon: ShoppingCart,
+          label: "Quản lý đơn hàng",
+          color: "indigo",
+          dropdownItems: [
+            {
+              to: "/lead-sale/orders",
+              icon: Package,
+              label: "Tất cả đơn hàng",
+            },
+            {
+              to: "/lead-sale/orders/tracking",
+              icon: List,
+              label: "Đơn hàng đang xử lý",
+            },
+          ],
+          isOpen: isOrderDropdownOpen,
+          onToggle: () => setIsOrderDropdownOpen(!isOrderDropdownOpen),
+        },
+
+        {
+          type: "dropdown",
           icon: Users2,
-          label: "Nhân viên",
+          label: "Quản lý nhân viên",
           color: "indigo",
           dropdownItems: [
             {
@@ -89,34 +136,37 @@ const LeadSaleSideBar = () => {
               label: "Nhân viên kho",
             },
             {
-              to: "/lead-sale/search",
-              icon: Search,
-              label: "Tìm kiếm khách hàng",
+              to: "/lead-sale/sales-staff",
+              icon: Users,
+              label: "Nhân viên sale",
             },
           ],
+          isOpen: isStaffDropdownOpen,
+          onToggle: () => setIsStaffDropdownOpen(!isStaffDropdownOpen),
         },
         {
           to: "/lead-sale/destination",
           icon: MapPin,
-          label: "Điểm đến",
+          label: "Quản lý lộ trình",
+          color: "indigo",
+        },
+
+        {
+          to: "/lead-sale/schedule",
+          icon: Calendar,
+          label: "Quản lý lịch hẹn",
           color: "indigo",
         },
         {
           to: "/lead-sale/img",
-          icon: Image,
-          label: "Upload Ảnh",
+          icon: Book,
+          label: "upload ảnh",
           color: "indigo",
         },
         {
-          to: "/lead-sale/order",
-          icon: List,
-          label: "Danh sách đơn hàng",
-          color: "indigo",
-        },
-        {
-          to: "/lead-sale/or",
-          icon: List,
-          label: "Danh sách đơn hàng",
+          to: "/lead-sale/campaigns",
+          icon: Megaphone,
+          label: "Chiến dịch bán hàng",
           color: "indigo",
         },
       ],
@@ -134,7 +184,7 @@ const LeadSaleSideBar = () => {
       return (
         <div key={itemIndex} className="space-y-1">
           <button
-            onClick={() => setIsStaffDropdownOpen(!isStaffDropdownOpen)}
+            onClick={item.onToggle}
             className={`flex items-center gap-3 px-4 py-2 w-full text-left rounded-lg transition-colors duration-200 ${
               isDropdownActive
                 ? "bg-indigo-50 text-indigo-700"
@@ -149,11 +199,11 @@ const LeadSaleSideBar = () => {
             <ChevronDown
               size={16}
               className={`transition-transform duration-200 ${
-                isStaffDropdownOpen ? "rotate-180" : ""
+                item.isOpen ? "rotate-180" : ""
               } ${isDropdownActive ? "text-indigo-700" : "text-gray-500"}`}
             />
           </button>
-          {isStaffDropdownOpen && (
+          {item.isOpen && (
             <div className="ml-6 space-y-1 border-l-2 border-gray-200 pl-3">
               {item.dropdownItems?.map((dropdownItem, dropdownIndex) => {
                 const DropdownIcon = dropdownItem.icon;
@@ -224,7 +274,7 @@ const LeadSaleSideBar = () => {
               <User size={20} className="text-white" />
             </div>
           </div>
-          <h2 className="text-lg font-semibold text-gray-800">LeaderSale</h2>
+          <h2 className="text-lg font-semibold text-gray-800">Leader Sale</h2>
         </div>
       </div>
 

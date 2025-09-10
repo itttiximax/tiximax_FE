@@ -189,9 +189,11 @@ const ManagerOrder = () => {
     <div className="p-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Quản lý đơn hàng</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          Quản lý trang thái đơn hàng
+        </h1>
         <p className="mt-1 text-sm text-gray-600">
-          Quản lý đơn hàng theo trạng thái
+          Quản lí trạng thái đơn hàng, xem chi tiết đơn hàng
         </p>
       </div>
 
