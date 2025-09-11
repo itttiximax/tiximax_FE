@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import orderlinkService from "../../Services/StaffPurchase/orderlinkService";
 import DetailOrderLink from "./DetailOrderLink";
+import CreatePurchase from "./CreatePurchase";
 import toast from "react-hot-toast";
 
 const OrderLinkList = () => {
@@ -8,7 +9,6 @@ const OrderLinkList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedLinkId, setSelectedLinkId] = useState(null);
-  // Thêm state để quản lý việc expand/collapse order
   const [expandedOrders, setExpandedOrders] = useState({});
   const [pagination, setPagination] = useState({
     pageNumber: 0,
@@ -19,6 +19,11 @@ const OrderLinkList = () => {
     last: true,
   });
 
+  // States for CreatePurchase component
+  const [showCreatePurchase, setShowCreatePurchase] = useState(false);
+  const [selectedOrderForPurchase, setSelectedOrderForPurchase] =
+    useState(null);
+
   // Fetch orders data
   useEffect(() => {
     fetchOrders(0, 10);
@@ -28,30 +33,106 @@ const OrderLinkList = () => {
     try {
       setLoading(true);
       setError(null);
+
+      console.log("🔍 Fetching orders:", { page, size });
+
       const response = await orderlinkService.getOrdersWithLinks(page, size);
 
-      setOrders(response.content || []);
-      setPagination({
-        pageNumber: response.number || 0,
-        pageSize: response.size || 10,
-        totalPages: response.totalPages || 0,
-        totalElements: response.totalElements || 0,
-        first: response.first || true,
-        last: response.last || true,
+      console.log("📦 API Response:", response);
+      console.log("📄 Response structure:", {
+        content: response.content?.length || 0,
+        number: response.number,
+        size: response.size,
+        totalPages: response.totalPages,
+        totalElements: response.totalElements,
+        first: response.first,
+        last: response.last,
       });
+
+      // Kiểm tra xem response có dữ liệu không
+      if (response && response.content) {
+        setOrders(response.content);
+
+        const newPagination = {
+          pageNumber: response.number !== undefined ? response.number : 0,
+          pageSize: response.size !== undefined ? response.size : 10,
+          totalPages:
+            response.totalPages !== undefined ? response.totalPages : 0,
+          totalElements:
+            response.totalElements !== undefined ? response.totalElements : 0,
+          first: response.first !== undefined ? response.first : true,
+          last: response.last !== undefined ? response.last : true,
+        };
+
+        console.log("📊 Setting pagination:", newPagination);
+        setPagination(newPagination);
+      } else {
+        // Nếu response không có cấu trúc mong đợi
+        console.warn("⚠️ Response structure unexpected:", response);
+        setOrders([]);
+        setPagination({
+          pageNumber: 0,
+          pageSize: 10,
+          totalPages: 0,
+          totalElements: 0,
+          first: true,
+          last: true,
+        });
+      }
     } catch (error) {
-      console.error("Error fetching orders:", error);
+      console.error("❌ Error fetching orders:", error);
+      console.error("❌ Error details:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
       setError(error.message);
       toast.error("Không thể tải danh sách đơn hàng");
+
+      // Reset state khi có lỗi
+      setOrders([]);
+      setPagination({
+        pageNumber: 0,
+        pageSize: 10,
+        totalPages: 0,
+        totalElements: 0,
+        first: true,
+        last: true,
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle pagination
+  // Handle pagination - Sửa logic kiểm tra
   const handlePageChange = (newPage) => {
-    if (newPage >= 0 && newPage < pagination.totalPages) {
+    console.log("📄 Page change requested:", {
+      currentPage: pagination.pageNumber,
+      newPage,
+      totalPages: pagination.totalPages,
+      canGoNext: newPage < pagination.totalPages,
+      canGoPrev: newPage >= 0,
+    });
+
+    // Kiểm tra điều kiện hợp lệ trước khi chuyển trang
+    if (
+      newPage >= 0 &&
+      newPage < pagination.totalPages &&
+      newPage !== pagination.pageNumber
+    ) {
+      console.log("✅ Executing page change to:", newPage);
       fetchOrders(newPage, pagination.pageSize);
+    } else {
+      console.log("❌ Page change blocked:", {
+        reason:
+          newPage < 0
+            ? "Negative page"
+            : newPage >= pagination.totalPages
+            ? "Exceeds total pages"
+            : newPage === pagination.pageNumber
+            ? "Same page"
+            : "Unknown",
+      });
     }
   };
 
@@ -65,12 +146,33 @@ const OrderLinkList = () => {
     setSelectedLinkId(null);
   };
 
-  // Thêm function để toggle expand order
+  // Toggle expand order
   const toggleExpandOrder = (orderId) => {
     setExpandedOrders((prev) => ({
       ...prev,
       [orderId]: !prev[orderId],
     }));
+  };
+
+  // Handle open create purchase modal
+  const handleCreatePurchase = (order) => {
+    if (!order.orderLinks || order.orderLinks.length === 0) {
+      toast.error("Đơn hàng này chưa có sản phẩm nào");
+      return;
+    }
+    setSelectedOrderForPurchase(order);
+    setShowCreatePurchase(true);
+  };
+
+  // Handle close create purchase modal
+  const handleCloseCreatePurchase = () => {
+    setShowCreatePurchase(false);
+    setSelectedOrderForPurchase(null);
+  };
+
+  // Handle purchase success
+  const handlePurchaseSuccess = () => {
+    fetchOrders(pagination.pageNumber, pagination.pageSize);
   };
 
   // Format date
@@ -122,6 +224,16 @@ const OrderLinkList = () => {
     }
   };
 
+  // Tính toán hiển thị trang hiện tại
+  const getCurrentPageDisplay = () => {
+    const start = pagination.pageNumber * pagination.pageSize + 1;
+    const end = Math.min(
+      (pagination.pageNumber + 1) * pagination.pageSize,
+      pagination.totalElements
+    );
+    return { start, end };
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -167,18 +279,29 @@ const OrderLinkList = () => {
     );
   }
 
+  const { start, end } = getCurrentPageDisplay();
+
   return (
     <div className="min-h-screen bg-gray-50 py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div>
+          <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold text-gray-900">
               Danh sách đơn hàng
             </h1>
-            <p className="text-gray-600 mt-1">
-              Tổng {pagination.totalElements} đơn hàng
-            </p>
+            {/* Pagination info */}
+            <div className="text-sm text-gray-500 space-y-1">
+              <div>
+                Trang: {pagination.pageNumber + 1}/{pagination.totalPages || 1}
+              </div>
+              <div>Tổng: {pagination.totalElements} đơn hàng</div>
+              {pagination.totalElements > 0 && (
+                <div>
+                  Hiển thị: {start} - {end}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -232,10 +355,6 @@ const OrderLinkList = () => {
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
                       <div>
-                        <span className="font-medium">ID:</span> #
-                        {order.orderId}
-                      </div>
-                      <div>
                         <span className="font-medium">Ngày tạo:</span>{" "}
                         {formatDate(order.createdAt)}
                       </div>
@@ -243,31 +362,39 @@ const OrderLinkList = () => {
                         <span className="font-medium">Tỷ giá:</span>{" "}
                         {order.exchangeRate?.toLocaleString() || "N/A"}
                       </div>
-                      <div>
-                        <span className="font-medium">Kiểm hàng:</span>{" "}
-                        {order.checkRequired ? "Có" : "Không"}
-                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-gray-900">
-                      {formatCurrency(order.finalPriceOrder)}
+                  <div className="text-right flex flex-col items-end space-y-2">
+                    <div>
+                      <div className="text-lg font-bold text-gray-900">
+                        {formatCurrency(order.finalPriceOrder)}
+                      </div>
+                      <div className="text-sm text-gray-500">Tổng tiền</div>
                     </div>
-                    <div className="text-sm text-gray-500">Tổng tiền</div>
+                    {/* Create Purchase Button */}
+                    {order.orderLinks && order.orderLinks.length > 0 && (
+                      <button
+                        onClick={() => handleCreatePurchase(order)}
+                        className="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors flex items-center"
+                      >
+                        <svg
+                          className="w-4 h-4 mr-2"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                          />
+                        </svg>
+                        Tạo Purchase
+                      </button>
+                    )}
                   </div>
                 </div>
-
-                {/* Order Note */}
-                {order.note && order.note !== "string" && (
-                  <div className="mb-4 p-3 bg-gray-50 rounded-md">
-                    <div className="text-sm">
-                      <span className="font-medium text-gray-700">
-                        Ghi chú:
-                      </span>{" "}
-                      <span className="text-gray-600">{order.note}</span>
-                    </div>
-                  </div>
-                )}
 
                 {/* Order Links */}
                 {order.orderLinks && order.orderLinks.length > 0 ? (
@@ -289,7 +416,7 @@ const OrderLinkList = () => {
                         </svg>
                         Sản phẩm ({order.orderLinks.length})
                       </h4>
-                      {order.orderLinks.length >= 2 && (
+                      {order.orderLinks.length > 2 && (
                         <button
                           onClick={() => toggleExpandOrder(order.orderId)}
                           className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
@@ -333,8 +460,7 @@ const OrderLinkList = () => {
                       )}
                     </div>
                     <div className="space-y-3">
-                      {(order.orderLinks.length <= 1 ||
-                      expandedOrders[order.orderId]
+                      {(expandedOrders[order.orderId]
                         ? order.orderLinks
                         : order.orderLinks.slice(0, 0)
                       ).map((link) => (
@@ -371,25 +497,21 @@ const OrderLinkList = () => {
                                   {link.priceWeb?.toLocaleString() || 0}
                                 </div>
                                 <div className="text-gray-600">
-                                  Ship: {link.shipWeb?.toLocaleString() || 0}
+                                  Giá Ship:{" "}
+                                  {link.shipWeb?.toLocaleString() || 0}
                                 </div>
                               </div>
                             </div>
                             <div>
                               <div className="text-sm">
                                 <div className="text-gray-600">
-                                  Phí mua:{" "}
-                                  {link.purchaseFee?.toLocaleString() || 0}
-                                </div>
-                                <div className="text-gray-600">
-                                  Phụ phí:{" "}
-                                  {link.extraCharge?.toLocaleString() || 0}
-                                </div>
-                                <div className="text-gray-600">
-                                  Group:{" "}
+                                  Group Tag:{" "}
                                   {link.groupTag !== "string"
                                     ? link.groupTag
                                     : "N/A"}
+                                </div>
+                                <div className="text-gray-600">
+                                  Note: {link.note || "N/A"}
                                 </div>
                               </div>
                             </div>
@@ -464,41 +586,90 @@ const OrderLinkList = () => {
           )}
         </div>
 
-        {/* Pagination */}
+        {/* Enhanced Pagination */}
         {pagination.totalPages > 1 && (
           <div className="bg-white rounded-lg shadow-sm p-4 mt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Pagination Info */}
               <div className="text-sm text-gray-600">
-                Hiển thị {pagination.pageNumber * pagination.pageSize + 1}-
-                {Math.min(
-                  (pagination.pageNumber + 1) * pagination.pageSize,
-                  pagination.totalElements
-                )}{" "}
-                trong tổng số {pagination.totalElements} đơn hàng
+                {pagination.totalElements > 0 ? (
+                  <>
+                    Hiển thị <span className="font-medium">{start}</span> -{" "}
+                    <span className="font-medium">{end}</span> trong tổng số{" "}
+                    <span className="font-medium">
+                      {pagination.totalElements}
+                    </span>{" "}
+                    đơn hàng
+                  </>
+                ) : (
+                  "Không có dữ liệu"
+                )}
               </div>
+
+              {/* Pagination Controls */}
               <div className="flex items-center space-x-2">
+                {/* First Page */}
                 <button
-                  onClick={() => handlePageChange(pagination.pageNumber - 1)}
+                  onClick={() => handlePageChange(0)}
+                  disabled={pagination.first}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Trang đầu"
+                >
+                  ««
+                </button>
+
+                {/* Previous Page */}
+                <button
+                  onClick={() => {
+                    console.log("📄 Previous button clicked");
+                    handlePageChange(pagination.pageNumber - 1);
+                  }}
                   disabled={pagination.first}
                   className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Trước
+                  « Trước
                 </button>
-                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-md text-sm font-medium">
+
+                {/* Current Page Info */}
+                <span className="px-4 py-1 bg-blue-100 text-blue-800 rounded-md text-sm font-medium">
                   {pagination.pageNumber + 1} / {pagination.totalPages}
                 </span>
+
+                {/* Next Page */}
                 <button
-                  onClick={() => handlePageChange(pagination.pageNumber + 1)}
+                  onClick={() => {
+                    console.log("📄 Next button clicked");
+                    handlePageChange(pagination.pageNumber + 1);
+                  }}
                   disabled={pagination.last}
                   className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Tiếp
+                  Tiếp »
+                </button>
+
+                {/* Last Page */}
+                <button
+                  onClick={() => handlePageChange(pagination.totalPages - 1)}
+                  disabled={pagination.last}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Trang cuối"
+                >
+                  »»
                 </button>
               </div>
             </div>
           </div>
         )}
       </div>
+
+      {/* CreatePurchase Modal */}
+      <CreatePurchase
+        isOpen={showCreatePurchase}
+        onClose={handleCloseCreatePurchase}
+        orderCode={selectedOrderForPurchase?.orderCode}
+        orderLinks={selectedOrderForPurchase?.orderLinks || []}
+        onSuccess={handlePurchaseSuccess}
+      />
 
       {/* Detail Modal */}
       {selectedLinkId && (

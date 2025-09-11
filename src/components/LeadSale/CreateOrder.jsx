@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import orderService from "../../Services/LeadSale/orderService";
 import routesService from "../../Services/StaffSale/routeService";
 import managerDestinationService from "../../Services/Manager/managerDestinationService";
@@ -9,17 +9,20 @@ import toast from "react-hot-toast";
 import AccountSearch from "../LeadSale/AccountSearch";
 
 const CreateOrder = () => {
+  // Consolidated states
   const [preliminary, setPreliminary] = useState({
     customerCode: "",
     routeId: "",
   });
+
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+
   const [form, setForm] = useState({
     orderType: "MUA_HO",
     destinationId: "",
     exchangeRate: "",
     checkRequired: false,
-    note: "",
+    // note: "",
     orderLinkRequests: [
       {
         productLink: "",
@@ -33,27 +36,28 @@ const CreateOrder = () => {
         website: "",
         productTypeId: "",
         groupTag: "",
+        note: "",
       },
     ],
   });
-  const [routes, setRoutes] = useState([]);
-  const [destinations, setDestinations] = useState([]);
-  const [productTypes, setProductTypes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  // States cho upload ảnh
-  const [uploadingImages, setUploadingImages] = useState({});
-  const [uploadProgress, setUploadProgress] = useState({});
-  const [imagePreviews, setImagePreviews] = useState({});
+  const [masterData, setMasterData] = useState({
+    routes: [],
+    destinations: [],
+    productTypes: [],
+  });
 
-  // Fetch data
+  const [ui, setUi] = useState({
+    loading: false,
+    error: null,
+    uploadingImages: {},
+  });
+
+  // Fetch data once on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
-        setError(null);
-
+        setUi((prev) => ({ ...prev, loading: true, error: null }));
         const token = localStorage.getItem("token");
 
         const [routesData, destinationsData, productTypesData] =
@@ -63,157 +67,143 @@ const CreateOrder = () => {
             getAllProductTypes(),
           ]);
 
-        setRoutes(routesData);
-        setDestinations(destinationsData);
-        setProductTypes(productTypesData);
+        setMasterData({
+          routes: routesData,
+          destinations: destinationsData,
+          productTypes: productTypesData,
+        });
       } catch (error) {
         console.error("Error fetching data:", error);
-        if (error.response?.status === 401) {
-          setError("Token đã hết hạn. Vui lòng đăng nhập lại.");
-        } else if (error.response?.status === 404) {
-          setError("Không tìm thấy API. Kiểm tra cấu hình server.");
-        } else {
-          setError("Lỗi khi tải dữ liệu.");
-        }
+        const errorMessage =
+          error.response?.status === 401
+            ? "Token đã hết hạn. Vui lòng đăng nhập lại."
+            : error.response?.status === 404
+            ? "Không tìm thấy API. Kiểm tra cấu hình server."
+            : "Lỗi khi tải dữ liệu.";
+        setUi((prev) => ({ ...prev, error: errorMessage }));
       } finally {
-        setLoading(false);
+        setUi((prev) => ({ ...prev, loading: false }));
       }
     };
 
     fetchData();
   }, []);
 
-  // Cleanup image previews
-  useEffect(() => {
-    return () => {
-      Object.values(imagePreviews).forEach((preview) => {
-        if (preview) URL.revokeObjectURL(preview);
-      });
-    };
-  }, [imagePreviews]);
-
-  // Handle customer selection từ AccountSearch
-  const handleSelectCustomer = (customer) => {
-    console.log("Selected customer:", customer);
+  // Memoized handlers
+  const handleSelectCustomer = useCallback((customer) => {
     setSelectedCustomer(customer);
-    setPreliminary({
-      ...preliminary,
+    setPreliminary((prev) => ({
+      ...prev,
       customerCode: customer.customerCode,
-    });
+    }));
     toast.success(
       `Đã chọn khách hàng: ${customer.name} (${customer.customerCode})`
     );
-  };
+  }, []);
 
-  // Handle manual customer code input
-  const handleCustomerCodeChange = (e) => {
-    const value = e.target.value;
-    setPreliminary({ ...preliminary, customerCode: value });
+  const handleCustomerCodeChange = useCallback(
+    (e) => {
+      const value = e.target.value;
+      setPreliminary((prev) => ({ ...prev, customerCode: value }));
 
-    // Clear selected customer nếu value rỗng hoặc khác với selected customer
-    if (
-      !value ||
-      (selectedCustomer && value !== selectedCustomer.customerCode)
-    ) {
-      setSelectedCustomer(null);
-    }
-  };
+      if (
+        !value ||
+        (selectedCustomer && value !== selectedCustomer.customerCode)
+      ) {
+        setSelectedCustomer(null);
+      }
+    },
+    [selectedCustomer]
+  );
 
-  // Thêm function để clear customer - được gọi khi bấm X
-  const handleClearCustomer = () => {
-    setPreliminary({ ...preliminary, customerCode: "" });
+  const handleClearCustomer = useCallback(() => {
+    setPreliminary((prev) => ({ ...prev, customerCode: "" }));
     setSelectedCustomer(null);
     toast("Đã xóa thông tin khách hàng", { icon: "🗑️" });
-  };
+  }, []);
 
-  const getProductTypeFee = (productTypeId) => {
-    const productType = productTypes.find(
-      (p) => p.productTypeId === productTypeId
-    );
-    return productType?.fee || false;
-  };
+  const handlePreliminaryChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
 
-  // Updated handlePreliminaryChange function with auto-fill exchangeRate
-  const handlePreliminaryChange = (e) => {
-    const { name, value } = e.target;
-
-    if (name === "routeId") {
-      // Tìm route được chọn
-      const selectedRoute = routes.find(
-        (route) => route.routeId === Number(value)
-      );
-
-      // Update preliminary state
-      setPreliminary({ ...preliminary, [name]: value });
-
-      // Auto-fill exchangeRate nếu route có exchangeRate
-      if (selectedRoute && selectedRoute.exchangeRate) {
-        setForm({
-          ...form,
-          exchangeRate: selectedRoute.exchangeRate,
-        });
-
-        // Thêm toast notification
-        toast.success(
-          `Tỷ giá hôm nay: ${selectedRoute.exchangeRate.toLocaleString()} VND`
+      if (name === "routeId") {
+        const selectedRoute = masterData.routes.find(
+          (route) => route.routeId === Number(value)
         );
-      }
-    } else {
-      setPreliminary({ ...preliminary, [name]: value });
-    }
-  };
+        setPreliminary((prev) => ({ ...prev, [name]: value }));
 
-  const handleChange = (e) => {
+        if (selectedRoute?.exchangeRate) {
+          setForm((prev) => ({
+            ...prev,
+            exchangeRate: selectedRoute.exchangeRate,
+          }));
+          toast.success(
+            `Tỷ giá hôm nay: ${selectedRoute.exchangeRate.toLocaleString()} VND`
+          );
+        }
+      } else {
+        setPreliminary((prev) => ({ ...prev, [name]: value }));
+      }
+    },
+    [masterData.routes]
+  );
+
+  const handleChange = useCallback((e) => {
     const { name, value, type, checked } = e.target;
-    setForm({
-      ...form,
+    setForm((prev) => ({
+      ...prev,
       [name]:
         type === "checkbox"
           ? checked
           : name === "destinationId"
           ? Number(value)
           : value,
-    });
-  };
+    }));
+  }, []);
 
-  const handleProductChange = (index, e) => {
-    const { name, value } = e.target;
-    const updatedProducts = [...form.orderLinkRequests];
+  const handleProductChange = useCallback(
+    (index, e) => {
+      const { name, value } = e.target;
+      setForm((prev) => {
+        const updatedProducts = [...prev.orderLinkRequests];
 
-    if (name === "productTypeId") {
-      const productTypeId = Number(value);
-      const hasFee = getProductTypeFee(productTypeId);
-      updatedProducts[index] = {
-        ...updatedProducts[index],
-        [name]: productTypeId,
-        extraCharge: hasFee ? updatedProducts[index].extraCharge : 0,
-      };
-    } else {
-      updatedProducts[index][name] = [
-        "quantity",
-        "priceWeb",
-        "shipWeb",
-        "purchaseFee",
-        "extraCharge",
-      ].includes(name)
-        ? Number(value)
-        : value;
-    }
+        if (name === "productTypeId") {
+          const productTypeId = Number(value);
+          const productType = masterData.productTypes.find(
+            (p) => p.productTypeId === productTypeId
+          );
+          updatedProducts[index] = {
+            ...updatedProducts[index],
+            [name]: productTypeId,
+            extraCharge: productType?.fee
+              ? updatedProducts[index].extraCharge
+              : 0,
+          };
+        } else {
+          updatedProducts[index][name] = [
+            "quantity",
+            "priceWeb",
+            "shipWeb",
+            "purchaseFee",
+            "extraCharge",
+          ].includes(name)
+            ? Number(value)
+            : value;
+        }
 
-    setForm({ ...form, orderLinkRequests: updatedProducts });
-  };
+        return { ...prev, orderLinkRequests: updatedProducts };
+      });
+    },
+    [masterData.productTypes]
+  );
 
-  // Handle image upload cho từng product
-  const handleImageUpload = async (index, file) => {
-    if (!file) return;
-
-    // Validate file
-    if (!file.type.startsWith("image/")) {
+  const handleImageUpload = useCallback(async (index, file) => {
+    if (!file || !file.type.startsWith("image/")) {
       toast.error("Vui lòng chọn file hình ảnh");
       return;
     }
 
-    if (file.size / 1024 / 1024 > 1) {
+    if (file.size > 1024 * 1024) {
       toast.error("File quá lớn. Vui lòng chọn ảnh dưới 1MB");
       return;
     }
@@ -221,121 +211,63 @@ const CreateOrder = () => {
     const uploadKey = `product_${index}`;
 
     try {
-      // Set uploading state
-      setUploadingImages((prev) => ({ ...prev, [uploadKey]: true }));
-      setUploadProgress((prev) => ({ ...prev, [uploadKey]: 0 }));
+      setUi((prev) => ({
+        ...prev,
+        uploadingImages: { ...prev.uploadingImages, [uploadKey]: true },
+      }));
 
-      // Create preview
-      const previewUrl = URL.createObjectURL(file);
-      setImagePreviews((prev) => ({ ...prev, [uploadKey]: previewUrl }));
-
-      // Compress image
       const options = {
         maxSizeMB: 0.5,
         maxWidthOrHeight: 1080,
         useWebWorker: true,
       };
       const compressedFile = await imageCompression(file, options);
+      const response = await uploadImageService.upload(compressedFile);
 
-      // Upload image
-      const response = await uploadImageService.upload(compressedFile, {
-        onUploadProgress: (event) => {
-          const percent = Math.round((event.loaded * 100) / event.total);
-          setUploadProgress((prev) => ({ ...prev, [uploadKey]: percent }));
-        },
-      });
-
-      // Debug: Log toàn bộ response để xem cấu trúc
-      console.log("=== UPLOAD DEBUG ===");
-      console.log("Full response từ upload:", response);
-      console.log("Response type:", typeof response);
-
-      // Backend trả về string URL trực tiếp
-      let imageUrl = null;
-
-      if (typeof response === "string" && response.startsWith("http")) {
-        // Response là URL string trực tiếp
-        imageUrl = response;
-      } else if (response && typeof response === "object") {
-        // Thử các field thường gặp cho object response
-        imageUrl =
-          response.url ||
-          response.imageUrl ||
-          response.publicUrl ||
-          response.data?.url ||
-          response.data?.publicUrl ||
-          response.data?.imageUrl ||
-          response.path ||
-          response.data?.path;
-
-        // Nếu có baseURL, combine với path
-        if (!imageUrl && response.path && response.baseUrl) {
-          imageUrl = response.baseUrl + response.path;
-        }
-      }
-
-      console.log("Image URL extracted:", imageUrl);
-      console.log("==================");
+      let imageUrl =
+        typeof response === "string" && response.startsWith("http")
+          ? response
+          : response?.url || response?.imageUrl || response?.data?.url;
 
       if (!imageUrl) {
-        console.error("Không tìm thấy URL trong response:", response);
         toast.error("Upload thành công nhưng không lấy được URL ảnh");
         return;
       }
 
-      // Update purchaseImage URL in form
-      const updatedProducts = [...form.orderLinkRequests];
-      updatedProducts[index].purchaseImage = imageUrl;
-      setForm({ ...form, orderLinkRequests: updatedProducts });
+      setForm((prev) => {
+        const updatedProducts = [...prev.orderLinkRequests];
+        updatedProducts[index].purchaseImage = imageUrl;
+        return { ...prev, orderLinkRequests: updatedProducts };
+      });
 
       toast.success(`Upload ảnh sản phẩm ${index + 1} thành công!`);
-      console.log("Upload thành công, URL đã được set:", imageUrl);
-      console.log(
-        "Form updated, purchaseImage:",
-        updatedProducts[index].purchaseImage
-      );
     } catch (error) {
       console.error("Lỗi upload:", error);
       toast.error(
         "Upload thất bại: " + (error.response?.data?.error || error.message)
       );
-
-      // Clean up preview on error
-      if (imagePreviews[uploadKey]) {
-        URL.revokeObjectURL(imagePreviews[uploadKey]);
-      }
-      setImagePreviews((prev) => ({ ...prev, [uploadKey]: null }));
     } finally {
-      setUploadingImages((prev) => ({ ...prev, [uploadKey]: false }));
-      setUploadProgress((prev) => ({ ...prev, [uploadKey]: 0 }));
+      setUi((prev) => ({
+        ...prev,
+        uploadingImages: { ...prev.uploadingImages, [uploadKey]: false },
+      }));
     }
-  };
+  }, []);
 
-  // Remove image
-  const handleRemoveImage = (index) => {
-    const uploadKey = `product_${index}`;
-
-    // Clean up preview
-    if (imagePreviews[uploadKey]) {
-      URL.revokeObjectURL(imagePreviews[uploadKey]);
-    }
-
-    // Clear states
-    setImagePreviews((prev) => ({ ...prev, [uploadKey]: null }));
-
-    // Clear purchaseImage URL
-    const updatedProducts = [...form.orderLinkRequests];
-    updatedProducts[index].purchaseImage = "";
-    setForm({ ...form, orderLinkRequests: updatedProducts });
-
+  const handleRemoveImage = useCallback((index) => {
+    setForm((prev) => {
+      const updatedProducts = [...prev.orderLinkRequests];
+      updatedProducts[index].purchaseImage = "";
+      return { ...prev, orderLinkRequests: updatedProducts };
+    });
     toast("Đã xóa ảnh sản phẩm", { icon: "🗑️" });
-  };
+  }, []);
 
-  const addProduct = () => {
-    setForm({
-      ...form,
+  const addProduct = useCallback(() => {
+    setForm((prev) => ({
+      ...prev,
       orderLinkRequests: [
-        ...form.orderLinkRequests,
+        ...prev.orderLinkRequests,
         {
           productLink: "",
           quantity: 1,
@@ -350,27 +282,26 @@ const CreateOrder = () => {
           groupTag: "",
         },
       ],
-    });
-  };
+    }));
+  }, []);
 
-  const removeProduct = (index) => {
-    const updatedProducts = form.orderLinkRequests.filter(
-      (_, i) => i !== index
-    );
-    setForm({ ...form, orderLinkRequests: updatedProducts });
-  };
+  const removeProduct = useCallback((index) => {
+    setForm((prev) => ({
+      ...prev,
+      orderLinkRequests: prev.orderLinkRequests.filter((_, i) => i !== index),
+    }));
+  }, []);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     try {
-      const result = await orderService.createOrder(
+      await orderService.createOrder(
         preliminary.customerCode,
         preliminary.routeId,
         form
       );
-      console.log("Order created:", result);
       toast.success("Tạo đơn hàng thành công!");
 
-      // Reset form after successful creation
+      // Reset form
       setPreliminary({ customerCode: "", routeId: "" });
       setSelectedCustomer(null);
       setForm({
@@ -400,148 +331,83 @@ const CreateOrder = () => {
       const errorMessage =
         error.response?.data?.error ||
         error.response?.data?.message ||
-        error.message ||
         "Tạo đơn hàng thất bại";
-      toast.error(`${errorMessage}`);
+      toast.error(errorMessage);
     }
-  };
+  }, [preliminary, form]);
 
   const isFormEnabled = preliminary.customerCode && preliminary.routeId;
 
   return (
-    <div className="min-h-screen bg-gray-10 p-3">
+    <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
-          <h1 className="text-xl font-bold text-gray-800">Tạo đơn hàng mới</h1>
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            Tạo đơn hàng mới
+          </h1>
 
-          {error && (
-            <div className="mt-3 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-sm">
-              {error}
+          {ui.error && (
+            <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
+              {ui.error}
             </div>
           )}
 
-          {loading && (
-            <div className="mt-3 p-3 bg-blue-100 border border-blue-400 text-blue-700 rounded-md text-sm">
-              Đang tải dữ liệu tuyến đường và điểm đến...
+          {ui.loading && (
+            <div className="mt-4 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded-md">
+              Đang tải dữ liệu...
             </div>
           )}
         </div>
 
-        <div className="grid grid-cols-12 gap-4">
-          {/* Left Panel - Customer & Order Info */}
-          <div className="col-span-12 lg:col-span-4 space-y-4">
+        <div className="grid grid-cols-12 gap-6">
+          {/* Left Panel */}
+          <div className="col-span-12 lg:col-span-4 space-y-6">
             {/* Customer Section */}
-            <div className="bg-white rounded-lg shadow-sm p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                <svg
-                  className="w-4 h-4 mr-2 text-blue-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
-                Tìm kiếm khách hàng
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                Thông tin khách hàng
               </h3>
+              <AccountSearch
+                onSelectAccount={handleSelectCustomer}
+                value={preliminary.customerCode}
+                onChange={handleCustomerCodeChange}
+                onClear={handleClearCustomer}
+              />
 
-              <div className="space-y-3">
-                <div className="relative">
-                  <AccountSearch
-                    onSelectAccount={handleSelectCustomer}
-                    value={preliminary.customerCode}
-                    onChange={handleCustomerCodeChange}
-                    onClear={handleClearCustomer}
-                  />
-                  {preliminary.customerCode && (
-                    <div className="absolute right-10 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                      <svg
-                        className="w-4 h-4 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                  )}
+              {selectedCustomer && (
+                <div className="mt-4 bg-blue-50 border border-blue-200 rounded-md p-4">
+                  <p className="text-sm font-medium text-blue-900">
+                    {selectedCustomer.name}
+                  </p>
+                  <p className="text-sm text-blue-600">
+                    {selectedCustomer.email} • {selectedCustomer.phone}
+                  </p>
                 </div>
-
-                {selectedCustomer && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-                    <div className="flex items-center space-x-2">
-                      <svg
-                        className="w-4 h-4 text-blue-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
-                      <div className="flex-1">
-                        <p className="text-xs font-medium text-blue-900">
-                          {selectedCustomer.name}
-                        </p>
-                        <p className="text-xs text-blue-600">
-                          {selectedCustomer.email} • {selectedCustomer.phone}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
 
             {/* Route Section */}
-            <div className="bg-white rounded-lg shadow-sm p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                <svg
-                  className="w-4 h-4 mr-2 text-green-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-                  />
-                </svg>
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-700 mb-4">
                 Tuyến đường
               </h3>
-
               <select
                 name="routeId"
                 value={preliminary.routeId}
                 onChange={handlePreliminaryChange}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
-                disabled={loading || error}
+                disabled={ui.loading || ui.error}
               >
                 <option value="">
-                  {loading
+                  {ui.loading
                     ? "Đang tải..."
-                    : error
+                    : ui.error
                     ? "Không thể tải tuyến đường"
                     : "Chọn tuyến đường"}
                 </option>
-                {routes.map((route) => (
+                {masterData.routes.map((route) => (
                   <option key={route.routeId} value={route.routeId}>
                     {route.name} ({route.shipTime} ngày,{" "}
                     {route.unitBuyingPrice.toLocaleString()} đ)
@@ -551,54 +417,35 @@ const CreateOrder = () => {
             </div>
 
             {/* Order Details */}
-            <div className="bg-white rounded-lg shadow-sm p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                <svg
-                  className="w-4 h-4 mr-2 text-purple-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-700 mb-4">
                 Thông tin đơn hàng
               </h3>
 
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                    <label className="block text-sm font-medium text-gray-600 mb-2">
                       Loại đơn
                     </label>
-                    <div className="px-3 py-2 bg-green-50 border border-green-200 rounded-md text-xs font-medium text-green-700">
+                    <div className="px-4 py-3 bg-green-50 border border-green-200 rounded-md text-sm font-medium text-green-700">
                       Mua hộ
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                    <label className="block text-sm font-medium text-gray-600 mb-2">
                       Điểm đến
                     </label>
                     <select
                       name="destinationId"
                       value={form.destinationId}
                       onChange={handleChange}
-                      className="w-full px-2 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      disabled={!isFormEnabled || loading}
+                      className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      disabled={!isFormEnabled || ui.loading}
                     >
-                      <option value="">
-                        {loading
-                          ? "Đang tải..."
-                          : error
-                          ? "Không thể tải điểm đến"
-                          : "Chọn điểm đến"}
-                      </option>
-                      {destinations.map((destination) => (
+                      <option value="">Chọn điểm đến</option>
+                      {masterData.destinations.map((destination) => (
                         <option
                           key={destination.destinationId}
                           value={destination.destinationId}
@@ -611,7 +458,7 @@ const CreateOrder = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-sm font-medium text-gray-600 mb-2">
                     Tỷ giá (VND)
                   </label>
                   <input
@@ -619,7 +466,7 @@ const CreateOrder = () => {
                     name="exchangeRate"
                     value={form.exchangeRate}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Viet Nam Dong (VND)"
                     disabled={!isFormEnabled}
                   />
@@ -634,115 +481,75 @@ const CreateOrder = () => {
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     disabled={!isFormEnabled}
                   />
-                  <span className="ml-2 text-xs text-gray-700">
+                  <span className="ml-3 text-sm text-gray-700">
                     Kiểm hàng trước khi giao
                   </span>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                {/* <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-2">
                     Ghi chú
                   </label>
                   <textarea
                     name="note"
                     value={form.note}
                     onChange={handleChange}
-                    rows="2"
-                    className="w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    rows="3"
+                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     disabled={!isFormEnabled}
                     placeholder="Ghi chú đơn hàng..."
                   />
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
 
           {/* Right Panel - Products */}
           <div className="col-span-12 lg:col-span-8">
-            <div className="bg-white rounded-lg shadow-sm p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-700 flex items-center">
-                  <svg
-                    className="w-4 h-4 mr-2 text-orange-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                    />
-                  </svg>
+            <div className="bg-white rounded-lg shadow-sm p-6 h-full">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-700">
                   Danh sách sản phẩm ({form.orderLinkRequests.length})
                 </h3>
-
                 <button
                   onClick={addProduct}
-                  className="bg-blue-500 text-white px-3 py-1 rounded-md text-xs hover:bg-blue-600 disabled:opacity-50 flex items-center transition-colors"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 flex items-center space-x-2"
                   disabled={!isFormEnabled}
                 >
-                  <svg
-                    className="w-3 h-3 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                  </svg>
-                  Thêm
+                  <span>+</span>
+                  <span>Thêm sản phẩm</span>
                 </button>
               </div>
 
-              <div className="space-y-3 max-h-96 overflow-y-auto">
+              <div className="space-y-6 max-h-[600px] overflow-y-auto">
                 {form.orderLinkRequests.map((product, index) => {
                   const uploadKey = `product_${index}`;
-                  const isUploading = uploadingImages[uploadKey];
-                  const progress = uploadProgress[uploadKey] || 0;
-                  const preview = imagePreviews[uploadKey];
+                  const isUploading = ui.uploadingImages[uploadKey];
 
                   return (
                     <div
                       key={index}
-                      className="border border-gray-200 rounded-lg p-3 bg-gray-50"
+                      className="border border-gray-200 rounded-lg p-6 bg-gray-50"
                     >
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-medium text-gray-600">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-lg font-medium text-gray-700">
                           Sản phẩm {index + 1}
                         </span>
                         {index > 0 && (
                           <button
                             onClick={() => removeProduct(index)}
-                            className="text-red-500 hover:text-red-700 text-xs transition-colors"
+                            className="text-red-500 hover:text-red-700 px-3 py-1 border border-red-300 rounded-md hover:bg-red-50"
                             disabled={!isFormEnabled}
                           >
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
+                            Xóa
                           </button>
                         )}
                       </div>
 
-                      <div className="grid grid-cols-6 gap-2">
-                        {/* Row 1 */}
-                        <div className="col-span-3">
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                      {/* Product Basic Info */}
+                      <div className="grid grid-cols-4 gap-4 mb-4">
+                        <div className="col-span-2">
+                          <label className="block text-sm font-medium text-gray-600 mb-2">
                             Tên sản phẩm
                           </label>
                           <input
@@ -750,14 +557,14 @@ const CreateOrder = () => {
                             name="productName"
                             value={product.productName}
                             onChange={(e) => handleProductChange(index, e)}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             disabled={!isFormEnabled}
-                            placeholder="Tên sản phẩm..."
+                            placeholder="Nhập tên sản phẩm..."
                           />
                         </div>
 
-                        <div className="col-span-2">
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-2">
                             Website
                           </label>
                           <input
@@ -765,54 +572,56 @@ const CreateOrder = () => {
                             name="website"
                             value={product.website}
                             onChange={(e) => handleProductChange(index, e)}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             disabled={!isFormEnabled}
                             placeholder="AMAZON, SHOPEE..."
                           />
                         </div>
 
-                        <div className="col-span-1">
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                            SL
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-2">
+                            Số lượng
                           </label>
                           <input
                             type="number"
                             name="quantity"
                             value={product.quantity}
                             onChange={(e) => handleProductChange(index, e)}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             disabled={!isFormEnabled}
                             min="1"
                           />
                         </div>
+                      </div>
 
-                        {/* Row 2 */}
-                        <div className="col-span-6">
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Link sản phẩm
-                          </label>
-                          <input
-                            type="text"
-                            name="productLink"
-                            value={product.productLink}
-                            onChange={(e) => handleProductChange(index, e)}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            disabled={!isFormEnabled}
-                            placeholder="https://..."
-                          />
-                        </div>
+                      {/* Product Link */}
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-600 mb-2">
+                          Link sản phẩm
+                        </label>
+                        <input
+                          type="text"
+                          name="productLink"
+                          value={product.productLink}
+                          onChange={(e) => handleProductChange(index, e)}
+                          className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          disabled={!isFormEnabled}
+                          placeholder="https://..."
+                        />
+                      </div>
 
-                        {/* Row 3 */}
-                        <div className="col-span-2">
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Giá SP
+                      {/* Price Info */}
+                      <div className="grid grid-cols-4 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-2">
+                            Giá sản phẩm
                           </label>
                           <input
                             type="number"
                             name="priceWeb"
                             value={product.priceWeb}
                             onChange={(e) => handleProductChange(index, e)}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             disabled={!isFormEnabled}
                             placeholder="Giá ngoại tệ"
                             step="0.01"
@@ -820,8 +629,8 @@ const CreateOrder = () => {
                           />
                         </div>
 
-                        <div className="col-span-2">
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-2">
                             Phí ship
                           </label>
                           <input
@@ -829,7 +638,7 @@ const CreateOrder = () => {
                             name="shipWeb"
                             value={product.shipWeb}
                             onChange={(e) => handleProductChange(index, e)}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             disabled={!isFormEnabled}
                             placeholder="Giá ngoại tệ"
                             step="0.01"
@@ -837,8 +646,8 @@ const CreateOrder = () => {
                           />
                         </div>
 
-                        <div className="col-span-2">
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-2">
                             Phí mua hộ
                           </label>
                           <input
@@ -846,7 +655,7 @@ const CreateOrder = () => {
                             name="purchaseFee"
                             value={product.purchaseFee}
                             onChange={(e) => handleProductChange(index, e)}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             disabled={!isFormEnabled}
                             placeholder="Giá ngoại tệ"
                             step="0.01"
@@ -854,22 +663,37 @@ const CreateOrder = () => {
                           />
                         </div>
 
-                        {/* Row 4 */}
-                        <div className="col-span-3">
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-2">
+                            Group Tag
+                          </label>
+                          <input
+                            type="text"
+                            name="groupTag"
+                            value={product.groupTag}
+                            onChange={(e) => handleProductChange(index, e)}
+                            className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            disabled={!isFormEnabled}
+                            placeholder="A, B, C..."
+                          />
+                        </div>
+                      </div>
+
+                      {/* Product Type and Extra Charge */}
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-2">
                             Loại sản phẩm
                           </label>
                           <select
                             name="productTypeId"
                             value={product.productTypeId}
                             onChange={(e) => handleProductChange(index, e)}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            disabled={!isFormEnabled || loading}
+                            className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            disabled={!isFormEnabled || ui.loading}
                           >
-                            <option value="">
-                              {loading ? "Đang tải..." : "Chọn loại sản phẩm"}
-                            </option>
-                            {productTypes.map((type) => (
+                            <option value="">Chọn loại sản phẩm</option>
+                            {masterData.productTypes.map((type) => (
                               <option
                                 key={type.productTypeId}
                                 value={type.productTypeId}
@@ -881,54 +705,41 @@ const CreateOrder = () => {
                           </select>
                         </div>
 
-                        <div className="col-span-2">
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-2">
                             Phụ phí
                           </label>
-                          {getProductTypeFee(product.productTypeId) ? (
+                          {masterData.productTypes.find(
+                            (p) => p.productTypeId === product.productTypeId
+                          )?.fee ? (
                             <input
                               type="number"
                               name="extraCharge"
                               value={product.extraCharge}
                               onChange={(e) => handleProductChange(index, e)}
-                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                               disabled={!isFormEnabled}
                               placeholder="0.00"
                               step="0.01"
                               min="0"
                             />
                           ) : (
-                            <div className="w-full px-2 py-1 text-xs border border-gray-300 rounded bg-gray-100 text-gray-500">
+                            <div className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md bg-gray-100 text-gray-500 flex items-center">
                               Miễn phí (0 VND)
                             </div>
                           )}
                         </div>
-
-                        <div className="col-span-1">
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Group
-                          </label>
-                          <input
-                            type="text"
-                            name="groupTag"
-                            value={product.groupTag}
-                            onChange={(e) => handleProductChange(index, e)}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            disabled={!isFormEnabled}
-                            placeholder="A, B, C..."
-                          />
-                        </div>
                       </div>
 
                       {/* Image Upload Section */}
-                      <div className="mt-3 pt-3 border-t border-gray-200">
-                        <div className="flex items-center justify-between mb-2">
-                          <label className="text-xs font-medium text-gray-600">
+                      <div className="pt-4 border-t border-gray-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <label className="text-sm font-medium text-gray-600">
                             Ảnh sản phẩm
                           </label>
-                          <div className="flex space-x-2">
-                            <label className="bg-blue-500 text-white px-2 py-1 rounded text-xs cursor-pointer hover:bg-blue-600 disabled:opacity-50 transition-colors">
-                              {isUploading ? "Uploading..." : "Chọn ảnh"}
+                          <div className="flex space-x-3">
+                            <label className="bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-blue-600 disabled:opacity-50 text-sm">
+                              {isUploading ? "Đang upload..." : "Chọn ảnh"}
                               <input
                                 type="file"
                                 accept="image/*"
@@ -943,52 +754,46 @@ const CreateOrder = () => {
                               <button
                                 type="button"
                                 onClick={() => handleRemoveImage(index)}
-                                className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600 disabled:opacity-50 transition-colors"
+                                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 text-sm"
                                 disabled={!isFormEnabled || isUploading}
                               >
-                                Xóa
+                                Xóa ảnh
                               </button>
                             )}
                           </div>
                         </div>
 
-                        {/* Progress */}
-                        {isUploading && (
-                          <div className="mb-2">
-                            <div className="text-xs text-gray-600 mb-1">
-                              Đang upload... {progress}%
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-1">
-                              <div
-                                className="bg-blue-600 h-1 rounded-full transition-all duration-300"
-                                style={{ width: `${progress}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Image Preview/Display */}
-                        {(preview || product.purchaseImage) && (
-                          <div className="flex items-start space-x-2">
+                        {product.purchaseImage ? (
+                          <div className="flex items-start space-x-4">
                             <img
-                              src={preview || product.purchaseImage}
+                              src={product.purchaseImage}
                               alt={`Product ${index + 1}`}
-                              className="w-16 h-16 object-cover border border-gray-200 rounded"
+                              className="w-20 h-20 object-cover border border-gray-200 rounded-md"
                             />
-                            {product.purchaseImage && (
-                              <div className="flex-1 text-xs text-gray-500 break-all bg-gray-100 p-2 rounded">
-                                <strong>URL:</strong> {product.purchaseImage}
-                              </div>
-                            )}
+                            <div className="flex-1 text-sm text-gray-500 break-all bg-gray-100 p-3 rounded-md">
+                              <strong>URL:</strong> {product.purchaseImage}
+                            </div>
                           </div>
-                        )}
-
-                        {/* Status message when no image */}
-                        {!product.purchaseImage && !preview && !isUploading && (
-                          <div className="text-xs text-gray-500 italic">
+                        ) : (
+                          <div className="text-sm text-gray-500 italic bg-gray-100 p-4 rounded-md text-center">
                             Chưa có ảnh sản phẩm. Click "Chọn ảnh" để upload.
                           </div>
                         )}
+                      </div>
+
+                      {/* note */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-2">
+                          Ghi chú
+                        </label>
+                        <textarea
+                          name="note"
+                          value={product.note}
+                          onChange={(e) => handleProductChange(index, e)}
+                          className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          disabled={!isFormEnabled}
+                          placeholder="Ghi chú đơn hàng..."
+                        />
                       </div>
                     </div>
                   );
@@ -999,51 +804,64 @@ const CreateOrder = () => {
         </div>
 
         {/* Submit Button */}
-        <div className="mt-4">
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <div className="flex justify-between items-center">
-              <div className="text-sm text-gray-600">
-                {!isFormEnabled && (
-                  <span className="text-amber-600 flex items-center text-xs">
-                    <svg
-                      className="w-4 h-4 mr-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
-                      />
-                    </svg>
-                    Vui lòng chọn Mã khách hàng và Tuyến để tiếp tục
+        <div className="mt-6 bg-white rounded-lg shadow-sm p-6">
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-600">
+              {!isFormEnabled && (
+                <span className="text-amber-600 flex items-center space-x-2">
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span>
+                    Vui lòng chọn khách hàng và tuyến đường để tiếp tục
                   </span>
-                )}
-              </div>
-
-              <button
-                onClick={handleSubmit}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center text-sm transition-colors"
-                disabled={!isFormEnabled}
-              >
-                <svg
-                  className="w-4 h-4 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                Hoàn tất đơn hàng
-              </button>
+                </span>
+              )}
+              {isFormEnabled && (
+                <span className="text-green-600 flex items-center space-x-2">
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span>Sẵn sàng tạo đơn hàng</span>
+                </span>
+              )}
             </div>
+            <button
+              onClick={handleSubmit}
+              className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium flex items-center space-x-2"
+              disabled={!isFormEnabled}
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              <span>Hoàn tất đơn hàng</span>
+            </button>
           </div>
         </div>
       </div>
@@ -1052,3 +870,4 @@ const CreateOrder = () => {
 };
 
 export default CreateOrder;
+// Hoàn thiện
