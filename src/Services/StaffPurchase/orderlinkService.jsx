@@ -2,8 +2,8 @@
 import api from "../../config/api.js";
 
 const orderlinkService = {
-  // Get orders with links (paginated)
-  getOrdersWithLinks: async (page = 0, size = 10) => {
+  // Get orders with links (paginated) - Using path parameters as per your API
+  getOrdersWithLinks: async (page = 0, size = 15) => {
     // Input validation
     if (typeof page !== "number" || page < 0) {
       throw new Error("Page must be a non-negative number");

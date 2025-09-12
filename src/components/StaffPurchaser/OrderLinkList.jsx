@@ -12,34 +12,33 @@ const OrderLinkList = () => {
   const [expandedOrders, setExpandedOrders] = useState({});
   const [pagination, setPagination] = useState({
     pageNumber: 0,
-    pageSize: 10,
+    pageSize: 15,
     totalPages: 0,
     totalElements: 0,
     first: true,
     last: true,
   });
-
-  // States for CreatePurchase component
   const [showCreatePurchase, setShowCreatePurchase] = useState(false);
   const [selectedOrderForPurchase, setSelectedOrderForPurchase] =
     useState(null);
 
-  // Memoized fetch function
-  const fetchOrders = useCallback(async (page = 0, size = 10) => {
+  const fetchOrders = useCallback(async (page = 0, size = 15) => {
     try {
       setLoading(true);
       setError(null);
 
+      console.log(`Fetching orders - Page: ${page}, Size: ${size}`); // Debug log
       const response = await orderlinkService.getOrdersWithLinks(page, size);
+      console.log("API Response:", response); // Debug response
 
       if (response?.content) {
         setOrders(response.content);
         setPagination({
-          pageNumber: response.number ?? 0,
-          pageSize: response.size ?? 10,
+          pageNumber: response.number ?? page,
+          pageSize: response.size ?? size,
           totalPages: response.totalPages ?? 0,
           totalElements: response.totalElements ?? 0,
-          first: response.first ?? true,
+          first: response.first ?? page === 0,
           last: response.last ?? true,
         });
       } else {
@@ -48,20 +47,22 @@ const OrderLinkList = () => {
       }
     } catch (error) {
       console.error("Error fetching orders:", error);
-      setError(error.message);
-      toast.error("Không thể tải danh sách đơn hàng");
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể tải danh sách đơn hàng";
+      setError(errorMessage);
+      toast.error(errorMessage);
       setOrders([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Initial fetch
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
 
-  // Handle pagination
   const handlePageChange = useCallback(
     (newPage) => {
       if (
@@ -80,17 +81,14 @@ const OrderLinkList = () => {
     ]
   );
 
-  // Handle view detail
   const handleViewDetail = useCallback((linkId) => {
     setSelectedLinkId(linkId);
   }, []);
 
-  // Handle close detail
   const handleCloseDetail = useCallback(() => {
     setSelectedLinkId(null);
   }, []);
 
-  // Toggle expand order
   const toggleExpandOrder = useCallback((orderId) => {
     setExpandedOrders((prev) => ({
       ...prev,
@@ -98,7 +96,6 @@ const OrderLinkList = () => {
     }));
   }, []);
 
-  // Handle create purchase
   const handleCreatePurchase = useCallback((order) => {
     if (!order.orderLinks?.length) {
       toast.error("Đơn hàng này chưa có sản phẩm nào");
@@ -108,18 +105,15 @@ const OrderLinkList = () => {
     setShowCreatePurchase(true);
   }, []);
 
-  // Handle close create purchase modal
   const handleCloseCreatePurchase = useCallback(() => {
     setShowCreatePurchase(false);
     setSelectedOrderForPurchase(null);
   }, []);
 
-  // Handle purchase success
   const handlePurchaseSuccess = useCallback(() => {
     fetchOrders(pagination.pageNumber, pagination.pageSize);
   }, [fetchOrders, pagination.pageNumber, pagination.pageSize]);
 
-  // Utility functions
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("vi-VN", {
@@ -132,7 +126,7 @@ const OrderLinkList = () => {
   };
 
   const formatCurrency = (amount) => {
-    if (amount == null) return "N/A";
+    if (!amount) return "N/A";
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
@@ -140,56 +134,40 @@ const OrderLinkList = () => {
   };
 
   const getStatusColor = (status) => {
-    const statusColors = {
+    const colors = {
       CHO_MUA: "bg-yellow-100 text-yellow-800",
       DANG_MUA: "bg-blue-100 text-blue-800",
       DA_MUA: "bg-green-100 text-green-800",
       HUY: "bg-red-100 text-red-800",
       HOAT_DONG: "bg-green-100 text-green-800",
     };
-    return statusColors[status] || "bg-gray-100 text-gray-800";
+    return colors[status] || "bg-gray-100 text-gray-800";
   };
 
-  const getOrderTypeDisplay = (type) => (type === "MUA_HO" ? "Mua hộ" : type);
-
-  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex items-center space-x-2">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="text-gray-600">Đang tải danh sách đơn hàng...</span>
+          <span className="text-gray-600">Đang tải...</span>
         </div>
       </div>
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="bg-white rounded-lg shadow-sm p-6 max-w-md w-full mx-4">
           <div className="text-center">
-            <svg
-              className="w-12 h-12 text-red-500 mx-auto mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
-              />
-            </svg>
+            <div className="text-red-500 text-5xl mb-4">⚠️</div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               Không thể tải dữ liệu
             </h3>
             <p className="text-gray-600 mb-4">{error}</p>
             <button
               onClick={() => fetchOrders()}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             >
               Thử lại
             </button>
@@ -214,7 +192,7 @@ const OrderLinkList = () => {
             <h1 className="text-2xl font-bold text-gray-900">
               Danh sách đơn hàng
             </h1>
-            <div className="text-sm text-gray-500 space-y-1">
+            <div className="text-sm text-gray-500">
               <div>
                 Trang: {pagination.pageNumber + 1}/{pagination.totalPages || 1}
               </div>
@@ -232,19 +210,7 @@ const OrderLinkList = () => {
         <div className="space-y-4">
           {orders.length === 0 ? (
             <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-              <svg
-                className="w-16 h-16 text-gray-400 mx-auto mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                />
-              </svg>
+              <div className="text-gray-400 text-6xl mb-4">📦</div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 Không có đơn hàng
               </h3>
@@ -256,7 +222,7 @@ const OrderLinkList = () => {
             orders.map((order) => (
               <div
                 key={order.orderId}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+                className="bg-white rounded-lg shadow-sm border p-6"
               >
                 {/* Order Header */}
                 <div className="flex items-start justify-between mb-4">
@@ -273,7 +239,9 @@ const OrderLinkList = () => {
                         {order.status}
                       </span>
                       <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                        {getOrderTypeDisplay(order.orderType)}
+                        {order.orderType === "MUA_HO"
+                          ? "Mua hộ"
+                          : order.orderType}
                       </span>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
@@ -297,21 +265,9 @@ const OrderLinkList = () => {
                     {order.orderLinks?.length > 0 && (
                       <button
                         onClick={() => handleCreatePurchase(order)}
-                        className="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors flex items-center"
+                        className="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 flex items-center"
                       >
-                        <svg
-                          className="w-4 h-4 mr-2"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                          />
-                        </svg>
+                        <span className="mr-2">+</span>
                         Tạo Purchase
                       </button>
                     )}
@@ -323,19 +279,6 @@ const OrderLinkList = () => {
                   <div className="mt-4">
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="text-sm font-medium text-gray-700 flex items-center">
-                        <svg
-                          className="w-4 h-4 mr-2"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                          />
-                        </svg>
                         Sản phẩm ({order.orderLinks.length})
                       </h4>
                       {order.orderLinks.length > 2 && (
@@ -382,7 +325,7 @@ const OrderLinkList = () => {
                       )}
                     </div>
                     <div className="space-y-3">
-                      {(order.orderLinks.length <= 1 ||
+                      {(order.orderLinks.length <= 2 ||
                       expandedOrders[order.orderId]
                         ? order.orderLinks
                         : order.orderLinks.slice(0, 0)
@@ -393,50 +336,38 @@ const OrderLinkList = () => {
                         >
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
-                              <div className="text-sm">
-                                <div className="font-medium text-gray-900 mb-1">
-                                  {link.productName !== "string"
-                                    ? link.productName
-                                    : "Tên sản phẩm"}
-                                </div>
-                                <div className="text-gray-600">
-                                  Website:{" "}
-                                  {link.website !== "string"
-                                    ? link.website
-                                    : "N/A"}
-                                </div>
-                                <div className="text-gray-600">
-                                  Tracking: {link.trackingCode}
-                                </div>
+                              <div className="font-medium text-gray-900 mb-1">
+                                {link.productName !== "string"
+                                  ? link.productName
+                                  : "Tên sản phẩm"}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                Website:{" "}
+                                {link.website !== "string"
+                                  ? link.website
+                                  : "N/A"}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                Tracking: {link.trackingCode}
                               </div>
                             </div>
-                            <div>
-                              <div className="text-sm">
-                                <div className="text-gray-600">
-                                  SL: {link.quantity}
-                                </div>
-                                <div className="text-gray-600">
-                                  Giá web:{" "}
-                                  {link.priceWeb?.toLocaleString() || 0}
-                                </div>
-                                <div className="text-gray-600">
-                                  Giá Ship:{" "}
-                                  {link.shipWeb?.toLocaleString() || 0}
-                                </div>
+                            <div className="text-sm text-gray-600">
+                              <div>SL: {link.quantity}</div>
+                              <div>
+                                Giá web: {link.priceWeb?.toLocaleString() || 0}
+                              </div>
+                              <div>
+                                Giá Ship: {link.shipWeb?.toLocaleString() || 0}
                               </div>
                             </div>
-                            <div>
-                              <div className="text-sm">
-                                <div className="text-gray-600">
-                                  Group Tag:{" "}
-                                  {link.groupTag !== "string"
-                                    ? link.groupTag
-                                    : "N/A"}
-                                </div>
-                                <div className="text-gray-600">
-                                  Note: {link.note || "N/A"}
-                                </div>
+                            <div className="text-sm text-gray-600">
+                              <div>
+                                Group:{" "}
+                                {link.groupTag !== "string"
+                                  ? link.groupTag
+                                  : "N/A"}
                               </div>
+                              <div>Note: {link.note || "N/A"}</div>
                             </div>
                             <div className="text-right">
                               <div className="text-lg font-semibold text-gray-900 mb-2">
@@ -452,27 +383,8 @@ const OrderLinkList = () => {
                                 </span>
                                 <button
                                   onClick={() => handleViewDetail(link.linkId)}
-                                  className="bg-blue-600 text-white px-3 py-1 rounded-md text-xs hover:bg-blue-700 transition-colors flex items-center justify-center"
+                                  className="bg-blue-600 text-white px-3 py-1 rounded-md text-xs hover:bg-blue-700 flex items-center justify-center"
                                 >
-                                  <svg
-                                    className="w-3 h-3 mr-1"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth="2"
-                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                    />
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth="2"
-                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                    />
-                                  </svg>
                                   Chi tiết
                                 </button>
                               </div>
@@ -485,19 +397,7 @@ const OrderLinkList = () => {
                 ) : (
                   <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
                     <div className="flex items-center">
-                      <svg
-                        className="w-5 h-5 text-yellow-600 mr-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
-                        />
-                      </svg>
+                      <span className="text-yellow-600 mr-2">⚠️</span>
                       <span className="text-sm text-yellow-800">
                         Đơn hàng chưa có sản phẩm nào
                       </span>

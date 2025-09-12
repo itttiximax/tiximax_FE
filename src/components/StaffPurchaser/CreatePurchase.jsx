@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import createPurchaseService from "../../Services/StaffPurchase/createpurchaseService";
 import toast from "react-hot-toast";
+import createPurchaseService from "../../Services/StaffPurchase/createPurchaseService";
 
 const CreatePurchase = ({
   isOpen,
@@ -14,6 +14,7 @@ const CreatePurchase = ({
     purchaseTotal: "",
     image: "",
     note: "",
+    shipmentCode: "",
   });
   const [creatingPurchase, setCreatingPurchase] = useState(false);
 
@@ -25,6 +26,7 @@ const CreatePurchase = ({
         purchaseTotal: "",
         image: "",
         note: "",
+        shipmentCode: "",
       });
     }
   }, [isOpen]);
@@ -49,7 +51,7 @@ const CreatePurchase = ({
     try {
       setCreatingPurchase(true);
 
-      // Client-side validation
+      // Basic validation
       if (selectedTrackingCodes.length === 0) {
         toast.error("Vui lòng chọn ít nhất một tracking code");
         return;
@@ -63,12 +65,6 @@ const CreatePurchase = ({
         return;
       }
 
-      if (!orderCode) {
-        toast.error("Không tìm thấy mã đơn hàng");
-        return;
-      }
-
-      // Get token
       const token = localStorage.getItem("token");
       if (!token) {
         toast.error("Không tìm thấy token. Vui lòng đăng nhập lại.");
@@ -80,83 +76,54 @@ const CreatePurchase = ({
         purchaseTotal: Number(purchaseData.purchaseTotal),
         image: purchaseData.image || "string",
         note: purchaseData.note || "",
+        shipmentCode: purchaseData.shipmentCode || "",
         trackingCode: selectedTrackingCodes,
       };
 
-      // Make API call
-      const response = await createPurchaseService.createPurchase(
+      await createPurchaseService.createPurchase(
         orderCode,
+
         payload,
         token
       );
 
-      // Success
       toast.success("Tạo purchase thành công!");
       handleClose();
-
-      // Callback to refresh parent component
-      if (onSuccess) {
-        onSuccess();
-      }
+      onSuccess?.();
     } catch (error) {
       console.error("Error creating purchase:", error);
 
-      // Handle different types of errors
-      let errorMessage = "Có lỗi xảy ra khi tạo purchase";
-
-      if (error.status) {
-        switch (error.status) {
-          case 400:
-            errorMessage =
-              "Dữ liệu không hợp lệ. Kiểm tra lại tracking codes và order code.";
-            break;
-          case 401:
-            errorMessage = "Token đã hết hạn. Vui lòng đăng nhập lại.";
-            localStorage.removeItem("token");
-            break;
-          case 403:
-            errorMessage = "Bạn không có quyền thực hiện thao tác này.";
-            break;
-          case 404:
-            errorMessage = `Không tìm thấy đơn hàng ${orderCode} hoặc tracking codes không tồn tại.`;
-            break;
-          case 409:
-            errorMessage = "Purchase đã tồn tại cho order này.";
-            break;
-          case 422:
-            errorMessage =
-              error.data?.message || "Dữ liệu không đúng định dạng.";
-            break;
-          case 500:
-            errorMessage = "Lỗi server. Vui lòng thử lại sau.";
-            break;
-          default:
-            errorMessage = error.message || `Lỗi HTTP ${error.status}`;
-        }
-      } else {
-        errorMessage = error.message || "Không thể kết nối tới server";
-      }
+      // Sử dụng message từ BE, fallback về message mặc định
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Có lỗi xảy ra khi tạo purchase";
 
       toast.error(errorMessage);
+
+      // Handle token expiry
+      if (error.status === 401) {
+        localStorage.removeItem("token");
+      }
     } finally {
       setCreatingPurchase(false);
     }
   };
 
-  // Handle close modal
   const handleClose = () => {
     setSelectedTrackingCodes([]);
     setPurchaseData({
       purchaseTotal: "",
       image: "",
       note: "",
+      shipmentCode: "",
     });
     onClose();
   };
 
   // Format currency for display
   const formatCurrency = (amount) => {
-    if (amount === null || amount === undefined) return "N/A";
+    if (!amount) return "N/A";
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
@@ -165,20 +132,14 @@ const CreatePurchase = ({
 
   // Get status color
   const getStatusColor = (status) => {
-    switch (status) {
-      case "CHO_MUA":
-        return "bg-yellow-100 text-yellow-800";
-      case "DANG_MUA":
-        return "bg-blue-100 text-blue-800";
-      case "DA_MUA":
-        return "bg-green-100 text-green-800";
-      case "HUY":
-        return "bg-red-100 text-red-800";
-      case "HOAT_DONG":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+    const colors = {
+      CHO_MUA: "bg-yellow-100 text-yellow-800",
+      DANG_MUA: "bg-blue-100 text-blue-800",
+      DA_MUA: "bg-green-100 text-green-800",
+      HUY: "bg-red-100 text-red-800",
+      HOAT_DONG: "bg-green-100 text-green-800",
+    };
+    return colors[status] || "bg-gray-100 text-gray-800";
   };
 
   if (!isOpen) return null;
@@ -199,7 +160,7 @@ const CreatePurchase = ({
             </h3>
             <button
               onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 hover:text-gray-600"
             >
               <svg
                 className="w-6 h-6"
@@ -237,7 +198,7 @@ const CreatePurchase = ({
               </label>
             </div>
 
-            {/* Selected tracking codes summary */}
+            {/* Selected summary */}
             {selectedTrackingCodes.length > 0 && (
               <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
                 <div className="text-sm font-medium text-blue-900 mb-1">
@@ -254,7 +215,7 @@ const CreatePurchase = ({
               {orderLinks.map((link) => (
                 <div
                   key={link.linkId}
-                  className={`p-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors ${
+                  className={`p-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 ${
                     selectedTrackingCodes.includes(link.trackingCode)
                       ? "bg-blue-50 border-l-4 border-l-blue-500"
                       : ""
@@ -337,14 +298,11 @@ const CreatePurchase = ({
                       purchaseTotal: e.target.value,
                     }))
                   }
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="1900000"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="000000"
                   min="1"
                   required
                 />
-                <div className="text-xs text-gray-500 mt-1">
-                  Ví dụ: 1900000 (không có dấu phẩy)
-                </div>
               </div>
 
               <div>
@@ -360,12 +318,30 @@ const CreatePurchase = ({
                       image: e.target.value,
                     }))
                   }
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="string (để trống sẽ dùng 'string')"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="URL hình ảnh"
                 />
               </div>
             </div>
-
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Ship code <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={purchaseData.shipmentCode}
+                onChange={(e) =>
+                  setPurchaseData((prev) => ({
+                    ...prev,
+                    shipmentCode: e.target.value,
+                  }))
+                }
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="SP-VN908000"
+                min="1"
+                required
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Ghi chú
@@ -373,14 +349,11 @@ const CreatePurchase = ({
               <textarea
                 value={purchaseData.note}
                 onChange={(e) =>
-                  setPurchaseData((prev) => ({
-                    ...prev,
-                    note: e.target.value,
-                  }))
+                  setPurchaseData((prev) => ({ ...prev, note: e.target.value }))
                 }
                 rows={3}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="ok code"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Ghi chú"
               />
             </div>
           </div>
@@ -389,7 +362,7 @@ const CreatePurchase = ({
           <div className="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
             <button
               onClick={handleClose}
-              className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+              className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
               Hủy
             </button>
@@ -400,7 +373,7 @@ const CreatePurchase = ({
                 !purchaseData.purchaseTotal ||
                 selectedTrackingCodes.length === 0
               }
-              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
               {creatingPurchase && (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
