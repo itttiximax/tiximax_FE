@@ -1,6 +1,4 @@
-import axios from "axios";
-
-const API_URL = "https://t-6cn5.onrender.com/purchases";
+import api from "../../config/api.js";
 
 const createPurchaseService = {
   createPurchase: async (orderCode, data, token) => {
@@ -17,8 +15,8 @@ const createPurchaseService = {
       throw new Error("Authorization token is required");
     }
 
-    const response = await axios.post(
-      `${API_URL}/add?orderCode=${orderCode}`,
+    const response = await api.post(
+      `/purchases/add?orderCode=${orderCode}`,
       data,
       {
         headers: {

@@ -22,7 +22,6 @@ const CreateOrder = () => {
     destinationId: "",
     exchangeRate: "",
     checkRequired: false,
-    // note: "",
     orderLinkRequests: [
       {
         productLink: "",
@@ -51,6 +50,7 @@ const CreateOrder = () => {
     loading: false,
     error: null,
     uploadingImages: {},
+    deletingImages: {}, // Track image deletion state
   });
 
   // Fetch data once on mount
@@ -254,14 +254,53 @@ const CreateOrder = () => {
     }
   }, []);
 
-  const handleRemoveImage = useCallback((index) => {
-    setForm((prev) => {
-      const updatedProducts = [...prev.orderLinkRequests];
-      updatedProducts[index].purchaseImage = "";
-      return { ...prev, orderLinkRequests: updatedProducts };
-    });
-    toast("Đã xóa ảnh sản phẩm", { icon: "🗑️" });
-  }, []);
+  const handleRemoveImage = useCallback(
+    async (index) => {
+      const currentImage = form.orderLinkRequests[index].purchaseImage;
+
+      if (!currentImage) {
+        toast.error("Không có ảnh để xóa");
+        return;
+      }
+
+      const deleteKey = `product_${index}`;
+
+      try {
+        // Set deleting state
+        setUi((prev) => ({
+          ...prev,
+          deletingImages: { ...prev.deletingImages, [deleteKey]: true },
+        }));
+
+        // Try to delete from server first
+        try {
+          await uploadImageService.deleteByUrl(currentImage);
+          console.log("Đã xóa ảnh từ server thành công");
+        } catch (deleteError) {
+          console.warn("Không thể xóa ảnh từ server:", deleteError);
+          // Continue anyway - remove from form even if server deletion fails
+        }
+
+        // Remove from form state
+        setForm((prev) => {
+          const updatedProducts = [...prev.orderLinkRequests];
+          updatedProducts[index].purchaseImage = "";
+          return { ...prev, orderLinkRequests: updatedProducts };
+        });
+
+        toast.success("Đã xóa ảnh sản phẩm thành công");
+      } catch (error) {
+        console.error("Lỗi khi xóa ảnh:", error);
+        toast.error("Có lỗi khi xóa ảnh");
+      } finally {
+        setUi((prev) => ({
+          ...prev,
+          deletingImages: { ...prev.deletingImages, [deleteKey]: false },
+        }));
+      }
+    },
+    [form.orderLinkRequests]
+  );
 
   const addProduct = useCallback(() => {
     setForm((prev) => ({
@@ -280,17 +319,35 @@ const CreateOrder = () => {
           website: "",
           productTypeId: "",
           groupTag: "",
+          note: "",
         },
       ],
     }));
   }, []);
 
-  const removeProduct = useCallback((index) => {
-    setForm((prev) => ({
-      ...prev,
-      orderLinkRequests: prev.orderLinkRequests.filter((_, i) => i !== index),
-    }));
-  }, []);
+  const removeProduct = useCallback(
+    async (index) => {
+      const productToRemove = form.orderLinkRequests[index];
+
+      // If product has an image, try to delete it first
+      if (productToRemove.purchaseImage) {
+        try {
+          await uploadImageService.deleteByUrl(productToRemove.purchaseImage);
+          console.log("Đã xóa ảnh sản phẩm khỏi server");
+        } catch (error) {
+          console.warn("Không thể xóa ảnh sản phẩm:", error);
+        }
+      }
+
+      setForm((prev) => ({
+        ...prev,
+        orderLinkRequests: prev.orderLinkRequests.filter((_, i) => i !== index),
+      }));
+
+      toast.success("Đã xóa sản phẩm");
+    },
+    [form.orderLinkRequests]
+  );
 
   const handleSubmit = useCallback(async () => {
     try {
@@ -309,7 +366,6 @@ const CreateOrder = () => {
         destinationId: "",
         exchangeRate: "",
         checkRequired: false,
-        note: "",
         orderLinkRequests: [
           {
             productLink: "",
@@ -323,6 +379,7 @@ const CreateOrder = () => {
             website: "",
             productTypeId: "",
             groupTag: "",
+            note: "",
           },
         ],
       });
@@ -485,21 +542,6 @@ const CreateOrder = () => {
                     Kiểm hàng trước khi giao
                   </span>
                 </div>
-
-                {/* <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">
-                    Ghi chú
-                  </label>
-                  <textarea
-                    name="note"
-                    value={form.note}
-                    onChange={handleChange}
-                    rows="3"
-                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!isFormEnabled}
-                    placeholder="Ghi chú đơn hàng..."
-                  />
-                </div> */}
               </div>
             </div>
           </div>
@@ -524,7 +566,9 @@ const CreateOrder = () => {
               <div className="space-y-6 max-h-[600px] overflow-y-auto">
                 {form.orderLinkRequests.map((product, index) => {
                   const uploadKey = `product_${index}`;
+                  const deleteKey = `product_${index}`;
                   const isUploading = ui.uploadingImages[uploadKey];
+                  const isDeleting = ui.deletingImages[deleteKey];
 
                   return (
                     <div
@@ -754,10 +798,10 @@ const CreateOrder = () => {
                               <button
                                 type="button"
                                 onClick={() => handleRemoveImage(index)}
-                                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 text-sm"
-                                disabled={!isFormEnabled || isUploading}
+                                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 text-sm disabled:opacity-50"
+                                disabled={!isFormEnabled || isDeleting}
                               >
-                                Xóa ảnh
+                                {isDeleting ? "Đang xóa..." : "Xóa ảnh"}
                               </button>
                             )}
                           </div>
@@ -765,24 +809,64 @@ const CreateOrder = () => {
 
                         {product.purchaseImage ? (
                           <div className="flex items-start space-x-4">
-                            <img
-                              src={product.purchaseImage}
-                              alt={`Product ${index + 1}`}
-                              className="w-20 h-20 object-cover border border-gray-200 rounded-md"
-                            />
-                            <div className="flex-1 text-sm text-gray-500 break-all bg-gray-100 p-3 rounded-md">
-                              <strong>URL:</strong> {product.purchaseImage}
+                            <div className="flex-shrink-0">
+                              <img
+                                src={product.purchaseImage}
+                                alt={`Product ${index + 1}`}
+                                className="w-24 h-24 object-cover border border-gray-200 rounded-md shadow-sm"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <div className="bg-green-50 border border-green-200 rounded-md p-3">
+                                <div className="flex items-center space-x-2">
+                                  <svg
+                                    className="w-5 h-5 text-green-600"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                  <span className="text-sm font-medium text-green-800">
+                                    Ảnh sản phẩm đã được tải lên thành công
+                                  </span>
+                                </div>
+                                <p className="text-xs text-green-600 mt-1">
+                                  Ảnh sẽ được hiển thị trong đơn hàng
+                                </p>
+                              </div>
                             </div>
                           </div>
                         ) : (
-                          <div className="text-sm text-gray-500 italic bg-gray-100 p-4 rounded-md text-center">
-                            Chưa có ảnh sản phẩm. Click "Chọn ảnh" để upload.
+                          <div className="text-sm text-gray-500 italic bg-gray-100 p-4 rounded-md text-center border-2 border-dashed border-gray-300">
+                            <div className="flex flex-col items-center space-y-2">
+                              <svg
+                                className="w-8 h-8 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
+                              </svg>
+                              <span>Chưa có ảnh sản phẩm</span>
+                              <span className="text-xs">
+                                Click "Chọn ảnh" để upload ảnh sản phẩm
+                              </span>
+                            </div>
                           </div>
                         )}
                       </div>
 
-                      {/* note */}
-                      <div>
+                      {/* Note */}
+                      <div className="mt-4">
                         <label className="block text-sm font-medium text-gray-600 mb-2">
                           Ghi chú
                         </label>
@@ -790,9 +874,10 @@ const CreateOrder = () => {
                           name="note"
                           value={product.note}
                           onChange={(e) => handleProductChange(index, e)}
+                          rows="3"
                           className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           disabled={!isFormEnabled}
-                          placeholder="Ghi chú đơn hàng..."
+                          placeholder="Ghi chú cho sản phẩm này..."
                         />
                       </div>
                     </div>
@@ -870,4 +955,3 @@ const CreateOrder = () => {
 };
 
 export default CreateOrder;
-// Hoàn thiện
