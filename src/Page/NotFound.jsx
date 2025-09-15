@@ -28,13 +28,13 @@ const NotFound = () => {
 
         {/* Nút điều hướng */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
+          {/* <Link
             to="/"
             className="flex items-center justify-center px-6 py-3 bg-gray-800 text-white rounded-md hover:bg-gray-900 transition min-w-[150px]"
           >
             <FaHome className="mr-2" />
             Về Trang Chủ
-          </Link>
+          </Link> */}
 
           <button
             onClick={handleGoBack}

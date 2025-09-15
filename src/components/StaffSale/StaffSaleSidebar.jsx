@@ -1,243 +1,286 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
-  FaChartLine,
-  FaUsers,
-  FaBoxOpen,
-  FaShippingFast,
-  FaCalculator,
-  FaWarehouse,
-  FaRoute,
-  FaSignOutAlt,
-  FaUserCircle,
-  FaChevronDown,
-  FaPhone,
-  FaBook,
-  FaCalendarAlt,
-  FaChartBar,
-  FaGlobe,
-} from "react-icons/fa";
+  LayoutDashboard,
+  Users,
+  Package,
+  Truck,
+  Calculator,
+  Warehouse,
+  Route,
+  LogOut,
+  ChevronDown,
+  User,
+  Phone,
+  Book,
+  Calendar,
+  BarChart3,
+  TrendingUp,
+  FileText,
+  UserPlus,
+} from "lucide-react";
 
 const StaffSaleSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [openOrders, setOpenOrders] = useState(false);
-  const [openLogistics, setOpenLogistics] = useState(false);
-  const [openCustomers, setOpenCustomers] = useState(false);
-
-  const menuSections = [
-    {
-      title: "Bán hàng",
-      items: [
-        {
-          text: "Tạo hóa đơn",
-          icon: <FaBoxOpen />,
-          path: "/staff-sale/create-invoice",
-        },
-        {
-          text: "Báo giá",
-          icon: <FaCalculator />,
-          path: "/staff-sale/quotations",
-        },
-      ],
-    },
-    {
-      title: "Báo cáo",
-      items: [
-        {
-          text: "Thống kê",
-          icon: <FaChartLine />,
-          path: "/staff-sale/dashboard",
-        },
-        {
-          text: "Hiệu suất cá nhân",
-          icon: <FaChartBar />,
-          path: "/staff-sale/performance",
-        },
-      ],
-    },
-    {
-      title: "Khách hàng",
-      items: [
-        {
-          text: "Quản lý khách hàng",
-          icon: <FaUsers />,
-          hasSubmenu: true,
-          isOpen: openCustomers,
-          onToggle: () => setOpenCustomers(!openCustomers),
-          submenuItems: [
-            { text: "Tạo khách hàng", path: "/staff-sale/createaccountuser" },
-            { text: "Danh sách khách hàng", path: "/staff-sale/customers" },
-            { text: "Khách hàng tiềm năng", path: "/staff-sale/prospects" },
-          ],
-        },
-      ],
-    },
-    {
-      title: "Đơn hàng",
-      items: [
-        {
-          text: "Quản lý đơn hàng",
-          icon: <FaBoxOpen />,
-          hasSubmenu: true,
-          isOpen: openOrders,
-          onToggle: () => setOpenOrders(!openOrders),
-          submenuItems: [
-            { text: "Tất cả", path: "/staff-sale/orders" },
-            { text: "Đang xử lý", path: "/staff-sale/orders/pending" },
-          ],
-        },
-      ],
-    },
-    {
-      title: "Vận chuyển",
-      items: [
-        {
-          text: "Theo dõi vận chuyển",
-          icon: <FaShippingFast />,
-          hasSubmenu: true,
-          isOpen: openLogistics,
-          onToggle: () => setOpenLogistics(!openLogistics),
-          submenuItems: [
-            { text: "Khách lẻ", path: "/staff-sale/shipping/domestic" },
-            {
-              text: "Khách đại lý",
-              path: "/staff-sale/shipping/international",
-            },
-          ],
-        },
-        { text: "Lộ trình", icon: <FaRoute />, path: "/staff-sale/tracking" },
-        {
-          text: "Kho hàng",
-          icon: <FaWarehouse />,
-          path: "/staff-sale/warehouses",
-        },
-      ],
-    },
-    {
-      title: "Telesale",
-      items: [
-        {
-          text: "Công cụ liên lạc",
-          icon: <FaPhone />,
-          path: "/staff-sale/telesale",
-        },
-      ],
-    },
-    {
-      title: "Kiến thức Logistics",
-      items: [
-        {
-          text: "Hướng dẫn & Tài liệu",
-          icon: <FaBook />,
-          path: "/staff-sale/knowledge",
-        },
-      ],
-    },
-    {
-      title: "Lịch hẹn",
-      items: [
-        {
-          text: "Quản lý lịch hẹn",
-          icon: <FaCalendarAlt />,
-          path: "/staff-sale/schedule",
-        },
-      ],
-    },
-  ];
+  const [isCustomerDropdownOpen, setIsCustomerDropdownOpen] = useState(false);
+  const [isOrderDropdownOpen, setIsOrderDropdownOpen] = useState(false);
+  const [isShippingDropdownOpen, setIsShippingDropdownOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/signin");
   };
 
-  const isActive = (path) => location.pathname.startsWith(path);
+  const isActive = (path) => location.pathname === path;
 
-  const renderMenuItem = (item) => {
-    if (item.hasSubmenu) {
+  const menuItems = [
+    {
+      section: "BÁN HÀNG",
+      items: [
+        {
+          to: "/staff-sale/create-invoice",
+          icon: FileText,
+          label: "Tạo hóa đơn",
+        },
+        {
+          to: "/staff-sale/quotations",
+          icon: Calculator,
+          label: "Báo giá",
+        },
+      ],
+    },
+    {
+      section: "BÁO CÁO",
+      items: [
+        {
+          to: "/staff-sale/dashboard",
+          icon: LayoutDashboard,
+          label: "Thống kê",
+        },
+        {
+          to: "/staff-sale/performance",
+          icon: TrendingUp,
+          label: "Hiệu suất cá nhân",
+        },
+      ],
+    },
+    {
+      section: "QUẢN LÝ",
+      items: [
+        {
+          type: "dropdown",
+          icon: Users,
+          label: "Quản lý khách hàng",
+          dropdownItems: [
+            {
+              to: "/staff-sale/createaccountuser",
+              icon: UserPlus,
+              label: "Tạo khách hàng",
+            },
+            {
+              to: "/staff-sale/customers",
+              icon: Users,
+              label: "Danh sách khách hàng",
+            },
+            {
+              to: "/staff-sale/prospects",
+              icon: Users,
+              label: "Khách hàng tiềm năng",
+            },
+          ],
+          isOpen: isCustomerDropdownOpen,
+          onToggle: () => setIsCustomerDropdownOpen(!isCustomerDropdownOpen),
+        },
+        {
+          type: "dropdown",
+          icon: Package,
+          label: "Quản lý đơn hàng",
+          dropdownItems: [
+            {
+              to: "/staff-sale/orders",
+              icon: Package,
+              label: "Tất cả đơn hàng",
+            },
+            {
+              to: "/staff-sale/orders/pending",
+              icon: Package,
+              label: "Đang xử lý",
+            },
+          ],
+          isOpen: isOrderDropdownOpen,
+          onToggle: () => setIsOrderDropdownOpen(!isOrderDropdownOpen),
+        },
+        {
+          type: "dropdown",
+          icon: Truck,
+          label: "Theo dõi vận chuyển",
+          dropdownItems: [
+            {
+              to: "/staff-sale/shipping/domestic",
+              icon: Truck,
+              label: "Khách lẻ",
+            },
+            {
+              to: "/staff-sale/shipping/international",
+              icon: Truck,
+              label: "Khách đại lý",
+            },
+          ],
+          isOpen: isShippingDropdownOpen,
+          onToggle: () => setIsShippingDropdownOpen(!isShippingDropdownOpen),
+        },
+        {
+          to: "/staff-sale/tracking",
+          icon: Route,
+          label: "Lộ trình",
+        },
+        {
+          to: "/staff-sale/warehouses",
+          icon: Warehouse,
+          label: "Kho hàng",
+        },
+        {
+          to: "/staff-sale/telesale",
+          icon: Phone,
+          label: "Công cụ liên lạc",
+        },
+        {
+          to: "/staff-sale/knowledge",
+          icon: Book,
+          label: "Tài liệu",
+        },
+        {
+          to: "/staff-sale/schedule",
+          icon: Calendar,
+          label: "Lịch hẹn",
+        },
+      ],
+    },
+  ];
+
+  const renderMenuItem = (item, itemIndex) => {
+    const Icon = item.icon;
+
+    if (item.type === "dropdown") {
+      const isDropdownActive = item.dropdownItems?.some((dropdownItem) =>
+        isActive(dropdownItem.to)
+      );
+
       return (
-        <div key={item.text}>
+        <div key={itemIndex} className="space-y-1">
           <button
             onClick={item.onToggle}
-            className={`flex items-center justify-between w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-150 ${
-              item.isOpen ? "bg-gray-100" : ""
+            className={`flex items-center gap-3 px-4 py-2 w-full text-left rounded-lg transition-colors duration-200 ${
+              isDropdownActive
+                ? "bg-indigo-50 text-indigo-700"
+                : "text-gray-600 hover:bg-gray-100"
             }`}
           >
-            <div className="flex items-center gap-3">
-              <span className="text-gray-500">{item.icon}</span>
-              <span className="text-sm font-medium">{item.text}</span>
-            </div>
-            <FaChevronDown
-              className={`text-xs transition-transform duration-150 ${
+            <Icon
+              size={20}
+              className={isDropdownActive ? "text-indigo-700" : "text-gray-500"}
+            />
+            <span className="flex-1 text-sm font-medium">{item.label}</span>
+            <ChevronDown
+              size={16}
+              className={`transition-transform duration-200 ${
                 item.isOpen ? "rotate-180" : ""
-              }`}
+              } ${isDropdownActive ? "text-indigo-700" : "text-gray-500"}`}
             />
           </button>
-          <div
-            className={`ml-8 mt-1 space-y-1 transition-all duration-200 ease-in-out ${
-              item.isOpen
-                ? "max-h-96 opacity-100"
-                : "max-h-0 opacity-0 overflow-hidden"
-            }`}
-          >
-            {item.submenuItems.map((subItem) => (
-              <Link
-                key={subItem.path}
-                to={subItem.path}
-                className={`block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg ${
-                  isActive(subItem.path) ? "bg-blue-50 text-blue-700" : ""
-                }`}
-              >
-                {subItem.text}
-              </Link>
-            ))}
-          </div>
+          {item.isOpen && (
+            <div className="ml-6 space-y-1 border-l-2 border-gray-200 pl-3">
+              {item.dropdownItems?.map((dropdownItem, dropdownIndex) => {
+                const DropdownIcon = dropdownItem.icon;
+                const dropdownActive = isActive(dropdownItem.to);
+
+                return (
+                  <Link
+                    key={dropdownIndex}
+                    to={dropdownItem.to}
+                    className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors duration-200 ${
+                      dropdownActive
+                        ? "bg-indigo-50 text-indigo-700"
+                        : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    <DropdownIcon
+                      size={18}
+                      className={
+                        dropdownActive ? "text-indigo-700" : "text-gray-500"
+                      }
+                    />
+                    <span className="text-sm font-medium">
+                      {dropdownItem.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       );
     }
 
+    const active = isActive(item.to);
+
     return (
       <Link
-        key={item.path}
-        to={item.path}
-        className={`flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-150 ${
-          isActive(item.path) ? "bg-blue-50 text-blue-700" : ""
+        key={itemIndex}
+        to={item.to}
+        className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors duration-200 ${
+          active
+            ? "bg-indigo-50 text-indigo-700"
+            : "text-gray-600 hover:bg-gray-100"
         }`}
       >
-        <span className="text-gray-500">{item.icon}</span>
-        <span className="text-sm font-medium">{item.text}</span>
+        <Icon
+          size={20}
+          className={active ? "text-indigo-700" : "text-gray-500"}
+        />
+        <span className="text-sm font-medium">{item.label}</span>
       </Link>
     );
   };
 
   return (
-    <div className="w-64 h-screen bg-white shadow-md flex flex-col">
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex items-center gap-3">
-          <FaUserCircle className="w-8 h-8 text-blue-600" />
-          <span className="text-sm font-semibold text-gray-800">
-            Sales Staff
-          </span>
+    <div className="w-64 h-screen bg-white flex flex-col border-r border-gray-200 shadow-sm fixed">
+      {/* Header */}
+      <div className="p-4 border-b border-gray-200 flex-shrink-0">
+        <div className="text-center space-y-2">
+          <div className="flex justify-center">
+            <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+              <User size={20} className="text-white" />
+            </div>
+          </div>
+          <h2 className="text-lg font-semibold text-gray-800">Sales Staff</h2>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-4">
-        {menuSections.map((section) => (
-          <div key={section.title}>
-            <h2 className="px-4 py-1 text-xs font-semibold text-gray-500 uppercase">
-              {section.title}
-            </h2>
-            <div className="space-y-1">{section.items.map(renderMenuItem)}</div>
+      {/* Navigation */}
+      <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+        {menuItems.map((section, sectionIndex) => (
+          <div key={sectionIndex} className="space-y-2">
+            <h3 className="px-4 text-xs font-semibold uppercase text-gray-500 tracking-wide">
+              {section.section}
+            </h3>
+            <div className="space-y-1">
+              {section.items.map((item, itemIndex) =>
+                renderMenuItem(item, itemIndex)
+              )}
+            </div>
           </div>
         ))}
-      </div>
+      </nav>
 
-      <div className="p-3 border-t border-gray-100">
+      {/* Fixed Footer with Logout */}
+      <div className="p-3 border-t border-gray-200 flex-shrink-0 bg-white sticky bottom-0">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-150"
+          className="w-full flex items-center justify-center gap-2 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors duration-200"
         >
-          <FaSignOutAlt className="text-xs" />
+          <LogOut size={16} />
           <span className="text-sm font-medium">Đăng xuất</span>
         </button>
       </div>

@@ -9,11 +9,9 @@ import {
   CreditCard,
   MapPin,
   LogOut,
-  ChevronRight,
   ChevronDown,
   User,
   Package,
-  Search,
   Calendar,
   Book,
   Megaphone,
@@ -37,62 +35,52 @@ const LeadSaleSideBar = () => {
 
   const menuItems = [
     {
-      section: "Bán hàng",
-      highlighted: true,
+      section: "BÁN HÀNG",
       items: [
         {
           to: "/lead-sale/createorder",
           icon: LayoutDashboard,
           label: "Bán hàng",
-          color: "blue",
         },
         {
           to: "/lead-sale/createpayment",
           icon: CreditCard,
           label: "Phê duyệt thanh toán",
-          color: "indigo",
         },
       ],
     },
     {
       section: "LEADER SALE",
-      highlighted: true,
       items: [
         {
           to: "/lead-sale/dashboard",
           icon: LayoutDashboard,
           label: "Tổng quan",
-          color: "blue",
         },
         {
           to: "/lead-sale/team",
           icon: Users,
           label: "Quản lý đội nhóm",
-          color: "blue",
         },
         {
           to: "/lead-sale/salesreport",
           icon: BarChart3,
           label: "Thống kê bán hàng",
-          color: "blue",
         },
         {
           to: "/lead-sale/team-performance",
           icon: TrendingUp,
           label: "Hiệu suất đội nhóm",
-          color: "blue",
         },
       ],
     },
     {
       section: "QUẢN LÝ",
-      highlighted: true,
       items: [
         {
           type: "dropdown",
           icon: Users2,
           label: "Quản lý khách hàng",
-          color: "indigo",
           dropdownItems: [
             {
               to: "/lead-sale/customers",
@@ -107,7 +95,6 @@ const LeadSaleSideBar = () => {
           type: "dropdown",
           icon: ShoppingCart,
           label: "Quản lý đơn hàng",
-          color: "indigo",
           dropdownItems: [
             {
               to: "/lead-sale/orders",
@@ -123,12 +110,10 @@ const LeadSaleSideBar = () => {
           isOpen: isOrderDropdownOpen,
           onToggle: () => setIsOrderDropdownOpen(!isOrderDropdownOpen),
         },
-
         {
           type: "dropdown",
           icon: Users2,
           label: "Quản lý nhân viên",
-          color: "indigo",
           dropdownItems: [
             {
               to: "/lead-sale/warehouse-staff",
@@ -148,26 +133,21 @@ const LeadSaleSideBar = () => {
           to: "/lead-sale/destination",
           icon: MapPin,
           label: "Quản lý lộ trình",
-          color: "indigo",
         },
-
         {
           to: "/lead-sale/schedule",
           icon: Calendar,
           label: "Quản lý lịch hẹn",
-          color: "indigo",
         },
         {
           to: "/lead-sale/img",
           icon: Book,
-          label: "upload ảnh",
-          color: "indigo",
+          label: "Upload ảnh",
         },
         {
           to: "/lead-sale/campaigns",
           icon: Megaphone,
           label: "Chiến dịch bán hàng",
-          color: "indigo",
         },
       ],
     },
@@ -253,21 +233,15 @@ const LeadSaleSideBar = () => {
           size={20}
           className={active ? "text-indigo-700" : "text-gray-500"}
         />
-        <span className="flex-1 text-sm font-medium">{item.label}</span>
-        <ChevronRight
-          size={16}
-          className={`${
-            active ? "text-indigo-700" : "text-gray-500"
-          } transition-transform duration-200 ${active ? "translate-x-1" : ""}`}
-        />
+        <span className="text-sm font-medium">{item.label}</span>
       </Link>
     );
   };
 
   return (
-    <div className="w-64 min-h-screen bg-white flex flex-col border-r border-gray-200 shadow-sm">
+    <div className="w-64 h-screen bg-white flex flex-col border-r border-gray-200 shadow-sm fixed">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-gray-200 flex-shrink-0">
         <div className="text-center space-y-2">
           <div className="flex justify-center">
             <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
@@ -294,8 +268,8 @@ const LeadSaleSideBar = () => {
         ))}
       </nav>
 
-      {/* Footer */}
-      <div className="p-3 border-t border-gray-200">
+      {/* Fixed Footer with Logout */}
+      <div className="p-3 border-t border-gray-200 flex-shrink-0 bg-white sticky bottom-0">
         <button
           onClick={handleLogout}
           className="w-full flex items-center justify-center gap-2 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors duration-200"
