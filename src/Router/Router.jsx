@@ -20,7 +20,9 @@ import LeadSaleLayout from "../components/LeadSale/LeadSaleLayout";
 import LeadSalePage from "../components/LeadSale/LeadSalePage";
 import CreateOrder from "../components/LeadSale/CreateOrder";
 import DashboardLeadSale from "../components/LeadSale/DashboardLeadSale";
-import CreatePayment from "../components/LeadSale/CreatePayment";
+// import CreatePayment from "../components/LeadSale/CreatePayment";
+
+import SearchWebsite from "../components/LeadSale/SearchWebsite";
 
 //StaffWarehouseForeign components
 import StaffWarehouseForeignLayout from "../components/WarehouseForeign/StaffWarehouseForeignLayout";
@@ -59,6 +61,8 @@ import CreateAccountUser from "../components/StaffSale/CreateAccountUser";
 import ProfilePage from "../Page/ProfilePage";
 import OrderLinkList from "../components/StaffPurchaser/OrderLinkList";
 import CreateAccountStaff from "../components/Admin/CreateAccountStaff";
+import AccountSearch from "../components/LeadSale/AccountSearch";
+import CreateOrderPaymentList from "../components/StaffSale/CreateOrderPaymentList";
 
 const Router = createBrowserRouter([
   {
@@ -130,12 +134,15 @@ const Router = createBrowserRouter([
       { path: "customers", element: <NotFound /> },
       { path: "orders", element: <ManagerOrder /> },
       { path: "orders/tracking", element: <ManagerOrder /> },
-      { path: "createpayment", element: <CreateOrderPayment /> },
+      { path: "createpayment", element: <CreateOrderPaymentList /> },
       { path: "warehouse-staff", element: <NotFound /> },
       { path: "sales-staff", element: <NotFound /> },
       { path: "schedule", element: <NotFound /> },
       { path: "destination", element: <NotFound /> },
       { path: "img", element: <UploadImage /> },
+      { path: "campaigns", element: <SearchWebsite /> },
+      { path: "camp", element: <AccountSearch /> },
+
       // { path: "trackingpayment", element: <CreateOrderPayment /> },
       // { path: "search", element: <AccountSearch /> },
     ],

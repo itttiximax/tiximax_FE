@@ -149,6 +149,11 @@ const LeadSaleSideBar = () => {
           icon: Megaphone,
           label: "Chiến dịch bán hàng",
         },
+        {
+          to: "/lead-sale/camp",
+          icon: Megaphone,
+          label: "Chiến dịch bán hàng",
+        },
       ],
     },
   ];
