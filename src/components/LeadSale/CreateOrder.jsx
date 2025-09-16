@@ -6,7 +6,7 @@ import { getAllProductTypes } from "../../Services/Manager/managerProductTypeSer
 import uploadImageService from "../../Services/uploadImageService";
 import imageCompression from "browser-image-compression";
 import toast from "react-hot-toast";
-import AccountSearch from "../LeadSale/AccountSearch";
+import AccountSearch from "../Order/AccountSearch";
 
 const CreateOrder = () => {
   // Consolidated states

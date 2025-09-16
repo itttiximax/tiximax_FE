@@ -22,7 +22,7 @@ import CreateOrder from "../components/LeadSale/CreateOrder";
 import DashboardLeadSale from "../components/LeadSale/DashboardLeadSale";
 // import CreatePayment from "../components/LeadSale/CreatePayment";
 
-import SearchWebsite from "../components/LeadSale/SearchWebsite";
+import SearchWebsite from "../components/Order/SearchWebsite";
 
 //StaffWarehouseForeign components
 import StaffWarehouseForeignLayout from "../components/WarehouseForeign/StaffWarehouseForeignLayout";
@@ -55,14 +55,14 @@ import ProtectedRoute from "../Router/ProtectedRoute";
 import { ROLES } from "../Services/Auth/authService";
 import ManagerOrder from "../components/Manager/ManagerOrder";
 import UploadImage from "../components/UploadImage";
-// import AccountSearch from "../components/LeadSale/AccountSearch";
 import NotFound from "../Page/NotFound";
 import CreateAccountUser from "../components/StaffSale/CreateAccountUser";
 import ProfilePage from "../Page/ProfilePage";
 import OrderLinkList from "../components/StaffPurchaser/OrderLinkList";
 import CreateAccountStaff from "../components/Admin/CreateAccountStaff";
-import AccountSearch from "../components/LeadSale/AccountSearch";
+import AccountSearch from "../components/Order/AccountSearch";
 import CreateOrderPaymentList from "../components/StaffSale/CreateOrderPaymentList";
+import CreateOrderForm from "../components/Order/CreateOrderForm";
 
 const Router = createBrowserRouter([
   {
@@ -126,7 +126,8 @@ const Router = createBrowserRouter([
         index: true,
         element: <LeadSalePage />,
       },
-      { path: "createorder", element: <CreateOrder /> },
+      // { path: "createorder", element: <CreateOrder /> },
+      { path: "createorder", element: <CreateOrderForm /> },
       { path: "dashboard", element: <DashboardLeadSale /> },
       { path: "team", element: <NotFound /> },
       { path: "salesreport", element: <NotFound /> },
