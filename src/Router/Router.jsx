@@ -15,10 +15,10 @@ import AdminPage from "../components/Admin/AdminPage";
 import AdminDashboard from "../components/Admin/AdminDashboard";
 import StaffList from "../components/Admin/StaffList";
 import CustomerList from "../components/Admin/CustomerList";
+
 //LeadSale components
 import LeadSaleLayout from "../components/LeadSale/LeadSaleLayout";
 import LeadSalePage from "../components/LeadSale/LeadSalePage";
-import CreateOrder from "../components/LeadSale/CreateOrder";
 import DashboardLeadSale from "../components/LeadSale/DashboardLeadSale";
 // import CreatePayment from "../components/LeadSale/CreatePayment";
 
@@ -41,6 +41,7 @@ import StaffSalePage from "../components/StaffSale/StaffSalePage";
 import StaffSaleLayout from "../components/StaffSale/StaffSaleLayout";
 import Tracking from "../components/StaffSale/Tracking";
 import CreateOrderPayment from "../components/PaymentOrder/CreateOrderPayment";
+
 //StaffPurchaser components
 import StaffPurchaserPage from "../components/StaffPurchaser/StaffPurchaserPage";
 import StaffPurchaserLayout from "../components/StaffPurchaser/StaffPurchaserLayout";
@@ -50,6 +51,7 @@ import ManagerLayout from "../components/Manager/ManagerLayout";
 import ManagerRoutes from "../components/Manager/ManagerRoutes";
 import ManagerDestination from "../components/Manager/ManagerDestination";
 import ManagerProductType from "../components/Manager/ManagerProductType";
+
 //Protected Route
 import ProtectedRoute from "../Router/ProtectedRoute";
 import { ROLES } from "../Services/Auth/authService";
@@ -129,7 +131,6 @@ const Router = createBrowserRouter([
         index: true,
         element: <LeadSalePage />,
       },
-      // { path: "createorder", element: <CreateOrder /> },
       { path: "createorder", element: <CreateOrderForm /> },
       { path: "dashboard", element: <DashboardLeadSale /> },
       { path: "team", element: <NotFound /> },
@@ -164,8 +165,8 @@ const Router = createBrowserRouter([
         index: true,
         element: <StaffSalePage />,
       },
-      { path: "create-invoice", element: <CreateOrder /> },
-      { path: "quotations", element: <CreateOrderPayment /> },
+      { path: "create-invoice", element: <CreateOrderForm /> },
+      { path: "quotations", element: <CreateOrderPaymentList /> },
       { path: "dashboard", element: <ManagerOrder /> },
       { path: "performance", element: <NotFound /> }, // Chưa triển khai
       { path: "customers", element: <NotFound /> }, // Chưa triển khai
