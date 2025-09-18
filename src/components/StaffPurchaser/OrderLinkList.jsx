@@ -231,13 +231,6 @@ const OrderLinkList = () => {
                       <h3 className="text-lg font-semibold text-gray-900">
                         {order.orderCode}
                       </h3>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                          order.status
-                        )}`}
-                      >
-                        {order.status}
-                      </span>
                       <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
                         {order.orderType === "MUA_HO"
                           ? "Mua hộ"

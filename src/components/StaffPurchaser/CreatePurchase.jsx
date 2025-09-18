@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import createPurchaseService from "../../Services/StaffPurchase/createPurchaseService";
+import uploadImageService from "../../Services/uploadImageService";
+import imageCompression from "browser-image-compression";
 
 const CreatePurchase = ({
   isOpen,
@@ -17,6 +19,8 @@ const CreatePurchase = ({
     shipmentCode: "",
   });
   const [creatingPurchase, setCreatingPurchase] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [deletingImage, setDeletingImage] = useState(false);
 
   // Reset form khi modal mở
   useEffect(() => {
@@ -28,8 +32,90 @@ const CreatePurchase = ({
         note: "",
         shipmentCode: "",
       });
+      setUploadingImage(false);
+      setDeletingImage(false);
     }
   }, [isOpen]);
+
+  // Handle image upload
+  const handleImageUpload = async (file) => {
+    if (!file || !file.type.startsWith("image/")) {
+      toast.error("Vui lòng chọn file hình ảnh");
+      return;
+    }
+
+    if (file.size > 1024 * 1024) {
+      toast.error("File quá lớn. Vui lòng chọn ảnh dưới 1MB");
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+
+      const options = {
+        maxSizeMB: 0.5,
+        maxWidthOrHeight: 1080,
+        useWebWorker: true,
+      };
+      const compressedFile = await imageCompression(file, options);
+      const response = await uploadImageService.upload(compressedFile);
+
+      let imageUrl =
+        typeof response === "string" && response.startsWith("http")
+          ? response
+          : response?.url || response?.imageUrl || response?.data?.url;
+
+      if (!imageUrl) {
+        toast.error("Upload thành công nhưng không lấy được URL ảnh");
+        return;
+      }
+
+      setPurchaseData((prev) => ({
+        ...prev,
+        image: imageUrl,
+      }));
+
+      toast.success("Upload ảnh thành công!");
+    } catch (error) {
+      console.error("Lỗi upload:", error);
+      toast.error(
+        "Upload thất bại: " + (error.response?.data?.error || error.message)
+      );
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // Handle image removal
+  const handleRemoveImage = async () => {
+    if (!purchaseData.image) {
+      toast.error("Không có ảnh để xóa");
+      return;
+    }
+
+    try {
+      setDeletingImage(true);
+
+      try {
+        await uploadImageService.deleteByUrl(purchaseData.image);
+        console.log("Đã xóa ảnh từ server thành công");
+      } catch (deleteError) {
+        console.warn("Không thể xóa ảnh từ server:", deleteError);
+      }
+
+      setPurchaseData((prev) => ({
+        ...prev,
+        image: "",
+      }));
+
+      toast.success("Đã xóa ảnh thành công");
+    } catch (error) {
+      console.error("Lỗi khi xóa ảnh:", error);
+      toast.error("Có lỗi khi xóa ảnh");
+    } finally {
+      setDeletingImage(false);
+    }
+  };
 
   // Handle tracking code selection
   const handleTrackingCodeSelect = (trackingCode, isSelected) => {
@@ -65,6 +151,21 @@ const CreatePurchase = ({
         return;
       }
 
+      if (!purchaseData.shipmentCode.trim()) {
+        toast.error("Vui lòng nhập mã ship");
+        return;
+      }
+
+      // NEW: Validation bắt buộc phải có ảnh
+      if (
+        !purchaseData.image ||
+        purchaseData.image.trim() === "" ||
+        purchaseData.image === "string"
+      ) {
+        toast.error("Vui lòng upload ảnh purchase");
+        return;
+      }
+
       const token = localStorage.getItem("token");
       if (!token) {
         toast.error("Không tìm thấy token. Vui lòng đăng nhập lại.");
@@ -74,18 +175,13 @@ const CreatePurchase = ({
       // Prepare payload
       const payload = {
         purchaseTotal: Number(purchaseData.purchaseTotal),
-        image: purchaseData.image || "string",
+        image: purchaseData.image, // Không còn fallback về "string" nữa
         note: purchaseData.note || "",
         shipmentCode: purchaseData.shipmentCode || "",
         trackingCode: selectedTrackingCodes,
       };
 
-      await createPurchaseService.createPurchase(
-        orderCode,
-
-        payload,
-        token
-      );
+      await createPurchaseService.createPurchase(orderCode, payload, token);
 
       toast.success("Tạo purchase thành công!");
       handleClose();
@@ -307,41 +403,125 @@ const CreatePurchase = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Hình ảnh (URL)
+                  Mã vận đơn <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  value={purchaseData.image}
+                  value={purchaseData.shipmentCode}
                   onChange={(e) =>
                     setPurchaseData((prev) => ({
                       ...prev,
-                      image: e.target.value,
+                      shipmentCode: e.target.value,
                     }))
                   }
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="URL hình ảnh"
+                  placeholder="SP-VN908000"
+                  required
                 />
               </div>
             </div>
+
+            {/* Image Upload Section */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ship code <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Hình ảnh Purchase <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                value={purchaseData.shipmentCode}
-                onChange={(e) =>
-                  setPurchaseData((prev) => ({
-                    ...prev,
-                    shipmentCode: e.target.value,
-                  }))
-                }
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="SP-VN908000"
-                min="1"
-                required
-              />
+
+              <div className="space-y-3">
+                {/* Upload buttons */}
+                <div className="flex space-x-2">
+                  <label className="bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-blue-600 disabled:opacity-50 text-sm flex items-center">
+                    {uploadingImage ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Uploading...
+                      </>
+                    ) : (
+                      "Chọn ảnh"
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e.target.files[0])}
+                      className="hidden"
+                      disabled={uploadingImage}
+                    />
+                  </label>
+
+                  {purchaseData.image && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 text-sm disabled:opacity-50 flex items-center"
+                      disabled={deletingImage}
+                    >
+                      {deletingImage ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Deleting...
+                        </>
+                      ) : (
+                        "Xóa ảnh"
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {/* Image preview or placeholder */}
+                {purchaseData.image ? (
+                  <div className="flex items-center space-x-3">
+                    <img
+                      src={purchaseData.image}
+                      alt="Purchase"
+                      className="w-20 h-20 object-cover border border-gray-200 rounded-md"
+                    />
+                    <div className="flex-1">
+                      <div className="bg-green-50 border border-green-200 rounded-md p-3">
+                        <div className="flex items-center space-x-2">
+                          <svg
+                            className="w-5 h-5 text-green-600"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          <span className="text-sm font-medium text-green-800">
+                            Ảnh đã upload thành công
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500 bg-gray-100 p-4 rounded-md text-center border-2 border-dashed border-gray-300">
+                    <div className="flex flex-col items-center space-y-2">
+                      <svg
+                        className="w-8 h-8 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <span>Chưa có ảnh purchase</span>
+                      <span className="text-xs text-gray-400">
+                        Chọn ảnh để upload (tối đa 1MB)
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Ghi chú
@@ -371,7 +551,12 @@ const CreatePurchase = ({
               disabled={
                 creatingPurchase ||
                 !purchaseData.purchaseTotal ||
-                selectedTrackingCodes.length === 0
+                !purchaseData.shipmentCode.trim() ||
+                selectedTrackingCodes.length === 0 ||
+                !purchaseData.image || // NEW: Thêm condition check ảnh
+                purchaseData.image === "string" || // NEW: Check không phải default value
+                uploadingImage ||
+                deletingImage
               }
               className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >

@@ -47,6 +47,11 @@ const LeadSaleSideBar = () => {
           icon: CreditCard,
           label: "Phê duyệt thanh toán",
         },
+        {
+          to: "/lead-sale/createpaymentsupport",
+          icon: CreditCard,
+          label: "Hỗ trợ gọp đơn hàng ",
+        },
       ],
     },
     {

@@ -63,6 +63,8 @@ import CreateAccountStaff from "../components/Admin/CreateAccountStaff";
 import AccountSearch from "../components/Order/AccountSearch";
 import CreateOrderPaymentList from "../components/PaymentOrder/CreateOrderPaymentList";
 import CreateOrderForm from "../components/Order/CreateOrderForm";
+import OrderCustomerList from "../components/Order/OrderCustomerList";
+import ManagerWebsite from "../components/Manager/ManagerWebsite";
 
 const Router = createBrowserRouter([
   {
@@ -112,6 +114,7 @@ const Router = createBrowserRouter([
       { path: "dashboard", element: <ManagerDashboard /> },
       { path: "producttype", element: <ManagerProductType /> },
       { path: "order", element: <ManagerOrder /> },
+      { path: "website", element: <ManagerWebsite /> },
     ],
   },
   {
@@ -136,6 +139,7 @@ const Router = createBrowserRouter([
       { path: "orders", element: <ManagerOrder /> },
       { path: "orders/tracking", element: <ManagerOrder /> },
       { path: "createpayment", element: <CreateOrderPaymentList /> },
+      { path: "createpaymentsupport", element: <OrderCustomerList /> },
       { path: "warehouse-staff", element: <NotFound /> },
       { path: "sales-staff", element: <NotFound /> },
       { path: "schedule", element: <NotFound /> },

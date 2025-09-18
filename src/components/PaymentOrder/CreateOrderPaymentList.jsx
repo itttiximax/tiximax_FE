@@ -3,6 +3,7 @@ import toast, { Toaster } from "react-hot-toast";
 import createOrderPaymentService from "../../Services/SharedService/createorderpayment";
 import countStatusService from "../../Services/SharedService/countStatusService";
 import CreateOrderPayment from "./CreateOrderPayment";
+import OrderPending from "./OrderPending";
 
 const CreateOrderPaymentList = () => {
   const validTabs = [
@@ -49,10 +50,10 @@ const CreateOrderPaymentList = () => {
     setStatsLoading(true);
     try {
       const response = await countStatusService.getForPaymentStatistics();
-      console.log("Status statistics response:", response); // Debug API response
+      console.log("Status statistics response:", response);
       // Ensure all valid tabs have a count, defaulting to 0 if missing
       const normalizedCounts = validTabs.reduce((acc, tab) => {
-        acc[tab] = response[tab] ?? 0; // Use 0 if response[tab] is undefined
+        acc[tab] = response[tab] ?? 0;
         return acc;
       }, {});
       setStatusCounts(normalizedCounts);
@@ -115,6 +116,71 @@ const CreateOrderPaymentList = () => {
     }
   };
 
+  // Render appropriate component based on active tab
+  const renderOrderComponent = () => {
+    if (activeTab === "CHO_THANH_TOAN") {
+      return (
+        <OrderPending
+          orders={orders}
+          paymentResults={paymentResults}
+          setPaymentResults={setPaymentResults}
+          fetchOrders={fetchOrders}
+          currentPage={currentPage}
+        />
+      );
+    }
+
+    // For other tabs, use the original CreateOrderPayment component
+    return (
+      <CreateOrderPayment
+        orders={orders}
+        paymentResults={paymentResults}
+        setPaymentResults={setPaymentResults}
+        activeTab={activeTab}
+        fetchOrders={fetchOrders}
+        currentPage={currentPage}
+      />
+    );
+  };
+
+  // Get header columns based on active tab
+  const getHeaderColumns = () => {
+    if (activeTab === "CHO_THANH_TOAN") {
+      // Special headers for CHO_THANH_TOAN tab with separate payment code column
+      return [
+        { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
+        { key: "paymentCode", label: "Mã giao dịch", colSpan: "col-span-2" },
+        { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
+        { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
+        { key: "exchangeRate", label: "Tỷ giá", colSpan: "col-span-1" },
+        { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-2" },
+        { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-1" },
+        { key: "actions", label: "Thao tác", colSpan: "col-span-2" },
+      ];
+    }
+
+    // Default headers for other tabs
+    const baseColumns = [
+      { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
+      { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
+      { key: "status", label: "Trạng thái", colSpan: "col-span-2" },
+      { key: "exchangeRate", label: "Tỷ giá", colSpan: "col-span-1" },
+      { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-2" },
+      { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-2" },
+    ];
+
+    // Add actions column for specific tabs
+    if (activeTab === "DA_XAC_NHAN") {
+      baseColumns.push({
+        key: "actions",
+        label: "Thao tác",
+        colSpan: "col-span-2",
+      });
+    }
+
+    return baseColumns;
+  };
+
   return (
     <div className="mx-auto p-6">
       <Toaster />
@@ -146,8 +212,7 @@ const CreateOrderPaymentList = () => {
               </span>
             ) : (
               <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                {statusCounts[tab.key] ?? 0}{" "}
-                {/* Always show count, default to 0 */}
+                {statusCounts[tab.key] ?? 0}
               </span>
             )}
           </button>
@@ -177,27 +242,19 @@ const CreateOrderPaymentList = () => {
             </div>
           ) : (
             <>
+              {/* Header */}
               <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
                 <div className="grid grid-cols-12 gap-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <div className="col-span-2">Mã đơn hàng</div>
-                  <div className="col-span-1">Loại đơn</div>
-                  <div className="col-span-2">Trạng thái</div>
-                  <div className="col-span-1">Tỷ giá</div>
-                  <div className="col-span-2">Tổng tiền</div>
-                  <div className="col-span-2">Ngày tạo</div>
-                  {activeTab === "DA_XAC_NHAN" && (
-                    <div className="col-span-2">Thao tác</div>
-                  )}
+                  {getHeaderColumns().map((column) => (
+                    <div key={column.key} className={column.colSpan}>
+                      {column.label}
+                    </div>
+                  ))}
                 </div>
               </div>
-              <CreateOrderPayment
-                orders={orders}
-                paymentResults={paymentResults}
-                setPaymentResults={setPaymentResults}
-                activeTab={activeTab}
-                fetchOrders={fetchOrders}
-                currentPage={currentPage}
-              />
+
+              {/* Render appropriate order component */}
+              {renderOrderComponent()}
             </>
           )}
         </div>

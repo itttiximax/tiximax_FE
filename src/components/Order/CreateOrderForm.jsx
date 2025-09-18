@@ -86,7 +86,6 @@ const CreateOrderForm = () => {
   });
 
   const [ui, setUi] = useState({
-    loading: false,
     error: null,
   });
 
@@ -97,7 +96,7 @@ const CreateOrderForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setUi((prev) => ({ ...prev, loading: true, error: null }));
+        setUi((prev) => ({ ...prev, error: null }));
         const token = localStorage.getItem("token");
 
         const [routesData, destinationsData, productTypesData] =
@@ -121,8 +120,6 @@ const CreateOrderForm = () => {
             ? "Không tìm thấy API. Kiểm tra cấu hình server."
             : "Lỗi khi tải dữ liệu.";
         setUi((prev) => ({ ...prev, error: errorMessage }));
-      } finally {
-        setUi((prev) => ({ ...prev, loading: false }));
       }
     };
 
@@ -287,12 +284,6 @@ const CreateOrderForm = () => {
               {ui.error}
             </div>
           )}
-
-          {ui.loading && (
-            <div className="mt-4 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded-md">
-              Đang tải dữ liệu...
-            </div>
-          )}
         </div>
 
         <div className="grid grid-cols-12 gap-6">
@@ -316,13 +307,13 @@ const CreateOrderForm = () => {
                     {selectedCustomer.name}
                   </p>
                   <p className="text-sm text-blue-600">
-                    {selectedCustomer.email} • {selectedCustomer.phone}
+                    {selectedCustomer.email} - {selectedCustomer.phone}
                   </p>
                 </div>
               )}
             </div>
 
-            {/* Route Section - Với React Icons */}
+            {/* Route Section */}
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-700 mb-4">
                 Tuyến đường
@@ -334,12 +325,10 @@ const CreateOrderForm = () => {
                   onChange={handlePreliminaryChange}
                   className="w-full px-4 py-3 pr-10 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
                   required
-                  disabled={ui.loading || ui.error}
+                  disabled={ui.error}
                 >
                   <option value="">
-                    {ui.loading
-                      ? "Đang tải..."
-                      : ui.error
+                    {ui.error
                       ? "Không thể tải tuyến đường"
                       : "Chọn tuyến đường"}
                   </option>
@@ -351,7 +340,6 @@ const CreateOrderForm = () => {
                   ))}
                 </select>
 
-                {/* Custom dropdown icon với React Icons */}
                 <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
                   <HiChevronDown className="w-4 h-4 text-gray-400" />
                 </div>
@@ -385,7 +373,7 @@ const CreateOrderForm = () => {
                         value={form.destinationId}
                         onChange={handleChange}
                         className="w-full px-4 py-3 pr-10 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
-                        disabled={!isFormEnabled || ui.loading}
+                        disabled={!isFormEnabled}
                       >
                         <option value="">Chọn điểm đến</option>
                         {masterData.destinations.map((destination) => (
@@ -398,7 +386,6 @@ const CreateOrderForm = () => {
                         ))}
                       </select>
 
-                      {/* Custom dropdown icon với React Icons */}
                       <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
                         <HiChevronDown className="w-4 h-4 text-gray-400" />
                       </div>
@@ -449,7 +436,7 @@ const CreateOrderForm = () => {
           </div>
         </div>
 
-        {/* Submit Button - Với React Icons */}
+        {/* Submit Button */}
         <div className="mt-6 bg-white rounded-lg shadow-sm p-6">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-600">
@@ -522,4 +509,4 @@ const CreateOrderForm = () => {
 };
 
 export default CreateOrderForm;
-// hi code
+// ok

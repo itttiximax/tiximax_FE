@@ -69,6 +69,11 @@ const ManagerSidebar = () => {
           icon: <FaGlobeAmericas />,
           path: "/manager/producttype",
         },
+        {
+          text: "Website",
+          icon: <FaGlobeAmericas />,
+          path: "/manager/website",
+        },
         { text: "Đơn hàng", icon: <FaGlobeAmericas />, path: "/manager/order" },
       ],
     },

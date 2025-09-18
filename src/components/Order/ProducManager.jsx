@@ -58,7 +58,7 @@ const ProductManager = ({
         return updated;
       });
 
-      toast("Đã xóa thông tin website", { icon: "🗑️" });
+      toast("Đã xóa thông tin website");
     },
     [setProducts]
   );
