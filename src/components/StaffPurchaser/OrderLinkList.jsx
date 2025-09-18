@@ -267,7 +267,6 @@ const OrderLinkList = () => {
                         onClick={() => handleCreatePurchase(order)}
                         className="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 flex items-center"
                       >
-                        <span className="mr-2">+</span>
                         Tạo Purchase
                       </button>
                     )}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { HiChevronDown, HiExclamation, HiCheckCircle } from "react-icons/hi";
 import orderService from "../../Services/LeadSale/orderService";
 import routesService from "../../Services/StaffSale/routeService";
 import managerDestinationService from "../../Services/Manager/managerDestinationService";
@@ -6,6 +7,44 @@ import { getAllProductTypes } from "../../Services/Manager/managerProductTypeSer
 import toast from "react-hot-toast";
 import AccountSearch from "./AccountSearch";
 import ProductManager from "./ProducManager";
+
+// Confirm Dialog Component
+const ConfirmDialog = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  confirmText = "Xác nhận",
+  cancelText = "Hủy",
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+          <p className="text-gray-600 mb-6">{message}</p>
+          <div className="flex justify-end space-x-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              {cancelText}
+            </button>
+            <button
+              onClick={onConfirm}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              {confirmText}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const CreateOrderForm = () => {
   // Consolidated states
@@ -50,6 +89,9 @@ const CreateOrderForm = () => {
     loading: false,
     error: null,
   });
+
+  // State for confirm dialog
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // Fetch data once on mount
   useEffect(() => {
@@ -159,8 +201,21 @@ const CreateOrderForm = () => {
     }));
   }, []);
 
-  const handleSubmit = useCallback(async () => {
+  // Show confirm dialog
+  const handleSubmitClick = useCallback(() => {
+    setShowConfirmDialog(true);
+  }, []);
+
+  // Close confirm dialog
+  const handleCloseDialog = useCallback(() => {
+    setShowConfirmDialog(false);
+  }, []);
+
+  // Actual submit function
+  const handleConfirmSubmit = useCallback(async () => {
     try {
+      setShowConfirmDialog(false);
+
       const orderData = {
         ...form,
         orderLinkRequests: products,
@@ -209,6 +264,14 @@ const CreateOrderForm = () => {
   }, [preliminary, form, products]);
 
   const isFormEnabled = preliminary.customerCode && preliminary.routeId;
+
+  // Get selected route and destination for confirmation
+  const selectedRoute = masterData.routes.find(
+    (route) => route.routeId === Number(preliminary.routeId)
+  );
+  const selectedDestination = masterData.destinations.find(
+    (dest) => dest.destinationId === form.destinationId
+  );
 
   return (
     <div className="min-h-screen p-4">
@@ -259,33 +322,40 @@ const CreateOrderForm = () => {
               )}
             </div>
 
-            {/* Route Section */}
+            {/* Route Section - Với React Icons */}
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-700 mb-4">
                 Tuyến đường
               </h3>
-              <select
-                name="routeId"
-                value={preliminary.routeId}
-                onChange={handlePreliminaryChange}
-                className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-                disabled={ui.loading || ui.error}
-              >
-                <option value="">
-                  {ui.loading
-                    ? "Đang tải..."
-                    : ui.error
-                    ? "Không thể tải tuyến đường"
-                    : "Chọn tuyến đường"}
-                </option>
-                {masterData.routes.map((route) => (
-                  <option key={route.routeId} value={route.routeId}>
-                    {route.name} ({route.shipTime} ngày,{" "}
-                    {route.unitBuyingPrice.toLocaleString()} đ)
+              <div className="relative">
+                <select
+                  name="routeId"
+                  value={preliminary.routeId}
+                  onChange={handlePreliminaryChange}
+                  className="w-full px-4 py-3 pr-10 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+                  required
+                  disabled={ui.loading || ui.error}
+                >
+                  <option value="">
+                    {ui.loading
+                      ? "Đang tải..."
+                      : ui.error
+                      ? "Không thể tải tuyến đường"
+                      : "Chọn tuyến đường"}
                   </option>
-                ))}
-              </select>
+                  {masterData.routes.map((route) => (
+                    <option key={route.routeId} value={route.routeId}>
+                      {route.name} ({route.shipTime} ngày,{" "}
+                      {route.unitBuyingPrice.toLocaleString()} đ)
+                    </option>
+                  ))}
+                </select>
+
+                {/* Custom dropdown icon với React Icons */}
+                <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                  <HiChevronDown className="w-4 h-4 text-gray-400" />
+                </div>
+              </div>
             </div>
 
             {/* Order Details */}
@@ -309,23 +379,30 @@ const CreateOrderForm = () => {
                     <label className="block text-sm font-medium text-gray-600 mb-2">
                       Điểm đến
                     </label>
-                    <select
-                      name="destinationId"
-                      value={form.destinationId}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      disabled={!isFormEnabled || ui.loading}
-                    >
-                      <option value="">Chọn điểm đến</option>
-                      {masterData.destinations.map((destination) => (
-                        <option
-                          key={destination.destinationId}
-                          value={destination.destinationId}
-                        >
-                          {destination.destinationName}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <select
+                        name="destinationId"
+                        value={form.destinationId}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 pr-10 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+                        disabled={!isFormEnabled || ui.loading}
+                      >
+                        <option value="">Chọn điểm đến</option>
+                        {masterData.destinations.map((destination) => (
+                          <option
+                            key={destination.destinationId}
+                            value={destination.destinationId}
+                          >
+                            {destination.destinationName}
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* Custom dropdown icon với React Icons */}
+                      <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                        <HiChevronDown className="w-4 h-4 text-gray-400" />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -372,23 +449,13 @@ const CreateOrderForm = () => {
           </div>
         </div>
 
-        {/* Submit Button */}
+        {/* Submit Button - Với React Icons */}
         <div className="mt-6 bg-white rounded-lg shadow-sm p-6">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-600">
               {!isFormEnabled && (
                 <span className="text-amber-600 flex items-center space-x-2">
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <HiExclamation className="w-5 h-5" />
                   <span>
                     Vui lòng chọn khách hàng và tuyến đường để tiếp tục
                   </span>
@@ -396,23 +463,13 @@ const CreateOrderForm = () => {
               )}
               {isFormEnabled && (
                 <span className="text-green-600 flex items-center space-x-2">
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <HiCheckCircle className="w-5 h-5" />
                   <span>Sẵn sàng tạo đơn hàng</span>
                 </span>
               )}
             </div>
             <button
-              onClick={handleSubmit}
+              onClick={handleSubmitClick}
               className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium flex items-center space-x-2"
               disabled={!isFormEnabled}
             >
@@ -420,10 +477,49 @@ const CreateOrderForm = () => {
             </button>
           </div>
         </div>
+
+        {/* Confirm Dialog */}
+        <ConfirmDialog
+          isOpen={showConfirmDialog}
+          onClose={handleCloseDialog}
+          onConfirm={handleConfirmSubmit}
+          title="Xác nhận tạo đơn hàng"
+          message={
+            <div className="space-y-2">
+              <p>Bạn có chắc chắn muốn tạo đơn hàng với thông tin sau:</p>
+              <div className="bg-gray-50 p-3 rounded-md text-sm">
+                <p>
+                  <strong>Khách hàng:</strong> {selectedCustomer?.name} (
+                  {selectedCustomer?.customerCode})
+                </p>
+                <p>
+                  <strong>Tuyến đường:</strong> {selectedRoute?.name}
+                </p>
+                {selectedDestination && (
+                  <p>
+                    <strong>Điểm đến:</strong>{" "}
+                    {selectedDestination.destinationName}
+                  </p>
+                )}
+                <p>
+                  <strong>Số sản phẩm:</strong> {products.length}
+                </p>
+                {form.exchangeRate && (
+                  <p>
+                    <strong>Tỷ giá:</strong>{" "}
+                    {Number(form.exchangeRate).toLocaleString()} VND
+                  </p>
+                )}
+              </div>
+            </div>
+          }
+          confirmText="Tạo đơn hàng"
+          cancelText="Hủy"
+        />
       </div>
     </div>
   );
 };
 
 export default CreateOrderForm;
-// okk
+// hi code

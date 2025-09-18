@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { HiSearch, HiX } from "react-icons/hi";
 import searchService from "../../Services/SharedService/searchService";
 
 const SearchWebsite = ({
@@ -145,74 +146,50 @@ const SearchWebsite = ({
 
   return (
     <div ref={searchRef} className="relative w-full">
-      {/* Search Input */}
+      {/* Search Input - Giảm chiều cao */}
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg
-            className="h-5 w-5 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+        <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+          <HiSearch className="h-4 w-4 text-gray-400" />
         </div>
 
         <input
           type="text"
-          // placeholder="Tìm kiếm website..."
+          placeholder="Website..."
           value={searchQuery}
           onChange={handleSearchChange}
           onKeyDown={handleKeyDown}
           onFocus={() =>
             searchQuery && setShowDropdown(filteredWebsites.length > 0)
           }
-          className="w-full pl-10 pr-10 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full pl-8 pr-8 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
         />
 
         {/* Clear button */}
         {searchQuery && (
           <button
             onClick={handleClearSearch}
-            className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600"
+            className="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-gray-600"
             type="button"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <HiX className="w-3 h-3" />
           </button>
         )}
       </div>
 
-      {/* Dropdown Results - Đơn giản hóa */}
+      {/* Dropdown Results - Giảm chiều cao */}
       {showDropdown && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
           {filteredWebsites.length > 0 ? (
             <ul className="py-1">
               {filteredWebsites.map((website, index) => (
                 <li key={website.websiteId}>
                   <button
                     onClick={() => handleSelectWebsite(website)}
-                    className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${
+                    className={`w-full text-left px-3 py-1.5 hover:bg-gray-50 ${
                       index === selectedIndex ? "bg-blue-50" : ""
                     }`}
                   >
-                    <p className="text-sm text-gray-900">
+                    <p className="text-xs text-gray-900 truncate">
                       {highlightMatch(
                         website.websiteName || "Không có tên website",
                         searchQuery.trim()
@@ -224,7 +201,7 @@ const SearchWebsite = ({
             </ul>
           ) : (
             searchQuery && (
-              <div className="px-4 py-3 text-center text-gray-500 text-sm">
+              <div className="px-3 py-2 text-center text-gray-500 text-xs">
                 Không tìm thấy website nào
               </div>
             )

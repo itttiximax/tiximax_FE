@@ -15,13 +15,10 @@ const ProductManager = ({
     deletingImages: {},
   });
 
-  // State để lưu websites đã chọn cho mỗi sản phẩm
   const [selectedWebsites, setSelectedWebsites] = useState({});
 
-  // State để quản lý collapsed products
   const [collapsedProducts, setCollapsedProducts] = useState({});
 
-  // Handler cho việc toggle collapse/expand
   const handleToggleCollapse = useCallback((index) => {
     setCollapsedProducts((prev) => ({
       ...prev,
@@ -29,7 +26,6 @@ const ProductManager = ({
     }));
   }, []);
 
-  // Handler cho việc chọn website từ SearchWebsite
   const handleSelectWebsite = useCallback(
     (index, website) => {
       setProducts((prev) => {
@@ -48,7 +44,6 @@ const ProductManager = ({
     [setProducts]
   );
 
-  // Handler cho việc xóa website
   const handleClearWebsite = useCallback(
     (index) => {
       setProducts((prev) => {
@@ -68,7 +63,6 @@ const ProductManager = ({
     [setProducts]
   );
 
-  // Handler cho việc thay đổi website input thủ công
   const handleWebsiteInputChange = useCallback(
     (index, e) => {
       const value = e.target.value;
@@ -93,40 +87,61 @@ const ProductManager = ({
     [setProducts, selectedWebsites]
   );
 
-  // Helper function để format số tiền với logic thông minh
+  // Helper function để format số tiền với dấu phẩy cho hiển thị (giữ nguyên phần thập phân)
   const formatCurrency = (value) => {
     if (!value || value === "") return "";
 
+    // Chuyển đổi thành string và xử lý
     const stringValue = value.toString();
 
-    // Không format khi đang nhập số thập phân
-    if (
-      stringValue.endsWith(".") ||
-      (stringValue.includes(".") && stringValue.split(".")[1]?.length === 1)
-    ) {
-      return stringValue; // Giữ nguyên "12000." hoặc "12000.5"
+    // Tách phần nguyên và phần thập phân
+    const parts = stringValue.split(".");
+    const integerPart = parts[0].replace(/,/g, ""); // Loại bỏ dấu phẩy cũ
+    const decimalPart = parts[1];
+
+    // Kiểm tra phần nguyên có hợp lệ không
+    if (!/^\d*$/.test(integerPart)) return stringValue;
+
+    // Format phần nguyên với dấu phẩy
+    const formattedInteger = integerPart
+      ? parseInt(integerPart).toLocaleString("en-US")
+      : "";
+
+    // Ghép lại với phần thập phân nếu có
+    if (decimalPart !== undefined) {
+      return formattedInteger + "." + decimalPart;
     }
 
-    const numValue = parseFloat(stringValue.replace(/,/g, ""));
-    if (isNaN(numValue)) return "";
-
-    // Format với dấu phẩy ngăn cách hàng nghìn
-    return numValue.toLocaleString("en-US", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    });
+    return formattedInteger;
   };
 
-  // Handler khi user blur khỏi quantity input
+  // Helper function để lấy giá trị thô (remove dấu phẩy nhưng giữ dấu chấm thập phân)
+  const getRawValue = (value) => {
+    return value.toString().replace(/,/g, "");
+  };
+
+  // Hàm kiểm tra tính hợp lệ của số thập phân
+  const isValidDecimal = (value) => {
+    // Cho phép: số nguyên, số thập phân, chuỗi rỗng
+    return /^\d*\.?\d*$/.test(value) || value === "";
+  };
+
   const handleQuantityBlur = useCallback(
     (index) => {
       setProducts((prev) => {
         const updatedProducts = [...prev];
-        const currentValue = updatedProducts[index].quantity;
+        const currentValue = getRawValue(updatedProducts[index].quantity);
 
-        // Nếu để trống hoặc 0, set default về 1
-        if (!currentValue || currentValue === "" || currentValue === 0) {
-          updatedProducts[index].quantity = 1;
+        if (!currentValue || currentValue === "" || currentValue === "0") {
+          updatedProducts[index].quantity = "1";
+        } else {
+          // Kiểm tra nếu là số hợp lệ
+          const numValue = parseFloat(currentValue);
+          if (!isNaN(numValue) && numValue > 0) {
+            updatedProducts[index].quantity = currentValue;
+          } else {
+            updatedProducts[index].quantity = "1";
+          }
         }
 
         return updatedProducts;
@@ -134,50 +149,31 @@ const ProductManager = ({
     },
     [setProducts]
   );
+
   const handleCurrencyBlur = useCallback(
     (index, fieldName) => {
       setProducts((prev) => {
         const updatedProducts = [...prev];
-        const currentValue = updatedProducts[index][fieldName];
+        const currentValue = getRawValue(updatedProducts[index][fieldName]);
 
         if (currentValue && currentValue !== "") {
           if (fieldName === "purchaseFee") {
-            // Xử lý phí mua hộ với %
-            const stringValue = currentValue.toString();
-            if (stringValue.includes("%")) {
-              // Nếu có %, chỉ cần clean up
-              const percentValue = stringValue.replace(/,/g, "");
-              const numPart = parseFloat(percentValue.replace("%", ""));
-              if (!isNaN(numPart) && numPart >= 0) {
+            if (currentValue.includes("%")) {
+              const numPart = currentValue.replace("%", "");
+              const numValue = parseFloat(numPart);
+              if (!isNaN(numValue) && numValue >= 0) {
                 updatedProducts[index][fieldName] = `${numPart}%`;
               }
             } else {
-              // Nếu không có %, format như currency bình thường
-              const cleanValue = stringValue.replace(/,/g, "");
-              const numValue = parseFloat(cleanValue);
+              const numValue = parseFloat(currentValue);
               if (!isNaN(numValue) && numValue >= 0) {
-                updatedProducts[index][fieldName] = numValue.toLocaleString(
-                  "en-US",
-                  {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 2,
-                  }
-                );
+                updatedProducts[index][fieldName] = currentValue;
               }
             }
           } else {
-            // Format currency bình thường cho các field khác
-            const cleanValue = currentValue.toString().replace(/,/g, "");
-            const numValue = parseFloat(cleanValue);
-
+            const numValue = parseFloat(currentValue);
             if (!isNaN(numValue) && numValue >= 0) {
-              updatedProducts[index][fieldName] = numValue.toLocaleString(
-                "en-US",
-                {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 2,
-                }
-              );
+              updatedProducts[index][fieldName] = currentValue;
             }
           }
         }
@@ -204,38 +200,46 @@ const ProductManager = ({
             [name]: productTypeId,
             extraCharge: productType?.fee
               ? updatedProducts[index].extraCharge
-              : 0,
+              : "0",
           };
         } else {
-          // Xử lý các field number (bao gồm price fields)
           if (["priceWeb", "shipWeb", "extraCharge"].includes(name)) {
-            // Cho phép nhập tự do, chỉ remove commas và validate
-            const cleanValue = value.replace(/,/g, "");
-            // Validate chỉ cho phép số và dấu chấm, không cho số âm
-            if (/^\d*\.?\d*$/.test(cleanValue) || cleanValue === "") {
+            const cleanValue = getRawValue(value);
+            // Cho phép nhập số thập phân
+            if (isValidDecimal(cleanValue)) {
               updatedProducts[index][name] = cleanValue;
             }
           } else if (name === "purchaseFee") {
-            // Phí mua hộ: cho phép nhập % và số, không cho số âm
-            let cleanValue = value.replace(/,/g, "");
-            // Validate cho phép số, dấu chấm và dấu %
+            let cleanValue = getRawValue(value);
+            // Cho phép số thập phân và dấu %
             if (/^\d*\.?\d*%?$/.test(cleanValue) || cleanValue === "") {
               updatedProducts[index][name] = cleanValue;
             }
           } else if (name === "quantity") {
-            // Quantity: cho phép xóa hoàn toàn để nhập số mới, chỉ remove leading zeros
-            let cleanValue = value.replace(/^0+/, ""); // Remove leading zeros: 09 → 9
+            const cleanValue = getRawValue(value);
+            // Loại bỏ số 0 ở đầu nhưng giữ nguyên nếu có dấu chấm thập phân
             if (cleanValue === "") {
-              // Cho phép để trống khi đang nhập
               updatedProducts[index][name] = "";
-            } else {
-              const numericValue = Number(cleanValue);
-              if (!isNaN(numericValue) && numericValue > 0) {
-                updatedProducts[index][name] = numericValue;
+            } else if (isValidDecimal(cleanValue)) {
+              // Xử lý số 0 ở đầu
+              if (
+                cleanValue.startsWith("0") &&
+                !cleanValue.startsWith("0.") &&
+                cleanValue.length > 1
+              ) {
+                const withoutLeadingZeros = cleanValue.replace(/^0+/, "");
+                updatedProducts[index][name] = withoutLeadingZeros || "0";
+              } else {
+                const numericValue = parseFloat(cleanValue);
+                if (!isNaN(numericValue) && numericValue > 0) {
+                  updatedProducts[index][name] = cleanValue;
+                } else if (cleanValue.endsWith(".")) {
+                  // Cho phép nhập dấu chấm (đang nhập số thập phân)
+                  updatedProducts[index][name] = cleanValue;
+                }
               }
             }
           } else {
-            // Text fields
             updatedProducts[index][name] = value;
           }
         }
@@ -355,7 +359,7 @@ const ProductManager = ({
       ...prev,
       {
         productLink: "",
-        quantity: 1,
+        quantity: "1",
         priceWeb: "",
         shipWeb: "",
         productName: "",
@@ -398,7 +402,6 @@ const ProductManager = ({
         return updated;
       });
 
-      // Cleanup collapsed state
       setCollapsedProducts((prev) => {
         const updated = {};
         Object.keys(prev).forEach((key) => {
@@ -417,16 +420,15 @@ const ProductManager = ({
     [products, setProducts]
   );
 
-  // Tự động collapse tất cả sản phẩm trừ sản phẩm cuối khi có >= 3 sản phẩm
   const shouldAutoCollapse = (index) => {
-    return products.length >= 3 && index < products.length - 1; // Thu gọn tất cả trừ sản phẩm cuối
+    return products.length >= 3 && index < products.length - 1;
   };
 
   const isCollapsed = (index) => {
     if (shouldAutoCollapse(index)) {
-      return collapsedProducts[index] !== false; // Default collapsed
+      return collapsedProducts[index] !== false;
     }
-    return collapsedProducts[index] === true; // Default expanded
+    return collapsedProducts[index] === true;
   };
 
   return (
@@ -459,14 +461,12 @@ const ProductManager = ({
                 collapsed ? "p-3" : "p-4"
               }`}
             >
-              {/* Header - Always visible */}
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-3">
                   <span className="text-base font-medium text-gray-700">
                     Sản phẩm {index + 1}
                   </span>
 
-                  {/* Compact info when collapsed */}
                   {collapsed && (
                     <div className="flex items-center space-x-2 text-xs text-gray-500">
                       {product.productName && (
@@ -482,7 +482,7 @@ const ProductManager = ({
                       )}
                       {product.quantity > 0 && (
                         <span className="bg-green-100 px-2 py-1 rounded text-green-700">
-                          SL: {product.quantity}
+                          SL: {formatCurrency(product.quantity)}
                         </span>
                       )}
                     </div>
@@ -490,7 +490,6 @@ const ProductManager = ({
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  {/* Collapse/Expand button cho sản phẩm có thể collapse */}
                   {(shouldAutoCollapse(index) ||
                     collapsedProducts[index] !== undefined) && (
                     <button
@@ -516,7 +515,6 @@ const ProductManager = ({
                     </button>
                   )}
 
-                  {/* Delete button */}
                   {index > 0 && (
                     <button
                       onClick={() => removeProduct(index)}
@@ -529,12 +527,10 @@ const ProductManager = ({
                 </div>
               </div>
 
-              {/* Content - Show/Hide based on collapsed state */}
               {!collapsed && (
                 <div className="space-y-3">
-                  {/* Row 1: Tên sản phẩm, Website, Số lượng */}
                   <div className="grid grid-cols-6 gap-3">
-                    <div className="col-span-3">
+                    <div className="col-span-2">
                       <label className="block text-xs font-medium text-gray-600 mb-1">
                         Tên sản phẩm
                       </label>
@@ -554,18 +550,18 @@ const ProductManager = ({
                         Số lượng
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         name="quantity"
-                        value={product.quantity || ""}
+                        value={formatCurrency(product.quantity || "")}
                         onChange={(e) => handleProductChange(index, e)}
                         onBlur={() => handleQuantityBlur(index)}
                         className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                         disabled={!isFormEnabled}
-                        min="1"
+                        placeholder="0"
                       />
                     </div>
 
-                    <div>
+                    <div className="col-span-2">
                       <label className="block text-xs font-medium text-gray-600 mb-1">
                         Website
                       </label>
@@ -580,7 +576,6 @@ const ProductManager = ({
                     </div>
                   </div>
 
-                  {/* Row 2: Link sản phẩm */}
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">
                       Link sản phẩm
@@ -596,7 +591,6 @@ const ProductManager = ({
                     />
                   </div>
 
-                  {/* Row 3: Price Info */}
                   <div className="grid grid-cols-4 gap-3">
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -605,7 +599,7 @@ const ProductManager = ({
                       <input
                         type="text"
                         name="priceWeb"
-                        value={product.priceWeb || ""}
+                        value={formatCurrency(product.priceWeb || "")}
                         onChange={(e) => handleProductChange(index, e)}
                         onBlur={() => handleCurrencyBlur(index, "priceWeb")}
                         className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
@@ -621,7 +615,7 @@ const ProductManager = ({
                       <input
                         type="text"
                         name="shipWeb"
-                        value={product.shipWeb || ""}
+                        value={formatCurrency(product.shipWeb || "")}
                         onChange={(e) => handleProductChange(index, e)}
                         onBlur={() => handleCurrencyBlur(index, "shipWeb")}
                         className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
@@ -632,7 +626,7 @@ const ProductManager = ({
 
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">
-                        Phí mua hộ ( %)
+                        Phí mua hộ (%)
                       </label>
                       <input
                         type="text"
@@ -642,7 +636,7 @@ const ProductManager = ({
                         onBlur={() => handleCurrencyBlur(index, "purchaseFee")}
                         className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                         disabled={!isFormEnabled}
-                        placeholder=" Nhập phần trăm"
+                        placeholder="Nhập phần trăm"
                       />
                     </div>
 
@@ -662,7 +656,6 @@ const ProductManager = ({
                     </div>
                   </div>
 
-                  {/* Row 4: Product Type and Extra Charge */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -698,7 +691,7 @@ const ProductManager = ({
                         <input
                           type="text"
                           name="extraCharge"
-                          value={product.extraCharge || ""}
+                          value={formatCurrency(product.extraCharge || "")}
                           onChange={(e) => handleProductChange(index, e)}
                           onBlur={() =>
                             handleCurrencyBlur(index, "extraCharge")
@@ -715,7 +708,6 @@ const ProductManager = ({
                     </div>
                   </div>
 
-                  {/* Image Upload Section */}
                   <div className="pt-3 border-t border-gray-200">
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-xs font-medium text-gray-600">
@@ -797,7 +789,6 @@ const ProductManager = ({
                     )}
                   </div>
 
-                  {/* Note */}
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">
                       Ghi chú
