@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import AccountSearch from "./AccountSearch";
-import orderCustomerService from "../../Services/LeadSale/orderCustomerService";
-import mergedPaymentService from "../../Services/Order/mergedPaymentService";
+import orderCustomerService from "../../Services/Order/orderCustomerService";
+import mergedPaymentService from "../../Services/Payment/mergedPaymentService";
 import {
   User,
   Calendar,

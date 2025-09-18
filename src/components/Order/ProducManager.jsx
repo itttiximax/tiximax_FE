@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import uploadImageService from "../../Services/uploadImageService";
 import imageCompression from "browser-image-compression";
 import toast from "react-hot-toast";

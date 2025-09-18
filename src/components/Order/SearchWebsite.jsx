@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { HiSearch, HiX } from "react-icons/hi";
 import searchService from "../../Services/SharedService/searchService";
 

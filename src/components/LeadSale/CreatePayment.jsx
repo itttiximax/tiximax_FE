@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import paymentService from "../../Services/LeadSale/paymentService";
+import paymentService from "../../Services/Payment/paymentService";
 
 const CreatePayment = () => {
   const [orderCode, setOrderCode] = useState("");

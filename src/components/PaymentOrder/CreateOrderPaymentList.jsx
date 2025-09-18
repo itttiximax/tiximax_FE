@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import createOrderPaymentService from "../../Services/SharedService/createorderpayment";
-import countStatusService from "../../Services/SharedService/countStatusService";
+import createOrderPaymentService from "../../Services/Payment/createOrderPaymentService";
+import countStatusService from "../../Services/Order/countStatusService";
 import CreateOrderPayment from "./CreateOrderPayment";
 import OrderPending from "./OrderPending";
 
