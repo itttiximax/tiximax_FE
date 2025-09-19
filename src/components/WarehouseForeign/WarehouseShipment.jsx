@@ -34,8 +34,8 @@ const WarehouseShipment = () => {
       return;
     }
 
-    if (file.size > 1024 * 1024) {
-      toast.error("File quá lớn. Vui lòng chọn ảnh dưới 1MB");
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("File quá lớn. Vui lòng chọn ảnh dưới 3MB");
       return;
     }
 
@@ -356,7 +356,7 @@ const WarehouseShipment = () => {
                   </svg>
                   <span>Chưa có ảnh shipment</span>
                   <span className="text-xs text-gray-400">
-                    Chọn ảnh để upload (tối đa 1MB)
+                    Chọn ảnh để upload (tối đa 3MB)
                   </span>
                 </div>
               </div>
