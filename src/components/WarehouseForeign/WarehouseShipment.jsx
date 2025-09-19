@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createShipment } from "../../Services/Warehouse/warehouseShipmentService";
-import UploadImg from "../UploadImg";
+import UploadImg from "../../common/UploadImg";
 
 const WarehouseShipment = () => {
   const [formData, setFormData] = useState({
@@ -174,7 +174,7 @@ const WarehouseShipment = () => {
               value={formData.weight}
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="g"
+              placeholder="kg"
               required
             />
           </div>
@@ -190,7 +190,7 @@ const WarehouseShipment = () => {
             value={formData.netWeight}
             onChange={handleInputChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="g"
+            placeholder="kg"
             required
           />
         </div>

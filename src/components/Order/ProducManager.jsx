@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import SearchWebsite from "./SearchWebsite";
-import UploadImg from "../UploadImg";
+import UploadImg from "../../common/UploadImg";
 
 const ProductManager = ({
   products,
@@ -628,7 +628,7 @@ const ProductManager = ({
                       }
                       onImageRemove={() => handleImageRemove(index)}
                       label="Ảnh sản phẩm"
-                      maxSizeMB={1}
+                      maxSizeMB={3}
                       placeholder="Chưa có ảnh sản phẩm"
                       className=""
                     />

@@ -1,19 +1,21 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
-  FaChartLine,
-  FaUsers,
-  FaUserTie,
-  FaMoneyCheck,
-  FaPlaneDeparture,
-  FaTruckMoving,
-  FaGlobeAmericas,
-  FaSignOutAlt,
-  FaFileInvoiceDollar,
-  FaBullhorn,
-  FaUserCircle,
-  FaChevronDown,
-} from "react-icons/fa";
+  FiBarChart,
+  FiUsers,
+  FiUserCheck,
+  FiCreditCard,
+  FiTruck,
+  FiMapPin,
+  FiBox,
+  FiGlobe,
+  FiShoppingCart,
+  FiLogOut,
+  FiFileText,
+  FiSpeaker,
+  FiUser,
+  FiChevronDown,
+} from "react-icons/fi";
 
 const ManagerSidebar = () => {
   const navigate = useNavigate();
@@ -24,9 +26,9 @@ const ManagerSidebar = () => {
     {
       title: "Phân tích",
       items: [
-        { text: "Thống kê", icon: <FaChartLine />, path: "/manager/dashboard" },
-        { text: "Nhóm", icon: <FaUserTie />, path: "/manager/team" },
-        { text: "Khách hàng", icon: <FaUsers />, path: "/manager/customers" },
+        { text: "Thống kê", icon: <FiBarChart />, path: "/manager/dashboard" },
+        { text: "Nhóm", icon: <FiUserCheck />, path: "/manager/team" },
+        { text: "Khách hàng", icon: <FiUsers />, path: "/manager/customers" },
       ],
     },
     {
@@ -34,10 +36,10 @@ const ManagerSidebar = () => {
       items: [
         {
           text: "Báo giá",
-          icon: <FaFileInvoiceDollar />,
+          icon: <FiFileText />,
           path: "/manager/quote",
         },
-        { text: "Marketing", icon: <FaBullhorn />, path: "/manager/ads" },
+        { text: "Marketing", icon: <FiSpeaker />, path: "/manager/ads" },
       ],
     },
     {
@@ -45,7 +47,7 @@ const ManagerSidebar = () => {
       items: [
         {
           text: "Thanh toán",
-          icon: <FaMoneyCheck />,
+          icon: <FiCreditCard />,
           hasSubmenu: true,
           isOpen: openCost,
           onToggle: () => setOpenCost(!openCost),
@@ -55,26 +57,26 @@ const ManagerSidebar = () => {
           ],
         },
         {
-          text: "Tuyến đường",
-          icon: <FaPlaneDeparture />,
+          text: "Tuyến vận chuyển",
+          icon: <FiTruck />,
           path: "/manager/routes",
         },
         {
-          text: "Vận chuyển",
-          icon: <FaTruckMoving />,
+          text: "Điểm đến",
+          icon: <FiMapPin />,
           path: "/manager/transfer",
         },
         {
           text: "Loại sản phẩm",
-          icon: <FaGlobeAmericas />,
+          icon: <FiBox />,
           path: "/manager/producttype",
         },
         {
           text: "Website",
-          icon: <FaGlobeAmericas />,
+          icon: <FiGlobe />,
           path: "/manager/website",
         },
-        { text: "Đơn hàng", icon: <FaGlobeAmericas />, path: "/manager/order" },
+        { text: "Đơn hàng", icon: <FiShoppingCart />, path: "/manager/order" },
       ],
     },
   ];
@@ -92,7 +94,7 @@ const ManagerSidebar = () => {
         <div key={item.text}>
           <button
             onClick={item.onToggle}
-            className={`flex items-center justify-between w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-150 ${
+            className={`flex items-center justify-between w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors ${
               item.isOpen ? "bg-gray-100" : ""
             }`}
           >
@@ -100,14 +102,14 @@ const ManagerSidebar = () => {
               <span className="text-gray-500">{item.icon}</span>
               <span className="text-sm font-medium">{item.text}</span>
             </div>
-            <FaChevronDown
-              className={`text-xs transition-transform duration-150 ${
+            <FiChevronDown
+              className={`text-xs transition-transform ${
                 item.isOpen ? "rotate-180" : ""
               }`}
             />
           </button>
           <div
-            className={`ml-8 mt-1 space-y-1 transition-all duration-200 ease-in-out ${
+            className={`ml-8 mt-1 space-y-1 transition-all ${
               item.isOpen
                 ? "max-h-96 opacity-100"
                 : "max-h-0 opacity-0 overflow-hidden"
@@ -133,7 +135,7 @@ const ManagerSidebar = () => {
       <Link
         key={item.path}
         to={item.path}
-        className={`flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-150 ${
+        className={`flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors ${
           isActive(item.path) ? "bg-blue-50 text-blue-700" : ""
         }`}
       >
@@ -147,7 +149,7 @@ const ManagerSidebar = () => {
     <div className="w-64 h-screen bg-white shadow-md flex flex-col">
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <FaUserCircle className="w-8 h-8 text-blue-600" />
+          <FiUser className="w-10 h-10 text-blue-600" />
           <span className="text-sm font-semibold text-gray-800">Manager</span>
         </div>
       </div>
@@ -166,9 +168,9 @@ const ManagerSidebar = () => {
       <div className="p-3 border-t border-gray-100">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-150"
+          className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
-          <FaSignOutAlt className="text-xs" />
+          <FiLogOut className="text-xs" />
           <span className="text-sm font-medium">Đăng xuất</span>
         </button>
       </div>

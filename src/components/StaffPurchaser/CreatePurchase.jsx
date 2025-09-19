@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import createPurchaseService from "../../Services/StaffPurchase/createPurchaseService";
-import UploadImg from "../UploadImg";
+import UploadImg from "../../common/UploadImg";
 
 const CreatePurchase = ({
   isOpen,

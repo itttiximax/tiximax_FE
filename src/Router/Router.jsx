@@ -56,7 +56,7 @@ import ManagerProductType from "../components/Manager/ManagerProductType";
 import ProtectedRoute from "../Router/ProtectedRoute";
 import { ROLES } from "../Services/Auth/authService";
 import ManagerOrder from "../components/Manager/ManagerOrder";
-import UploadImage from "../components/UploadImage";
+// import UploadImage from "../components/UploadImage";
 import NotFound from "../Page/NotFound";
 import CreateAccountUser from "../components/StaffSale/CreateAccountUser";
 import ProfilePage from "../Page/ProfilePage";
@@ -146,7 +146,7 @@ const Router = createBrowserRouter([
       { path: "sales-staff", element: <NotFound /> },
       { path: "schedule", element: <NotFound /> },
       { path: "destination", element: <NotFound /> },
-      { path: "img", element: <UploadImage /> },
+      // { path: "img", element: <UploadImage /> },
       { path: "campaigns", element: <SearchWebsite /> },
       { path: "camp", element: <AccountSearch /> },
 
