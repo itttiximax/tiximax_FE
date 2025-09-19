@@ -1,8 +1,7 @@
 import { useState, useCallback } from "react";
-import uploadImageService from "../../Services/uploadImageService";
-import imageCompression from "browser-image-compression";
 import toast from "react-hot-toast";
 import SearchWebsite from "./SearchWebsite";
+import UploadImg from "../UploadImg";
 
 const ProductManager = ({
   products,
@@ -10,13 +9,7 @@ const ProductManager = ({
   productTypes,
   isFormEnabled,
 }) => {
-  const [ui, setUi] = useState({
-    uploadingImages: {},
-    deletingImages: {},
-  });
-
   const [selectedWebsites, setSelectedWebsites] = useState({});
-
   const [collapsedProducts, setCollapsedProducts] = useState({});
 
   const handleToggleCollapse = useCallback((index) => {
@@ -250,108 +243,30 @@ const ProductManager = ({
     [productTypes, setProducts]
   );
 
+  // Handle image upload from UploadImg component
   const handleImageUpload = useCallback(
-    async (index, file) => {
-      if (!file || !file.type.startsWith("image/")) {
-        toast.error("Vui lòng chọn file hình ảnh");
-        return;
-      }
-
-      if (file.size > 1024 * 1024) {
-        toast.error("File quá lớn. Vui lòng chọn ảnh dưới 1MB");
-        return;
-      }
-
-      const uploadKey = `product_${index}`;
-
-      try {
-        setUi((prev) => ({
-          ...prev,
-          uploadingImages: { ...prev.uploadingImages, [uploadKey]: true },
-        }));
-
-        const options = {
-          maxSizeMB: 0.5,
-          maxWidthOrHeight: 1080,
-          useWebWorker: true,
-        };
-        const compressedFile = await imageCompression(file, options);
-        const response = await uploadImageService.upload(compressedFile);
-
-        let imageUrl =
-          typeof response === "string" && response.startsWith("http")
-            ? response
-            : response?.url || response?.imageUrl || response?.data?.url;
-
-        if (!imageUrl) {
-          toast.error("Upload thành công nhưng không lấy được URL ảnh");
-          return;
-        }
-
-        setProducts((prev) => {
-          const updatedProducts = [...prev];
-          updatedProducts[index].purchaseImage = imageUrl;
-          return updatedProducts;
-        });
-
-        toast.success(`Upload ảnh sản phẩm ${index + 1} thành công!`);
-      } catch (error) {
-        console.error("Lỗi upload:", error);
-        toast.error(
-          "Upload thất bại: " + (error.response?.data?.error || error.message)
-        );
-      } finally {
-        setUi((prev) => ({
-          ...prev,
-          uploadingImages: { ...prev.uploadingImages, [uploadKey]: false },
-        }));
-      }
+    (index, imageUrl) => {
+      setProducts((prev) => {
+        const updatedProducts = [...prev];
+        updatedProducts[index].purchaseImage = imageUrl;
+        return updatedProducts;
+      });
+      toast.success(`Upload ảnh sản phẩm ${index + 1} thành công!`);
     },
     [setProducts]
   );
 
-  const handleRemoveImage = useCallback(
-    async (index) => {
-      const currentImage = products[index].purchaseImage;
-
-      if (!currentImage) {
-        toast.error("Không có ảnh để xóa");
-        return;
-      }
-
-      const deleteKey = `product_${index}`;
-
-      try {
-        setUi((prev) => ({
-          ...prev,
-          deletingImages: { ...prev.deletingImages, [deleteKey]: true },
-        }));
-
-        try {
-          await uploadImageService.deleteByUrl(currentImage);
-          console.log("Đã xóa ảnh từ server thành công");
-        } catch (deleteError) {
-          console.warn("Không thể xóa ảnh từ server:", deleteError);
-        }
-
-        setProducts((prev) => {
-          const updatedProducts = [...prev];
-          updatedProducts[index].purchaseImage = "";
-          return updatedProducts;
-        });
-
-        toast.success("Đã xóa ảnh sản phẩm thành công");
-      } catch (error) {
-        console.error("Lỗi khi xóa ảnh:", error);
-        toast.error("Có lỗi khi xóa ảnh");
-      } finally {
-        setUi((prev) => ({
-          ...prev,
-          deletingImages: { ...prev.deletingImages, [deleteKey]: false },
-        }));
-      }
+  // Handle image removal from UploadImg component
+  const handleImageRemove = useCallback(
+    (index) => {
+      setProducts((prev) => {
+        const updatedProducts = [...prev];
+        updatedProducts[index].purchaseImage = "";
+        return updatedProducts;
+      });
+      toast.success("Đã xóa ảnh sản phẩm thành công");
     },
-    [products, setProducts]
+    [setProducts]
   );
 
   const addProduct = useCallback(() => {
@@ -448,10 +363,6 @@ const ProductManager = ({
 
       <div className="space-y-3 max-h-[700px] overflow-y-auto">
         {products.map((product, index) => {
-          const uploadKey = `product_${index}`;
-          const deleteKey = `product_${index}`;
-          const isUploading = ui.uploadingImages[uploadKey];
-          const isDeleting = ui.deletingImages[deleteKey];
           const collapsed = isCollapsed(index);
 
           return (
@@ -708,85 +619,19 @@ const ProductManager = ({
                     </div>
                   </div>
 
+                  {/* Upload Image Component */}
                   <div className="pt-3 border-t border-gray-200">
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="text-xs font-medium text-gray-600">
-                        Ảnh sản phẩm
-                      </label>
-                      <div className="flex space-x-2">
-                        <label className="bg-blue-500 text-white px-3 py-1 rounded cursor-pointer hover:bg-blue-600 disabled:opacity-50 text-xs">
-                          {isUploading ? "Uploading..." : "Chọn ảnh"}
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) =>
-                              handleImageUpload(index, e.target.files[0])
-                            }
-                            className="hidden"
-                            disabled={!isFormEnabled || isUploading}
-                          />
-                        </label>
-                        {product.purchaseImage && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveImage(index)}
-                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs disabled:opacity-50"
-                            disabled={!isFormEnabled || isDeleting}
-                          >
-                            {isDeleting ? "Deleting..." : "Xóa"}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {product.purchaseImage ? (
-                      <div className="flex items-center space-x-3">
-                        <img
-                          src={product.purchaseImage}
-                          alt={`Product ${index + 1}`}
-                          className="w-16 h-16 object-cover border border-gray-200 rounded"
-                        />
-                        <div className="flex-1">
-                          <div className="bg-green-50 border border-green-200 rounded p-2">
-                            <div className="flex items-center space-x-1">
-                              <svg
-                                className="w-4 h-4 text-green-600"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              <span className="text-xs font-medium text-green-800">
-                                Ảnh đã upload thành công
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-xs text-gray-500 bg-gray-100 p-3 rounded text-center border-2 border-dashed border-gray-300">
-                        <div className="flex flex-col items-center space-y-1">
-                          <svg
-                            className="w-6 h-6 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                          </svg>
-                          <span>Chưa có ảnh sản phẩm</span>
-                        </div>
-                      </div>
-                    )}
+                    <UploadImg
+                      imageUrl={product.purchaseImage}
+                      onImageUpload={(imageUrl) =>
+                        handleImageUpload(index, imageUrl)
+                      }
+                      onImageRemove={() => handleImageRemove(index)}
+                      label="Ảnh sản phẩm"
+                      maxSizeMB={1}
+                      placeholder="Chưa có ảnh sản phẩm"
+                      className=""
+                    />
                   </div>
 
                   <div>
