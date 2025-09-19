@@ -138,7 +138,7 @@ const WarehouseShipment = () => {
         image: formData.image,
       };
 
-      const result = await createShipment(Number(shipmentId), shipmentData);
+      const result = await createShipment(shipmentId, shipmentData);
       setMessage("Shipment created successfully!");
       console.log("Success:", result);
 
@@ -172,7 +172,7 @@ const WarehouseShipment = () => {
             Shipment ID <span className="text-red-500">*</span>
           </label>
           <input
-            type="number"
+            type="text"
             value={shipmentId}
             onChange={(e) => {
               console.log("Input value:", e.target.value);
