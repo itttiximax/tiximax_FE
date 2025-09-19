@@ -1,21 +1,33 @@
 import { Outlet } from "react-router-dom";
-import StaffWarehourseForeignSidebar from "./StaffWarehouseForeignSidebar";
-const StaffWarehourseForeignLayout = () => {
+import StaffWarehouseForeignSidebar from "./StaffWarehouseForeignSidebar";
+
+const StaffWarehouseForeignLayout = () => {
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Sidebar: chiều cao tự động, không scroll riêng */}
-      <div className="w-64 bg-white border-r shadow-md">
-        <StaffWarehourseForeignSidebar />
+    <div className="flex h-screen overflow-hidden bg-gray-50">
+      {/* Sidebar - Dynamic width to match collapsible sidebar */}
+      <div className="bg-white shadow-sm flex-shrink-0">
+        <StaffWarehouseForeignSidebar />
       </div>
 
-      {/* Main content: scroll riêng nếu nội dung dài */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-y-auto bg-gray-100 p-6">
-          <Outlet />
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        {/* Header Bar - Enhanced Design */}
+        {/* Add header here if needed */}
+
+        {/* Scrollable Content */}
+        <main className="flex-1 overflow-y-auto bg-gradient-to-br from-gray-50 to-blue-50/30 p-4 sm:p-6">
+          <div className="mx-auto max-w-7xl">
+            {/* Content Container với responsive padding */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 overflow-hidden">
+              <div className="p-4 sm:p-6 md:p-8">
+                <Outlet />
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     </div>
   );
 };
 
-export default StaffWarehourseForeignLayout;
+export default StaffWarehouseForeignLayout;

@@ -1,12 +1,12 @@
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
-  FaChartLine,
-  FaWarehouse,
+  FaChartBar,
+  FaBoxes,
   FaArrowDown,
   FaArrowUp,
   FaSignOutAlt,
-  FaUserCircle,
+  FaUserTie,
 } from "react-icons/fa";
 
 const StaffWarehouseDomesticSidebar = () => {
@@ -16,12 +16,12 @@ const StaffWarehouseDomesticSidebar = () => {
   const menuItems = [
     {
       text: "Thống kê",
-      icon: <FaChartLine />,
+      icon: <FaChartBar />,
       path: "/staff-warehouse-domestic/dashboard",
     },
     {
       text: "Tồn kho",
-      icon: <FaWarehouse />,
+      icon: <FaBoxes />,
       path: "/staff-warehouse-domestic/inventory",
     },
     {
@@ -47,11 +47,13 @@ const StaffWarehouseDomesticSidebar = () => {
     <div className="w-64 h-screen bg-white shadow-md flex flex-col">
       {/* Profile Section */}
       <div className="p-4 border-b border-gray-100">
-        <div className="flex items-center gap-3">
-          <FaUserCircle className="w-8 h-8 text-blue-600" />
-          <span className="text-sm font-semibold text-gray-800">
-            Warehouse Staff
-          </span>
+        <div className="flex flex-col items-center gap-2">
+          <FaUserTie className="w-8 h-8 text-blue-600" />
+          <div className="text-center">
+            <span className="text-sm font-semibold text-gray-800">
+              Domestic Warehouse Staff
+            </span>
+          </div>
         </div>
       </div>
 
@@ -61,7 +63,7 @@ const StaffWarehouseDomesticSidebar = () => {
           <Link
             key={item.path}
             to={item.path}
-            className={`flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-150 ease-in-out transform hover:scale-[1.02] ${
+            className={`flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg ${
               isActive(item.path) ? "bg-blue-50 text-blue-700 shadow-sm" : ""
             }`}
           >
@@ -75,22 +77,12 @@ const StaffWarehouseDomesticSidebar = () => {
       <div className="p-3 border-t border-gray-100">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-150 ease-in-out transform hover:scale-[1.02]"
+          className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           <FaSignOutAlt className="text-xs" />
           <span className="text-sm font-medium">Đăng xuất</span>
         </button>
       </div>
-
-      {/* Custom Styles for Animations */}
-      <style>{`
-        .transform {
-          transition: transform 0.15s ease-in-out;
-        }
-        .hover\\:scale-\\[1\\.02\\]:hover {
-          transform: scale(1.02);
-        }
-      `}</style>
     </div>
   );
 };

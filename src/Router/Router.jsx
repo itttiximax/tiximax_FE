@@ -67,6 +67,7 @@ import CreateOrderPaymentList from "../components/PaymentOrder/CreateOrderPaymen
 import CreateOrderForm from "../components/Order/CreateOrderForm";
 import OrderCustomerList from "../components/Order/OrderCustomerList";
 import ManagerWebsite from "../components/Manager/ManagerWebsite";
+import WarehouseShipment from "../components/WarehouseForeign/WarehouseShipment";
 
 const Router = createBrowserRouter([
   {
@@ -212,7 +213,7 @@ const Router = createBrowserRouter([
     children: [
       { index: true, element: <StaffWarehouseForeignPage /> },
       { path: "dashboard", element: <NotFound /> },
-      { path: "inventory", element: <NotFound /> },
+      { path: "inventory", element: <WarehouseShipment /> },
       { path: "import", element: <NotFound /> },
       { path: "export", element: <NotFound /> },
     ],
