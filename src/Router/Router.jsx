@@ -13,8 +13,6 @@ import Home from "../Page/Home";
 import AdminLayout from "../components/Admin/AdminLayout";
 import AdminPage from "../components/Admin/AdminPage";
 import AdminDashboard from "../components/Admin/AdminDashboard";
-import StaffList from "../components/Admin/StaffList";
-import CustomerList from "../components/Admin/CustomerList";
 
 //LeadSale components
 import LeadSaleLayout from "../components/LeadSale/LeadSaleLayout";
@@ -68,6 +66,7 @@ import CreateOrderForm from "../components/Order/CreateOrderForm";
 import OrderCustomerList from "../components/Order/OrderCustomerList";
 import ManagerWebsite from "../components/Manager/ManagerWebsite";
 import WarehouseShipment from "../components/WarehouseForeign/WarehouseShipment";
+import WarehouseList from "../components/WarehouseForeign/WarehouseList";
 
 const Router = createBrowserRouter([
   {
@@ -91,10 +90,40 @@ const Router = createBrowserRouter([
     children: [
       { index: true, element: <AdminPage /> },
       { path: "dashboard", element: <AdminDashboard /> },
-      { path: "orders", element: <CreateOrderPayment /> },
-      { path: "staff", element: <StaffList /> },
-      { path: "customers", element: <CustomerList /> },
-      { path: "createaccount", element: <CreateAccountStaff /> },
+      { path: "orders", element: <NotFound /> },
+      { path: "products", element: <NotFound /> },
+      { path: "staff", element: <NotFound /> },
+      { path: "customers", element: <NotFound /> },
+      { path: "settings", element: <CreateAccountStaff /> },
+      { path: "revenue-analytics", element: <NotFound /> },
+      { path: "order-status-overview", element: <NotFound /> },
+      { path: "profit-loss", element: <NotFound /> },
+      { path: "employee-kpi", element: <NotFound /> },
+      { path: "pending-deliveries", element: <NotFound /> },
+      { path: "shipment-tracking", element: <NotFound /> },
+      { path: "route-planning", element: <NotFound /> },
+      { path: "drivers", element: <NotFound /> },
+      { path: "vehicles", element: <NotFound /> },
+      { path: "inventory", element: <NotFound /> },
+      { path: "warehouse-transactions", element: <NotFound /> },
+      { path: "warehouse-locations", element: <NotFound /> },
+      { path: "inventory-reports", element: <NotFound /> },
+      { path: "orders/create", element: <NotFound /> },
+      { path: "order-processing", element: <NotFound /> },
+      { path: "customer-support", element: <NotFound /> },
+      { path: "order-history", element: <NotFound /> },
+      { path: "work-schedule", element: <NotFound /> },
+      { path: "employee-performance", element: <NotFound /> },
+      { path: "user-permissions", element: <NotFound /> },
+      { path: "financial-overview", element: <NotFound /> },
+      { path: "cod-payments", element: <NotFound /> },
+      { path: "customer-debts", element: <NotFound /> },
+      { path: "financial-reports", element: <NotFound /> },
+      { path: "delivery-performance", element: <NotFound /> },
+      { path: "fuel-analysis", element: <NotFound /> },
+      { path: "maintenance-costs", element: <NotFound /> },
+      { path: "top-customers", element: <NotFound /> },
+      { path: "shipping-trends", element: <NotFound /> },
     ],
   },
   {
@@ -214,7 +243,7 @@ const Router = createBrowserRouter([
       { index: true, element: <StaffWarehouseForeignPage /> },
       { path: "dashboard", element: <NotFound /> },
       { path: "inventory", element: <WarehouseShipment /> },
-      { path: "import", element: <NotFound /> },
+      { path: "import", element: <WarehouseList /> },
       { path: "export", element: <NotFound /> },
     ],
   },

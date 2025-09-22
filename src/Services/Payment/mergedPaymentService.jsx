@@ -1,7 +1,7 @@
 // src/Services/SharedService/mergedPaymentService.jsx
 import api from "../../config/api.js";
 
-const API_URL = "/merged-payment";
+const API_URL = "/payments/merged";
 
 const mergedPaymentService = {
   // Tạo merged payment

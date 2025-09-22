@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
+import {
+  FaUserPlus,
+  FaCheckCircle,
+  FaExclamationTriangle,
+  FaSpinner,
+} from "react-icons/fa";
 import registrationService from "../../Services/Auth/Registration";
+import managerRoutesService from "../../Services/Manager/managerRoutesService";
 
 const CreateAccountStaff = () => {
   const [formData, setFormData] = useState({
@@ -12,31 +19,33 @@ const CreateAccountStaff = () => {
     role: "",
     department: "",
     location: "",
-    routeIds: [],
+    routeIds: "",
   });
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState("");
   const [routes, setRoutes] = useState([]);
-  const [locations, setLocations] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Mock data - replace with actual API calls
+  // Fetch routes on component mount
   useEffect(() => {
-    setRoutes([
-      { id: 1, name: "Tuyến 1 - Quận 1" },
-      { id: 2, name: "Tuyến 2 - Quận 2" },
-      { id: 3, name: "Tuyến 3 - Quận 3" },
-      { id: 4, name: "Tuyến 4 - Quận 4" },
-    ]);
-
-    setLocations([
-      { id: "1", name: "Chi nhánh HCM" },
-      { id: "2", name: "Chi nhánh Hà Nội" },
-      { id: "3", name: "Chi nhánh Đà Nẵng" },
-    ]);
+    fetchRoutes();
   }, []);
+
+  const fetchRoutes = async () => {
+    try {
+      const data = await managerRoutesService.getRoutes();
+      setRoutes(data);
+      console.log("Routes loaded:", data); // Debug log
+    } catch (error) {
+      console.error("Error fetching routes:", error);
+      setErrors((prev) => ({
+        ...prev,
+        general: "Không thể tải danh sách tuyến đường",
+      }));
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -62,21 +71,7 @@ const CreateAccountStaff = () => {
       role: role,
       department: "",
       location: "",
-      routeIds: [],
-    }));
-  };
-
-  const handleRouteChange = (e) => {
-    const options = e.target.options;
-    const selectedRoutes = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selectedRoutes.push(parseInt(options[i].value));
-      }
-    }
-    setFormData((prev) => ({
-      ...prev,
-      routeIds: selectedRoutes,
+      routeIds: "",
     }));
   };
 
@@ -107,16 +102,27 @@ const CreateAccountStaff = () => {
       setErrors({});
       setSuccessMessage("");
 
+      // Convert routeIds to array if it's a string
+      const processedFormData = {
+        ...formData,
+        routeIds: formData.routeIds
+          ? formData.routeIds
+              .split(",")
+              .map((id) => parseInt(id.trim()))
+              .filter((id) => !isNaN(id))
+          : [],
+      };
+
       // Validate data
       const validation =
-        registrationService.validateStaffRegistrationData(formData);
+        registrationService.validateStaffRegistrationData(processedFormData);
       if (!validation.isValid) {
         setErrors(validation.errors);
         return;
       }
 
       // Remove confirmPassword before sending to API
-      const { confirmPassword, ...registrationData } = formData;
+      const { confirmPassword, ...registrationData } = processedFormData;
 
       // Register staff
       const result = await registrationService.registerStaff(registrationData);
@@ -136,7 +142,7 @@ const CreateAccountStaff = () => {
         role: "",
         department: "",
         location: "",
-        routeIds: [],
+        routeIds: "",
       });
       setSelectedRole("");
 
@@ -167,7 +173,7 @@ const CreateAccountStaff = () => {
       role: "",
       department: "",
       location: "",
-      routeIds: [],
+      routeIds: "",
     });
     setSelectedRole("");
     setErrors({});
@@ -180,19 +186,7 @@ const CreateAccountStaff = () => {
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-            <svg
-              className="w-6 h-6 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-              />
-            </svg>
+            <FaUserPlus className="w-6 h-6 mr-2" />
             Tạo tài khoản nhân viên
           </h2>
           <p className="text-gray-600 mt-1">
@@ -205,17 +199,7 @@ const CreateAccountStaff = () => {
           {successMessage && (
             <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-md">
               <div className="flex items-center">
-                <svg
-                  className="w-5 h-5 mr-2"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <FaCheckCircle className="w-5 h-5 mr-2" />
                 {successMessage}
               </div>
             </div>
@@ -225,17 +209,7 @@ const CreateAccountStaff = () => {
           {errors.general && (
             <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
               <div className="flex items-center">
-                <svg
-                  className="w-5 h-5 mr-2"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <FaExclamationTriangle className="w-5 h-5 mr-2" />
                 {errors.general}
               </div>
             </div>
@@ -421,13 +395,16 @@ const CreateAccountStaff = () => {
                   }`}
                 >
                   <option value="">Chọn vai trò</option>
-                  {Object.entries(registrationService.ROLES)
-                    .filter(([key]) => key !== "CUSTOMER")
-                    .map(([key, value]) => (
-                      <option key={value} value={value}>
-                        {getRoleDisplayName(value)}
-                      </option>
-                    ))}
+                  <option value="STAFF_SALE">Nhân viên bán hàng</option>
+                  <option value="LEAD_SALE">Trưởng nhóm bán hàng</option>
+                  <option value="STAFF_PURCHASER">Nhân viên mua hàng</option>
+                  <option value="STAFF_WAREHOUSE_FOREIGN">
+                    Nhân viên kho ngoại
+                  </option>
+                  <option value="STAFF_WAREHOUSE_DOMESTIC">
+                    Nhân viên kho nội
+                  </option>
+                  <option value="MANAGER">Quản lý</option>
                 </select>
                 {errors.role && (
                   <p className="mt-1 text-sm text-red-600">{errors.role}</p>
@@ -435,117 +412,102 @@ const CreateAccountStaff = () => {
               </div>
 
               {/* Department */}
-              {selectedRole && isFieldRequired("department") && (
-                <div>
-                  <label
-                    htmlFor="department"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Phòng ban <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="department"
-                    name="department"
-                    value={formData.department}
-                    onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.department ? "border-red-500" : "border-gray-300"
-                    }`}
-                  >
-                    <option value="">Chọn phòng ban</option>
-                    {Object.entries(registrationService.DEPARTMENTS).map(
-                      ([key, value]) => (
-                        <option key={value} value={value}>
-                          {key === "SALE"
-                            ? "Bán hàng"
-                            : key === "WAREHOUSE"
-                            ? "Kho"
-                            : key === "PURCHASING"
-                            ? "Mua hàng"
-                            : key === "MANAGEMENT"
-                            ? "Quản lý"
-                            : value}
-                        </option>
-                      )
-                    )}
-                  </select>
-                  {errors.department && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.department}
-                    </p>
-                  )}
-                </div>
-              )}
+              <div>
+                <label
+                  htmlFor="department"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Phòng ban
+                </label>
+                <input
+                  type="text"
+                  id="department"
+                  name="department"
+                  value={formData.department}
+                  onChange={handleInputChange}
+                  placeholder="Nhập phòng ban (VD: SALE, WAREHOUSE)"
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.department ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                {errors.department && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.department}
+                  </p>
+                )}
+                <p className="mt-1 text-xs text-gray-500">
+                  Các phòng ban: SALE, WAREHOUSE, PURCHASING, MANAGEMENT
+                </p>
+              </div>
 
               {/* Location */}
-              {selectedRole && isFieldRequired("location") && (
-                <div>
-                  <label
-                    htmlFor="location"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Địa điểm làm việc <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="location"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.location ? "border-red-500" : "border-gray-300"
-                    }`}
-                  >
-                    <option value="">Chọn địa điểm làm việc</option>
-                    {locations.map((location) => (
-                      <option key={location.id} value={location.id}>
-                        {location.name}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.location && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.location}
-                    </p>
-                  )}
-                </div>
-              )}
+              <div>
+                <label
+                  htmlFor="location"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Địa điểm làm việc
+                </label>
+                <input
+                  type="text"
+                  id="location"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  placeholder="Nhập địa điểm làm việc"
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.location ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                {errors.location && (
+                  <p className="mt-1 text-sm text-red-600">{errors.location}</p>
+                )}
+              </div>
 
-              {/* Route IDs for STAFF_SALE */}
-              {selectedRole === "STAFF_SALE" && (
-                <div className="md:col-span-2 lg:col-span-3">
-                  <label
-                    htmlFor="routeIds"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Tuyến đường phụ trách{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="routeIds"
-                    name="routeIds"
-                    multiple
-                    value={formData.routeIds}
-                    onChange={handleRouteChange}
-                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 h-32 ${
-                      errors.routeIds ? "border-red-500" : "border-gray-300"
-                    }`}
-                  >
-                    {routes.map((route) => (
-                      <option key={route.id} value={route.id}>
-                        {route.name}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Giữ Ctrl (hoặc Cmd) để chọn nhiều tuyến
-                  </p>
-                  {errors.routeIds && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.routeIds}
-                    </p>
-                  )}
-                </div>
-              )}
+              {/* Route IDs */}
+              <div className="md:col-span-2 lg:col-span-3">
+                <label
+                  htmlFor="routeIds"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Tuyến đường phụ trách (chỉ cho nhân viên bán hàng)
+                </label>
+                <select
+                  id="routeIds"
+                  name="routeIds"
+                  multiple
+                  value={
+                    formData.routeIds
+                      ? formData.routeIds.split(",").map((id) => id.trim())
+                      : []
+                  }
+                  onChange={(e) => {
+                    const selectedValues = Array.from(
+                      e.target.selectedOptions,
+                      (option) => option.value
+                    );
+                    setFormData((prev) => ({
+                      ...prev,
+                      routeIds: selectedValues.join(", "),
+                    }));
+                  }}
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 h-32 ${
+                    errors.routeIds ? "border-red-500" : "border-gray-300"
+                  }`}
+                >
+                  {routes.map((route) => (
+                    <option key={route.routeId} value={route.routeId}>
+                      {route.name} - {route.note || `Tuyến ${route.routeId}`}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-sm text-gray-500">
+                  Giữ Ctrl (hoặc Cmd) để chọn nhiều tuyến
+                </p>
+                {errors.routeIds && (
+                  <p className="mt-1 text-sm text-red-600">{errors.routeIds}</p>
+                )}
+              </div>
             </div>
           </div>
 
@@ -569,25 +531,7 @@ const CreateAccountStaff = () => {
             >
               {loading ? (
                 <div className="flex items-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
+                  <FaSpinner className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
                   Đang tạo...
                 </div>
               ) : (

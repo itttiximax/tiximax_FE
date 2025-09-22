@@ -443,7 +443,7 @@ const ProductManager = ({
                   <div className="grid grid-cols-6 gap-3">
                     <div className="col-span-2">
                       <label className="block text-xs font-medium text-gray-600 mb-1">
-                        Tên sản phẩm
+                        Tên sản phẩm <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -458,7 +458,7 @@ const ProductManager = ({
 
                     <div className="col-span-2">
                       <label className="block text-xs font-medium text-gray-600 mb-1">
-                        Số lượng
+                        Số lượng <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -474,7 +474,7 @@ const ProductManager = ({
 
                     <div className="col-span-2">
                       <label className="block text-xs font-medium text-gray-600 mb-1">
-                        Website
+                        Website <span className="text-red-500">*</span>
                       </label>
                       <SearchWebsite
                         onSelectWebsite={(website) =>
@@ -489,7 +489,7 @@ const ProductManager = ({
 
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Link sản phẩm
+                      Link sản phẩm <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -505,7 +505,7 @@ const ProductManager = ({
                   <div className="grid grid-cols-4 gap-3">
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">
-                        Giá sản phẩm
+                        Giá sản phẩm <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -521,7 +521,7 @@ const ProductManager = ({
 
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">
-                        Phí ship
+                        Phí ship <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -570,7 +570,7 @@ const ProductManager = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">
-                        Loại sản phẩm
+                        Loại sản phẩm <span className="text-red-500">*</span>
                       </label>
                       <select
                         name="productTypeId"
