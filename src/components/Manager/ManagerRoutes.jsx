@@ -166,7 +166,7 @@ const ManagerRoutes = () => {
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
           >
             <FiPlus className="w-5 h-5" />
-            Thêm tuyến mới
+            Thêm
           </button>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-12 text-center text-gray-500">
@@ -206,7 +206,7 @@ const ManagerRoutes = () => {
           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
         >
           <FiPlus className="w-5 h-5" />
-          Thêm tuyến mới
+          Thêm
         </button>
       </div>
 

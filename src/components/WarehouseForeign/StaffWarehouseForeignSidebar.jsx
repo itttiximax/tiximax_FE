@@ -16,26 +16,96 @@ const StaffWarehouseForeignSidebar = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const menuItems = [
+  const menuGroups = [
     {
-      text: "Thống kê",
-      icon: <FaChartBar />,
-      path: "/staff-warehouse-foreign/dashboard",
+      title: "Dashboard",
+      items: [
+        {
+          text: "Tổng quan",
+          icon: <FaChartBar />,
+          path: "/staff-warehouse-foreign/dashboard",
+        },
+      ],
     },
     {
-      text: "Tồn kho",
-      icon: <FaBoxes />,
-      path: "/staff-warehouse-foreign/inventory",
+      title: "Inbound (Nhập kho)",
+      items: [
+        {
+          text: "Lệnh nhập",
+          icon: <FaArrowDown />,
+          path: "/staff-warehouse-foreign/inventory",
+        },
+        {
+          text: "Kho",
+          icon: <FaArrowDown />,
+          path: "/staff-warehouse-foreign/import",
+        },
+      ],
     },
     {
-      text: "Nhập hàng",
-      icon: <FaArrowDown />,
-      path: "/staff-warehouse-foreign/import",
+      title: "Outbound (Xuất kho)",
+      items: [
+        {
+          text: "Lệnh xuất",
+          icon: <FaArrowUp />,
+          path: "/staff-warehouse-foreign/outbound/orders",
+        },
+        {
+          text: "Packing List",
+          icon: <FaArrowUp />,
+          path: "/staff-warehouse-foreign/outbound/packing-list",
+        },
+      ],
     },
     {
-      text: "Xuất hàng",
-      icon: <FaArrowUp />,
-      path: "/staff-warehouse-foreign/export",
+      title: "Stock Management",
+      items: [
+        {
+          text: "Tồn kho",
+          icon: <FaBoxes />,
+          path: "/staff-warehouse-foreign/stock",
+        },
+        {
+          text: "Serial Number",
+          icon: <FaBoxes />,
+          path: "/staff-warehouse-foreign/stock/serial",
+        },
+        {
+          text: "Vị trí hàng",
+          icon: <FaBoxes />,
+          path: "/staff-warehouse-foreign/stock/location",
+        },
+      ],
+    },
+    {
+      title: "Inventory Audit",
+      items: [
+        {
+          text: "Kiểm kê",
+          icon: <FaBoxes />,
+          path: "/staff-warehouse-foreign/audit/check",
+        },
+        {
+          text: "Đối chiếu",
+          icon: <FaBoxes />,
+          path: "/staff-warehouse-foreign/audit/reconcile",
+        },
+      ],
+    },
+    {
+      title: "Báo cáo & Thống kê",
+      items: [
+        {
+          text: "Báo cáo nhập/xuất/tồn",
+          icon: <FaChartBar />,
+          path: "/staff-warehouse-foreign/reports/dashboard",
+        },
+        {
+          text: "Hiệu suất",
+          icon: <FaChartBar />,
+          path: "/staff-warehouse-foreign/reports/performance",
+        },
+      ],
     },
   ];
 
@@ -83,19 +153,28 @@ const StaffWarehouseForeignSidebar = () => {
         </div>
 
         {/* Menu Items */}
-        <nav className="flex-1 p-3 space-y-1">
-          {menuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg ${
-                isActive(item.path) ? "bg-blue-50 text-blue-700 shadow-sm" : ""
-              }`}
-              onClick={() => setIsOpen(false)} // Close sidebar on link click in mobile
-            >
-              <span className="text-gray-500">{item.icon}</span>
-              <span className="text-sm font-medium">{item.text}</span>
-            </Link>
+        <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+          {menuGroups.map((group) => (
+            <div key={group.title}>
+              <h3 className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                {group.title}
+              </h3>
+              {group.items.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg ${
+                    isActive(item.path)
+                      ? "bg-blue-50 text-blue-700 shadow-sm"
+                      : ""
+                  }`}
+                  onClick={() => setIsOpen(false)} // Close sidebar on link click in mobile
+                >
+                  <span className="text-gray-500">{item.icon}</span>
+                  <span className="text-sm font-medium">{item.text}</span>
+                </Link>
+              ))}
+            </div>
           ))}
         </nav>
 
