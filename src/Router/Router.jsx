@@ -67,6 +67,7 @@ import OrderCustomerList from "../components/Order/OrderCustomerList";
 import ManagerWebsite from "../components/Manager/ManagerWebsite";
 import WarehouseShipment from "../components/WarehouseForeign/WarehouseShipment";
 import WarehouseList from "../components/WarehouseForeign/WarehouseList";
+// import PackingsList from "../components/WarehouseForeign/PackingsList";
 import PackingsList from "../components/WarehouseForeign/packingsList";
 
 const Router = createBrowserRouter([
