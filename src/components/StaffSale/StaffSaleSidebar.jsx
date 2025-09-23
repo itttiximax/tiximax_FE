@@ -258,8 +258,8 @@ const StaffSaleSidebar = () => {
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+      {/* Navigation with hidden scrollbar */}
+      <nav className="flex-1 p-3 space-y-4 overflow-y-auto hide-scrollbar">
         {menuItems.map((section, sectionIndex) => (
           <div key={sectionIndex} className="space-y-2">
             <h3 className="px-4 text-xs font-semibold uppercase text-gray-500 tracking-wide">

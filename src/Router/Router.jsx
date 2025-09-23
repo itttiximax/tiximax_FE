@@ -18,7 +18,6 @@ import AdminDashboard from "../components/Admin/AdminDashboard";
 import LeadSaleLayout from "../components/LeadSale/LeadSaleLayout";
 import LeadSalePage from "../components/LeadSale/LeadSalePage";
 import DashboardLeadSale from "../components/LeadSale/DashboardLeadSale";
-// import CreatePayment from "../components/LeadSale/CreatePayment";
 
 import SearchWebsite from "../components/Order/SearchWebsite";
 
@@ -67,8 +66,8 @@ import OrderCustomerList from "../components/Order/OrderCustomerList";
 import ManagerWebsite from "../components/Manager/ManagerWebsite";
 import WarehouseShipment from "../components/WarehouseForeign/WarehouseShipment";
 import WarehouseList from "../components/WarehouseForeign/WarehouseList";
-// import PackingsList from "../components/WarehouseForeign/PackingsList";
 import PackingsList from "../components/WarehouseForeign/PackingsList";
+import CreatePacking from "../components/WarehouseForeign/CreatePacking";
 
 const Router = createBrowserRouter([
   {
@@ -248,7 +247,7 @@ const Router = createBrowserRouter([
       { path: "import", element: <WarehouseList /> },
       { path: "outbound/orders", element: <NotFound /> },
       { path: "outbound/packing-list", element: <PackingsList /> },
-      { path: "stock", element: <NotFound /> },
+      { path: "stock", element: <CreatePacking /> },
       { path: "stock/serial", element: <NotFound /> },
       { path: "stock/location", element: <NotFound /> },
       { path: "audit/check", element: <NotFound /> },

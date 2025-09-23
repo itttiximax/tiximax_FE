@@ -152,8 +152,8 @@ const StaffWarehouseForeignSidebar = () => {
           </div>
         </div>
 
-        {/* Menu Items */}
-        <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+        {/* Menu Items with hidden scrollbar */}
+        <nav className="flex-1 p-3 space-y-4 overflow-y-auto hide-scrollbar">
           {menuGroups.map((group) => (
             <div key={group.title}>
               <h3 className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">

@@ -57,8 +57,8 @@ const StaffWarehouseDomesticSidebar = () => {
         </div>
       </div>
 
-      {/* Menu Items */}
-      <nav className="flex-1 p-3 space-y-1">
+      {/* Menu Items with hidden scrollbar */}
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto hide-scrollbar">
         {menuItems.map((item) => (
           <Link
             key={item.path}

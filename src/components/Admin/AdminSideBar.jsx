@@ -359,7 +359,7 @@ const AdminSidebar = () => {
 
       {/* Menu Sections */}
       <nav
-        className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-500/30 scrollbar-track-gray-800/50"
+        className="flex-1 p-4 space-y-2 overflow-y-auto hide-scrollbar"
         role="navigation"
         aria-label="Main navigation"
       >

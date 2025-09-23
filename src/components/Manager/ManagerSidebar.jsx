@@ -25,76 +25,77 @@ const ManagerSidebar = () => {
 
   const menuSections = [
     {
-      title: t("sidebar.analytics"),
+      title: t("analytics"),
       items: [
         {
-          text: t("sidebar.dashboard"),
+          text: t("dashboard"),
           icon: <FiBarChart />,
           path: "/manager/dashboard",
         },
         {
-          text: t("sidebar.team"),
+          text: t("team"),
           icon: <FiUserCheck />,
           path: "/manager/team",
         },
         {
-          text: t("sidebar.customers"),
+          text: t("customers"),
           icon: <FiUsers />,
           path: "/manager/customers",
         },
       ],
     },
     {
-      title: t("sidebar.pages"),
+      title: t("pages"),
       items: [
         {
-          text: t("sidebar.quote"),
+          text: t("quote"),
           icon: <FiFileText />,
           path: "/manager/quote",
         },
         {
-          text: t("sidebar.marketing"),
+          text: t("marketing"),
           icon: <FiSpeaker />,
           path: "/manager/ads",
         },
       ],
     },
     {
-      title: t("sidebar.management"),
+      title: t("management"),
       items: [
         {
-          text: t("sidebar.payment"),
+          text: t("payment"),
           icon: <FiCreditCard />,
           hasSubmenu: true,
           isOpen: openCost,
           onToggle: () => setOpenCost(!openCost),
           submenuItems: [
-            { text: t("sidebar.paylater"), path: "/manager/cost/paylater" },
-            { text: t("sidebar.paybefore"), path: "/manager/cost/paybefore" },
+            { text: t("paylater"), path: "/manager/cost/paylater" },
+            { text: t("paybefore"), path: "/manager/cost/paybefore" },
           ],
         },
         {
-          text: t("sidebar.routes"),
+          text: t("routes"),
           icon: <FiTruck />,
           path: "/manager/routes",
         },
         {
-          text: t("sidebar.transfer"),
+          text: t("transfer"),
           icon: <FiMapPin />,
           path: "/manager/transfer",
         },
         {
-          text: t("sidebar.producttype"),
+          text: t("producttype"),
           icon: <FiBox />,
           path: "/manager/producttype",
         },
+
         {
-          text: t("sidebar.website"),
+          text: t("website"),
           icon: <FiGlobe />,
           path: "/manager/website",
         },
         {
-          text: t("sidebar.order"),
+          text: t("order"),
           icon: <FiShoppingCart />,
           path: "/manager/order",
         },
@@ -177,8 +178,8 @@ const ManagerSidebar = () => {
   };
 
   return (
-    <div className="w-64 h-screen bg-white dark:bg-gray-800 shadow-md flex flex-col border-r border-gray-200/60 dark:border-gray-700/60">
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+    <div className="w-64 h-full bg-white dark:bg-gray-800 shadow-md flex flex-col border-r border-gray-200/60 dark:border-gray-700/60">
+      <div className="flex-1 overflow-y-auto hide-scrollbar p-4 space-y-6">
         {menuSections.map((section) => (
           <div key={section.title}>
             <h2 className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">

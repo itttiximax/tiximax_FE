@@ -1,4 +1,4 @@
-import api from "../../config/api.js"; // ← THAY ĐỔI: import api thay vì axios
+import api from "../../config/api.js";
 
 const orderService = {
   // Create order

@@ -1,4 +1,4 @@
-// ManagerLayout.jsx - TẤT CẢ UI COMPONENTS
+// ManagerLayout.jsx - FIXED SCROLL ISSUE
 import React, { useRef, useEffect, lazy, Suspense } from "react";
 import { Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -221,13 +221,13 @@ const ManagerLayout = () => {
   } = useManagerLayout();
 
   return (
-    <div className="h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
       {/* Error Toast */}
       <ErrorToast message={error} onClose={clearError} />
 
-      {/* Header Bar */}
-      <header className="bg-blue-600 dark:bg-blue-800 shadow-xl border-b border-blue-700/50 px-4 sm:px-6 py-2 relative z-20">
-        <div className="flex items-center justify-between">
+      {/* Header Bar - Fixed height */}
+      <header className="flex-shrink-0 bg-blue-600 dark:bg-blue-800 shadow-xl border-b border-blue-700/50 px-4 sm:px-6 py-2 relative z-20">
+        <div className="flex items-center justify-between h-12">
           {/* Logo & Hamburger */}
           <div className="flex items-center w-auto sm:w-64 justify-start">
             <button
@@ -278,22 +278,24 @@ const ManagerLayout = () => {
       </header>
 
       {/* Container cho Sidebar và Main Content */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0">
         {/* Sidebar */}
         <div
           className={`fixed md:static inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-800 shadow-sm transform ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } md:translate-x-0 transition-transform duration-300 ease-in-out`}
+          } md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col`}
         >
-          <Suspense
-            fallback={
-              <div className="flex justify-center items-center h-32">
-                <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            }
-          >
-            <ManagerSidebar />
-          </Suspense>
+          <div className="flex-1 overflow-y-auto hide-scrollbar">
+            <Suspense
+              fallback={
+                <div className="flex justify-center items-center h-32">
+                  <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              }
+            >
+              <ManagerSidebar />
+            </Suspense>
+          </div>
         </div>
 
         {/* Overlay cho sidebar trên mobile */}
@@ -304,10 +306,10 @@ const ManagerLayout = () => {
           ></div>
         )}
 
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto ">
-          <div className="w-full ">
-            <div className="bg-white dark:bg-gray-800shadow-sm border border-gray-300/60 dark:border-gray-700/60 overflow-hidden">
+        {/* Main Content Area - Key changes here */}
+        <main className="flex-1 min-w-0 overflow-hidden">
+          <div className="h-full overflow-y-auto hide-scrollbar ">
+            <div className="min-h-full bg-white dark:bg-gray-800 shadow-sm border border-gray-300/60 dark:border-gray-700/60">
               <div className="p-6 sm:p-8">
                 {isLoading ? (
                   <div className="flex justify-center items-center h-32">
