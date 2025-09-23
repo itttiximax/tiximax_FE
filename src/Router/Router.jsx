@@ -68,7 +68,7 @@ import ManagerWebsite from "../components/Manager/ManagerWebsite";
 import WarehouseShipment from "../components/WarehouseForeign/WarehouseShipment";
 import WarehouseList from "../components/WarehouseForeign/WarehouseList";
 // import PackingsList from "../components/WarehouseForeign/PackingsList";
-import PackingsList from "../components/WarehouseForeign/packingsList";
+import PackingsList from "../components/WarehouseForeign/PackingsList";
 
 const Router = createBrowserRouter([
   {
