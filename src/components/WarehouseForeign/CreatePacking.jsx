@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createPackingService } from "../../Services/Warehouse/createpackingService";
 import managerDestinationService from "../../Services/Manager/managerDestinationService";
+import BarcodeScanner from "../../common/BarcodeScanner"; // chỉnh lại path nếu khác
 
 const CreatePacking = () => {
   const [destinations, setDestinations] = useState([]);
@@ -99,8 +100,26 @@ const CreatePacking = () => {
     }
   };
 
+  // ✅ Callback khi BarcodeScanner quét thành công
+  const handleScannedCode = (scannedCode) => {
+    setFormData((prev) => {
+      const lastIndex = prev.shipmentCodes.length - 1;
+      const lastValue = prev.shipmentCodes[lastIndex].trim();
+
+      if (lastValue === "") {
+        // điền vào ô cuối nếu trống
+        const updated = [...prev.shipmentCodes];
+        updated[lastIndex] = scannedCode;
+        return { ...prev, shipmentCodes: updated };
+      } else {
+        // nếu ô cuối đã có → thêm ô mới
+        return { ...prev, shipmentCodes: [...prev.shipmentCodes, scannedCode] };
+      }
+    });
+  };
+
   return (
-    <div className="min-h-screen  py-8 px-4">
+    <div className="min-h-screen py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
@@ -181,19 +200,7 @@ const CreatePacking = () => {
                           onClick={() => removeShipmentCode(index)}
                           className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
                         >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
+                          🗑
                         </button>
                       )}
                     </div>
@@ -206,6 +213,14 @@ const CreatePacking = () => {
                   >
                     + Add Another Shipment Code
                   </button>
+                </div>
+
+                {/* Barcode Scanner */}
+                <div className="mt-6">
+                  <h3 className="font-medium text-gray-700 mb-2">
+                    Scan Shipment Code
+                  </h3>
+                  <BarcodeScanner onDetected={handleScannedCode} />
                 </div>
               </div>
 
@@ -224,19 +239,6 @@ const CreatePacking = () => {
             {error && (
               <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-lg">
                 <div className="flex items-center">
-                  <svg
-                    className="w-5 h-5 text-red-400 mr-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
                   <p className="text-red-700">{error}</p>
                 </div>
               </div>
@@ -245,19 +247,6 @@ const CreatePacking = () => {
             {result && (
               <div className="bg-white rounded-lg shadow-lg p-6 border-l-4 border-green-400">
                 <div className="flex items-center mb-4">
-                  <svg
-                    className="w-6 h-6 text-green-500 mr-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
                   <h3 className="text-lg font-semibold text-green-800">
                     Packing Created Successfully!
                   </h3>
@@ -311,7 +300,7 @@ const CreatePacking = () => {
                 </h3>
                 <ol className="space-y-2 text-blue-700">
                   <li>1. Select a destination from the dropdown</li>
-                  <li>2. Add shipment codes</li>
+                  <li>2. Add or scan shipment codes</li>
                   <li>3. Click create to generate packing</li>
                 </ol>
               </div>
