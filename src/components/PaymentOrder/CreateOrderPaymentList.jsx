@@ -8,8 +8,8 @@ import OrderPending from "./OrderPending";
 const CreateOrderPaymentList = () => {
   const validTabs = [
     "DA_XAC_NHAN",
-    "CHO_THANH_TOAN_SHIP",
     "CHO_THANH_TOAN",
+    "CHO_THANH_TOAN_SHIP",
     "CHO_NHAP_KHO_VN",
   ];
   const savedTab = localStorage.getItem("activeTab");
@@ -90,12 +90,6 @@ const CreateOrderPaymentList = () => {
       bgColor: "bg-white",
     },
     {
-      key: "CHO_THANH_TOAN_SHIP",
-      label: "Chờ thanh toán ship",
-      color: "text-yellow-700",
-      bgColor: "bg-white",
-    },
-    {
       key: "CHO_THANH_TOAN",
       label: "Chờ thanh toán",
       color: "text-orange-700",
@@ -105,6 +99,12 @@ const CreateOrderPaymentList = () => {
       key: "CHO_NHAP_KHO_VN",
       label: "Chờ nhập kho VN",
       color: "text-blue-700",
+      bgColor: "bg-white",
+    },
+    {
+      key: "CHO_THANH_TOAN_SHIP",
+      label: "Chờ thanh toán ship",
+      color: "text-yellow-700",
       bgColor: "bg-white",
     },
   ];

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import {
   FiPlus,
   FiEdit2,
@@ -152,46 +152,94 @@ const ManagerRoutes = () => {
   const formatCurrency = (amount) =>
     new Intl.NumberFormat("vi-VN").format(amount);
 
-  if (routes.length === 0 && !loading) {
-    return (
-      <div className="p-6 bg-white-50 min-h-screen">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Quản lý Tuyến Vận Chuyển
-          </h1>
-        </div>
-        <div className="mb-6">
-          <button
-            onClick={openCreateDialog}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
-          >
-            <FiPlus className="w-5 h-5" />
-            Thêm
-          </button>
-        </div>
-        <div className="bg-white rounded-xl shadow-lg p-12 text-center text-gray-500">
-          <FiFileText className="w-12 h-12 text-gray-400 mb-4 mx-auto" />
-          <p className="text-lg">Chưa có dữ liệu tuyến vận chuyển</p>
-          <p className="text-sm text-gray-400 mt-1">
-            Nhấn "Thêm tuyến mới" để bắt đầu
-          </p>
-        </div>
-
-        {/* Loading overlay chỉ ở phía dưới table */}
-        {deleteLoading && (
-          <div className="absolute inset-x-0 bottom-0 bg-white bg-opacity-75 flex items-center justify-center py-8 rounded-b-xl">
-            <div className="flex items-center gap-3">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600"></div>
-              <span className="text-red-600 font-medium">Đang xóa...</span>
+  const renderTableContent = () => {
+    if (loading) {
+      return (
+        <tr>
+          <td colSpan="8" className="px-6 py-12">
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-3 text-gray-600">Đang tải dữ liệu...</span>
             </div>
+          </td>
+        </tr>
+      );
+    }
+
+    if (routes.length === 0) {
+      return (
+        <tr>
+          <td colSpan="8" className="px-6 py-20 text-center text-gray-500">
+            <FiFileText className="w-16 h-16 text-gray-400 mb-4 mx-auto" />
+            <p className="text-xl font-medium mb-2">
+              Chưa có dữ liệu tuyến vận chuyển
+            </p>
+            <p className="text-sm text-gray-400 mb-6">
+              Nhấn "Thêm tuyến mới" để bắt đầu
+            </p>
+            <button
+              onClick={openCreateDialog}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl mx-auto"
+            >
+              <FiPlus className="w-5 h-5" />
+              Thêm tuyến mới
+            </button>
+          </td>
+        </tr>
+      );
+    }
+
+    return routes.map((item) => (
+      <tr key={item.routeId} className="hover:bg-gray-50 transition-colors">
+        <td className="px-6 py-4 text-sm font-medium text-gray-900">
+          #{item.routeId}
+        </td>
+        <td className="px-6 py-4 font-medium text-gray-900">{item.name}</td>
+        <td className="px-6 py-4 text-sm text-gray-700">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            {item.shipTime}
+          </span>
+        </td>
+        <td className="px-6 py-4 text-sm text-right text-gray-900 font-mono">
+          {item.unitBuyingPrice ? formatCurrency(item.unitBuyingPrice) : "-"}
+        </td>
+        <td className="px-6 py-4 text-sm text-right text-gray-900 font-mono">
+          {item.unitDepositPrice ? formatCurrency(item.unitDepositPrice) : "-"}
+        </td>
+        <td className="px-6 py-4 text-sm text-right text-gray-900 font-mono">
+          {item.exchangeRate ? formatCurrency(item.exchangeRate) : "-"}
+        </td>
+        <td className="px-6 py-4 font-medium text-gray-900">
+          <div className="max-w-xs truncate" title={item.note}>
+            {item.note || "Không có"}
           </div>
-        )}
-      </div>
-    );
-  }
+        </td>
+        <td className="px-6 py-4">
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={() => handleEdit(item)}
+              className="bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-lg transition-all hover:scale-105"
+              title="Chỉnh sửa"
+            >
+              <FiEdit2 className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => handleDelete(item.routeId)}
+              className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-all hover:scale-105"
+              title="Xóa"
+            >
+              <FiTrash2 className="w-4 h-4" />
+            </button>
+          </div>
+        </td>
+      </tr>
+    ));
+  };
 
   return (
-    <div className="p-6 bg white-50 min-h-screen">
+    <div className="p-6 bg-white-50 min-h-screen">
+      <Toaster position="top-right" />
+
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">
@@ -243,78 +291,20 @@ const ManagerRoutes = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {loading ? (
-                <tr>
-                  <td colSpan="8" className="px-6 py-12">
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                      <span className="ml-3 text-gray-600">
-                        Đang tải dữ liệu...
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                routes.map((item) => (
-                  <tr
-                    key={item.routeId}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                      #{item.routeId}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      {item.name}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {item.shipTime}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-right text-gray-900 font-mono">
-                      {item.unitBuyingPrice
-                        ? formatCurrency(item.unitBuyingPrice)
-                        : "-"}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-right text-gray-900 font-mono">
-                      {item.unitDepositPrice
-                        ? formatCurrency(item.unitDepositPrice)
-                        : "-"}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-right text-gray-900 font-mono">
-                      {item.exchangeRate
-                        ? formatCurrency(item.exchangeRate)
-                        : "-"}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      <div className="max-w-xs truncate" title={item.note}>
-                        {item.note || "Không có"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-lg transition-all hover:scale-105"
-                          title="Chỉnh sửa"
-                        >
-                          <FiEdit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.routeId)}
-                          className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-all hover:scale-105"
-                          title="Xóa"
-                        >
-                          <FiTrash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
+              {renderTableContent()}
             </tbody>
           </table>
         </div>
+
+        {/* Loading overlay chỉ ở phía dưới table */}
+        {deleteLoading && (
+          <div className="absolute inset-x-0 bottom-0 bg-white bg-opacity-75 flex items-center justify-center py-8 rounded-b-xl">
+            <div className="flex items-center gap-3">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600"></div>
+              <span className="text-red-600 font-medium">Đang xóa...</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Dialog Modal */}

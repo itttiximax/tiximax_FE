@@ -5,7 +5,7 @@ import {
   Users,
   Package,
   Truck,
-  Calculator,
+  PackageSearch,
   Warehouse,
   Route,
   LogOut,
@@ -13,17 +13,23 @@ import {
   User,
   Phone,
   Book,
-  Calendar,
-  BarChart3,
+  List,
+  History,
   TrendingUp,
   FileText,
   UserPlus,
+  Landmark,
+  Luggage,
+  Banknote,
+  CopyPlus,
+  UserStar,
 } from "lucide-react";
 
 const StaffSaleSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isCustomerDropdownOpen, setIsCustomerDropdownOpen] = useState(false);
+  const [isStaffDropdownOpen, setIsStaffDropdownOpen] = useState(false);
   const [isOrderDropdownOpen, setIsOrderDropdownOpen] = useState(false);
   const [isShippingDropdownOpen, setIsShippingDropdownOpen] = useState(false);
 
@@ -39,29 +45,39 @@ const StaffSaleSidebar = () => {
       section: "BÁN HÀNG",
       items: [
         {
+          type: "dropdown",
           to: "/staff-sale/create-invoice",
           icon: FileText,
-          label: "Tạo hóa đơn",
+          label: "Tạo đơn ",
+          dropdownItems: [
+            {
+              to: "/staff-sale/create-invoice",
+              icon: FileText,
+              label: "Tạo hóa đơn",
+            },
+            {
+              to: "/staff-sale/deposit",
+              icon: Luggage,
+              label: "Ký gửi",
+            },
+            {
+              to: "/staff-sale/auction",
+              icon: Landmark,
+              label: "Đấu giá",
+            },
+          ],
+          isOpen: isStaffDropdownOpen,
+          onToggle: () => setIsStaffDropdownOpen(!isStaffDropdownOpen),
         },
         {
           to: "/staff-sale/quotations",
-          icon: Calculator,
+          icon: Banknote,
           label: "Báo giá",
         },
-      ],
-    },
-    {
-      section: "BÁO CÁO",
-      items: [
         {
-          to: "/staff-sale/dashboard",
-          icon: LayoutDashboard,
-          label: "Thống kê",
-        },
-        {
-          to: "/staff-sale/performance",
-          icon: TrendingUp,
-          label: "Hiệu suất cá nhân",
+          to: "/staff-sale/megerequests",
+          icon: CopyPlus,
+          label: "Hỗ trợ gợp đơn",
         },
       ],
     },
@@ -74,18 +90,18 @@ const StaffSaleSidebar = () => {
           label: "Quản lý khách hàng",
           dropdownItems: [
             {
-              to: "/staff-sale/createaccountuser",
-              icon: UserPlus,
-              label: "Tạo khách hàng",
-            },
-            {
               to: "/staff-sale/customers",
               icon: Users,
               label: "Danh sách khách hàng",
             },
             {
+              to: "/staff-sale/createaccountuser",
+              icon: UserPlus,
+              label: "Tạo khách hàng",
+            },
+            {
               to: "/staff-sale/prospects",
-              icon: Users,
+              icon: UserStar,
               label: "Khách hàng tiềm năng",
             },
           ],
@@ -94,7 +110,7 @@ const StaffSaleSidebar = () => {
         },
         {
           type: "dropdown",
-          icon: Package,
+          icon: List,
           label: "Quản lý đơn hàng",
           dropdownItems: [
             {
@@ -104,7 +120,7 @@ const StaffSaleSidebar = () => {
             },
             {
               to: "/staff-sale/orders/pending",
-              icon: Package,
+              icon: PackageSearch,
               label: "Đang xử lý",
             },
           ],
@@ -119,21 +135,21 @@ const StaffSaleSidebar = () => {
             {
               to: "/staff-sale/shipping/domestic",
               icon: Truck,
-              label: "Khách lẻ",
+              label: "Tra cứu đơn hàng",
             },
             {
               to: "/staff-sale/shipping/international",
-              icon: Truck,
-              label: "Khách đại lý",
+              icon: History,
+              label: "Lịch sử vận chuyển",
+            },
+            {
+              to: "/staff-sale/tracking",
+              icon: Route,
+              label: "Lộ trình",
             },
           ],
           isOpen: isShippingDropdownOpen,
           onToggle: () => setIsShippingDropdownOpen(!isShippingDropdownOpen),
-        },
-        {
-          to: "/staff-sale/tracking",
-          icon: Route,
-          label: "Lộ trình",
         },
         {
           to: "/staff-sale/warehouses",
@@ -143,17 +159,32 @@ const StaffSaleSidebar = () => {
         {
           to: "/staff-sale/telesale",
           icon: Phone,
-          label: "Công cụ liên lạc",
+          label: "Liên hệ",
         },
         {
           to: "/staff-sale/knowledge",
           icon: Book,
           label: "Tài liệu",
         },
+        // {
+        //   to: "/staff-sale/schedule",
+        //   icon: Calendar,
+        //   label: "Lịch hẹn",
+        // },
+      ],
+    },
+    {
+      section: "BÁO CÁO",
+      items: [
         {
-          to: "/staff-sale/schedule",
-          icon: Calendar,
-          label: "Lịch hẹn",
+          to: "/staff-sale/dashboard",
+          icon: LayoutDashboard,
+          label: "Thống kê",
+        },
+        {
+          to: "/staff-sale/performance",
+          icon: TrendingUp,
+          label: "Hiệu suất cá nhân",
         },
       ],
     },

@@ -37,7 +37,7 @@ import ManagerDashboard from "../components/Manager/ManagerDashboard";
 import StaffSalePage from "../components/StaffSale/StaffSalePage";
 import StaffSaleLayout from "../components/StaffSale/StaffSaleLayout";
 import Tracking from "../components/StaffSale/Tracking";
-import CreateOrderPayment from "../components/PaymentOrder/CreateOrderPayment";
+// import CreateOrderPayment from "../components/PaymentOrder/CreateOrderPayment";
 
 //StaffPurchaser components
 import StaffPurchaserPage from "../components/StaffPurchaser/StaffPurchaserPage";
@@ -66,8 +66,9 @@ import OrderCustomerList from "../components/Order/OrderCustomerList";
 import ManagerWebsite from "../components/Manager/ManagerWebsite";
 import WarehouseShipment from "../components/WarehouseForeign/WarehouseShipment";
 import WarehouseList from "../components/WarehouseForeign/WarehouseList";
-import PackingsList from "../components/WarehouseForeign/PackingsList";
 import CreatePacking from "../components/WarehouseForeign/CreatePacking";
+import PackingEligibleList from "../components/WarehouseForeign/PackingEligibleList";
+import PackingAwaitList from "../components/WarehouseForeign/PackingAwaitList";
 
 const Router = createBrowserRouter([
   {
@@ -163,12 +164,20 @@ const Router = createBrowserRouter([
         element: <LeadSalePage />,
       },
       { path: "createorder", element: <CreateOrderForm /> },
+      { path: "deposit", element: <NotFound /> }, // Chưa triển khai
+      { path: "auction", element: <NotFound /> }, // Chưa triển khai
+
+      { path: "createaccountuser", element: <CreateAccountUser /> },
+      { path: "prospects", element: <NotFound /> },
       { path: "dashboard", element: <DashboardLeadSale /> },
       { path: "team", element: <NotFound /> },
       { path: "salesreport", element: <NotFound /> },
       { path: "team-performance", element: <NotFound /> },
       { path: "customers", element: <NotFound /> },
       { path: "orders", element: <ManagerOrder /> },
+      { path: "/lead-sale/shipping/domestic", element: <NotFound /> },
+      { path: "/lead-sale/shipping/international", element: <NotFound /> },
+      { path: "tracking", element: <NotFound /> },
       { path: "orders/tracking", element: <ManagerOrder /> },
       { path: "createpayment", element: <CreateOrderPaymentList /> },
       { path: "createpaymentsupport", element: <OrderCustomerList /> },
@@ -176,12 +185,8 @@ const Router = createBrowserRouter([
       { path: "sales-staff", element: <NotFound /> },
       { path: "schedule", element: <NotFound /> },
       { path: "destination", element: <NotFound /> },
-      // { path: "img", element: <UploadImage /> },
       { path: "campaigns", element: <SearchWebsite /> },
       { path: "camp", element: <AccountSearch /> },
-
-      // { path: "trackingpayment", element: <CreateOrderPayment /> },
-      // { path: "search", element: <AccountSearch /> },
     ],
   },
   {
@@ -198,21 +203,25 @@ const Router = createBrowserRouter([
       },
       { path: "create-invoice", element: <CreateOrderForm /> },
       { path: "quotations", element: <CreateOrderPaymentList /> },
-      { path: "dashboard", element: <ManagerOrder /> },
-      { path: "performance", element: <NotFound /> }, // Chưa triển khai
-      { path: "customers", element: <NotFound /> }, // Chưa triển khai
-      { path: "prospects", element: <NotFound /> }, // Chưa triển khai
+      { path: "deposit", element: <NotFound /> }, // Chưa triển khai
+      { path: "auction", element: <NotFound /> }, // Chưa triển khai
+      { path: "megerequests", element: <OrderCustomerList /> },
+      { path: "orders/pending", element: <ManagerOrder /> },
       { path: "createaccountuser", element: <CreateAccountUser /> },
-      { path: "orders", element: <NotFound /> }, // Chưa triển khai
+
+      { path: "customers", element: <NotFound /> },
+      { path: "prospects", element: <NotFound /> },
+      { path: "orders", element: <NotFound /> },
       { path: "orders/pending", element: <NotFound /> }, // Chưa triển khai
       { path: "shipping/domestic", element: <NotFound /> }, // Chưa triển khai
       { path: "shipping/international", element: <NotFound /> }, // Chưa triển khai
-      { path: "tracking", element: <Tracking /> },
-      { path: "warehouses", element: <Tracking /> },
+      { path: "tracking", element: <Tracking /> }, // Chưa triển khai
+      { path: "warehouses", element: <Tracking /> }, // Chưa triển khai
       { path: "telesale", element: <NotFound /> }, // Chưa triển khai
       { path: "knowledge", element: <NotFound /> }, // Chưa triển khai
       { path: "schedule", element: <NotFound /> }, // Chưa triển khai
-      { path: "createaccountuser", element: <CreateAccountUser /> },
+      { path: "dashboard", element: <NotFound /> },
+      { path: "performance", element: <NotFound /> },
     ],
   },
   {
@@ -246,7 +255,11 @@ const Router = createBrowserRouter([
       { path: "inventory", element: <WarehouseShipment /> },
       { path: "import", element: <WarehouseList /> },
       { path: "outbound/orders", element: <NotFound /> },
-      { path: "outbound/packing-list", element: <PackingsList /> },
+
+      { path: "outbound/packinginwarehouse", element: <NotFound /> },
+      { path: "outbound/packingeligible", element: <PackingEligibleList /> },
+      { path: "outbound/packingawaiting", element: <PackingAwaitList /> },
+
       { path: "stock", element: <CreatePacking /> },
       { path: "stock/serial", element: <NotFound /> },
       { path: "stock/location", element: <NotFound /> },

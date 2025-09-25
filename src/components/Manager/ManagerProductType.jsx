@@ -138,35 +138,89 @@ const ManagerProductType = () => {
     }));
   };
 
-  if (productTypes.length === 0 && !loading) {
-    return (
-      <div className="p-6 bg-gray-50 min-h-screen">
-        <Toaster position="top-right" />
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Quản lý Loại Sản Phẩm
-          </h1>
-          <p className="text-gray-600">Quản lý thông tin các loại sản phẩm</p>
-        </div>
-        <div className="mb-6">
-          <button
-            onClick={openCreateDialog}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
-          >
-            <FiPlus className="w-5 h-5" />
-            Thêm
-          </button>
-        </div>
-        <div className="bg-white rounded-xl shadow-lg p-12 text-center text-gray-500">
-          <FiBox className="w-12 h-12 text-gray-400 mb-4 mx-auto" />
-          <p className="text-lg">Chưa có dữ liệu loại sản phẩm</p>
-          <p className="text-sm text-gray-400 mt-1">
-            Nhấn "Thêm loại sản phẩm mới" để bắt đầu
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const renderTableContent = () => {
+    if (loading) {
+      return (
+        <tr>
+          <td colSpan="4" className="px-6 py-12">
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-3 text-gray-600">Đang tải dữ liệu...</span>
+            </div>
+          </td>
+        </tr>
+      );
+    }
+
+    if (productTypes.length === 0) {
+      return (
+        <tr>
+          <td colSpan="4" className="px-6 py-20 text-center text-gray-500">
+            <FiBox className="w-16 h-16 text-gray-400 mb-4 mx-auto" />
+            <p className="text-xl font-medium mb-2">
+              Chưa có dữ liệu loại sản phẩm
+            </p>
+            <p className="text-sm text-gray-400 mb-6">
+              Nhấn "Thêm loại sản phẩm mới" để bắt đầu
+            </p>
+            <button
+              onClick={openCreateDialog}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl mx-auto"
+            >
+              <FiPlus className="w-5 h-5" />
+              Thêm loại sản phẩm mới
+            </button>
+          </td>
+        </tr>
+      );
+    }
+
+    return productTypes.map((item) => (
+      <tr
+        key={item.productTypeId}
+        className="hover:bg-gray-50 transition-colors"
+      >
+        <td className="px-6 py-4 text-sm font-medium text-gray-900">
+          #{item.productTypeId}
+        </td>
+        <td className="px-6 py-4 font-medium text-gray-900">
+          <div className="flex items-center gap-2">
+            <FiBox className="w-4 h-4 text-gray-500" />
+            {item.productTypeName}
+          </div>
+        </td>
+        <td className="px-6 py-4 text-center">
+          {item.fee ? (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+              Có phí
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              Miễn phí
+            </span>
+          )}
+        </td>
+        <td className="px-6 py-4">
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={() => handleEdit(item)}
+              className="bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-lg transition-all hover:scale-105"
+              title="Chỉnh sửa"
+            >
+              <FiEdit2 className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => handleDelete(item.productTypeId)}
+              className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-all hover:scale-105"
+              title="Xóa"
+            >
+              <FiTrash2 className="w-4 h-4" />
+            </button>
+          </div>
+        </td>
+      </tr>
+    ));
+  };
 
   return (
     <div className="p-6 bg-white-50 min-h-screen">
@@ -211,64 +265,7 @@ const ManagerProductType = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {loading ? (
-                <tr>
-                  <td colSpan="4" className="px-6 py-12">
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                      <span className="ml-3 text-gray-600">
-                        Đang tải dữ liệu...
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                productTypes.map((item) => (
-                  <tr
-                    key={item.productTypeId}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                      #{item.productTypeId}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      <div className="flex items-center gap-2">
-                        <FiBox className="w-4 h-4 text-gray-500" />
-                        {item.productTypeName}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      {item.fee ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                          Có phí
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Miễn phí
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-lg transition-all hover:scale-105"
-                          title="Chỉnh sửa"
-                        >
-                          <FiEdit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.productTypeId)}
-                          className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-all hover:scale-105"
-                          title="Xóa"
-                        >
-                          <FiTrash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
+              {renderTableContent()}
             </tbody>
           </table>
         </div>

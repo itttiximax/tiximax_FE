@@ -5,18 +5,26 @@ import {
   Users,
   BarChart3,
   Users2,
-  ShoppingCart,
-  CreditCard,
   MapPin,
+  Truck,
   LogOut,
   ChevronDown,
   User,
   Package,
   Calendar,
-  Book,
+  History,
+  Route,
+  FileText,
   Megaphone,
   List,
   TrendingUp,
+  Luggage,
+  Landmark,
+  Banknote,
+  UserPlus,
+  UserStar,
+  PackageSearch,
+  CopyPlus,
 } from "lucide-react";
 
 const LeadSaleSideBar = () => {
@@ -25,7 +33,8 @@ const LeadSaleSideBar = () => {
   const [isStaffDropdownOpen, setIsStaffDropdownOpen] = useState(false);
   const [isCustomerDropdownOpen, setIsCustomerDropdownOpen] = useState(false);
   const [isOrderDropdownOpen, setIsOrderDropdownOpen] = useState(false);
-
+  const [isStaffLeadDropdownOpen, setIsStaffLeadDropdownOpen] = useState(false);
+  const [isShippingDropdownOpen, setIsShippingDropdownOpen] = useState(false);
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/signin");
@@ -38,19 +47,40 @@ const LeadSaleSideBar = () => {
       section: "BÁN HÀNG",
       items: [
         {
+          type: "dropdown",
           to: "/lead-sale/createorder",
-          icon: LayoutDashboard,
-          label: "Bán hàng",
+          icon: FileText,
+          label: "Tạo đơn ",
+          dropdownItems: [
+            {
+              to: "/lead-sale/createorder",
+              icon: FileText,
+              label: "Tạo hóa đơn",
+            },
+            {
+              to: "/lead-sale/deposit",
+              icon: Luggage,
+              label: "Ký gửi",
+            },
+            {
+              to: "/lead-sale/auction",
+              icon: Landmark,
+              label: "Đấu giá",
+            },
+          ],
+          isOpen: isStaffLeadDropdownOpen,
+          onToggle: () => setIsStaffLeadDropdownOpen(!isStaffLeadDropdownOpen),
         },
+
         {
           to: "/lead-sale/createpayment",
-          icon: CreditCard,
-          label: "Phê duyệt thanh toán",
+          icon: Banknote,
+          label: "Báo giá",
         },
         {
           to: "/lead-sale/createpaymentsupport",
-          icon: CreditCard,
-          label: "Hỗ trợ gọp đơn hàng ",
+          icon: CopyPlus,
+          label: "Hỗ trợ gọp đơn",
         },
       ],
     },
@@ -84,7 +114,7 @@ const LeadSaleSideBar = () => {
       items: [
         {
           type: "dropdown",
-          icon: Users2,
+          icon: Users,
           label: "Quản lý khách hàng",
           dropdownItems: [
             {
@@ -92,13 +122,23 @@ const LeadSaleSideBar = () => {
               icon: Users,
               label: "Danh sách khách hàng",
             },
+            {
+              to: "/lead-sale/createaccountuser",
+              icon: UserPlus,
+              label: "Tạo khách hàng",
+            },
+            {
+              to: "/lead-sale/prospects",
+              icon: UserStar,
+              label: "Khách hàng tiềm năng",
+            },
           ],
           isOpen: isCustomerDropdownOpen,
           onToggle: () => setIsCustomerDropdownOpen(!isCustomerDropdownOpen),
         },
         {
           type: "dropdown",
-          icon: ShoppingCart,
+          icon: List,
           label: "Quản lý đơn hàng",
           dropdownItems: [
             {
@@ -108,12 +148,36 @@ const LeadSaleSideBar = () => {
             },
             {
               to: "/lead-sale/orders/tracking",
-              icon: List,
+              icon: PackageSearch,
               label: "Đơn hàng đang xử lý",
             },
           ],
           isOpen: isOrderDropdownOpen,
           onToggle: () => setIsOrderDropdownOpen(!isOrderDropdownOpen),
+        },
+        {
+          type: "dropdown",
+          icon: Truck,
+          label: "Theo dõi vận chuyển",
+          dropdownItems: [
+            {
+              to: "/lead-sale/shipping/domestic",
+              icon: Truck,
+              label: "Tra cứu đơn hàng",
+            },
+            {
+              to: "/lead-sale/shipping/international",
+              icon: History,
+              label: "Lịch sử vận chuyển",
+            },
+            {
+              to: "/lead-sale/tracking",
+              icon: Route,
+              label: "Lộ trình",
+            },
+          ],
+          isOpen: isShippingDropdownOpen,
+          onToggle: () => setIsShippingDropdownOpen(!isShippingDropdownOpen),
         },
         {
           type: "dropdown",
@@ -134,6 +198,7 @@ const LeadSaleSideBar = () => {
           isOpen: isStaffDropdownOpen,
           onToggle: () => setIsStaffDropdownOpen(!isStaffDropdownOpen),
         },
+
         {
           to: "/lead-sale/destination",
           icon: MapPin,
@@ -145,17 +210,7 @@ const LeadSaleSideBar = () => {
           label: "Quản lý lịch hẹn",
         },
         {
-          to: "/lead-sale/img",
-          icon: Book,
-          label: "Upload ảnh",
-        },
-        {
           to: "/lead-sale/campaigns",
-          icon: Megaphone,
-          label: "Chiến dịch bán hàng",
-        },
-        {
-          to: "/lead-sale/camp",
           icon: Megaphone,
           label: "Chiến dịch bán hàng",
         },

@@ -33,6 +33,11 @@ const ManagerSidebar = () => {
           path: "/manager/dashboard",
         },
         {
+          text: t("order"),
+          icon: <FiShoppingCart />,
+          path: "/manager/order",
+        },
+        {
           text: t("team"),
           icon: <FiUserCheck />,
           path: "/manager/team",
@@ -93,11 +98,6 @@ const ManagerSidebar = () => {
           text: t("website"),
           icon: <FiGlobe />,
           path: "/manager/website",
-        },
-        {
-          text: t("order"),
-          icon: <FiShoppingCart />,
-          path: "/manager/order",
         },
       ],
     },

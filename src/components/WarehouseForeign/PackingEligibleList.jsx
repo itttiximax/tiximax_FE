@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import packingsService from "../../Services/Warehouse/packingsService";
 
-const PackingsList = () => {
+const PackingEligibleList = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
@@ -76,7 +76,7 @@ const PackingsList = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <h2 className="text-2xl font-bold text-gray-800">
-          Danh sách đơn hàng đóng gói
+          Danh sách đơn hàng đủ điều kiện đóng gói
         </h2>
         <div className="flex items-center gap-3">
           <button
@@ -238,4 +238,4 @@ const PackingsList = () => {
   );
 };
 
-export default PackingsList;
+export default PackingEligibleList;

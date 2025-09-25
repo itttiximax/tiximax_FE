@@ -51,9 +51,20 @@ const StaffWarehouseForeignSidebar = () => {
           path: "/staff-warehouse-foreign/outbound/orders",
         },
         {
-          text: "Packing List",
+          text: "PackingInWarehouse List",
           icon: <FaArrowUp />,
-          path: "/staff-warehouse-foreign/outbound/packing-list",
+          path: "/staff-warehouse-foreign/outbound/packinginwarehouse",
+        },
+        {
+          text: "PackingEligible List",
+          icon: <FaArrowUp />,
+          path: "/staff-warehouse-foreign/outbound/packingeligible",
+        },
+
+        {
+          text: "PackingAwaiting List",
+          icon: <FaArrowUp />,
+          path: "/staff-warehouse-foreign/outbound/packingawaiting",
         },
       ],
     },

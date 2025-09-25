@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createPackingService } from "../../Services/Warehouse/createpackingService";
 import managerDestinationService from "../../Services/Manager/managerDestinationService";
-import BarcodeScanner from "../../common/BarcodeScanner"; // chỉnh lại path nếu khác
 
 const CreatePacking = () => {
   const [destinations, setDestinations] = useState([]);
@@ -100,24 +99,6 @@ const CreatePacking = () => {
     }
   };
 
-  // ✅ Callback khi BarcodeScanner quét thành công
-  const handleScannedCode = (scannedCode) => {
-    setFormData((prev) => {
-      const lastIndex = prev.shipmentCodes.length - 1;
-      const lastValue = prev.shipmentCodes[lastIndex].trim();
-
-      if (lastValue === "") {
-        // điền vào ô cuối nếu trống
-        const updated = [...prev.shipmentCodes];
-        updated[lastIndex] = scannedCode;
-        return { ...prev, shipmentCodes: updated };
-      } else {
-        // nếu ô cuối đã có → thêm ô mới
-        return { ...prev, shipmentCodes: [...prev.shipmentCodes, scannedCode] };
-      }
-    });
-  };
-
   return (
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-4xl mx-auto">
@@ -214,14 +195,6 @@ const CreatePacking = () => {
                     + Add Another Shipment Code
                   </button>
                 </div>
-
-                {/* Barcode Scanner */}
-                <div className="mt-6">
-                  <h3 className="font-medium text-gray-700 mb-2">
-                    Scan Shipment Code
-                  </h3>
-                  <BarcodeScanner onDetected={handleScannedCode} />
-                </div>
               </div>
 
               <button
@@ -300,7 +273,7 @@ const CreatePacking = () => {
                 </h3>
                 <ol className="space-y-2 text-blue-700">
                   <li>1. Select a destination from the dropdown</li>
-                  <li>2. Add or scan shipment codes</li>
+                  <li>2. Add shipment codes manually</li>
                   <li>3. Click create to generate packing</li>
                 </ol>
               </div>
