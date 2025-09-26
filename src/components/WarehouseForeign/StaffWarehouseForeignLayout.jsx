@@ -14,10 +14,10 @@ const StaffWarehouseForeignLayout = () => {
         {/* Header Bar - Enhanced Design */}
 
         {/* Scrollable Content with hidden scrollbar */}
-        <main className="flex-1 overflow-y-auto hide-scrollbar bg-gradient-to-br from-gray-50 to-blue-50/30 p-6">
+        <main className="flex-1 overflow-y-auto hide-scrollbar">
           <div className=" mx-auto">
             {/* Content Container với responsive padding */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 overflow-hidden">
+            <div className="bg-white overflow-hidden">
               <div className="p-6 md:p-8">
                 <Outlet />
               </div>

@@ -13,6 +13,12 @@ import Home from "../Page/Home";
 import AdminLayout from "../components/Admin/AdminLayout";
 import AdminPage from "../components/Admin/AdminPage";
 import AdminDashboard from "../components/Admin/AdminDashboard";
+import ShipmentTracking from "../components/Admin/ShipmentTracking";
+import InventoryList from "../components/Admin/InventoryList";
+import RevenueDashboard from "../components/Admin/RevenueDashboard";
+import TrackingOrder from "../components/Admin/TrackingOrder";
+import EmployeeKPI from "../components/Admin/EmployeeKPI";
+import ProfitLoss from "../components/Admin/ProfitLoss";
 
 //LeadSale components
 import LeadSaleLayout from "../components/LeadSale/LeadSaleLayout";
@@ -97,16 +103,17 @@ const Router = createBrowserRouter([
       { path: "staff", element: <NotFound /> },
       { path: "customers", element: <NotFound /> },
       { path: "settings", element: <CreateAccountStaff /> },
-      { path: "revenue-analytics", element: <NotFound /> },
-      { path: "order-status-overview", element: <NotFound /> },
-      { path: "profit-loss", element: <NotFound /> },
-      { path: "employee-kpi", element: <NotFound /> },
+      { path: "revenue-analytics", element: <RevenueDashboard /> }, // Chua tien khai
+      { path: "order-status-overview", element: <TrackingOrder /> },
+      { path: "profit-loss", element: <ProfitLoss /> },
+      { path: "employee-kpi", element: <EmployeeKPI /> },
       { path: "pending-deliveries", element: <NotFound /> },
-      { path: "shipment-tracking", element: <NotFound /> },
+
+      { path: "shipment-tracking", element: <ShipmentTracking /> }, // Chưa triển khai
       { path: "route-planning", element: <NotFound /> },
       { path: "drivers", element: <NotFound /> },
       { path: "vehicles", element: <NotFound /> },
-      { path: "inventory", element: <NotFound /> },
+      { path: "inventory", element: <InventoryList /> }, // Chưa triển khai
       { path: "warehouse-transactions", element: <NotFound /> },
       { path: "warehouse-locations", element: <NotFound /> },
       { path: "inventory-reports", element: <NotFound /> },
@@ -240,6 +247,7 @@ const Router = createBrowserRouter([
       { path: "orders", element: <OrderLinkList /> },
       { path: "suppliers", element: <NotFound /> },
       { path: "inventory", element: <NotFound /> },
+      { path: "inventory/audit", element: <NotFound /> },
     ],
   },
   {
@@ -252,15 +260,14 @@ const Router = createBrowserRouter([
     children: [
       { index: true, element: <StaffWarehouseForeignPage /> },
       { path: "dashboard", element: <NotFound /> },
-      { path: "inventory", element: <WarehouseShipment /> },
-      { path: "import", element: <WarehouseList /> },
-      { path: "outbound/orders", element: <NotFound /> },
-
-      { path: "outbound/packinginwarehouse", element: <NotFound /> },
+      { path: "warehouse", element: <WarehouseList /> },
+      { path: "imports", element: <WarehouseShipment /> },
+      { path: "packings", element: <CreatePacking /> },
       { path: "outbound/packingeligible", element: <PackingEligibleList /> },
       { path: "outbound/packingawaiting", element: <PackingAwaitList /> },
 
-      { path: "stock", element: <CreatePacking /> },
+      { path: "outbound/orders", element: <NotFound /> },
+      { path: "outbound/packinginwarehouse", element: <NotFound /> },
       { path: "stock/serial", element: <NotFound /> },
       { path: "stock/location", element: <NotFound /> },
       { path: "audit/check", element: <NotFound /> },

@@ -11,7 +11,7 @@ const StaffPurchaserLayout = () => {
 
       {/* Main content: scroll riêng nếu nội dung dài với hidden scrollbar */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-y-auto hide-scrollbar bg-gray-100 p-6">
+        <main className="flex-1 overflow-y-auto hide-scrollbar bg-white-100 p-6">
           <Outlet />
         </main>
       </div>

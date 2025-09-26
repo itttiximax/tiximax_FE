@@ -1,15 +1,22 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
-  FaChartBar,
-  FaBoxes,
-  FaArrowDown,
-  FaArrowUp,
-  FaSignOutAlt,
-  FaUserTie,
-  FaBars,
-  FaTimes,
-} from "react-icons/fa";
+  LayoutDashboard,
+  PackageOpen,
+  PackageCheck,
+  ListChecks,
+  Package,
+  ClipboardCheck,
+  BarChart,
+  User,
+  Menu,
+  X,
+  FolderOutput,
+  PackagePlus,
+  Plane,
+  Warehouse,
+  LogOut,
+} from "lucide-react";
 
 const StaffWarehouseForeignSidebar = () => {
   const navigate = useNavigate();
@@ -22,8 +29,13 @@ const StaffWarehouseForeignSidebar = () => {
       items: [
         {
           text: "Tổng quan",
-          icon: <FaChartBar />,
+          icon: <LayoutDashboard className="w-5 h-5" />,
           path: "/staff-warehouse-foreign/dashboard",
+        },
+        {
+          text: "Kho",
+          icon: <Warehouse className="w-5 h-5" />,
+          path: "/staff-warehouse-foreign/warehouse",
         },
       ],
     },
@@ -31,14 +43,14 @@ const StaffWarehouseForeignSidebar = () => {
       title: "Inbound (Nhập kho)",
       items: [
         {
-          text: "Lệnh nhập",
-          icon: <FaArrowDown />,
-          path: "/staff-warehouse-foreign/inventory",
+          text: "Nhập kho",
+          icon: <PackagePlus className="w-5 h-5" />,
+          path: "/staff-warehouse-foreign/imports",
         },
         {
-          text: "Kho",
-          icon: <FaArrowDown />,
-          path: "/staff-warehouse-foreign/import",
+          text: "Đóng gói",
+          icon: <PackageOpen className="w-5 h-5" />,
+          path: "/staff-warehouse-foreign/packings",
         },
       ],
     },
@@ -46,25 +58,24 @@ const StaffWarehouseForeignSidebar = () => {
       title: "Outbound (Xuất kho)",
       items: [
         {
+          text: "Hàng đủ điều kiện",
+          icon: <PackageCheck className="w-5 h-5" />,
+          path: "/staff-warehouse-foreign/outbound/packingeligible",
+        },
+        {
+          text: "Chờ chuyến bay",
+          icon: <Plane className="w-5 h-5" />,
+          path: "/staff-warehouse-foreign/outbound/packingawaiting",
+        },
+        {
           text: "Lệnh xuất",
-          icon: <FaArrowUp />,
+          icon: <FolderOutput className="w-5 h-5" />,
           path: "/staff-warehouse-foreign/outbound/orders",
         },
         {
           text: "PackingInWarehouse List",
-          icon: <FaArrowUp />,
+          icon: <FolderOutput className="w-5 h-5" />,
           path: "/staff-warehouse-foreign/outbound/packinginwarehouse",
-        },
-        {
-          text: "PackingEligible List",
-          icon: <FaArrowUp />,
-          path: "/staff-warehouse-foreign/outbound/packingeligible",
-        },
-
-        {
-          text: "PackingAwaiting List",
-          icon: <FaArrowUp />,
-          path: "/staff-warehouse-foreign/outbound/packingawaiting",
         },
       ],
     },
@@ -72,18 +83,13 @@ const StaffWarehouseForeignSidebar = () => {
       title: "Stock Management",
       items: [
         {
-          text: "Tồn kho",
-          icon: <FaBoxes />,
-          path: "/staff-warehouse-foreign/stock",
-        },
-        {
           text: "Serial Number",
-          icon: <FaBoxes />,
+          icon: <Package className="w-5 h-5" />,
           path: "/staff-warehouse-foreign/stock/serial",
         },
         {
           text: "Vị trí hàng",
-          icon: <FaBoxes />,
+          icon: <Package className="w-5 h-5" />,
           path: "/staff-warehouse-foreign/stock/location",
         },
       ],
@@ -93,12 +99,12 @@ const StaffWarehouseForeignSidebar = () => {
       items: [
         {
           text: "Kiểm kê",
-          icon: <FaBoxes />,
+          icon: <ListChecks className="w-5 h-5" />,
           path: "/staff-warehouse-foreign/audit/check",
         },
         {
           text: "Đối chiếu",
-          icon: <FaBoxes />,
+          icon: <ClipboardCheck className="w-5 h-5" />,
           path: "/staff-warehouse-foreign/audit/reconcile",
         },
       ],
@@ -108,12 +114,12 @@ const StaffWarehouseForeignSidebar = () => {
       items: [
         {
           text: "Báo cáo nhập/xuất/tồn",
-          icon: <FaChartBar />,
+          icon: <BarChart className="w-5 h-5" />,
           path: "/staff-warehouse-foreign/reports/dashboard",
         },
         {
           text: "Hiệu suất",
-          icon: <FaChartBar />,
+          icon: <BarChart className="w-5 h-5" />,
           path: "/staff-warehouse-foreign/reports/performance",
         },
       ],
@@ -138,11 +144,7 @@ const StaffWarehouseForeignSidebar = () => {
         className="md:hidden fixed top-4 left-4 z-50 text-gray-700 p-2 rounded-lg bg-white shadow-md"
         onClick={toggleSidebar}
       >
-        {isOpen ? (
-          <FaTimes className="w-6 h-6" />
-        ) : (
-          <FaBars className="w-6 h-6" />
-        )}
+        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </button>
 
       {/* Sidebar */}
@@ -154,7 +156,7 @@ const StaffWarehouseForeignSidebar = () => {
         {/* Profile Section */}
         <div className="p-4 border-b border-gray-100">
           <div className="flex flex-col items-center gap-2">
-            <FaUserTie className="w-8 h-8 text-blue-600" />
+            <User className="w-8 h-8 text-blue-600" />
             <div className="text-center">
               <span className="text-sm font-semibold text-gray-800">
                 Foreign Warehouse Staff
@@ -195,7 +197,7 @@ const StaffWarehouseForeignSidebar = () => {
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
-            <FaSignOutAlt className="text-xs" />
+            <LogOut className="w-4 h-4" />
             <span className="text-sm font-medium">Đăng xuất</span>
           </button>
         </div>

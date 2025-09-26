@@ -161,7 +161,7 @@ const CreatePurchase = ({
     const colors = {
       CHO_MUA: "bg-yellow-100 text-yellow-800",
       DANG_MUA: "bg-blue-100 text-blue-800",
-      DA_MUA: "bg-green-100 text-green-800",
+      DA_MUA: "bg-red-600 text-white",
       HUY: "bg-red-100 text-red-800",
       HOAT_DONG: "bg-green-100 text-green-800",
     };

@@ -14,13 +14,11 @@ const AdminLayout = () => {
         {/* Main content: scrollable area with hidden scrollbar */}
         <main className="flex-1 overflow-y-auto hide-scrollbar bg-gradient-to-br from-gray-900 via-gray-800 to-black">
           {/* Content container with proper spacing */}
-          <div className="min-h-full">
-            <div className="p-6">
-              {/* Outlet wrapper with enhanced styling */}
-              <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-yellow-500/10 shadow-2xl">
-                <div className="p-6">
-                  <Outlet />
-                </div>
+          <div className="mx-auto">
+            {/* Outlet wrapper with enhanced styling */}
+            <div className="bg-black/20 backdrop-blur-sm overflow-hidden ">
+              <div className="p-6 md:p-8">
+                <Outlet />
               </div>
             </div>
           </div>
