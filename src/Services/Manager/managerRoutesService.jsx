@@ -12,7 +12,6 @@ const routesService = {
   },
 
   createRoute: async (data) => {
-    // Transform frontend data to match API structure
     const apiData = {
       name: data.name,
       shipTime: data.shipTime.toString(), // API expects string
@@ -27,7 +26,6 @@ const routesService = {
   },
 
   updateRoute: async (id, data) => {
-    // Transform frontend data to match API structure
     const apiData = {
       name: data.name,
       shipTime: data.shipTime.toString(), // API expects string
@@ -43,6 +41,11 @@ const routesService = {
 
   deleteRoute: async (id) => {
     const res = await api.delete(`/routes/${id}`);
+    return res.data;
+  },
+
+  updateExchangeRates: async () => {
+    const res = await api.put("/routes/update-exchange-rates");
     return res.data;
   },
 };

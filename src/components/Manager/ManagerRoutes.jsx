@@ -7,9 +7,10 @@ import {
   FiX,
   FiCheck,
   FiFileText,
-  FiAlertTriangle,
+  FiRefreshCw,
 } from "react-icons/fi";
 import managerRoutesService from "../../Services/Manager/managerRoutesService";
+import ConfirmDialog from "../../common/ConfirmDialog";
 
 const ManagerRoutes = () => {
   const [routes, setRoutes] = useState([]);
@@ -18,6 +19,7 @@ const ManagerRoutes = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [updateRatesLoading, setUpdateRatesLoading] = useState(false); // NEW
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -40,6 +42,41 @@ const ManagerRoutes = () => {
       toast.error("Có lỗi khi tải dữ liệu!");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // NEW: Hàm cập nhật tỷ giá cho tất cả routes
+  const handleUpdateExchangeRates = async () => {
+    setUpdateRatesLoading(true);
+    const loadingToast = toast.loading("Đang cập nhật tỷ giá...");
+
+    try {
+      await managerRoutesService.updateExchangeRates();
+      toast.success("Cập nhật tỷ giá thành công!", { id: loadingToast });
+
+      // Refresh lại danh sách routes để hiển thị tỷ giá mới
+      await fetchRoutes();
+    } catch (error) {
+      console.error("Error updating exchange rates:", error);
+
+      let errorMessage = "Có lỗi xảy ra khi cập nhật tỷ giá!";
+
+      if (error.response?.data) {
+        errorMessage =
+          error.response.data.error ||
+          error.response.data.message ||
+          error.response.data.detail ||
+          JSON.stringify(error.response.data);
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error(errorMessage, {
+        id: loadingToast,
+        duration: 5000,
+      });
+    } finally {
+      setUpdateRatesLoading(false);
     }
   };
 
@@ -75,8 +112,26 @@ const ManagerRoutes = () => {
       }
 
       closeDialog();
-    } catch {
-      toast.error("Có lỗi xảy ra!", { id: loadingToast });
+    } catch (error) {
+      console.error("Error submitting form:", error);
+
+      let errorMessage = "Có lỗi xảy ra!";
+
+      if (error.response?.data) {
+        errorMessage =
+          error.response.data.error ||
+          error.response.data.message ||
+          error.response.data.detail ||
+          JSON.stringify(error.response.data);
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error(errorMessage, {
+        id: loadingToast,
+        duration: 5000,
+      });
+
       if (editingId) fetchRoutes();
     }
   };
@@ -134,8 +189,20 @@ const ManagerRoutes = () => {
       setRoutes((prev) => prev.filter((item) => item.routeId !== deleteId));
       await managerRoutesService.deleteRoute(deleteId);
       toast.success("Xóa thành công!");
-    } catch {
-      toast.error("Có lỗi xảy ra khi xóa!");
+    } catch (error) {
+      console.error("Error deleting:", error);
+
+      let errorMessage = "Có lỗi xảy ra khi xóa!";
+
+      if (error.response?.data) {
+        errorMessage =
+          error.response.data.error ||
+          error.response.data.message ||
+          error.response.data.detail ||
+          "Có lỗi xảy ra khi xóa!";
+      }
+
+      toast.error(errorMessage, { duration: 5000 });
       fetchRoutes();
     } finally {
       setDeleteLoading(false);
@@ -240,15 +307,14 @@ const ManagerRoutes = () => {
     <div className="p-6 bg-white-50 min-h-screen">
       <Toaster position="top-right" />
 
-      {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">
           Quản lý Tuyến Vận Chuyển
         </h1>
       </div>
 
-      {/* Add button */}
-      <div className="mb-6">
+      {/* UPDATED: Thêm button Cập nhật tỷ giá */}
+      <div className="mb-6 flex items-center gap-3">
         <button
           onClick={openCreateDialog}
           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
@@ -256,9 +322,26 @@ const ManagerRoutes = () => {
           <FiPlus className="w-5 h-5" />
           Thêm
         </button>
+
+        <button
+          onClick={handleUpdateExchangeRates}
+          disabled={updateRatesLoading || loading}
+          className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {updateRatesLoading ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              <span>Đang cập nhật...</span>
+            </>
+          ) : (
+            <>
+              <FiRefreshCw className="w-5 h-5" />
+              <span>Cập nhật tỷ giá</span>
+            </>
+          )}
+        </button>
       </div>
 
-      {/* Table */}
       <div className="bg-white rounded-xl shadow-lg overflow-hidden relative">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -296,7 +379,6 @@ const ManagerRoutes = () => {
           </table>
         </div>
 
-        {/* Loading overlay chỉ ở phía dưới table */}
         {deleteLoading && (
           <div className="absolute inset-x-0 bottom-0 bg-white bg-opacity-75 flex items-center justify-center py-8 rounded-b-xl">
             <div className="flex items-center gap-3">
@@ -307,11 +389,9 @@ const ManagerRoutes = () => {
         )}
       </div>
 
-      {/* Dialog Modal */}
       {showDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            {/* Header */}
             <div className="flex items-center justify-between p-6 border-b">
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">
@@ -328,10 +408,8 @@ const ManagerRoutes = () => {
               </button>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Tên tuyến */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Mã tỷ giá<span className="text-red-500">*</span>
@@ -347,7 +425,6 @@ const ManagerRoutes = () => {
                   />
                 </div>
 
-                {/* Thời gian vận chuyển */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Thời gian vận chuyển <span className="text-red-500">*</span>
@@ -363,7 +440,6 @@ const ManagerRoutes = () => {
                   />
                 </div>
 
-                {/* Đơn giá mua */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Đơn giá mua hộ (VNĐ)<span className="text-red-500">*</span>
@@ -380,7 +456,6 @@ const ManagerRoutes = () => {
                   />
                 </div>
 
-                {/* Đơn giá đặt cọc */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Đơn giá ký gửi (VNĐ)<span className="text-red-500">*</span>
@@ -397,7 +472,6 @@ const ManagerRoutes = () => {
                   />
                 </div>
 
-                {/* Tỷ giá */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Tỷ giá<span className="text-red-500">*</span>
@@ -414,7 +488,6 @@ const ManagerRoutes = () => {
                   />
                 </div>
 
-                {/* Ghi chú */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Tên tuyến<span className="text-red-500">*</span>
@@ -424,14 +497,11 @@ const ManagerRoutes = () => {
                     value={formData.note}
                     onChange={handleInputChange}
                     className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    min="0"
-                    step="0.01"
                     placeholder="Nhập tên tuyến vận chuyển..."
                   />
                 </div>
               </div>
 
-              {/* Footer */}
               <div className="flex gap-3 mt-8 pt-6 border-t">
                 <button
                   type="button"
@@ -453,68 +523,20 @@ const ManagerRoutes = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Dialog */}
-      {showDeleteDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-            {/* Header */}
-            <div className="flex items-center gap-4 p-6 border-b">
-              <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                <FiAlertTriangle className="w-5 h-5 text-red-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Xác nhận xóa
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Hành động này không thể hoàn tác
-                </p>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="p-6">
-              <p className="text-gray-700">
-                Bạn có chắc chắn muốn xóa tuyến vận chuyển này không? Tất cả dữ
-                liệu liên quan sẽ bị xóa vĩnh viễn.
-              </p>
-            </div>
-
-            {/* Footer */}
-            <div className="flex gap-3 p-6 border-t bg-gray-50 rounded-b-2xl">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowDeleteDialog(false);
-                  setDeleteId(null);
-                }}
-                disabled={deleteLoading}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50"
-              >
-                Hủy
-              </button>
-              <button
-                type="button"
-                onClick={confirmDelete}
-                disabled={deleteLoading}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {deleteLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Đang xóa...
-                  </>
-                ) : (
-                  <>
-                    <FiTrash2 className="w-4 h-4" />
-                    Xác nhận xóa
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => {
+          setShowDeleteDialog(false);
+          setDeleteId(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Xác nhận xóa"
+        message="Bạn có chắc chắn muốn xóa tuyến vận chuyển này không? Tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn."
+        confirmText="Xác nhận xóa"
+        cancelText="Hủy"
+        loading={deleteLoading}
+        type="danger"
+      />
     </div>
   );
 };

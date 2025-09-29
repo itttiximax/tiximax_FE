@@ -75,6 +75,10 @@ import WarehouseList from "../components/WarehouseForeign/WarehouseList";
 import CreatePacking from "../components/WarehouseForeign/CreatePacking";
 import PackingEligibleList from "../components/WarehouseForeign/PackingEligibleList";
 import PackingAwaitList from "../components/WarehouseForeign/PackingAwaitList";
+import OrderList from "../components/Order/OrderList";
+import StaffList from "../components/Manager/StaffList";
+import CustomerList from "../components/Manager/CustomerList";
+import CustomerStaffList from "../components/StaffSale/CustomerStaffList";
 
 const Router = createBrowserRouter([
   {
@@ -144,8 +148,8 @@ const Router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <ManagerPage /> },
-      { path: "team", element: <NotFound /> },
-      { path: "customers", element: <NotFound /> },
+      { path: "team", element: <StaffList /> },
+      { path: "customers", element: <CustomerList /> },
       { path: "quote", element: <NotFound /> },
       { path: "ads", element: <NotFound /> },
       { path: "cost/paylater", element: <NotFound /> },
@@ -180,8 +184,8 @@ const Router = createBrowserRouter([
       { path: "team", element: <NotFound /> },
       { path: "salesreport", element: <NotFound /> },
       { path: "team-performance", element: <NotFound /> },
-      { path: "customers", element: <NotFound /> },
-      { path: "orders", element: <ManagerOrder /> },
+      { path: "customers", element: <CustomerStaffList /> },
+      { path: "orders", element: <OrderList /> },
       { path: "/lead-sale/shipping/domestic", element: <NotFound /> },
       { path: "/lead-sale/shipping/international", element: <NotFound /> },
       { path: "tracking", element: <NotFound /> },
@@ -216,7 +220,7 @@ const Router = createBrowserRouter([
       { path: "orders/pending", element: <ManagerOrder /> },
       { path: "createaccountuser", element: <CreateAccountUser /> },
 
-      { path: "customers", element: <NotFound /> },
+      { path: "customers", element: <CustomerStaffList /> },
       { path: "prospects", element: <NotFound /> },
       { path: "orders", element: <NotFound /> },
       { path: "orders/pending", element: <NotFound /> }, // Chưa triển khai

@@ -1,20 +1,13 @@
 import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import {
-  FiPlus,
-  FiEdit2,
-  FiTrash2,
-  FiX,
-  FiCheck,
-  FiBox,
-  FiAlertTriangle,
-} from "react-icons/fi";
+import { FiPlus, FiEdit2, FiTrash2, FiX, FiCheck, FiBox } from "react-icons/fi";
 import {
   getAllProductTypes,
   createProductType,
   updateProductType,
   deleteProductType,
 } from "../../Services/Manager/managerProductTypeService";
+import ConfirmDialog from "../../common/ConfirmDialog";
 
 const ManagerProductType = () => {
   const [productTypes, setProductTypes] = useState([]);
@@ -72,13 +65,26 @@ const ManagerProductType = () => {
       }
 
       closeDialog();
-    } catch (err) {
-      // Bắt lỗi từ backend
-      const errorMessage =
-        err?.response?.data?.error || err?.message || "Có lỗi xảy ra!";
-      toast.error(errorMessage, { id: loadingToast });
+    } catch (error) {
+      console.error("Error submitting form:", error);
 
-      // Rollback optimistic update nếu cần
+      let errorMessage = "Có lỗi xảy ra!";
+
+      if (error.response?.data) {
+        errorMessage =
+          error.response.data.error ||
+          error.response.data.message ||
+          error.response.data.detail ||
+          JSON.stringify(error.response.data);
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error(errorMessage, {
+        id: loadingToast,
+        duration: 5000,
+      });
+
       if (editingId) fetchProductTypes();
     }
   };
@@ -120,8 +126,20 @@ const ManagerProductType = () => {
       );
       await deleteProductType(deleteId);
       toast.success("Xóa thành công!");
-    } catch {
-      toast.error("Có lỗi xảy ra khi xóa!");
+    } catch (error) {
+      console.error("Error deleting:", error);
+
+      let errorMessage = "Có lỗi xảy ra khi xóa!";
+
+      if (error.response?.data) {
+        errorMessage =
+          error.response.data.error ||
+          error.response.data.message ||
+          error.response.data.detail ||
+          "Có lỗi xảy ra khi xóa!";
+      }
+
+      toast.error(errorMessage, { duration: 5000 });
       fetchProductTypes();
     } finally {
       setDeleteLoading(false);
@@ -226,14 +244,12 @@ const ManagerProductType = () => {
     <div className="p-6 bg-white-50 min-h-screen">
       <Toaster position="top-right" />
 
-      {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">
           Quản lý Loại Sản Phẩm
         </h1>
       </div>
 
-      {/* Add button */}
       <div className="mb-6">
         <button
           onClick={openCreateDialog}
@@ -244,7 +260,6 @@ const ManagerProductType = () => {
         </button>
       </div>
 
-      {/* Table */}
       <div className="bg-white rounded-xl shadow-lg overflow-hidden relative">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -270,7 +285,6 @@ const ManagerProductType = () => {
           </table>
         </div>
 
-        {/* Loading overlay chỉ ở phía dưới table */}
         {deleteLoading && (
           <div className="absolute inset-x-0 bottom-0 bg-white bg-opacity-75 flex items-center justify-center py-8 rounded-b-xl">
             <div className="flex items-center gap-3">
@@ -281,11 +295,9 @@ const ManagerProductType = () => {
         )}
       </div>
 
-      {/* Dialog Modal */}
       {showDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            {/* Header */}
             <div className="flex items-center justify-between p-6 border-b">
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">
@@ -302,7 +314,6 @@ const ManagerProductType = () => {
               </button>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="p-6">
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -324,7 +335,6 @@ const ManagerProductType = () => {
                   Trạng thái phí
                 </label>
                 <div className="flex gap-4">
-                  {/* Miễn phí option */}
                   <label
                     className={`flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
                       !formData.fee
@@ -364,7 +374,6 @@ const ManagerProductType = () => {
                     </span>
                   </label>
 
-                  {/* Có phí option */}
                   <label
                     className={`flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
                       formData.fee
@@ -409,7 +418,6 @@ const ManagerProductType = () => {
                 </p>
               </div>
 
-              {/* Footer */}
               <div className="flex gap-3 pt-6 border-t">
                 <button
                   type="button"
@@ -431,68 +439,20 @@ const ManagerProductType = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Dialog */}
-      {showDeleteDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-            {/* Header */}
-            <div className="flex items-center gap-4 p-6 border-b">
-              <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                <FiAlertTriangle className="w-5 h-5 text-red-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Xác nhận xóa
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Hành động này không thể hoàn tác
-                </p>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="p-6">
-              <p className="text-gray-700">
-                Bạn có chắc chắn muốn xóa loại sản phẩm này không? Tất cả dữ
-                liệu liên quan sẽ bị xóa vĩnh viễn.
-              </p>
-            </div>
-
-            {/* Footer */}
-            <div className="flex gap-3 p-6 border-t bg-gray-50 rounded-b-2xl">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowDeleteDialog(false);
-                  setDeleteId(null);
-                }}
-                disabled={deleteLoading}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50"
-              >
-                Hủy
-              </button>
-              <button
-                type="button"
-                onClick={confirmDelete}
-                disabled={deleteLoading}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {deleteLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Đang xóa...
-                  </>
-                ) : (
-                  <>
-                    <FiTrash2 className="w-4 h-4" />
-                    Xác nhận xóa
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => {
+          setShowDeleteDialog(false);
+          setDeleteId(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Xác nhận xóa"
+        message="Bạn có chắc chắn muốn xóa loại sản phẩm này không? Tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn."
+        confirmText="Xác nhận xóa"
+        cancelText="Hủy"
+        loading={deleteLoading}
+        type="danger"
+      />
     </div>
   );
 };

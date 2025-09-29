@@ -7,44 +7,7 @@ import { getAllProductTypes } from "../../Services/Manager/managerProductTypeSer
 import toast from "react-hot-toast";
 import AccountSearch from "./AccountSearch";
 import ProductManager from "./ProducManager";
-
-// Confirm Dialog Component
-const ConfirmDialog = ({
-  isOpen,
-  onClose,
-  onConfirm,
-  title,
-  message,
-  confirmText = "Xác nhận",
-  cancelText = "Hủy",
-}) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-        <div className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
-          <p className="text-gray-600 mb-6">{message}</p>
-          <div className="flex justify-end space-x-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              {cancelText}
-            </button>
-            <button
-              onClick={onConfirm}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              {confirmText}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+import ConfirmDialog from "../../common/ConfirmDialog"; // IMPORT COMPONENT CHUNG
 
 const CreateOrderForm = () => {
   // Consolidated states
@@ -91,7 +54,7 @@ const CreateOrderForm = () => {
 
   // State for confirm dialog
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // Fetch data once on mount
   useEffect(() => {
     const fetchData = async () => {
@@ -208,21 +171,106 @@ const CreateOrderForm = () => {
     setShowConfirmDialog(false);
   }, []);
 
-  // Actual submit function
+  // Actual submit function with validation and better error handling
   const handleConfirmSubmit = useCallback(async () => {
-    try {
+    // Validation trước khi submit
+    if (!preliminary.customerCode) {
+      toast.error("Vui lòng chọn khách hàng");
       setShowConfirmDialog(false);
+      return;
+    }
 
+    if (!preliminary.routeId) {
+      toast.error("Vui lòng chọn tuyến đường");
+      setShowConfirmDialog(false);
+      return;
+    }
+
+    if (!form.destinationId) {
+      toast.error("Vui lòng chọn điểm đến");
+      setShowConfirmDialog(false);
+      return;
+    }
+
+    // Validate products
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
+
+      if (!product.productName?.trim()) {
+        toast.error(`Sản phẩm ${i + 1}: Thiếu tên sản phẩm`);
+        setShowConfirmDialog(false);
+        return;
+      }
+
+      if (!product.productLink?.trim()) {
+        toast.error(`Sản phẩm ${i + 1}: Thiếu link sản phẩm`);
+        setShowConfirmDialog(false);
+        return;
+      }
+
+      if (!product.website?.trim()) {
+        toast.error(`Sản phẩm ${i + 1}: Thiếu thông tin website`);
+        setShowConfirmDialog(false);
+        return;
+      }
+
+      if (!product.productTypeId) {
+        toast.error(`Sản phẩm ${i + 1}: Thiếu loại sản phẩm`);
+        setShowConfirmDialog(false);
+        return;
+      }
+
+      if (
+        !product.priceWeb ||
+        product.priceWeb === "0" ||
+        product.priceWeb === ""
+      ) {
+        toast.error(`Sản phẩm ${i + 1}: Thiếu giá sản phẩm`);
+        setShowConfirmDialog(false);
+        return;
+      }
+
+      if (
+        !product.shipWeb ||
+        product.shipWeb === "0" ||
+        product.shipWeb === ""
+      ) {
+        toast.error(`Sản phẩm ${i + 1}: Thiếu phí ship`);
+        setShowConfirmDialog(false);
+        return;
+      }
+
+      if (
+        !product.quantity ||
+        product.quantity === "0" ||
+        product.quantity === ""
+      ) {
+        toast.error(`Sản phẩm ${i + 1}: Số lượng phải lớn hơn 0`);
+        setShowConfirmDialog(false);
+        return;
+      }
+    }
+
+    setIsSubmitting(true);
+
+    try {
       const orderData = {
         ...form,
         orderLinkRequests: products,
       };
+
+      console.log("Submitting order data:", {
+        customerCode: preliminary.customerCode,
+        routeId: preliminary.routeId,
+        orderData,
+      });
 
       await orderService.createOrder(
         preliminary.customerCode,
         preliminary.routeId,
         orderData
       );
+
       toast.success("Tạo đơn hàng thành công!");
 
       // Reset form
@@ -252,11 +300,49 @@ const CreateOrderForm = () => {
       ]);
     } catch (error) {
       console.error("Error creating order:", error);
-      const errorMessage =
-        error.response?.data?.error ||
-        error.response?.data?.message ||
-        "Tạo đơn hàng thất bại";
-      toast.error(errorMessage);
+
+      // Hiển thị lỗi chi tiết từ Backend
+      let errorMessage = "Tạo đơn hàng thất bại";
+
+      if (error.response) {
+        const backendError =
+          error.response.data?.error ||
+          error.response.data?.message ||
+          error.response.data?.detail ||
+          error.response.data?.errors;
+
+        if (backendError) {
+          if (
+            typeof backendError === "object" &&
+            !Array.isArray(backendError)
+          ) {
+            const errorMessages = Object.entries(backendError)
+              .map(([field, msg]) => `${field}: ${msg}`)
+              .join(", ");
+            errorMessage = `Lỗi validation: ${errorMessages}`;
+          } else if (Array.isArray(backendError)) {
+            errorMessage = backendError.join(", ");
+          } else {
+            errorMessage = backendError;
+          }
+        } else {
+          errorMessage = `Lỗi ${error.response.status}: ${
+            error.response.statusText || "Không xác định"
+          }`;
+        }
+      } else if (error.request) {
+        errorMessage =
+          "Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng.";
+      } else {
+        errorMessage = error.message || "Đã xảy ra lỗi không xác định";
+      }
+
+      toast.error(errorMessage, {
+        duration: 5000,
+      });
+    } finally {
+      setIsSubmitting(false);
+      setShowConfirmDialog(false);
     }
   }, [preliminary, form, products]);
 
@@ -272,7 +358,8 @@ const CreateOrderForm = () => {
 
   return (
     <div className="min-h-screen p-4">
-      <div className="max-w-7xl mx-auto">
+      {/* <div className="max-w-7xl mx-auto"> */}
+      <div className=" mx-auto">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-1 mb-1">
           <h1 className="text-2xl font-bold text-gray-800 mb-2">
@@ -458,14 +545,21 @@ const CreateOrderForm = () => {
             <button
               onClick={handleSubmitClick}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium flex items-center space-x-2"
-              disabled={!isFormEnabled}
+              disabled={!isFormEnabled || isSubmitting}
             >
-              <span>Hoàn thành tạo đơn </span>
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Đang xử lý...</span>
+                </>
+              ) : (
+                <span>Hoàn thành tạo đơn</span>
+              )}
             </button>
           </div>
         </div>
 
-        {/* Confirm Dialog */}
+        {/* SỬ DỤNG COMPONENT CONFIRMDIALOG CHUNG */}
         <ConfirmDialog
           isOpen={showConfirmDialog}
           onClose={handleCloseDialog}
@@ -502,6 +596,9 @@ const CreateOrderForm = () => {
           }
           confirmText="Tạo đơn hàng"
           cancelText="Hủy"
+          loading={isSubmitting}
+          loadingText="Đang tạo đơn "
+          type="info"
         />
       </div>
     </div>
@@ -509,4 +606,3 @@ const CreateOrderForm = () => {
 };
 
 export default CreateOrderForm;
-// ok
