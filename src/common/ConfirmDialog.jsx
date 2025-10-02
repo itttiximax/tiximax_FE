@@ -85,7 +85,7 @@ const ConfirmDialog = ({
               </>
             ) : (
               <>
-                <FiTrash2 className="w-4 h-4" />
+                {/* <FiTrash2 className="w-4 h-4" /> */}
                 {confirmText}
               </>
             )}

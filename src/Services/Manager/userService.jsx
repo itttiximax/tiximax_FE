@@ -83,6 +83,35 @@ const userService = {
     }
   },
 
+  // Get sale lead staff accounts with pagination
+  getSaleLeadStaff: async (page = 0, size = 10) => {
+    try {
+      // Validation
+      if (page < 0 || size < 1 || size > 100) {
+        throw new Error("Invalid parameters");
+      }
+
+      const response = await api.get(
+        `/accounts/sale-lead-staff/${page}/${size}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching sale lead staff:`, error);
+
+      if (error.response?.status === 404) {
+        throw new Error("API endpoint not found");
+      } else if (error.response?.status === 400) {
+        throw new Error("Invalid request parameters");
+      } else if (error.response?.status === 403) {
+        throw new Error("Access denied - insufficient permissions");
+      } else if (error.response?.status === 500) {
+        throw new Error("Server error");
+      }
+
+      throw error;
+    }
+  },
+
   // Get staff roles configuration
   getAvailableRoles: () => [
     { key: "ADMIN", label: "Quản trị viên", color: "red" },

@@ -47,6 +47,7 @@ const WarehouseShipment = () => {
       // Validation
       if (!shipmentId) {
         setMessage("Vui lòng nhập Shipment ID");
+        setLoading(false);
         return;
       }
 
@@ -58,6 +59,7 @@ const WarehouseShipment = () => {
         !formData.netWeight
       ) {
         setMessage("Vui lòng điền đầy đủ thông tin kích thước và trọng lượng");
+        setLoading(false);
         return;
       }
 
@@ -85,7 +87,21 @@ const WarehouseShipment = () => {
       });
       setShipmentId("");
     } catch (error) {
-      setMessage("Error creating shipment: " + error.message);
+      // Xử lý lỗi từ Backend
+      let errorMessage = "Đã xảy ra lỗi không xác định";
+
+      if (error.response?.data?.error) {
+        // Lỗi trả về dạng { error: "message" }
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.message) {
+        // Lỗi trả về dạng { message: "message" }
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        // Lỗi từ network hoặc client
+        errorMessage = error.message;
+      }
+
+      setMessage(errorMessage);
       console.error("Error:", error);
     } finally {
       setLoading(false);
@@ -225,9 +241,9 @@ const WarehouseShipment = () => {
       {message && (
         <div
           className={`mt-4 p-3 rounded-md ${
-            message.includes("Error") || message.includes("Vui lòng")
-              ? "bg-red-100 text-red-700 border border-red-300"
-              : "bg-green-100 text-green-700 border border-green-300"
+            message.includes("successfully")
+              ? "bg-green-100 text-green-700 border border-green-300"
+              : "bg-red-100 text-red-700 border border-red-300"
           }`}
         >
           {message}

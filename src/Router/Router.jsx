@@ -79,6 +79,8 @@ import OrderList from "../components/Order/OrderList";
 import StaffList from "../components/Manager/StaffList";
 import CustomerList from "../components/Manager/CustomerList";
 import CustomerStaffList from "../components/StaffSale/CustomerStaffList";
+import Permission from "../components/Admin/Permission";
+import StaffListPermission from "../components/Manager/StaffListPermission";
 
 const Router = createBrowserRouter([
   {
@@ -104,7 +106,7 @@ const Router = createBrowserRouter([
       { path: "dashboard", element: <AdminDashboard /> },
       { path: "orders", element: <NotFound /> },
       { path: "products", element: <NotFound /> },
-      { path: "staff", element: <NotFound /> },
+      { path: "staff", element: <Permission /> },
       { path: "customers", element: <NotFound /> },
       { path: "settings", element: <CreateAccountStaff /> },
       { path: "revenue-analytics", element: <RevenueDashboard /> }, // Chua tien khai
@@ -150,6 +152,8 @@ const Router = createBrowserRouter([
       { index: true, element: <ManagerPage /> },
       { path: "team", element: <StaffList /> },
       { path: "customers", element: <CustomerList /> },
+      { path: "permission", element: <Permission /> },
+      { path: "stafflead", element: <StaffListPermission /> },
       { path: "quote", element: <NotFound /> },
       { path: "ads", element: <NotFound /> },
       { path: "cost/paylater", element: <NotFound /> },

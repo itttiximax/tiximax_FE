@@ -32,6 +32,78 @@ const CreatePurchase = ({
     }
   }, [isOpen]);
 
+  // ============ FORMAT CURRENCY - GIỐNG PRODUCTMANAGER ============
+
+  // Helper function để format số tiền với dấu phẩy cho hiển thị (giữ nguyên phần thập phân)
+  const formatCurrency = (value) => {
+    if (!value || value === "") return "";
+
+    // Chuyển đổi thành string và xử lý
+    const stringValue = value.toString();
+
+    // Tách phần nguyên và phần thập phân
+    const parts = stringValue.split(".");
+    const integerPart = parts[0].replace(/,/g, ""); // Loại bỏ dấu phẩy cũ
+    const decimalPart = parts[1];
+
+    // Kiểm tra phần nguyên có hợp lệ không
+    if (!/^\d*$/.test(integerPart)) return stringValue;
+
+    // Format phần nguyên với dấu phẩy
+    const formattedInteger = integerPart
+      ? parseInt(integerPart).toLocaleString("en-US")
+      : "";
+
+    // Ghép lại với phần thập phân nếu có
+    if (decimalPart !== undefined) {
+      return formattedInteger + "." + decimalPart;
+    }
+
+    return formattedInteger;
+  };
+
+  // Helper function để lấy giá trị thô (remove dấu phẩy nhưng giữ dấu chấm thập phân)
+  const getRawValue = (value) => {
+    return value.toString().replace(/,/g, "");
+  };
+
+  // Hàm kiểm tra tính hợp lệ của số thập phân
+  const isValidDecimal = (value) => {
+    // Cho phép: số nguyên, số thập phân, chuỗi rỗng
+    return /^\d*\.?\d*$/.test(value) || value === "";
+  };
+
+  // Handle purchase total input change
+  const handlePurchaseTotalChange = (e) => {
+    const value = e.target.value;
+    const cleanValue = getRawValue(value);
+
+    // Cho phép nhập số thập phân
+    if (isValidDecimal(cleanValue)) {
+      setPurchaseData((prev) => ({
+        ...prev,
+        purchaseTotal: cleanValue,
+      }));
+    }
+  };
+
+  // Handle blur - validate khi rời khỏi input
+  const handlePurchaseTotalBlur = () => {
+    const currentValue = getRawValue(purchaseData.purchaseTotal);
+
+    if (currentValue && currentValue !== "") {
+      const numValue = parseFloat(currentValue);
+      if (!isNaN(numValue) && numValue >= 0) {
+        setPurchaseData((prev) => ({
+          ...prev,
+          purchaseTotal: currentValue,
+        }));
+      }
+    }
+  };
+
+  // ============ END FORMAT CURRENCY ============
+
   // Handle image upload from UploadImg component
   const handleImageUpload = (imageUrl) => {
     setPurchaseData((prev) => ({
@@ -74,10 +146,8 @@ const CreatePurchase = ({
         return;
       }
 
-      if (
-        !purchaseData.purchaseTotal ||
-        Number(purchaseData.purchaseTotal) <= 0
-      ) {
+      const rawPurchaseTotal = getRawValue(purchaseData.purchaseTotal);
+      if (!rawPurchaseTotal || Number(rawPurchaseTotal) <= 0) {
         toast.error("Vui lòng nhập tổng tiền hợp lệ (> 0)");
         return;
       }
@@ -105,12 +175,14 @@ const CreatePurchase = ({
 
       // Prepare payload
       const payload = {
-        purchaseTotal: Number(purchaseData.purchaseTotal),
+        purchaseTotal: Number(rawPurchaseTotal),
         image: purchaseData.image,
         note: purchaseData.note || "",
         shipmentCode: purchaseData.shipmentCode || "",
         trackingCode: selectedTrackingCodes,
       };
+
+      console.log("Payload gửi lên:", payload);
 
       await createPurchaseService.createPurchase(orderCode, payload, token);
 
@@ -119,18 +191,79 @@ const CreatePurchase = ({
       onSuccess?.();
     } catch (error) {
       console.error("Error creating purchase:", error);
+      console.error("Error response:", error.response);
 
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Có lỗi xảy ra khi tạo purchase";
+      // ============ XỬ LÝ LỖI TỪ BE CHI TIẾT ============
 
-      toast.error(errorMessage);
+      let errorMessage = "Có lỗi xảy ra khi tạo purchase";
 
-      // Handle token expiry
-      if (error.status === 401) {
-        localStorage.removeItem("token");
+      if (error.response) {
+        // Lỗi từ server có response
+        const { data, status } = error.response;
+
+        console.log("Backend error status:", status);
+        console.log("Backend error data:", data);
+
+        // Xử lý các format lỗi khác nhau từ BE
+        if (data) {
+          // Format 1: { message: "error message" }
+          if (data.message) {
+            errorMessage = data.message;
+          }
+          // Format 2: { error: "error message" }
+          else if (data.error) {
+            errorMessage = data.error;
+          }
+          // Format 3: { errors: [{...}] } - validation errors
+          else if (data.errors && Array.isArray(data.errors)) {
+            errorMessage = data.errors
+              .map((err) => err.message || err.msg)
+              .join(", ");
+          }
+          // Format 4: { detail: "error message" }
+          else if (data.detail) {
+            errorMessage = data.detail;
+          }
+          // Format 5: Nếu data là string
+          else if (typeof data === "string") {
+            errorMessage = data;
+          }
+        }
+
+        // Thêm status code vào message nếu cần
+        if (status === 400) {
+          errorMessage = `[Lỗi dữ liệu] ${errorMessage}`;
+        } else if (status === 401) {
+          errorMessage = "[Không có quyền truy cập] Vui lòng đăng nhập lại";
+          localStorage.removeItem("token");
+        } else if (status === 403) {
+          errorMessage = `[Forbidden] ${errorMessage}`;
+        } else if (status === 404) {
+          errorMessage = `[Không tìm thấy] ${errorMessage}`;
+        } else if (status === 409) {
+          errorMessage = `[Conflict] ${errorMessage}`;
+        } else if (status === 500) {
+          errorMessage = `[Lỗi server] ${errorMessage}`;
+        }
+      } else if (error.request) {
+        // Request được gửi nhưng không nhận được response
+        console.error("No response received:", error.request);
+        errorMessage =
+          "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.";
+      } else {
+        // Lỗi khác
+        errorMessage = error.message || errorMessage;
       }
+
+      // Hiển thị lỗi
+      toast.error(errorMessage, {
+        duration: 5000, // Hiển thị lâu hơn để user đọc được
+        style: {
+          maxWidth: "500px",
+        },
+      });
+
+      // ============ END XỬ LÝ LỖI ============
     } finally {
       setCreatingPurchase(false);
     }
@@ -147,8 +280,8 @@ const CreatePurchase = ({
     onClose();
   };
 
-  // Format currency for display
-  const formatCurrency = (amount) => {
+  // Format currency for display VND
+  const formatCurrencyVND = (amount) => {
     if (!amount) return "N/A";
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -287,7 +420,7 @@ const CreatePurchase = ({
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-semibold text-gray-900 mb-2">
-                          {formatCurrency(link.finalPriceVnd)}
+                          {formatCurrencyVND(link.finalPriceVnd)}
                         </div>
                         <span
                           className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
@@ -316,19 +449,17 @@ const CreatePurchase = ({
                   Tổng tiền <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="number"
-                  value={purchaseData.purchaseTotal}
-                  onChange={(e) =>
-                    setPurchaseData((prev) => ({
-                      ...prev,
-                      purchaseTotal: e.target.value,
-                    }))
-                  }
+                  type="text"
+                  value={formatCurrency(purchaseData.purchaseTotal || "")}
+                  onChange={handlePurchaseTotalChange}
+                  onBlur={handlePurchaseTotalBlur}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="000000"
-                  min="1"
+                  placeholder="0"
                   required
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  Nhập số tiền (ví dụ: 1000000 hoặc 1,000,000)
+                </p>
               </div>
 
               <div>

@@ -74,7 +74,8 @@ const CreatePacking = () => {
       );
 
       if (filteredShipmentCodes.length === 0) {
-        setError("Please enter at least one shipment code");
+        setError("Vui lòng nhập ít nhất một mã vận đơn");
+        setLoading(false);
         return;
       }
 
@@ -91,9 +92,21 @@ const CreatePacking = () => {
         shipmentCodes: [""],
       });
     } catch (err) {
-      setError(
-        err.response?.data?.message || err.message || "An error occurred"
-      );
+      // Xử lý lỗi từ Backend
+      let errorMessage = "Đã xảy ra lỗi không xác định";
+
+      if (err.response?.data?.error) {
+        // Lỗi trả về dạng { error: "message" }
+        errorMessage = err.response.data.error;
+      } else if (err.response?.data?.message) {
+        // Lỗi trả về dạng { message: "message" }
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        // Lỗi từ network hoặc client
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -103,9 +116,7 @@ const CreatePacking = () => {
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Create Packing
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Tạo Packing</h1>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">

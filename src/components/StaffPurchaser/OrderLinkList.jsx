@@ -324,7 +324,7 @@ const OrderLinkList = () => {
                     <div className="text-right flex items-center gap-3">
                       <div>
                         <div className="text-base font-bold text-gray-900 flex items-center gap-1">
-                          <DollarSign className="w-3 h-3" />
+                          {/* <DollarSign className="w-3 h-3" /> */}
                           {formatCurrency(order.finalPriceOrder)}
                         </div>
                         <div className="text-xs text-gray-500">Tổng tiền</div>

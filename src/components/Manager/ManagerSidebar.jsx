@@ -47,6 +47,16 @@ const ManagerSidebar = () => {
           icon: <FiUsers />,
           path: "/manager/customers",
         },
+        {
+          text: t("customers"),
+          icon: <FiUsers />,
+          path: "/manager/permission",
+        },
+        {
+          text: t("customers"),
+          icon: <FiUsers />,
+          path: "/manager/stafflead",
+        },
       ],
     },
     {
