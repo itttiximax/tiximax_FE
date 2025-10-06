@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Search,
   Package2,
@@ -8,6 +8,8 @@ import {
   Calendar,
   Eye,
   RefreshCw,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import domesticService from "../../Services/Warehouse/domesticService";
 
@@ -20,6 +22,9 @@ const ExportList = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState("");
+  const [expandedOrders, setExpandedOrders] = useState({}); // Track which orders are expanded
+
+  const pageSizeOptions = [5, 10, 20, 50, 100];
 
   // Load domestic orders with pagination
   const loadOrders = async (page = 0, limit = 10) => {
@@ -27,11 +32,17 @@ const ExportList = () => {
     setError(null);
     try {
       const response = await domesticService.getDomesticOrders(page, limit);
-      setOrders(response.content || []);
+      if (!response || !Array.isArray(response.content)) {
+        throw new Error("Invalid API response format");
+      }
+      setOrders(response.content);
       setTotalOrders(response.totalElements || 0);
       setCurrentPage(page);
     } catch (err) {
-      setError("Không thể tải danh sách đơn hàng nội địa");
+      setError(
+        err.response?.data?.message ||
+          "Không thể tải danh sách đơn hàng nội địa"
+      );
       console.error("Error loading domestic orders:", err);
     } finally {
       setLoading(false);
@@ -51,6 +62,14 @@ const ExportList = () => {
     return packings.map((packing) => packing.packingCode);
   };
 
+  // Toggle details for a specific order
+  const toggleOrderDetails = (orderIndex) => {
+    setExpandedOrders((prev) => ({
+      ...prev,
+      [orderIndex]: !prev[orderIndex],
+    }));
+  };
+
   useEffect(() => {
     loadOrders(0, pageSize);
   }, [pageSize]);
@@ -66,15 +85,16 @@ const ExportList = () => {
   };
 
   // Filter orders based on search term and date
-  const filteredOrders = orders.filter(
-    (order) =>
-      (order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        getPackingCodes(order.packings).some((code) =>
-          code.toLowerCase().includes(searchTerm.toLowerCase())
-        )) &&
-      // Note: Add date filtering if API returns a date field (e.g., createdDate)
-      !filterDate /* || order.createdDate?.split("T")[0] === filterDate */
-  );
+  const filteredOrders = useMemo(() => {
+    return orders.filter(
+      (order) =>
+        (order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          getPackingCodes(order.packings).some((code) =>
+            code.toLowerCase().includes(searchTerm.toLowerCase())
+          )) &&
+        (!filterDate || order.createdDate?.split("T")[0] === filterDate)
+    );
+  }, [orders, searchTerm, filterDate]);
 
   const totalPages = Math.ceil(totalOrders / pageSize);
 
@@ -109,7 +129,6 @@ const ExportList = () => {
         {/* Controls Section */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-            {/* Search and Filter */}
             <div className="flex flex-col sm:flex-row gap-4 flex-1">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -121,7 +140,6 @@ const ExportList = () => {
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                 />
               </div>
-
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
@@ -131,18 +149,17 @@ const ExportList = () => {
                   className="pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                 />
               </div>
-
               <select
                 value={pageSize}
                 onChange={handlePageSizeChange}
                 disabled={loading}
                 className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100"
               >
-                <option value={5}>5 / trang</option>
-                <option value={10}>10 / trang</option>
-                <option value={20}>20 / trang</option>
-                <option value={50}>50 / trang</option>
-                <option value={100}>100 / trang</option>
+                {pageSizeOptions.map((size) => (
+                  <option key={size} value={size}>
+                    {size} / trang
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -170,6 +187,17 @@ const ExportList = () => {
                 ? "Không tìm thấy kết quả phù hợp với từ khóa tìm kiếm."
                 : "Hiện tại không có đơn hàng nội địa nào."}
             </p>
+            {(searchTerm || filterDate) && (
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setFilterDate("");
+                }}
+                className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200"
+              >
+                Xóa bộ lọc
+              </button>
+            )}
           </div>
         )}
 
@@ -216,12 +244,16 @@ const ExportList = () => {
                             {order.customerName}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600">
-                          Số điện thoại: {order.customerPhone}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Địa chỉ: {order.customerAddress}
-                        </p>
+                        {expandedOrders[index] && (
+                          <>
+                            <p className="text-sm text-gray-600">
+                              Số điện thoại: {order.customerPhone}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              Địa chỉ: {order.customerAddress}
+                            </p>
+                          </>
+                        )}
                       </div>
 
                       {/* Packing List */}
@@ -230,19 +262,29 @@ const ExportList = () => {
                           Mã đóng gói:
                         </p>
                         <div className="flex flex-wrap gap-1">
-                          {order.packings.slice(0, 3).map((packing) => (
-                            <span
-                              key={packing.packingCode}
-                              className="inline-block px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full font-medium"
-                            >
-                              {packing.packingCode}
-                            </span>
-                          ))}
-                          {order.packings.length > 3 && (
-                            <span className="inline-block px-2 py-1 bg-gray-200 text-gray-600 text-xs rounded-full">
-                              +{order.packings.length - 3} mã khác
-                            </span>
-                          )}
+                          {expandedOrders[index]
+                            ? order.packings.map((packing) => (
+                                <span
+                                  key={packing.packingCode}
+                                  className="inline-block px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full font-medium"
+                                >
+                                  {packing.packingCode}
+                                </span>
+                              ))
+                            : order.packings.slice(0, 1).map((packing) => (
+                                <span
+                                  key={packing.packingCode}
+                                  className="inline-block px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full font-medium"
+                                >
+                                  {packing.packingCode}
+                                </span>
+                              ))}
+                          {order.packings.length > 1 &&
+                            !expandedOrders[index] && (
+                              <span className="inline-block px-2 py-1 bg-gray-200 text-gray-600 text-xs rounded-full">
+                                +{order.packings.length - 1} mã khác
+                              </span>
+                            )}
                         </div>
                       </div>
 
@@ -257,28 +299,47 @@ const ExportList = () => {
                           </span>
                           <span className="text-sm text-gray-500">mã</span>
                         </div>
-                        <div className="space-y-1">
-                          {order.packings.slice(0, 2).map((packing) =>
-                            packing.trackingCodes.slice(0, 2).map((code) => (
-                              <div
-                                key={code}
-                                className="flex justify-between text-xs text-gray-600"
-                              >
-                                <span className="truncate max-w-[100px]">
-                                  {code}
-                                </span>
-                                <span className="font-medium">1 mã</span>
-                              </div>
-                            ))
-                          )}
-                          {getTotalTrackingCodes(order.packings) > 4 && (
-                            <div className="text-xs text-gray-500 italic">
-                              +{getTotalTrackingCodes(order.packings) - 4} mã
-                              khác
-                            </div>
-                          )}
-                        </div>
+                        {expandedOrders[index] && (
+                          <div className="space-y-1">
+                            {order.packings.map((packing) =>
+                              packing.trackingCodes.map((code) => (
+                                <div
+                                  key={code}
+                                  className="flex justify-between text-xs text-gray-600"
+                                >
+                                  <span className="truncate max-w-[100px]">
+                                    {code}
+                                  </span>
+                                  <span className="font-medium">1 mã</span>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        )}
                       </div>
+                    </div>
+
+                    {/* View Details Button */}
+                    <div className="flex-shrink-0">
+                      <button
+                        onClick={() => toggleOrderDetails(index)}
+                        className="flex items-center gap-2 px-3 py-1 text-sm font-medium text-purple-600 hover:bg-purple-100 rounded-lg transition-all duration-200"
+                        aria-label={
+                          expandedOrders[index] ? "Ẩn chi tiết" : "Xem chi tiết"
+                        }
+                      >
+                        {expandedOrders[index] ? (
+                          <>
+                            <ChevronUp className="w-4 h-4" />
+                            Ẩn chi tiết
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="w-4 h-4" />
+                            Xem chi tiết
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -298,6 +359,7 @@ const ExportList = () => {
                   ? "text-gray-400 cursor-not-allowed"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
+              aria-label="Trang trước"
             >
               <ChevronLeft className="w-5 h-5" />
               Trang trước
@@ -318,6 +380,7 @@ const ExportList = () => {
                   ? "text-gray-400 cursor-not-allowed"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
+              aria-label="Trang sau"
             >
               Trang sau
               <ChevronRight className="w-5 h-5" />

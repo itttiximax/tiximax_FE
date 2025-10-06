@@ -8,12 +8,15 @@ import {
   LogOut,
   User,
   ChevronDown,
+  Menu,
+  X,
 } from "lucide-react";
 
 const StaffPurchaserSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isInventoryDropdownOpen, setIsInventoryDropdownOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -21,6 +24,8 @@ const StaffPurchaserSidebar = () => {
   };
 
   const isActive = (path) => location.pathname === path;
+
+  const toggleSidebar = () => setIsOpen(!isOpen);
 
   const menuItems = [
     {
@@ -78,20 +83,20 @@ const StaffPurchaserSidebar = () => {
             onClick={item.onToggle}
             className={`flex items-center gap-3 px-4 py-2 w-full text-left rounded-lg transition-colors duration-200 ${
               isDropdownActive
-                ? "bg-indigo-50 text-indigo-700"
-                : "text-gray-600 hover:bg-gray-100"
+                ? "bg-sky-100 text-sky-700 font-semibold shadow-sm"
+                : "text-slate-700 hover:bg-slate-200"
             }`}
           >
             <Icon
               size={20}
-              className={isDropdownActive ? "text-indigo-700" : "text-gray-500"}
+              className={isDropdownActive ? "text-sky-600" : "text-gray-500"}
             />
             <span className="flex-1 text-sm font-medium">{item.label}</span>
             <ChevronDown
               size={16}
               className={`transition-transform duration-200 ${
                 item.isOpen ? "rotate-180" : ""
-              } ${isDropdownActive ? "text-indigo-700" : "text-gray-500"}`}
+              } ${isDropdownActive ? "text-sky-600" : "text-gray-500"}`}
             />
           </button>
           {item.isOpen && (
@@ -106,14 +111,15 @@ const StaffPurchaserSidebar = () => {
                     to={dropdownItem.to}
                     className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors duration-200 ${
                       dropdownActive
-                        ? "bg-indigo-50 text-indigo-700"
-                        : "text-gray-600 hover:bg-gray-100"
+                        ? "bg-sky-100 text-sky-700 font-semibold shadow-sm"
+                        : "text-slate-700 hover:bg-slate-200"
                     }`}
+                    onClick={() => setIsOpen(false)}
                   >
                     <DropdownIcon
                       size={18}
                       className={
-                        dropdownActive ? "text-indigo-700" : "text-gray-500"
+                        dropdownActive ? "text-sky-600" : "text-gray-500"
                       }
                     />
                     <span className="text-sm font-medium">
@@ -136,62 +142,93 @@ const StaffPurchaserSidebar = () => {
         to={item.to}
         className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors duration-200 ${
           active
-            ? "bg-indigo-50 text-indigo-700"
-            : "text-gray-600 hover:bg-gray-100"
+            ? "bg-sky-100 text-sky-700 font-semibold shadow-sm"
+            : "text-slate-700 hover:bg-slate-200"
         }`}
+        onClick={() => setIsOpen(false)}
       >
-        <Icon
-          size={20}
-          className={active ? "text-indigo-700" : "text-gray-500"}
-        />
+        <Icon size={20} className={active ? "text-sky-600" : "text-gray-500"} />
         <span className="text-sm font-medium">{item.label}</span>
       </Link>
     );
   };
 
   return (
-    <div className="w-64 h-screen bg-white flex flex-col border-r border-gray-200 shadow-sm fixed">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-200 flex-shrink-0">
-        <div className="text-center space-y-2">
-          <div className="flex justify-center">
-            <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
-              <User size={20} className="text-white" />
+    <>
+      {/* Hamburger Menu Button for Mobile */}
+      <button
+        className="md:hidden fixed top-4 left-4 z-50 text-slate-700 p-2 rounded-lg bg-slate-50 shadow-md hover:bg-slate-100 transition-colors duration-200"
+        onClick={toggleSidebar}
+      >
+        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+      </button>
+
+      {/* Sidebar */}
+      <div
+        className={`fixed md:static inset-y-0 left-0 w-64 bg-slate-50 shadow-lg flex flex-col transform transition-transform duration-300 ease-in-out z-40 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0 h-screen`}
+      >
+        {/* Header */}
+        <div className="p-4 border-b border-gray-200 flex-shrink-0">
+          <Link
+            to="/staff-purchaser/profile"
+            className={`flex flex-col items-center gap-2 p-2 rounded-lg transition-colors duration-200 ${
+              isActive("/staff-purchaser/profile")
+                ? "bg-sky-100 text-sky-700 shadow-sm"
+                : "text-slate-700 hover:bg-slate-200"
+            }`}
+            onClick={() => setIsOpen(false)}
+          >
+            <User
+              className={`w-8 h-8 ${
+                isActive("/staff-purchaser/profile")
+                  ? "text-sky-600"
+                  : "text-gray-500"
+              }`}
+            />
+            <span className="text-sm font-semibold text-slate-800">
+              Nhân viên mua hàng
+            </span>
+          </Link>
+        </div>
+
+        {/* Navigation with hidden scrollbar */}
+        <nav className="flex-1 p-3 space-y-4 overflow-y-auto hide-scrollbar">
+          {menuItems.map((section, sectionIndex) => (
+            <div key={sectionIndex} className="space-y-2">
+              <h3 className="px-4 text-xs font-semibold uppercase text-slate-500 tracking-wide">
+                {section.section}
+              </h3>
+              <div className="space-y-1">
+                {section.items.map((item, itemIndex) =>
+                  renderMenuItem(item, itemIndex)
+                )}
+              </div>
             </div>
-          </div>
-          <h2 className="text-lg font-semibold text-gray-800">
-            Purchaser Staff
-          </h2>
+          ))}
+        </nav>
+
+        {/* Fixed Footer with Logout */}
+        <div className="p-3 border-t border-gray-200 flex-shrink-0 bg-slate-50 sticky bottom-0">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm"
+          >
+            <LogOut size={16} />
+            <span className="text-sm font-medium">Đăng xuất</span>
+          </button>
         </div>
       </div>
 
-      {/* Navigation with hidden scrollbar */}
-      <nav className="flex-1 p-3 space-y-4 overflow-y-auto hide-scrollbar">
-        {menuItems.map((section, sectionIndex) => (
-          <div key={sectionIndex} className="space-y-2">
-            <h3 className="px-4 text-xs font-semibold uppercase text-gray-500 tracking-wide">
-              {section.section}
-            </h3>
-            <div className="space-y-1">
-              {section.items.map((item, itemIndex) =>
-                renderMenuItem(item, itemIndex)
-              )}
-            </div>
-          </div>
-        ))}
-      </nav>
-
-      {/* Fixed Footer with Logout */}
-      <div className="p-3 border-t border-gray-200 flex-shrink-0 bg-white sticky bottom-0">
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors duration-200"
-        >
-          <LogOut size={16} />
-          <span className="text-sm font-medium">Đăng xuất</span>
-        </button>
-      </div>
-    </div>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-60 z-30 md:hidden"
+          onClick={toggleSidebar}
+        />
+      )}
+    </>
   );
 };
 

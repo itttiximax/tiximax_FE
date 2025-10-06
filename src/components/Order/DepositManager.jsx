@@ -220,7 +220,7 @@ const DepositManager = ({
     <div className="w-full">
       {/* Header Section - Compact */}
       <div className="bg-white shadow-sm p-3 mb-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between ">
           <div>
             <p className="text-sm text-gray-600">
               Tổng số kiện:{" "}

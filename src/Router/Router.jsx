@@ -156,10 +156,12 @@ const Router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <ManagerPage /> },
+      { path: "profile", element: <ProfilePage /> },
       { path: "team", element: <StaffList /> },
       { path: "customers", element: <CustomerList /> },
       { path: "permission", element: <Permission /> },
       { path: "stafflead", element: <StaffListPermission /> },
+      { path: "createstaff", element: <CreateAccountStaff /> },
       { path: "quote", element: <NotFound /> },
       { path: "ads", element: <NotFound /> },
       { path: "cost/paylater", element: <NotFound /> },
@@ -184,6 +186,7 @@ const Router = createBrowserRouter([
         index: true,
         element: <LeadSalePage />,
       },
+      { path: "profile", element: <ProfilePage /> },
       { path: "createorder", element: <CreateOrderForm /> },
       { path: "deposit", element: <CreateDepositForm /> }, // Chưa triển khai
       { path: "auction", element: <NotFound /> }, // Chưa triển khai
@@ -224,11 +227,15 @@ const Router = createBrowserRouter([
         index: true,
         element: <StaffSalePage />,
       },
+      { path: "profile", element: <ProfilePage /> },
       { path: "create-invoice", element: <CreateOrderForm /> },
       { path: "quotations", element: <PaymentOrderList /> },
-      { path: "deposit", element: <NotFound /> }, // Chưa triển khai
+      { path: "deposit", element: <CreateDepositForm /> },
       { path: "auction", element: <NotFound /> }, // Chưa triển khai
-      { path: "megerequests", element: <MergedPaymentOrder /> },
+      { path: "order-payment", element: <PaymentOrderList /> },
+      { path: "ship-payment", element: <PaymentShipList /> },
+      { path: "createpaymentsupport", element: <MergedPaymentOrder /> },
+      { path: "createpaymentshipping", element: <MergedPaymentShip /> },
       { path: "orders/pending", element: <ManagerOrder /> },
       { path: "createaccountuser", element: <CreateAccountUser /> },
       { path: "customers", element: <CustomerStaffList /> },
@@ -258,6 +265,7 @@ const Router = createBrowserRouter([
         index: true,
         element: <StaffPurchaserPage />,
       },
+      { path: "profile", element: <ProfilePage /> },
       { path: "dashboard", element: <NotFound /> },
       { path: "orders", element: <OrderLinkList /> },
       { path: "suppliers", element: <NotFound /> },
@@ -274,6 +282,7 @@ const Router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <StaffWarehouseForeignPage /> },
+      { path: "profile", element: <ProfilePage /> },
       { path: "dashboard", element: <NotFound /> },
       { path: "warehouse", element: <WarehouseList /> },
       { path: "imports", element: <WarehouseShipment /> },
@@ -301,6 +310,7 @@ const Router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <StaffWarehouseDomesticPage /> },
+      { path: "profile", element: <ProfilePage /> },
       { path: "dashboard", element: <NotFound /> },
       { path: "inventory", element: <NotFound /> },
       { path: "imports", element: <PackingFlyingList /> },

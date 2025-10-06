@@ -2,20 +2,23 @@ import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
-  FiBarChart,
-  FiUsers,
-  FiUserCheck,
-  FiCreditCard,
-  FiTruck,
-  FiMapPin,
-  FiBox,
-  FiGlobe,
-  FiShoppingCart,
-  FiLogOut,
-  FiFileText,
-  FiSpeaker,
-  FiChevronDown,
-} from "react-icons/fi";
+  BarChart2,
+  Users,
+  UserCheck,
+  CreditCard,
+  Truck,
+  MapPin,
+  Box,
+  Globe,
+  ShoppingCart,
+  LogOut,
+  FileText,
+  Speaker,
+  ChevronDown,
+  List,
+  UserRoundPlus,
+  BookKey,
+} from "lucide-react";
 
 const ManagerSidebar = () => {
   const { t } = useTranslation();
@@ -25,37 +28,42 @@ const ManagerSidebar = () => {
 
   const menuSections = [
     {
-      title: t("analytics"),
+      title: t("Phân tích & Quản lý"),
       items: [
         {
-          text: t("dashboard"),
-          icon: <FiBarChart />,
+          text: t("Thống kê"),
+          icon: <BarChart2 />,
           path: "/manager/dashboard",
         },
         {
-          text: t("order"),
-          icon: <FiShoppingCart />,
+          text: t("Danh sách đơn hàng"),
+          icon: <ShoppingCart />,
           path: "/manager/order",
         },
         {
-          text: t("team"),
-          icon: <FiUserCheck />,
+          text: "Danh sách nhân viên",
+          icon: <List />,
           path: "/manager/team",
         },
         {
-          text: t("customers"),
-          icon: <FiUsers />,
+          text: t("Danh sách khách hàng"),
+          icon: <Users />,
           path: "/manager/customers",
         },
         {
-          text: t("customers"),
-          icon: <FiUsers />,
+          text: t("Cấp quyền"),
+          icon: <BookKey />,
           path: "/manager/permission",
         },
         {
-          text: t("customers"),
-          icon: <FiUsers />,
+          text: t("Thành viên"),
+          icon: <UserCheck />,
           path: "/manager/stafflead",
+        },
+        {
+          text: t("Tạo nhân viên"),
+          icon: <UserRoundPlus />,
+          path: "/manager/createstaff",
         },
       ],
     },
@@ -64,12 +72,12 @@ const ManagerSidebar = () => {
       items: [
         {
           text: t("quote"),
-          icon: <FiFileText />,
+          icon: <FileText />,
           path: "/manager/quote",
         },
         {
           text: t("marketing"),
-          icon: <FiSpeaker />,
+          icon: <Speaker />,
           path: "/manager/ads",
         },
       ],
@@ -79,7 +87,7 @@ const ManagerSidebar = () => {
       items: [
         {
           text: t("payment"),
-          icon: <FiCreditCard />,
+          icon: <CreditCard />,
           hasSubmenu: true,
           isOpen: openCost,
           onToggle: () => setOpenCost(!openCost),
@@ -90,23 +98,22 @@ const ManagerSidebar = () => {
         },
         {
           text: t("routes"),
-          icon: <FiTruck />,
+          icon: <Truck />,
           path: "/manager/routes",
         },
         {
           text: t("transfer"),
-          icon: <FiMapPin />,
+          icon: <MapPin />,
           path: "/manager/transfer",
         },
         {
           text: t("producttype"),
-          icon: <FiBox />,
+          icon: <Box />,
           path: "/manager/producttype",
         },
-
         {
           text: t("website"),
-          icon: <FiGlobe />,
+          icon: <Globe />,
           path: "/manager/website",
         },
       ],
@@ -138,7 +145,7 @@ const ManagerSidebar = () => {
               </span>
               <span className="text-sm font-medium">{item.text}</span>
             </div>
-            <FiChevronDown
+            <ChevronDown
               className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
                 item.isOpen ? "rotate-180" : ""
               }`}
@@ -206,7 +213,7 @@ const ManagerSidebar = () => {
           className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500"
           aria-label={t("aria.logout")}
         >
-          <FiLogOut className="w-4 h-4" />
+          <LogOut className="w-4 h-4" />
           <span className="text-sm font-medium">{t("logout")}</span>
         </button>
       </div>

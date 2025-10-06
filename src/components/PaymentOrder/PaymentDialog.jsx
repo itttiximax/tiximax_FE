@@ -151,11 +151,11 @@ const PaymentDialog = ({
             </div>
 
             {payment.collectedAmount > 0 && (
-              <div className="px-3 py-2 bg-green-50 flex justify-between items-center">
-                <span className="text-xs text-green-700 font-medium">
-                  Số tiền đã thu
+              <div className="px-3 py-2 bg-red-50 flex justify-between items-center">
+                <span className="text-xs text-red-700 font-medium">
+                  Số tiền thu
                 </span>
-                <span className="text-xs font-bold text-green-800">
+                <span className="text-xs font-bold text-black-800">
                   {formatCurrency(payment.collectedAmount)}
                 </span>
               </div>

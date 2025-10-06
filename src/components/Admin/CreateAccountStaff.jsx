@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  FaUserPlus,
-  FaCheckCircle,
-  FaExclamationTriangle,
-  FaSpinner,
-} from "react-icons/fa";
+import { UserPlus, CheckCircle, AlertTriangle, Loader2, X } from "lucide-react";
 import registrationService from "../../Services/Auth/Registration";
 import managerRoutesService from "../../Services/Manager/managerRoutesService";
 
@@ -19,7 +14,7 @@ const CreateAccountStaff = () => {
     role: "",
     department: "",
     location: "",
-    routeIds: "",
+    routeIds: [],
   });
 
   const [errors, setErrors] = useState({});
@@ -27,8 +22,8 @@ const CreateAccountStaff = () => {
   const [selectedRole, setSelectedRole] = useState("");
   const [routes, setRoutes] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
+  const [showRouteDropdown, setShowRouteDropdown] = useState(false);
 
-  // Fetch routes on component mount
   useEffect(() => {
     fetchRoutes();
   }, []);
@@ -37,7 +32,7 @@ const CreateAccountStaff = () => {
     try {
       const data = await managerRoutesService.getRoutes();
       setRoutes(data);
-      console.log("Routes loaded:", data); // Debug log
+      console.log("Routes loaded:", data);
     } catch (error) {
       console.error("Error fetching routes:", error);
       setErrors((prev) => ({
@@ -53,8 +48,6 @@ const CreateAccountStaff = () => {
       ...prev,
       [name]: value,
     }));
-
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -71,8 +64,18 @@ const CreateAccountStaff = () => {
       role: role,
       department: "",
       location: "",
-      routeIds: "",
+      routeIds: [],
     }));
+  };
+
+  const handleRouteSelect = (routeId) => {
+    setFormData((prev) => ({
+      ...prev,
+      routeIds: prev.routeIds.includes(routeId)
+        ? prev.routeIds.filter((id) => id !== routeId)
+        : [...prev.routeIds, routeId],
+    }));
+    setShowRouteDropdown(false);
   };
 
   const getRoleDisplayName = (role) => {
@@ -96,42 +99,25 @@ const CreateAccountStaff = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       setLoading(true);
       setErrors({});
       setSuccessMessage("");
 
-      // Convert routeIds to array if it's a string
-      const processedFormData = {
-        ...formData,
-        routeIds: formData.routeIds
-          ? formData.routeIds
-              .split(",")
-              .map((id) => parseInt(id.trim()))
-              .filter((id) => !isNaN(id))
-          : [],
-      };
-
-      // Validate data
       const validation =
-        registrationService.validateStaffRegistrationData(processedFormData);
+        registrationService.validateStaffRegistrationData(formData);
       if (!validation.isValid) {
         setErrors(validation.errors);
         return;
       }
 
-      // Remove confirmPassword before sending to API
-      const { confirmPassword, ...registrationData } = processedFormData;
-
-      // Register staff
+      const { confirmPassword, ...registrationData } = formData;
       const result = await registrationService.registerStaff(registrationData);
 
       setSuccessMessage(
         `Tạo tài khoản thành công! Mã nhân viên: ${result.staffCode}`
       );
 
-      // Reset form
       setFormData({
         username: "",
         password: "",
@@ -142,14 +128,11 @@ const CreateAccountStaff = () => {
         role: "",
         department: "",
         location: "",
-        routeIds: "",
+        routeIds: [],
       });
       setSelectedRole("");
-
-      console.log("Registration successful:", result);
     } catch (error) {
       console.error("Registration failed:", error);
-
       if (error.response?.data?.message) {
         setErrors({ general: error.response.data.message });
       } else if (error.message) {
@@ -173,7 +156,7 @@ const CreateAccountStaff = () => {
       role: "",
       department: "",
       location: "",
-      routeIds: "",
+      routeIds: [],
     });
     setSelectedRole("");
     setErrors({});
@@ -181,189 +164,267 @@ const CreateAccountStaff = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="bg-white shadow-lg rounded-lg">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <div className="w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-            <FaUserPlus className="w-6 h-6 mr-2" />
+        <div className="sticky top-0 bg-gradient-to-r from-indigo-500 to-blue-600 text-white px-6 py-4">
+          <h2 className="text-2xl font-bold flex items-center">
+            <UserPlus className="w-6 h-6 mr-2" />
             Tạo tài khoản nhân viên
           </h2>
-          <p className="text-gray-600 mt-1">
+          <p className="text-indigo-100 mt-1">
             Điền thông tin để tạo tài khoản mới cho nhân viên
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleSubmit} className="p-6 animate-fade-in">
           {/* Success Message */}
           {successMessage && (
-            <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-md">
-              <div className="flex items-center">
-                <FaCheckCircle className="w-5 h-5 mr-2" />
-                {successMessage}
-              </div>
+            <div
+              className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-800 rounded-r-lg flex items-center transition-all duration-300"
+              role="alert"
+              aria-live="assertive"
+            >
+              <CheckCircle className="w-5 h-5 mr-2" />
+              <span>{successMessage}</span>
+              <button
+                onClick={() => setSuccessMessage("")}
+                className="ml-auto text-green-600 hover:text-green-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
           )}
 
           {/* General Error */}
           {errors.general && (
-            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
-              <div className="flex items-center">
-                <FaExclamationTriangle className="w-5 h-5 mr-2" />
-                {errors.general}
-              </div>
+            <div
+              className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-800 rounded-r-lg flex items-center transition-all duration-300"
+              role="alert"
+              aria-live="assertive"
+            >
+              <AlertTriangle className="w-5 h-5 mr-2" />
+              <span>{errors.general}</span>
+              <button
+                onClick={() => setErrors({})}
+                className="ml-auto text-red-600 hover:text-red-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
           )}
 
           {/* Basic Information Section */}
           <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
               Thông tin cơ bản
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Username */}
-              <div>
-                <label
-                  htmlFor="username"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Tên đăng nhập <span className="text-red-500">*</span>
-                </label>
+              <div className="relative">
                 <input
                   type="text"
                   id="username"
                   name="username"
                   value={formData.username}
                   onChange={handleInputChange}
-                  placeholder="Nhập tên đăng nhập"
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.username ? "border-red-500" : "border-gray-300"
+                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 ${
+                    errors.username
+                      ? "border-red-500"
+                      : formData.username
+                      ? "border-indigo-300"
+                      : "border-gray-300"
                   }`}
+                  placeholder=" "
+                  aria-describedby="username-error"
                 />
+                <label
+                  htmlFor="username"
+                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-indigo-600"
+                >
+                  Tên đăng nhập <span className="text-red-500">*</span>
+                </label>
                 {errors.username && (
-                  <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+                  <p
+                    id="username-error"
+                    className="mt-1 text-sm text-red-600"
+                    aria-live="polite"
+                  >
+                    {errors.username}
+                  </p>
                 )}
               </div>
 
               {/* Name */}
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Họ và tên <span className="text-red-500">*</span>
-                </label>
+              <div className="relative">
                 <input
                   type="text"
                   id="name"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  placeholder="Nhập họ và tên"
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.name ? "border-red-500" : "border-gray-300"
+                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 ${
+                    errors.name
+                      ? "border-red-500"
+                      : formData.name
+                      ? "border-indigo-300"
+                      : "border-gray-300"
                   }`}
+                  placeholder=" "
+                  aria-describedby="name-error"
                 />
+                <label
+                  htmlFor="name"
+                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-indigo-600"
+                >
+                  Họ và tên <span className="text-red-500">*</span>
+                </label>
                 {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                  <p
+                    id="name-error"
+                    className="mt-1 text-sm text-red-600"
+                    aria-live="polite"
+                  >
+                    {errors.name}
+                  </p>
                 )}
               </div>
 
               {/* Email */}
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Email <span className="text-red-500">*</span>
-                </label>
+              <div className="relative">
                 <input
                   type="email"
                   id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  placeholder="Nhập địa chỉ email"
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.email ? "border-red-500" : "border-gray-300"
+                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 ${
+                    errors.email
+                      ? "border-red-500"
+                      : formData.email
+                      ? "border-indigo-300"
+                      : "border-gray-300"
                   }`}
+                  placeholder=" "
+                  aria-describedby="email-error"
                 />
+                <label
+                  htmlFor="email"
+                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-indigo-600"
+                >
+                  Email <span className="text-red-500">*</span>
+                </label>
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                  <p
+                    id="email-error"
+                    className="mt-1 text-sm text-red-600"
+                    aria-live="polite"
+                  >
+                    {errors.email}
+                  </p>
                 )}
               </div>
 
               {/* Phone */}
-              <div>
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Số điện thoại <span className="text-red-500">*</span>
-                </label>
+              <div className="relative">
                 <input
                   type="tel"
                   id="phone"
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  placeholder="Nhập số điện thoại"
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.phone ? "border-red-500" : "border-gray-300"
+                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 ${
+                    errors.phone
+                      ? "border-red-500"
+                      : formData.phone
+                      ? "border-indigo-300"
+                      : "border-gray-300"
                   }`}
+                  placeholder=" "
+                  aria-describedby="phone-error"
                 />
+                <label
+                  htmlFor="phone"
+                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-indigo-600"
+                >
+                  Số điện thoại <span className="text-red-500">*</span>
+                </label>
                 {errors.phone && (
-                  <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                  <p
+                    id="phone-error"
+                    className="mt-1 text-sm text-red-600"
+                    aria-live="polite"
+                  >
+                    {errors.phone}
+                  </p>
                 )}
               </div>
 
               {/* Password */}
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Mật khẩu <span className="text-red-500">*</span>
-                </label>
+              <div className="relative">
                 <input
                   type="password"
                   id="password"
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  placeholder="Nhập mật khẩu"
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.password ? "border-red-500" : "border-gray-300"
+                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 ${
+                    errors.password
+                      ? "border-red-500"
+                      : formData.password
+                      ? "border-indigo-300"
+                      : "border-gray-300"
                   }`}
+                  placeholder=" "
+                  aria-describedby="password-error"
                 />
+                <label
+                  htmlFor="password"
+                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-indigo-600"
+                >
+                  Mật khẩu <span className="text-red-500">*</span>
+                </label>
                 {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                  <p
+                    id="password-error"
+                    className="mt-1 text-sm text-red-600"
+                    aria-live="polite"
+                  >
+                    {errors.password}
+                  </p>
                 )}
               </div>
 
               {/* Confirm Password */}
-              <div>
-                <label
-                  htmlFor="confirmPassword"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Xác nhận mật khẩu <span className="text-red-500">*</span>
-                </label>
+              <div className="relative">
                 <input
                   type="password"
                   id="confirmPassword"
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  placeholder="Nhập lại mật khẩu"
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 ${
                     errors.confirmPassword
                       ? "border-red-500"
+                      : formData.confirmPassword
+                      ? "border-indigo-300"
                       : "border-gray-300"
                   }`}
+                  placeholder=" "
+                  aria-describedby="confirmPassword-error"
                 />
+                <label
+                  htmlFor="confirmPassword"
+                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-indigo-600"
+                >
+                  Xác nhận mật khẩu <span className="text-red-500">*</span>
+                </label>
                 {errors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">
+                  <p
+                    id="confirmPassword-error"
+                    className="mt-1 text-sm text-red-600"
+                    aria-live="polite"
+                  >
                     {errors.confirmPassword}
                   </p>
                 )}
@@ -373,26 +434,25 @@ const CreateAccountStaff = () => {
 
           {/* Work Information Section */}
           <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
               Thông tin công việc
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Role */}
-              <div>
-                <label
-                  htmlFor="role"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Vai trò <span className="text-red-500">*</span>
-                </label>
+              <div className="relative">
                 <select
                   id="role"
                   name="role"
                   value={formData.role}
                   onChange={handleRoleChange}
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.role ? "border-red-500" : "border-gray-300"
+                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 appearance-none ${
+                    errors.role
+                      ? "border-red-500"
+                      : formData.role
+                      ? "border-indigo-300"
+                      : "border-gray-300"
                   }`}
+                  aria-describedby="role-error"
                 >
                   <option value="">Chọn vai trò</option>
                   <option value="STAFF_SALE">Nhân viên bán hàng</option>
@@ -406,32 +466,53 @@ const CreateAccountStaff = () => {
                   </option>
                   <option value="MANAGER">Quản lý</option>
                 </select>
+                <label
+                  htmlFor="role"
+                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1"
+                >
+                  Vai trò <span className="text-red-500">*</span>
+                </label>
                 {errors.role && (
-                  <p className="mt-1 text-sm text-red-600">{errors.role}</p>
+                  <p
+                    id="role-error"
+                    className="mt-1 text-sm text-red-600"
+                    aria-live="polite"
+                  >
+                    {errors.role}
+                  </p>
                 )}
               </div>
 
               {/* Department */}
-              <div>
-                <label
-                  htmlFor="department"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Phòng ban
-                </label>
+              <div className="relative">
                 <input
                   type="text"
                   id="department"
                   name="department"
                   value={formData.department}
                   onChange={handleInputChange}
-                  placeholder="Nhập phòng ban (VD: SALE, WAREHOUSE)"
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.department ? "border-red-500" : "border-gray-300"
+                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 ${
+                    errors.department
+                      ? "border-red-500"
+                      : formData.department
+                      ? "border-indigo-300"
+                      : "border-gray-300"
                   }`}
+                  placeholder=" "
+                  aria-describedby="department-error"
                 />
+                <label
+                  htmlFor="department"
+                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-indigo-600"
+                >
+                  Phòng ban
+                </label>
                 {errors.department && (
-                  <p className="mt-1 text-sm text-red-600">
+                  <p
+                    id="department-error"
+                    className="mt-1 text-sm text-red-600"
+                    aria-live="polite"
+                  >
                     {errors.department}
                   </p>
                 )}
@@ -441,71 +522,105 @@ const CreateAccountStaff = () => {
               </div>
 
               {/* Location */}
-              <div>
-                <label
-                  htmlFor="location"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Địa điểm làm việc
-                </label>
+              <div className="relative">
                 <input
                   type="text"
                   id="location"
                   name="location"
                   value={formData.location}
                   onChange={handleInputChange}
-                  placeholder="Nhập địa điểm làm việc"
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.location ? "border-red-500" : "border-gray-300"
+                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 ${
+                    errors.location
+                      ? "border-red-500"
+                      : formData.location
+                      ? "border-indigo-300"
+                      : "border-gray-300"
                   }`}
+                  placeholder=" "
+                  aria-describedby="location-error"
                 />
+                <label
+                  htmlFor="location"
+                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-indigo-600"
+                >
+                  Địa điểm làm việc
+                </label>
                 {errors.location && (
-                  <p className="mt-1 text-sm text-red-600">{errors.location}</p>
+                  <p
+                    id="location-error"
+                    className="mt-1 text-sm text-red-600"
+                    aria-live="polite"
+                  >
+                    {errors.location}
+                  </p>
                 )}
               </div>
 
               {/* Route IDs */}
-              <div className="md:col-span-2 lg:col-span-3">
+              <div className="sm:col-span-2 lg:col-span-3">
                 <label
                   htmlFor="routeIds"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
                   Tuyến đường phụ trách (chỉ cho nhân viên bán hàng)
                 </label>
-                <select
-                  id="routeIds"
-                  name="routeIds"
-                  multiple
-                  value={
-                    formData.routeIds
-                      ? formData.routeIds.split(",").map((id) => id.trim())
-                      : []
-                  }
-                  onChange={(e) => {
-                    const selectedValues = Array.from(
-                      e.target.selectedOptions,
-                      (option) => option.value
-                    );
-                    setFormData((prev) => ({
-                      ...prev,
-                      routeIds: selectedValues.join(", "),
-                    }));
-                  }}
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 h-32 ${
-                    errors.routeIds ? "border-red-500" : "border-gray-300"
-                  }`}
-                >
-                  {routes.map((route) => (
-                    <option key={route.routeId} value={route.routeId}>
-                      {route.name} - {route.note || `Tuyến ${route.routeId}`}
-                    </option>
-                  ))}
-                </select>
-                <p className="mt-1 text-sm text-gray-500">
-                  Giữ Ctrl (hoặc Cmd) để chọn nhiều tuyến
+                <div className="relative">
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {formData.routeIds.map((routeId) => {
+                      const route = routes.find((r) => r.routeId === routeId);
+                      return (
+                        <span
+                          key={routeId}
+                          className="inline-flex items-center px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm"
+                        >
+                          {route?.name || `Tuyến ${routeId}`}
+                          <button
+                            type="button"
+                            onClick={() => handleRouteSelect(routeId)}
+                            className="ml-2 text-indigo-600 hover:text-indigo-800"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowRouteDropdown(!showRouteDropdown)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-left text-gray-600 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
+                  >
+                    {formData.routeIds.length === 0
+                      ? "Chọn tuyến đường"
+                      : "Thêm tuyến đường"}
+                  </button>
+                  {showRouteDropdown && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {routes.map((route) => (
+                        <button
+                          key={route.routeId}
+                          type="button"
+                          onClick={() => handleRouteSelect(route.routeId)}
+                          className={`w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-indigo-50 transition-all duration-200 ${
+                            formData.routeIds.includes(route.routeId)
+                              ? "bg-indigo-100"
+                              : ""
+                          }`}
+                        >
+                          {route.name} -{" "}
+                          {route.note || `Tuyến ${route.routeId}`}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  Nhấp để chọn hoặc bỏ chọn tuyến đường
                 </p>
                 {errors.routeIds && (
-                  <p className="mt-1 text-sm text-red-600">{errors.routeIds}</p>
+                  <p className="mt-1 text-sm text-red-600" aria-live="polite">
+                    {errors.routeIds}
+                  </p>
                 )}
               </div>
             </div>
@@ -516,22 +631,22 @@ const CreateAccountStaff = () => {
             <button
               type="button"
               onClick={handleReset}
-              className="px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="px-6 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
             >
               Đặt lại
             </button>
             <button
               type="submit"
               disabled={loading}
-              className={`px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+              className={`px-6 py-2 border border-transparent rounded-lg text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ${
                 loading
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
+                  : "bg-indigo-600 hover:bg-indigo-700"
               }`}
             >
               {loading ? (
                 <div className="flex items-center">
-                  <FaSpinner className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
+                  <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
                   Đang tạo...
                 </div>
               ) : (
