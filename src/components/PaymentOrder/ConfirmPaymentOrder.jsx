@@ -1,8 +1,39 @@
+// ConfirmPaymentOrder.jsx
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import confirmPaymentService from "../../Services/Payment/confirmPaymentService";
 
-const OrderPending = ({
+// Helper function to extract error message from backend
+const getErrorMessage = (error) => {
+  if (error.response) {
+    const backendError =
+      error.response.data?.error ||
+      error.response.data?.message ||
+      error.response.data?.detail ||
+      error.response.data?.errors;
+
+    if (backendError) {
+      if (typeof backendError === "object" && !Array.isArray(backendError)) {
+        const errorMessages = Object.entries(backendError)
+          .map(([field, msg]) => `${field}: ${msg}`)
+          .join(", ");
+        return `Lỗi validation: ${errorMessages}`;
+      } else if (Array.isArray(backendError)) {
+        return backendError.join(", ");
+      } else {
+        return backendError;
+      }
+    }
+    return `Lỗi ${error.response.status}: ${
+      error.response.statusText || "Không xác định"
+    }`;
+  } else if (error.request) {
+    return "Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng.";
+  }
+  return error.message || "Đã xảy ra lỗi không xác định";
+};
+
+const ConfirmPaymentOrder = ({
   orders,
   paymentResults,
   setPaymentResults,
@@ -52,7 +83,6 @@ const OrderPending = ({
 
   // Handle payment confirmation
   const handleConfirmPayment = async (order) => {
-    // Extract paymentCode from order data
     const paymentId = order.paymentCode;
 
     if (!paymentId) {
@@ -63,15 +93,13 @@ const OrderPending = ({
     setProcessingOrders((prev) => ({ ...prev, [order.orderId]: true }));
 
     try {
-      // Get token from localStorage or wherever you store it
-      const token =
-        localStorage.getItem("authToken") || localStorage.getItem("token");
+      const token = localStorage.getItem("token");
 
       if (!token) {
-        throw new Error("Không tìm thấy token xác thực");
+        toast.error("Không tìm thấy token xác thực");
+        return;
       }
 
-      // Call the actual API
       const response = await confirmPaymentService.confirmPayment(
         paymentId,
         token
@@ -97,14 +125,7 @@ const OrderPending = ({
     } catch (error) {
       console.error("Error confirming payment:", error);
 
-      let errorMessage = "Có lỗi xảy ra khi xác nhận thanh toán";
-
-      // Handle different error types
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
+      const errorMessage = getErrorMessage(error);
 
       setPaymentResults((prev) => ({
         ...prev,
@@ -114,7 +135,9 @@ const OrderPending = ({
         },
       }));
 
-      toast.error(errorMessage);
+      toast.error(`Không thể xác nhận thanh toán: ${errorMessage}`, {
+        duration: 5000,
+      });
     } finally {
       setProcessingOrders((prev) => ({ ...prev, [order.orderId]: false }));
     }
@@ -129,6 +152,7 @@ const OrderPending = ({
 
     await handleConfirmPayment(order);
   };
+
   // Get status badge styling
   const getStatusBadge = (status) => {
     const statusConfig = {
@@ -229,6 +253,7 @@ const OrderPending = ({
                   </div>
                 </div>
               </div>
+
               {/* Payment Result */}
               {paymentResult && (
                 <div
@@ -345,4 +370,4 @@ const OrderPending = ({
   );
 };
 
-export default OrderPending;
+export default ConfirmPaymentOrder;

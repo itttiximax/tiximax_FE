@@ -1,93 +1,22 @@
-import { useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import toast from "react-hot-toast";
-import SearchWebsite from "./SearchWebsite";
 import UploadImg from "../../common/UploadImg";
 import {
-  ShoppingCart,
+  Package,
   Plus,
   ChevronDown,
   Trash2,
-  Link2,
-  Image,
-  MessageSquare,
+  Tag,
+  ImageIcon,
 } from "lucide-react";
 
-const ProductManager = ({
+const DepositManager = ({
   products,
   setProducts,
   productTypes,
   isFormEnabled,
 }) => {
-  const [selectedWebsites, setSelectedWebsites] = useState({});
   const [collapsedProducts, setCollapsedProducts] = useState({});
-
-  const handleToggleCollapse = useCallback((index) => {
-    setCollapsedProducts((prev) => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
-  }, []);
-
-  const handleSelectWebsite = useCallback(
-    (index, website) => {
-      setProducts((prev) => {
-        const updatedProducts = [...prev];
-        updatedProducts[index].website = website.websiteName || "";
-        return updatedProducts;
-      });
-
-      setSelectedWebsites((prev) => ({
-        ...prev,
-        [index]: website,
-      }));
-
-      toast.success(`Đã chọn website: ${website.websiteName}`);
-    },
-    [setProducts]
-  );
-
-  const handleClearWebsite = useCallback(
-    (index) => {
-      setProducts((prev) => {
-        const updatedProducts = [...prev];
-        updatedProducts[index].website = "";
-        return updatedProducts;
-      });
-
-      setSelectedWebsites((prev) => {
-        const updated = { ...prev };
-        delete updated[index];
-        return updated;
-      });
-
-      toast("Đã xóa thông tin website");
-    },
-    [setProducts]
-  );
-
-  const handleWebsiteInputChange = useCallback(
-    (index, e) => {
-      const value = e.target.value;
-
-      setProducts((prev) => {
-        const updatedProducts = [...prev];
-        updatedProducts[index].website = value;
-        return updatedProducts;
-      });
-
-      if (
-        selectedWebsites[index] &&
-        value !== selectedWebsites[index].websiteName
-      ) {
-        setSelectedWebsites((prev) => {
-          const updated = { ...prev };
-          delete updated[index];
-          return updated;
-        });
-      }
-    },
-    [setProducts, selectedWebsites]
-  );
 
   const formatCurrency = (value) => {
     if (!value || value === "") return "";
@@ -111,6 +40,67 @@ const ProductManager = ({
   const isValidDecimal = (value) => {
     return /^\d*\.?\d*$/.test(value) || value === "";
   };
+
+  const handleToggleCollapse = useCallback((index) => {
+    setCollapsedProducts((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  }, []);
+
+  const handleProductChange = useCallback(
+    (index, e) => {
+      const { name, value } = e.target;
+      setProducts((prev) => {
+        const updatedProducts = [...prev];
+
+        if (name === "productTypeId") {
+          const productTypeId = Number(value);
+          const productType = productTypes.find(
+            (p) => p.productTypeId === productTypeId
+          );
+          updatedProducts[index] = {
+            ...updatedProducts[index],
+            [name]: productTypeId,
+            extraCharge: productType?.fee
+              ? updatedProducts[index].extraCharge
+              : "0",
+          };
+        } else if (name === "extraCharge" || name === "differentFee") {
+          const cleanValue = getRawValue(value);
+          if (isValidDecimal(cleanValue)) {
+            updatedProducts[index][name] = cleanValue;
+          }
+        } else if (name === "quantity") {
+          const cleanValue = getRawValue(value);
+          if (cleanValue === "") {
+            updatedProducts[index][name] = "";
+          } else if (isValidDecimal(cleanValue)) {
+            if (
+              cleanValue.startsWith("0") &&
+              !cleanValue.startsWith("0.") &&
+              cleanValue.length > 1
+            ) {
+              const withoutLeadingZeros = cleanValue.replace(/^0+/, "");
+              updatedProducts[index][name] = withoutLeadingZeros || "0";
+            } else {
+              const numericValue = parseFloat(cleanValue);
+              if (!isNaN(numericValue) && numericValue > 0) {
+                updatedProducts[index][name] = cleanValue;
+              } else if (cleanValue.endsWith(".")) {
+                updatedProducts[index][name] = cleanValue;
+              }
+            }
+          }
+        } else {
+          updatedProducts[index][name] = value;
+        }
+
+        return updatedProducts;
+      });
+    },
+    [productTypes, setProducts]
+  );
 
   const handleQuantityBlur = useCallback(
     (index) => {
@@ -142,92 +132,18 @@ const ProductManager = ({
         const currentValue = getRawValue(updatedProducts[index][fieldName]);
 
         if (currentValue && currentValue !== "") {
-          if (fieldName === "purchaseFee") {
-            if (currentValue.includes("%")) {
-              const numPart = currentValue.replace("%", "");
-              const numValue = parseFloat(numPart);
-              if (!isNaN(numValue) && numValue >= 0) {
-                updatedProducts[index][fieldName] = `${numPart}%`;
-              }
-            } else {
-              const numValue = parseFloat(currentValue);
-              if (!isNaN(numValue) && numValue >= 0) {
-                updatedProducts[index][fieldName] = currentValue;
-              }
-            }
-          } else {
-            const numValue = parseFloat(currentValue);
-            if (!isNaN(numValue) && numValue >= 0) {
-              updatedProducts[index][fieldName] = currentValue;
-            }
+          const numValue = parseFloat(currentValue);
+          if (!isNaN(numValue) && numValue >= 0) {
+            updatedProducts[index][fieldName] = currentValue;
           }
+        } else {
+          updatedProducts[index][fieldName] = "";
         }
 
         return updatedProducts;
       });
     },
     [setProducts]
-  );
-
-  const handleProductChange = useCallback(
-    (index, e) => {
-      const { name, value } = e.target;
-      setProducts((prev) => {
-        const updatedProducts = [...prev];
-
-        if (name === "productTypeId") {
-          const productTypeId = Number(value);
-          const productType = productTypes.find(
-            (p) => p.productTypeId === productTypeId
-          );
-          updatedProducts[index] = {
-            ...updatedProducts[index],
-            [name]: productTypeId,
-            extraCharge: productType?.fee
-              ? updatedProducts[index].extraCharge
-              : "0",
-          };
-        } else {
-          if (["priceWeb", "shipWeb", "extraCharge"].includes(name)) {
-            const cleanValue = getRawValue(value);
-            if (isValidDecimal(cleanValue)) {
-              updatedProducts[index][name] = cleanValue;
-            }
-          } else if (name === "purchaseFee") {
-            let cleanValue = getRawValue(value);
-            if (/^\d*\.?\d*%?$/.test(cleanValue) || cleanValue === "") {
-              updatedProducts[index][name] = cleanValue;
-            }
-          } else if (name === "quantity") {
-            const cleanValue = getRawValue(value);
-            if (cleanValue === "") {
-              updatedProducts[index][name] = "";
-            } else if (isValidDecimal(cleanValue)) {
-              if (
-                cleanValue.startsWith("0") &&
-                !cleanValue.startsWith("0.") &&
-                cleanValue.length > 1
-              ) {
-                const withoutLeadingZeros = cleanValue.replace(/^0+/, "");
-                updatedProducts[index][name] = withoutLeadingZeros || "0";
-              } else {
-                const numericValue = parseFloat(cleanValue);
-                if (!isNaN(numericValue) && numericValue > 0) {
-                  updatedProducts[index][name] = cleanValue;
-                } else if (cleanValue.endsWith(".")) {
-                  updatedProducts[index][name] = cleanValue;
-                }
-              }
-            }
-          } else {
-            updatedProducts[index][name] = value;
-          }
-        }
-
-        return updatedProducts;
-      });
-    },
-    [productTypes, setProducts]
   );
 
   const handleImageUpload = useCallback(
@@ -258,17 +174,12 @@ const ProductManager = ({
     setProducts((prev) => [
       ...prev,
       {
-        productLink: "",
         quantity: "1",
-        priceWeb: "",
-        shipWeb: "",
         productName: "",
-        purchaseFee: "",
+        differentFee: "",
         extraCharge: "",
         purchaseImage: "",
-        website: "",
         productTypeId: "",
-        groupTag: "",
         note: "",
       },
     ]);
@@ -277,20 +188,6 @@ const ProductManager = ({
   const removeProduct = useCallback(
     (index) => {
       setProducts((prev) => prev.filter((_, i) => i !== index));
-
-      setSelectedWebsites((prev) => {
-        const updated = {};
-        Object.keys(prev).forEach((key) => {
-          const oldIndex = parseInt(key);
-          if (oldIndex < index) {
-            updated[oldIndex] = prev[key];
-          } else if (oldIndex > index) {
-            updated[oldIndex - 1] = prev[key];
-          }
-        });
-        return updated;
-      });
-
       setCollapsedProducts((prev) => {
         const updated = {};
         Object.keys(prev).forEach((key) => {
@@ -303,7 +200,6 @@ const ProductManager = ({
         });
         return updated;
       });
-
       toast.success("Đã xóa sản phẩm");
     },
     [setProducts]
@@ -327,7 +223,7 @@ const ProductManager = ({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-600">
-              Tổng số sản phẩm:{" "}
+              Tổng số kiện:{" "}
               <span className="font-semibold text-blue-600">
                 {products.length}
               </span>
@@ -339,7 +235,7 @@ const ProductManager = ({
             disabled={!isFormEnabled}
           >
             <Plus className="w-4 h-4" />
-            Thêm sản phẩm
+            Thêm kiện hàng
           </button>
         </div>
       </div>
@@ -371,11 +267,6 @@ const ProductManager = ({
                           {product.productName || "Chưa đặt tên"}
                         </h3>
                         <div className="flex items-center gap-2">
-                          {product.website && (
-                            <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium border border-blue-200">
-                              {product.website}
-                            </span>
-                          )}
                           {productType && (
                             <span
                               className={`px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -396,7 +287,7 @@ const ProductManager = ({
                       </div>
                     ) : (
                       <h3 className="font-semibold text-gray-800 text-base">
-                        {product.productName || "Sản phẩm mới"}
+                        {product.productName || "Kiện hàng mới"}
                       </h3>
                     )}
                   </div>
@@ -439,9 +330,9 @@ const ProductManager = ({
                       {/* Section 1: Thông tin cơ bản */}
                       <div className="bg-gray-50 rounded-lg p-4">
                         <div className="grid grid-cols-12 gap-4">
-                          <div className="col-span-6">
+                          <div className="col-span-8">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Tên sản phẩm{" "}
+                              Tên kiện hàng{" "}
                               <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -451,10 +342,10 @@ const ProductManager = ({
                               onChange={(e) => handleProductChange(index, e)}
                               className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
                               disabled={!isFormEnabled}
-                              placeholder="Nhập tên sản phẩm..."
+                              placeholder="Nhập tên kiện hàng..."
                             />
                           </div>
-                          <div className="col-span-3">
+                          <div className="col-span-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                               Số lượng <span className="text-red-500">*</span>
                             </label>
@@ -469,114 +360,10 @@ const ProductManager = ({
                               placeholder="0"
                             />
                           </div>
-                          <div className="col-span-3">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Website <span className="text-red-500">*</span>
-                            </label>
-                            <SearchWebsite
-                              onSelectWebsite={(website) =>
-                                handleSelectWebsite(index, website)
-                              }
-                              value={product.website}
-                              onChange={(e) =>
-                                handleWebsiteInputChange(index, e)
-                              }
-                              onClear={() => handleClearWebsite(index)}
-                            />
-                          </div>
                         </div>
                       </div>
 
-                      {/* Section 2: Link sản phẩm */}
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <h4 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                          <Link2 className="w-4 h-4 text-purple-500" />
-                          Link sản phẩm
-                        </h4>
-                        <input
-                          type="text"
-                          name="productLink"
-                          value={product.productLink}
-                          onChange={(e) => handleProductChange(index, e)}
-                          className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                          disabled={!isFormEnabled}
-                          placeholder="https://..."
-                        />
-                      </div>
-
-                      {/* Section 3: Chi phí */}
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <div className="grid grid-cols-12 gap-4">
-                          <div className="col-span-3">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Giá sản phẩm{" "}
-                              <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              name="priceWeb"
-                              value={formatCurrency(product.priceWeb || "")}
-                              onChange={(e) => handleProductChange(index, e)}
-                              onBlur={() =>
-                                handleCurrencyBlur(index, "priceWeb")
-                              }
-                              className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                              disabled={!isFormEnabled}
-                              placeholder="0"
-                            />
-                          </div>
-                          <div className="col-span-3">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Phí ship <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              name="shipWeb"
-                              value={formatCurrency(product.shipWeb || "")}
-                              onChange={(e) => handleProductChange(index, e)}
-                              onBlur={() =>
-                                handleCurrencyBlur(index, "shipWeb")
-                              }
-                              className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                              disabled={!isFormEnabled}
-                              placeholder="0"
-                            />
-                          </div>
-                          <div className="col-span-3">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Phí mua hộ (%)
-                            </label>
-                            <input
-                              type="text"
-                              name="purchaseFee"
-                              value={product.purchaseFee || ""}
-                              onChange={(e) => handleProductChange(index, e)}
-                              onBlur={() =>
-                                handleCurrencyBlur(index, "purchaseFee")
-                              }
-                              className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                              disabled={!isFormEnabled}
-                              placeholder="Nhập %"
-                            />
-                          </div>
-                          <div className="col-span-3">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Group Tag
-                            </label>
-                            <input
-                              type="text"
-                              name="groupTag"
-                              value={product.groupTag}
-                              onChange={(e) => handleProductChange(index, e)}
-                              className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                              disabled={!isFormEnabled}
-                              placeholder="A, B, C..."
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Section 4: Phân loại */}
+                      {/* Section 2: Phân loại & Chi phí */}
                       <div className="bg-gray-50 rounded-lg p-4">
                         <div className="grid grid-cols-12 gap-4">
                           <div className="col-span-6">
@@ -603,9 +390,12 @@ const ProductManager = ({
                               ))}
                             </select>
                           </div>
-                          <div className="col-span-6">
+                          <div className="col-span-3">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Phụ phí
+                              Phụ phí{" "}
+                              {productType?.fee && (
+                                <span className="text-red-500">*</span>
+                              )}
                             </label>
                             {productType?.fee ? (
                               <input
@@ -628,13 +418,30 @@ const ProductManager = ({
                               </div>
                             )}
                           </div>
+                          <div className="col-span-3">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Phí khác <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              name="differentFee"
+                              value={formatCurrency(product.differentFee || "")}
+                              onChange={(e) => handleProductChange(index, e)}
+                              onBlur={() =>
+                                handleCurrencyBlur(index, "differentFee")
+                              }
+                              className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                              disabled={!isFormEnabled}
+                              placeholder="0"
+                            />
+                          </div>
                         </div>
                       </div>
 
-                      {/* Section 5: Ghi chú */}
+                      {/* Section 3: Ghi chú */}
                       <div className="bg-gray-50 rounded-lg p-4">
                         <h4 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                          <MessageSquare className="w-4 h-4 text-yellow-500" />
+                          <Tag className="w-4 h-4 text-yellow-500" />
                           Ghi chú bổ sung
                         </h4>
                         <textarea
@@ -644,7 +451,7 @@ const ProductManager = ({
                           rows="3"
                           className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
                           disabled={!isFormEnabled}
-                          placeholder="Ghi chú cho sản phẩm này (tùy chọn)..."
+                          placeholder="Ghi chú cho kiện hàng này (tùy chọn)..."
                         />
                       </div>
                     </div>
@@ -653,7 +460,7 @@ const ProductManager = ({
                     <div className="col-span-4">
                       <div className="bg-gray-50 rounded-lg p-4 h-full">
                         <h4 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                          <Image className="w-4 h-4 text-purple-500" />
+                          <ImageIcon className="w-4 h-4 text-purple-500" />
                           Hình ảnh sản phẩm
                         </h4>
                         <UploadImg
@@ -680,19 +487,19 @@ const ProductManager = ({
       {/* Empty State */}
       {products.length === 0 && (
         <div className="bg-white rounded-xl shadow-md p-12 text-center">
-          <ShoppingCart className="w-24 h-24 mx-auto mb-4 text-gray-300" />
+          <Package className="w-24 h-24 mx-auto mb-4 text-gray-300" />
           <h3 className="text-xl font-semibold text-gray-700 mb-2">
-            Chưa có sản phẩm nào
+            Chưa có kiện hàng nào
           </h3>
           <p className="text-gray-500 mb-6">
-            Bắt đầu thêm sản phẩm đầu tiên của bạn
+            Bắt đầu thêm kiện hàng đầu tiên của bạn
           </p>
           <button
             onClick={addProduct}
             className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-blue-700 inline-flex items-center gap-2 shadow-md"
           >
             <Plus className="w-5 h-5" />
-            Thêm sản phẩm đầu tiên
+            Thêm kiện hàng đầu tiên
           </button>
         </div>
       )}
@@ -700,4 +507,5 @@ const ProductManager = ({
   );
 };
 
-export default ProductManager;
+export default DepositManager;
+/// okoko

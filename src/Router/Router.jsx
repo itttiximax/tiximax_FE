@@ -43,7 +43,6 @@ import ManagerDashboard from "../components/Manager/ManagerDashboard";
 import StaffSalePage from "../components/StaffSale/StaffSalePage";
 import StaffSaleLayout from "../components/StaffSale/StaffSaleLayout";
 import Tracking from "../components/StaffSale/Tracking";
-// import CreateOrderPayment from "../components/PaymentOrder/CreateOrderPayment";
 
 //StaffPurchaser components
 import StaffPurchaserPage from "../components/StaffPurchaser/StaffPurchaserPage";
@@ -59,16 +58,17 @@ import ManagerProductType from "../components/Manager/ManagerProductType";
 import ProtectedRoute from "../Router/ProtectedRoute";
 import { ROLES } from "../Services/Auth/authService";
 import ManagerOrder from "../components/Manager/ManagerOrder";
-// import UploadImage from "../components/UploadImage";
 import NotFound from "../Page/NotFound";
 import CreateAccountUser from "../components/StaffSale/CreateAccountUser";
 import ProfilePage from "../Page/ProfilePage";
 import OrderLinkList from "../components/StaffPurchaser/OrderLinkList";
 import CreateAccountStaff from "../components/Admin/CreateAccountStaff";
 import AccountSearch from "../components/Order/AccountSearch";
-import CreateOrderPaymentList from "../components/PaymentOrder/CreateOrderPaymentList";
 import CreateOrderForm from "../components/Order/CreateOrderForm";
-import OrderCustomerList from "../components/Order/OrderCustomerList";
+// import OrderCustomerList from "../components/PaymentOrder/OrderCustomerList";
+// import OrderPaymentList from "../components/PaymentOrder/OrderPaymentList";
+// import CreateOrderPayment from "../components/PaymentOrder/CreateOrderPayment";
+
 import ManagerWebsite from "../components/Manager/ManagerWebsite";
 import WarehouseShipment from "../components/WarehouseForeign/WarehouseShipment";
 import WarehouseList from "../components/WarehouseForeign/WarehouseList";
@@ -81,6 +81,13 @@ import CustomerList from "../components/Manager/CustomerList";
 import CustomerStaffList from "../components/StaffSale/CustomerStaffList";
 import Permission from "../components/Admin/Permission";
 import StaffListPermission from "../components/Manager/StaffListPermission";
+import PackingFlyingList from "../components/WarehouseDomestic/PackingFlyingList";
+import ExportList from "../components/WarehouseDomestic/ExportList";
+import CreateDepositForm from "../components/Order/CreateDepositForm";
+import PaymentShipList from "../components/PaymentOrder/PaymentShipList";
+import MergedPaymentShip from "../components/PaymentOrder/MergedPaymentShip";
+import MergedPaymentOrder from "../components/PaymentOrder/MergedPaymentOrder";
+import PaymentOrderList from "../components/PaymentOrder/PaymentOrderList";
 
 const Router = createBrowserRouter([
   {
@@ -114,7 +121,6 @@ const Router = createBrowserRouter([
       { path: "profit-loss", element: <ProfitLoss /> },
       { path: "employee-kpi", element: <EmployeeKPI /> },
       { path: "pending-deliveries", element: <NotFound /> },
-
       { path: "shipment-tracking", element: <ShipmentTracking /> }, // Chưa triển khai
       { path: "route-planning", element: <NotFound /> },
       { path: "drivers", element: <NotFound /> },
@@ -179,7 +185,7 @@ const Router = createBrowserRouter([
         element: <LeadSalePage />,
       },
       { path: "createorder", element: <CreateOrderForm /> },
-      { path: "deposit", element: <NotFound /> }, // Chưa triển khai
+      { path: "deposit", element: <CreateDepositForm /> }, // Chưa triển khai
       { path: "auction", element: <NotFound /> }, // Chưa triển khai
 
       { path: "createaccountuser", element: <CreateAccountUser /> },
@@ -194,8 +200,10 @@ const Router = createBrowserRouter([
       { path: "/lead-sale/shipping/international", element: <NotFound /> },
       { path: "tracking", element: <NotFound /> },
       { path: "orders/tracking", element: <ManagerOrder /> },
-      { path: "createpayment", element: <CreateOrderPaymentList /> },
-      { path: "createpaymentsupport", element: <OrderCustomerList /> },
+      { path: "order-payment", element: <PaymentOrderList /> },
+      { path: "ship-payment", element: <PaymentShipList /> },
+      { path: "createpaymentsupport", element: <MergedPaymentOrder /> },
+      { path: "createpaymentshipping", element: <MergedPaymentShip /> },
       { path: "warehouse-staff", element: <NotFound /> },
       { path: "sales-staff", element: <NotFound /> },
       { path: "schedule", element: <NotFound /> },
@@ -217,13 +225,12 @@ const Router = createBrowserRouter([
         element: <StaffSalePage />,
       },
       { path: "create-invoice", element: <CreateOrderForm /> },
-      { path: "quotations", element: <CreateOrderPaymentList /> },
+      { path: "quotations", element: <PaymentOrderList /> },
       { path: "deposit", element: <NotFound /> }, // Chưa triển khai
       { path: "auction", element: <NotFound /> }, // Chưa triển khai
-      { path: "megerequests", element: <OrderCustomerList /> },
+      { path: "megerequests", element: <MergedPaymentOrder /> },
       { path: "orders/pending", element: <ManagerOrder /> },
       { path: "createaccountuser", element: <CreateAccountUser /> },
-
       { path: "customers", element: <CustomerStaffList /> },
       { path: "prospects", element: <NotFound /> },
       { path: "orders", element: <NotFound /> },
@@ -296,8 +303,12 @@ const Router = createBrowserRouter([
       { index: true, element: <StaffWarehouseDomesticPage /> },
       { path: "dashboard", element: <NotFound /> },
       { path: "inventory", element: <NotFound /> },
-      { path: "imports", element: <NotFound /> },
-      { path: "exports", element: <NotFound /> },
+      { path: "imports", element: <PackingFlyingList /> },
+      { path: "exports", element: <ExportList /> },
+      { path: "eligible-packings", element: <PackingEligibleList /> },
+      { path: "inventory-check", element: <NotFound /> },
+      { path: "product-search", element: <NotFound /> },
+      { path: "reports", element: <NotFound /> },
     ],
   },
   {

@@ -24,7 +24,7 @@ import {
   UserPlus,
   UserStar,
   PackageSearch,
-  CopyPlus,
+  CreditCard,
 } from "lucide-react";
 
 const LeadSaleSideBar = () => {
@@ -35,6 +35,10 @@ const LeadSaleSideBar = () => {
   const [isOrderDropdownOpen, setIsOrderDropdownOpen] = useState(false);
   const [isStaffLeadDropdownOpen, setIsStaffLeadDropdownOpen] = useState(false);
   const [isShippingDropdownOpen, setIsShippingDropdownOpen] = useState(false);
+  const [isQuotationDropdownOpen, setIsQuotationDropdownOpen] = useState(false); // Báo giá
+  const [isPaymentSupportDropdownOpen, setIsPaymentSupportDropdownOpen] =
+    useState(false); // Hỗ trợ thanh toán
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/signin");
@@ -50,7 +54,7 @@ const LeadSaleSideBar = () => {
           type: "dropdown",
           to: "/lead-sale/createorder",
           icon: FileText,
-          label: "Tạo đơn ",
+          label: "Tạo đơn",
           dropdownItems: [
             {
               to: "/lead-sale/createorder",
@@ -71,16 +75,44 @@ const LeadSaleSideBar = () => {
           isOpen: isStaffLeadDropdownOpen,
           onToggle: () => setIsStaffLeadDropdownOpen(!isStaffLeadDropdownOpen),
         },
-
         {
-          to: "/lead-sale/createpayment",
+          type: "dropdown",
           icon: Banknote,
           label: "Báo giá",
+          dropdownItems: [
+            {
+              to: "/lead-sale/order-payment",
+              icon: Banknote,
+              label: "Báo giá đơn hàng",
+            },
+            {
+              to: "/lead-sale/ship-payment",
+              icon: Truck,
+              label: "Báo giá vận chuyển",
+            },
+          ],
+          isOpen: isQuotationDropdownOpen,
+          onToggle: () => setIsQuotationDropdownOpen(!isQuotationDropdownOpen),
         },
         {
-          to: "/lead-sale/createpaymentsupport",
-          icon: CopyPlus,
-          label: "Hỗ trợ gọp đơn",
+          type: "dropdown",
+          icon: CreditCard,
+          label: "Hỗ trợ thanh toán",
+          dropdownItems: [
+            {
+              to: "/lead-sale/createpaymentsupport",
+              icon: Package,
+              label: "Thanh toán đơn hàng",
+            },
+            {
+              to: "/lead-sale/createpaymentshipping",
+              icon: Truck,
+              label: "Thanh toán vận chuyển",
+            },
+          ],
+          isOpen: isPaymentSupportDropdownOpen,
+          onToggle: () =>
+            setIsPaymentSupportDropdownOpen(!isPaymentSupportDropdownOpen),
         },
       ],
     },
@@ -198,7 +230,6 @@ const LeadSaleSideBar = () => {
           isOpen: isStaffDropdownOpen,
           onToggle: () => setIsStaffDropdownOpen(!isStaffDropdownOpen),
         },
-
         {
           to: "/lead-sale/destination",
           icon: MapPin,

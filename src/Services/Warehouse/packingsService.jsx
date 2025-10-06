@@ -101,6 +101,43 @@ class PackingsService {
       throw error;
     }
   }
+  // Get flying-away orders with pagination
+  async getFlyingAwayOrders(page = 0, limit = 10) {
+    try {
+      const response = await api.get(`/packings/flying-away/${page}/${limit}`);
+      if (response.data && response.data.error) {
+        throw new Error(`API Error: ${response.data.error}`);
+      }
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching flying-away orders:", error);
+      throw error;
+    }
+  }
+
+  // Get all flying-away orders (fetch all pages)
+  async getAllFlyingAwayOrders(limit = 10) {
+    const allOrders = [];
+    let currentPage = 0;
+    let hasMoreData = true;
+
+    while (hasMoreData) {
+      try {
+        const response = await this.getFlyingAwayOrders(currentPage, limit);
+        if (response && response.length > 0) {
+          allOrders.push(...response);
+          currentPage++;
+        } else {
+          hasMoreData = false;
+        }
+      } catch (error) {
+        console.error(`Error fetching flying-away page ${currentPage}:`, error);
+        hasMoreData = false;
+      }
+    }
+
+    return allOrders;
+  }
 }
 
 // Create and export a singleton instance

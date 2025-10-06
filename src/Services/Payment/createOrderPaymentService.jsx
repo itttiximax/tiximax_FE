@@ -74,7 +74,7 @@ const createOrderPaymentService = {
     }
   },
 
-  // Lấy danh sách đơn hàng chờ nhập kho Việt Nam (CHO_NHAP_KHO_VN)
+  // Lấy danh sách đơn hàng chờ nhập kho Việt Nam (DA_DU_HANG)
   getPendingWarehouseVNOrders: async (page = 0, size = 10) => {
     try {
       // Input validation
@@ -86,7 +86,7 @@ const createOrderPaymentService = {
       }
 
       const response = await api.get(
-        `/orders/for-payment/${page}/${size}/CHO_NHAP_KHO_VN`
+        `/orders/for-payment/${page}/${size}/DA_DU_HANG`
       );
       return response.data;
     } catch (error) {
@@ -117,7 +117,7 @@ const createOrderPaymentService = {
         "DA_XAC_NHAN",
         "CHO_THANH_TOAN_SHIP",
         "CHO_THANH_TOAN",
-        "CHO_NHAP_KHO_VN",
+        "DA_DU_HANG",
       ];
       if (!validStatuses.includes(status)) {
         throw new Error(
@@ -222,7 +222,7 @@ const createOrderPaymentService = {
         color: "yellow",
       },
       { key: "CHO_THANH_TOAN", label: "Chờ thanh toán", color: "orange" },
-      { key: "CHO_NHAP_KHO_VN", label: "Chờ nhập kho Việt Nam", color: "blue" },
+      { key: "DA_DU_HANG", label: "Đã đủ hàng", color: "blue" },
     ];
   },
 

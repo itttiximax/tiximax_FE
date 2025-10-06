@@ -7,6 +7,10 @@ import {
   FaArrowUp,
   FaSignOutAlt,
   FaUserTie,
+  FaPallet,
+  FaClipboardCheck,
+  FaSearch,
+  FaFileExcel,
 } from "react-icons/fa";
 
 const StaffWarehouseDomesticSidebar = () => {
@@ -18,21 +22,50 @@ const StaffWarehouseDomesticSidebar = () => {
       text: "Thống kê",
       icon: <FaChartBar />,
       path: "/staff-warehouse-domestic/dashboard",
+      title: "Xem số liệu tổng quan của kho nội địa",
     },
     {
       text: "Tồn kho",
       icon: <FaBoxes />,
       path: "/staff-warehouse-domestic/inventory",
+      title: "Quản lý hàng tồn kho",
     },
     {
-      text: "Nhập hàng",
+      text: "Đơn hàng nhập kho",
       icon: <FaArrowDown />,
       path: "/staff-warehouse-domestic/imports",
+      title: "Quản lý đơn hàng đang vận chuyển đến kho",
     },
     {
-      text: "Xuất hàng",
+      text: "Đơn hàng xuất kho",
       icon: <FaArrowUp />,
       path: "/staff-warehouse-domestic/exports",
+      title: "Quản lý đơn hàng nội địa sẵn sàng giao",
+    },
+    {
+      text: "Đơn đủ điều kiện",
+      icon: <FaPallet />,
+      path: "/staff-warehouse-domestic/eligible-packings",
+      title: "Quản lý đơn hàng đủ điều kiện đóng gói",
+    },
+    {
+      text: "Kiểm kê kho",
+      icon: <FaClipboardCheck />,
+      path: "/staff-warehouse-domestic/inventory-check",
+      title:
+        "Hỗ trợ kiểm kê định kỳ hoặc đột xuất, quét mã và báo cáo chênh lệch",
+    },
+    {
+      text: "Tra cứu sản phẩm",
+      icon: <FaSearch />,
+      path: "/staff-warehouse-domestic/product-search",
+      title: "Tra cứu theo mã, barcode, tên hàng và xem lịch sử nhập-xuất-tồn",
+    },
+    {
+      text: "Báo cáo thống kê",
+      icon: <FaFileExcel />,
+      path: "/staff-warehouse-domestic/reports",
+      title: "Báo cáo nhập-xuất-tồn theo ngày/tháng, xuất file Excel/PDF",
     },
   ];
 
@@ -51,7 +84,7 @@ const StaffWarehouseDomesticSidebar = () => {
           <FaUserTie className="w-8 h-8 text-blue-600" />
           <div className="text-center">
             <span className="text-sm font-semibold text-gray-800">
-              Domestic Warehouse Staff
+              Nhân viên kho nội địa
             </span>
           </div>
         </div>
@@ -63,6 +96,7 @@ const StaffWarehouseDomesticSidebar = () => {
           <Link
             key={item.path}
             to={item.path}
+            title={item.title}
             className={`flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg ${
               isActive(item.path) ? "bg-blue-50 text-blue-700 shadow-sm" : ""
             }`}

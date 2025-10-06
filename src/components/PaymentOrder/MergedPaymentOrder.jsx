@@ -1,8 +1,10 @@
+// MergedPaymentOrder.jsx
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import AccountSearch from "./AccountSearch";
+import AccountSearch from "../Order/AccountSearch";
 import orderCustomerService from "../../Services/Order/orderCustomerService";
 import mergedPaymentService from "../../Services/Payment/mergedPaymentService";
+import PaymentDialog from "./PaymentDialog";
 import {
   User,
   Calendar,
@@ -12,32 +14,56 @@ import {
   CheckSquare,
   Square,
   CreditCard as PaymentIcon,
-  X,
-  Copy,
-  Download,
-  QrCode,
 } from "lucide-react";
 
-const OrderCustomerList = () => {
+// Helper function to extract error message from backend
+const getErrorMessage = (error) => {
+  if (error.response) {
+    const backendError =
+      error.response.data?.error ||
+      error.response.data?.message ||
+      error.response.data?.detail ||
+      error.response.data?.errors;
+
+    if (backendError) {
+      if (typeof backendError === "object" && !Array.isArray(backendError)) {
+        const errorMessages = Object.entries(backendError)
+          .map(([field, msg]) => `${field}: ${msg}`)
+          .join(", ");
+        return `Lỗi validation: ${errorMessages}`;
+      } else if (Array.isArray(backendError)) {
+        return backendError.join(", ");
+      } else {
+        return backendError;
+      }
+    }
+    return `Lỗi ${error.response.status}: ${
+      error.response.statusText || "Không xác định"
+    }`;
+  } else if (error.request) {
+    return "Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng.";
+  }
+  return error.message || "Đã xảy ra lỗi không xác định";
+};
+
+const MergedPaymentOrder = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-
-  // New states for merged payment
   const [selectedOrders, setSelectedOrders] = useState([]);
   const [creatingMergedPayment, setCreatingMergedPayment] = useState(false);
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [mergedPaymentResult, setMergedPaymentResult] = useState(null);
+  const [paymentDialog, setPaymentDialog] = useState({
+    open: false,
+    payment: null,
+  });
 
   // Handle customer selection from AccountSearch
   const handleSelectCustomer = async (customer) => {
     setSelectedCustomer(customer);
     setHasSearched(true);
-    // Clear previous selections when switching customer
     setSelectedOrders([]);
-    setShowPaymentDialog(false);
-    setMergedPaymentResult(null);
+    setPaymentDialog({ open: false, payment: null });
     await fetchCustomerOrders(customer.customerCode);
   };
 
@@ -47,8 +73,7 @@ const OrderCustomerList = () => {
     setOrders([]);
     setHasSearched(false);
     setSelectedOrders([]);
-    setShowPaymentDialog(false);
-    setMergedPaymentResult(null);
+    setPaymentDialog({ open: false, payment: null });
   };
 
   // Handle order selection for merged payment
@@ -78,8 +103,7 @@ const OrderCustomerList = () => {
 
     try {
       setCreatingMergedPayment(true);
-      const token =
-        localStorage.getItem("token") || localStorage.getItem("authToken");
+      const token = localStorage.getItem("token");
 
       if (!token) {
         toast.error("Không tìm thấy token xác thực");
@@ -90,25 +114,18 @@ const OrderCustomerList = () => {
         selectedOrders,
         token
       );
-      setMergedPaymentResult(result);
-      setShowPaymentDialog(true);
+
+      setPaymentDialog({ open: true, payment: result });
       toast.success(
         `Tạo thanh toán gộp thành công! Mã thanh toán: ${result.paymentCode}`
       );
-
-      // Clear selections after successful creation
       setSelectedOrders([]);
     } catch (error) {
       console.error("Error creating merged payment:", error);
-
-      let errorMessage = "Có lỗi xảy ra khi tạo thanh toán gộp";
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      toast.error(errorMessage);
+      const errorMessage = getErrorMessage(error);
+      toast.error(`Không thể tạo thanh toán gộp: ${errorMessage}`, {
+        duration: 5000,
+      });
     } finally {
       setCreatingMergedPayment(false);
     }
@@ -116,31 +133,14 @@ const OrderCustomerList = () => {
 
   // Close payment dialog
   const handleClosePaymentDialog = () => {
-    setShowPaymentDialog(false);
+    setPaymentDialog({ open: false, payment: null });
   };
 
   // Copy payment code to clipboard
-  const handleCopyPaymentCode = async () => {
-    if (mergedPaymentResult?.paymentCode) {
-      try {
-        await navigator.clipboard.writeText(mergedPaymentResult.paymentCode);
-        toast.success("Đã sao chép mã thanh toán!");
-      } catch {
-        toast.error("Không thể sao chép mã thanh toán");
-      }
-    }
-  };
-
-  // Download QR Code
-  const handleDownloadQR = () => {
-    if (mergedPaymentResult?.qrCode) {
-      const link = document.createElement("a");
-      link.href = mergedPaymentResult.qrCode;
-      link.download = `QR_${mergedPaymentResult.paymentCode}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      toast.success("Đang tải xuống mã QR...");
+  const handleCopyPaymentCode = () => {
+    if (paymentDialog.payment?.paymentCode) {
+      navigator.clipboard.writeText(paymentDialog.payment.paymentCode);
+      toast.success("Đã sao chép mã thanh toán");
     }
   };
 
@@ -148,8 +148,7 @@ const OrderCustomerList = () => {
   const fetchCustomerOrders = async (customerCode) => {
     try {
       setLoading(true);
-      const token =
-        localStorage.getItem("token") || localStorage.getItem("authToken");
+      const token = localStorage.getItem("token");
 
       if (!token) {
         toast.error("Không tìm thấy token xác thực");
@@ -173,15 +172,10 @@ const OrderCustomerList = () => {
       }
     } catch (error) {
       console.error("Error fetching customer orders:", error);
-
-      let errorMessage = "Có lỗi xảy ra khi tải đơn hàng";
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      toast.error(errorMessage);
+      const errorMessage = getErrorMessage(error);
+      toast.error(`Không thể tải đơn hàng: ${errorMessage}`, {
+        duration: 5000,
+      });
       setOrders([]);
     } finally {
       setLoading(false);
@@ -206,6 +200,7 @@ const OrderCustomerList = () => {
 
   // Format date
   const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("vi-VN", {
       year: "numeric",
       month: "2-digit",
@@ -229,6 +224,10 @@ const OrderCustomerList = () => {
       CHO_THANH_TOAN: {
         text: "Chờ thanh toán",
         className: "bg-orange-100 text-orange-800",
+      },
+      DA_DU_HANG: {
+        text: "Đã đủ hàng",
+        className: "bg-blue-100 text-blue-800",
       },
       CHO_NHAP_KHO_VN: {
         text: "Chờ nhập kho VN",
@@ -266,161 +265,6 @@ const OrderCustomerList = () => {
       KY_GUI: "Ký gửi",
     };
     return typeConfig[orderType] || orderType;
-  };
-
-  // Payment Success Dialog Component
-  const PaymentSuccessDialog = () => {
-    if (!showPaymentDialog || !mergedPaymentResult) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-          {/* Header */}
-          <div className="relative bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-t-2xl">
-            <button
-              onClick={handleClosePaymentDialog}
-              className="absolute top-4 right-4 text-white hover:text-gray-200 transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <PaymentIcon className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold mb-2">
-                Thanh toán gộp thành công!
-              </h2>
-              <p className="text-green-100">
-                Đơn hàng đã được gộp và sẵn sàng thanh toán
-              </p>
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="p-6">
-            {/* Payment Code */}
-            <div className="mb-6">
-              <label className="text-sm font-medium text-gray-600 mb-2 block">
-                Mã thanh toán
-              </label>
-              <div className="flex items-center space-x-2">
-                <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-3">
-                  <span className="font-mono text-lg font-bold text-gray-900">
-                    {mergedPaymentResult.paymentCode}
-                  </span>
-                </div>
-                <button
-                  onClick={handleCopyPaymentCode}
-                  className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg transition-colors"
-                  title="Sao chép mã thanh toán"
-                >
-                  <Copy className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Payment Details */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div>
-                <label className="text-sm font-medium text-gray-600 mb-1 block">
-                  Tổng tiền
-                </label>
-                <div className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(mergedPaymentResult.totalAmount)}
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600 mb-1 block">
-                  Trạng thái
-                </label>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
-                  {mergedPaymentResult.status === "CHO_THANH_TOAN"
-                    ? "Chờ thanh toán"
-                    : mergedPaymentResult.status}
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div>
-                <label className="text-sm font-medium text-gray-600 mb-1 block">
-                  Số tiền đã thu
-                </label>
-                <div className="text-lg font-semibold text-gray-900">
-                  {formatCurrency(mergedPaymentResult.collectedAmount)}
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600 mb-1 block">
-                  Ngày tạo
-                </label>
-                <div className="text-sm text-gray-900">
-                  {formatDate(mergedPaymentResult.actionAt)}
-                </div>
-              </div>
-            </div>
-
-            {/* QR Code */}
-            {mergedPaymentResult.qrCode && (
-              <div className="text-center">
-                <label className="text-sm font-medium text-gray-600 mb-3 block">
-                  Mã QR thanh toán
-                </label>
-                <div className="bg-white border-2 border-gray-200 rounded-xl p-4 inline-block shadow-sm">
-                  <img
-                    src={mergedPaymentResult.qrCode}
-                    alt="QR Code thanh toán"
-                    className="w-48 h-48 mx-auto"
-                  />
-                </div>
-
-                <div className="mt-4 flex justify-center space-x-3">
-                  <button
-                    onClick={handleDownloadQR}
-                    className="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>Tải xuống QR</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Payment Instructions */}
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="font-medium text-blue-900 mb-2 flex items-center">
-                <QrCode className="w-4 h-4 mr-2" />
-                Hướng dẫn thanh toán
-              </h4>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>• Quét mã QR bằng ứng dụng ngân hàng</li>
-                <li>
-                  • Hoặc chuyển khoản với nội dung:{" "}
-                  <strong>{mergedPaymentResult.content}</strong>
-                </li>
-                <li>
-                  • Số tiền:{" "}
-                  <strong>
-                    {formatCurrency(mergedPaymentResult.totalAmount)}
-                  </strong>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="px-6 pb-6">
-            <button
-              onClick={handleClosePaymentDialog}
-              className="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-lg font-medium transition-colors"
-            >
-              Đóng
-            </button>
-          </div>
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -488,61 +332,15 @@ const OrderCustomerList = () => {
         )}
       </div>
 
-      {/* Merged Payment Result */}
-      {mergedPaymentResult && (
-        <div className="bg-white rounded-lg shadow-sm border border-green-200 p-6 mb-6">
-          <div className="flex items-center mb-4">
-            <PaymentIcon className="w-5 h-5 text-green-600 mr-2" />
-            <h2 className="text-lg font-semibold text-green-900">
-              Thanh toán gộp đã tạo thành công
-            </h2>
-          </div>
-
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <div className="text-sm text-green-700 mb-1">
-                  Mã thanh toán:
-                </div>
-                <div className="font-semibold text-green-900">
-                  {mergedPaymentResult.paymentCode}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-green-700 mb-1">Tổng tiền:</div>
-                <div className="font-semibold text-green-900">
-                  {formatCurrency(mergedPaymentResult.totalAmount)}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-green-700 mb-1">Trạng thái:</div>
-                <div className="font-semibold text-green-900">
-                  {mergedPaymentResult.status}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-green-700 mb-1">Ngày tạo:</div>
-                <div className="font-semibold text-green-900">
-                  {formatDate(mergedPaymentResult.actionAt)}
-                </div>
-              </div>
-            </div>
-
-            {mergedPaymentResult.qrCode && (
-              <div className="mt-4 pt-4 border-t border-green-200">
-                <div className="text-sm text-green-700 mb-2">
-                  Mã QR thanh toán:
-                </div>
-                <img
-                  src={mergedPaymentResult.qrCode}
-                  alt="QR Code thanh toán"
-                  className="w-48 h-48 border border-green-200 rounded"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Payment Dialog - Using reusable component */}
+      <PaymentDialog
+        open={paymentDialog.open}
+        payment={paymentDialog.payment}
+        onClose={handleClosePaymentDialog}
+        onCopyCode={handleCopyPaymentCode}
+        formatCurrency={formatCurrency}
+        formatDate={formatDate}
+      />
 
       {/* Loading State */}
       {loading && (
@@ -676,14 +474,18 @@ const OrderCustomerList = () => {
                             <Calendar className="w-4 h-4 mr-2" />
                             <span>{formatDate(order.createdAt)}</span>
                           </div>
-                          <div className="flex items-center">
-                            <CreditCard className="w-4 h-4 mr-2" />
-                            <span>Mã GD: {order.paymentCode}</span>
-                          </div>
+                          {order.paymentCode && (
+                            <div className="flex items-center">
+                              <CreditCard className="w-4 h-4 mr-2" />
+                              <span>Mã GD: {order.paymentCode}</span>
+                            </div>
+                          )}
                           <div className="flex items-center">
                             <span className="font-medium">Tỷ giá:</span>
                             <span className="ml-1">
-                              {order.exchangeRate?.toLocaleString("vi-VN")}
+                              {order.exchangeRate
+                                ? order.exchangeRate.toLocaleString("vi-VN")
+                                : "N/A"}
                             </span>
                           </div>
                         </div>
@@ -728,11 +530,8 @@ const OrderCustomerList = () => {
           </p>
         </div>
       )}
-
-      {/* Payment Success Dialog */}
-      <PaymentSuccessDialog />
     </div>
   );
 };
 
-export default OrderCustomerList;
+export default MergedPaymentOrder;

@@ -31,6 +31,40 @@ const confirmPaymentService = {
       throw error;
     }
   },
+
+  // Confirm shipping payment by paymentCode
+  confirmShippingPayment: async (paymentCode, token) => {
+    try {
+      // Input validation
+      if (!paymentCode) {
+        throw new Error("Payment code is required");
+      }
+      if (typeof paymentCode !== "string") {
+        throw new Error("Payment code must be a string");
+      }
+      if (!token) {
+        throw new Error("Authorization token is required");
+      }
+
+      const response = await api.put(
+        `/payments/confirm-shipping/${paymentCode}`,
+        {}, // Empty body
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "*/*",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Error confirming shipping payment:",
+        error.response || error
+      );
+      throw error;
+    }
+  },
 };
 
 // Export default service
@@ -38,3 +72,5 @@ export default confirmPaymentService;
 
 // BACKWARD COMPATIBILITY
 export const confirmPayment = confirmPaymentService.confirmPayment;
+export const confirmShippingPayment =
+  confirmPaymentService.confirmShippingPayment;

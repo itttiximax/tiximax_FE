@@ -1,16 +1,17 @@
+// PaymentOrderList.jsx
 import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import createOrderPaymentService from "../../Services/Payment/createOrderPaymentService";
 import countStatusService from "../../Services/Order/countStatusService";
 import CreateOrderPayment from "./CreateOrderPayment";
-import OrderPending from "./OrderPending";
+import ConfirmPaymentOrder from "./ConfirmPaymentOrder";
 
-const CreateOrderPaymentList = () => {
+const PaymentOrderList = () => {
   const validTabs = [
     "DA_XAC_NHAN",
     "CHO_THANH_TOAN",
     "CHO_THANH_TOAN_SHIP",
-    "CHO_NHAP_KHO_VN",
+    "DA_DU_HANG",
   ];
   const savedTab = localStorage.getItem("activeTab");
   const initialTab = validTabs.includes(savedTab) ? savedTab : "DA_XAC_NHAN";
@@ -60,8 +61,8 @@ const CreateOrderPaymentList = () => {
     } catch (error) {
       console.error("Error fetching payment statistics:", error);
       toast.error(
-        error.message.includes("CHO_NHAP_KHO_VN")
-          ? "Không thể tải thống kê cho Chờ nhập kho VN"
+        error.message.includes("DA_DU_HANG")
+          ? "Không thể tải thống kê cho đơn hàng đã đủ hàng"
           : "Không thể tải thống kê trạng thái"
       );
       // Set default counts to 0 for all tabs on error
@@ -96,8 +97,8 @@ const CreateOrderPaymentList = () => {
       bgColor: "bg-white",
     },
     {
-      key: "CHO_NHAP_KHO_VN",
-      label: "Chờ nhập kho VN",
+      key: "DA_DU_HANG",
+      label: "Đã đủ hàng",
       color: "text-blue-700",
       bgColor: "bg-white",
     },
@@ -120,7 +121,7 @@ const CreateOrderPaymentList = () => {
   const renderOrderComponent = () => {
     if (activeTab === "CHO_THANH_TOAN") {
       return (
-        <OrderPending
+        <ConfirmPaymentOrder
           orders={orders}
           paymentResults={paymentResults}
           setPaymentResults={setPaymentResults}
@@ -288,4 +289,4 @@ const CreateOrderPaymentList = () => {
   );
 };
 
-export default CreateOrderPaymentList;
+export default PaymentOrderList;
