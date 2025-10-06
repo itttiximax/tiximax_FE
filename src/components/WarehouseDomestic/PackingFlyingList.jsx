@@ -10,7 +10,8 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import packingsService from "../../Services/Warehouse/packingsService";
-import receivePackingService from "../../Services/Warehouse/receivePackingService";
+// import receivePackingService from "../../Services/Warehouse/receivePackingService";
+import receivePackingService from "../..//Services/Warehouse/receivepackingService";
 
 const PackingFlyingList = () => {
   const [packings, setPackings] = useState([]);
