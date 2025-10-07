@@ -145,11 +145,26 @@ const CreateAccountStaff = () => {
       setSelectedRole("");
     } catch (error) {
       console.error("Registration failed:", error);
-      if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("Có lỗi xảy ra khi tạo tài khoản");
+
+      // XỬ LÝ ERROR TỪ BACKEND
+      let errorMessage = "Có lỗi xảy ra khi tạo tài khoản";
+
+      if (error.response?.data) {
+        // Trường hợp 1: Backend trả về string trực tiếp
+        if (typeof error.response.data === "string") {
+          errorMessage = error.response.data;
+        }
+        // Trường hợp 2: Backend trả về object có message
+        else if (error.response.data.message) {
+          errorMessage = error.response.data.message;
+        }
+        // Trường hợp 3: Backend trả về object có error
+        else if (error.response.data.error) {
+          errorMessage = error.response.data.error;
+        }
       }
+
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
       setShowConfirmDialog(false);
@@ -183,9 +198,9 @@ const CreateAccountStaff = () => {
   const progress = calculateProgress();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br to-indigo-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header với Progress */}
+        {/* Header với Progress - KHÔNG DÙNG SVG */}
         <div className="bg-white rounded-xl shadow-md p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -196,44 +211,33 @@ const CreateAccountStaff = () => {
                 <h1 className="text-2xl font-bold text-gray-800">
                   Tạo tài khoản nhân viên
                 </h1>
-                <p className="text-sm text-gray-600 mt-1">
-                  Điền đầy đủ thông tin để tạo tài khoản mới
-                </p>
               </div>
             </div>
-            {/* Progress Circle */}
+
+            {/* Progress Bar - THAY THẾ SVG */}
             <div className="flex items-center gap-3">
               <div className="text-right">
-                <p className="text-xs text-gray-500">Tiến độ</p>
-                <p className="text-lg font-bold text-indigo-600">{progress}%</p>
+                <p className="text-xs text-gray-500">Tiến độ hoàn thành</p>
+                <p className="text-2xl font-bold text-indigo-600">
+                  {progress}%
+                </p>
               </div>
-              <div className="relative w-16 h-16">
-                <svg className="transform -rotate-90 w-16 h-16">
-                  <circle
-                    cx="32"
-                    cy="32"
-                    r="28"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="none"
-                    className="text-gray-200"
+              <div className="w-24">
+                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-indigo-600 to-blue-600 transition-all duration-500 ease-out"
+                    style={{ width: `${progress}%` }}
                   />
-                  <circle
-                    cx="32"
-                    cy="32"
-                    r="28"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="none"
-                    strokeDasharray={`${2 * Math.PI * 28}`}
-                    strokeDashoffset={`${
-                      2 * Math.PI * 28 * (1 - progress / 100)
+                </div>
+                <div className="flex items-center gap-1 mt-2">
+                  <CheckCircle
+                    className={`w-4 h-4 ${
+                      progress === 100 ? "text-green-600" : "text-gray-400"
                     }`}
-                    className="text-indigo-600 transition-all duration-500"
                   />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-indigo-600" />
+                  <span className="text-xs text-gray-500">
+                    {progress === 100 ? "Hoàn tất" : "Đang điền"}
+                  </span>
                 </div>
               </div>
             </div>

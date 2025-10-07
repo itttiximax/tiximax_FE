@@ -66,14 +66,14 @@ const LeadSaleSideBar = () => {
               label: "Mua hộ",
             },
             {
-              to: "/lead-sale/deposit",
-              icon: Luggage,
-              label: "Ký gửi",
-            },
-            {
               to: "/lead-sale/auction",
               icon: Landmark,
               label: "Đấu giá",
+            },
+            {
+              to: "/lead-sale/deposit",
+              icon: Luggage,
+              label: "Ký gửi",
             },
           ],
           isOpen: isStaffLeadDropdownOpen,
@@ -93,6 +93,11 @@ const LeadSaleSideBar = () => {
               to: "/lead-sale/ship-payment",
               icon: Truck,
               label: "Báo giá vận chuyển",
+            },
+            {
+              to: "/lead-sale/auction-payment",
+              icon: Truck,
+              label: "Thanh toán đấu giá ",
             },
           ],
           isOpen: isQuotationDropdownOpen,

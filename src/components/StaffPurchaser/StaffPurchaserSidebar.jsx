@@ -10,6 +10,7 @@ import {
   ChevronDown,
   Menu,
   X,
+  Landmark,
 } from "lucide-react";
 
 const StaffPurchaserSidebar = () => {
@@ -39,7 +40,12 @@ const StaffPurchaserSidebar = () => {
         {
           to: "/staff-purchaser/orders",
           icon: Package,
-          label: "Đơn hàng",
+          label: "Đơn hàng mua hộ",
+        },
+        {
+          to: "/staff-purchaser/auction",
+          icon: Landmark,
+          label: "Đơn hàng đấu giá",
         },
         {
           to: "/staff-purchaser/suppliers",
@@ -81,20 +87,20 @@ const StaffPurchaserSidebar = () => {
         <div key={itemIndex} className="space-y-1">
           <button
             onClick={item.onToggle}
-            className={`flex items-center gap-3 px-4 py-2 w-full text-left rounded-lg transition-colors duration-200 ${
+            className={`flex items-center gap-3 px-4 py-3 w-full text-left rounded-lg transition-colors duration-200 ${
               isDropdownActive
                 ? "bg-sky-100 text-sky-700 font-semibold shadow-sm"
                 : "text-slate-700 hover:bg-slate-200"
             }`}
           >
             <Icon
-              size={20}
-              className={isDropdownActive ? "text-sky-600" : "text-gray-500"}
+              className={`w-5 h-5 ${
+                isDropdownActive ? "text-sky-600" : "text-gray-500"
+              }`}
             />
             <span className="flex-1 text-sm font-medium">{item.label}</span>
             <ChevronDown
-              size={16}
-              className={`transition-transform duration-200 ${
+              className={`w-4 h-4 transition-transform duration-200 ${
                 item.isOpen ? "rotate-180" : ""
               } ${isDropdownActive ? "text-sky-600" : "text-gray-500"}`}
             />
@@ -117,10 +123,9 @@ const StaffPurchaserSidebar = () => {
                     onClick={() => setIsOpen(false)}
                   >
                     <DropdownIcon
-                      size={18}
-                      className={
+                      className={`w-5 h-5 ${
                         dropdownActive ? "text-sky-600" : "text-gray-500"
-                      }
+                      }`}
                     />
                     <span className="text-sm font-medium">
                       {dropdownItem.label}
@@ -140,14 +145,16 @@ const StaffPurchaserSidebar = () => {
       <Link
         key={itemIndex}
         to={item.to}
-        className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors duration-200 ${
+        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 ${
           active
             ? "bg-sky-100 text-sky-700 font-semibold shadow-sm"
             : "text-slate-700 hover:bg-slate-200"
         }`}
         onClick={() => setIsOpen(false)}
       >
-        <Icon size={20} className={active ? "text-sky-600" : "text-gray-500"} />
+        <Icon
+          className={`w-5 h-5 ${active ? "text-sky-600" : "text-gray-500"}`}
+        />
         <span className="text-sm font-medium">{item.label}</span>
       </Link>
     );
@@ -181,7 +188,7 @@ const StaffPurchaserSidebar = () => {
             onClick={() => setIsOpen(false)}
           >
             <User
-              className={`w-8 h-8 ${
+              className={`w-10 h-10 ${
                 isActive("/staff-purchaser/profile")
                   ? "text-sky-600"
                   : "text-gray-500"
@@ -215,7 +222,7 @@ const StaffPurchaserSidebar = () => {
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm"
           >
-            <LogOut size={16} />
+            <LogOut className="w-4 h-4" />
             <span className="text-sm font-medium">Đăng xuất</span>
           </button>
         </div>

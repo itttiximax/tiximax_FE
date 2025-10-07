@@ -1,7 +1,8 @@
+// src/Components/StaffPurchase/OrderAuctionList.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Search,
-  ShoppingBag,
+  Gavel,
   Package,
   ChevronLeft,
   ChevronRight,
@@ -16,9 +17,9 @@ import {
 } from "lucide-react";
 import orderlinkService from "../../Services/StaffPurchase/orderlinkService";
 import DetailOrderLink from "./DetailOrderLink";
-import CreatePurchase from "./CreatePurchase";
+import CreateAuctionPurchase from "./CreateAuctionPurchase"; // ✅ IMPORT CreateAuctionPurchase
 
-const OrderLinkList = () => {
+const OrderAuctionList = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -38,19 +39,19 @@ const OrderLinkList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState("");
 
-  // ✅ LUÔN FILTER MUA_HO
+  // ✅ LUÔN FILTER DAU_GIA
   const fetchOrders = useCallback(async (page = 0, size = 15) => {
     try {
       setLoading(true);
       setError(null);
 
-      console.log(`Fetching MUA_HO orders - Page: ${page}, Size: ${size}`);
+      console.log(`Fetching DAU_GIA orders - Page: ${page}, Size: ${size}`);
 
-      // ✅ HARDCODE orderType = "MUA_HO"
+      // ✅ HARDCODE orderType = "DAU_GIA"
       const response = await orderlinkService.getOrdersWithLinks(
         page,
         size,
-        "MUA_HO"
+        "DAU_GIA"
       );
       console.log("API Response:", response);
 
@@ -190,18 +191,18 @@ const OrderLinkList = () => {
   return (
     <div className="min-h-screen p-4 sm:p-6">
       <div className="mx-auto">
-        {/* Header Section */}
+        {/* Header Section - Purple Theme for Auction */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-1.5 bg-orange-100 rounded-lg">
-              <ShoppingBag className="w-4 h-4 text-orange-600" />
+            <div className="p-1.5 bg-purple-100 rounded-lg">
+              <Gavel className="w-4 h-4 text-purple-600" />
             </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-              Danh Sách Đơn Hàng Mua Hộ
+            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              Danh Sách Đơn Hàng Đấu Giá
             </h1>
           </div>
           <p className="text-gray-600 ml-7 text-sm">
-            Quản lý và theo dõi các đơn hàng mua hộ
+            Quản lý và theo dõi các đơn hàng đấu giá
           </p>
         </div>
 
@@ -235,7 +236,7 @@ const OrderLinkList = () => {
                   placeholder="Tìm kiếm theo mã đơn hàng..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                 />
               </div>
 
@@ -245,7 +246,7 @@ const OrderLinkList = () => {
                   type="date"
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
-                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                 />
               </div>
 
@@ -253,7 +254,7 @@ const OrderLinkList = () => {
                 value={pagination.pageSize}
                 onChange={handlePageSizeChange}
                 disabled={loading}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100"
+                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100"
               >
                 <option value={10}>10 / trang</option>
                 <option value={15}>15 / trang</option>
@@ -268,8 +269,8 @@ const OrderLinkList = () => {
         {/* Loading State */}
         {loading && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-orange-600">
-              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-orange-600" />
+            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-purple-600">
+              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-600" />
               Đang tải dữ liệu...
             </div>
           </div>
@@ -278,14 +279,14 @@ const OrderLinkList = () => {
         {/* Empty State */}
         {!loading && !error && filteredOrders.length === 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-            <ShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <Gavel className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <h3 className="text-base font-medium text-gray-900 mb-2">
               Không có đơn hàng nào
             </h3>
             <p className="text-gray-500 text-sm">
               {searchTerm
                 ? "Không tìm thấy kết quả phù hợp với từ khóa tìm kiếm."
-                : "Hiện tại chưa có đơn hàng mua hộ nào trong hệ thống."}
+                : "Hiện tại chưa có đơn hàng đấu giá nào trong hệ thống."}
             </p>
           </div>
         )}
@@ -296,14 +297,14 @@ const OrderLinkList = () => {
             {filteredOrders.map((order, index) => (
               <div
                 key={order.orderId}
-                className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+                className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
               >
                 {/* Order Header */}
                 <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-semibold text-orange-600">
+                      <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+                        <span className="text-xs font-semibold text-purple-600">
                           {pagination.pageNumber * pagination.pageSize +
                             index +
                             1}
@@ -311,7 +312,7 @@ const OrderLinkList = () => {
                       </div>
                       <div>
                         <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                          <Package className="w-3 h-3 text-orange-500" />
+                          <Gavel className="w-3 h-3 text-purple-500" />
                           {order.orderCode}
                         </h3>
                         <div className="flex items-center gap-3 text-xs text-gray-600 mt-1">
@@ -319,8 +320,8 @@ const OrderLinkList = () => {
                             <Calendar className="w-2.5 h-2.5 inline mr-1" />
                             {formatDate(order.createdAt)}
                           </span>
-                          <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                            Mua hộ
+                          <span className="px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+                            Đấu giá
                           </span>
                         </div>
                       </div>
@@ -357,7 +358,7 @@ const OrderLinkList = () => {
                         {order.orderLinks.length > 2 && (
                           <button
                             onClick={() => toggleExpandOrder(order.orderId)}
-                            className="text-orange-600 hover:text-orange-800 text-xs font-medium flex items-center gap-1"
+                            className="text-purple-600 hover:text-purple-800 text-xs font-medium flex items-center gap-1"
                           >
                             {expandedOrders[order.orderId] ? (
                               <>
@@ -382,7 +383,7 @@ const OrderLinkList = () => {
                         ).map((link) => (
                           <div
                             key={link.linkId}
-                            className="border border-gray-200 rounded-lg p-3 bg-gradient-to-r from-gray-50 to-gray-100"
+                            className="border border-gray-200 rounded-lg p-3 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-purple-50 hover:to-purple-100 transition-all"
                           >
                             <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
                               {/* Product Info */}
@@ -467,7 +468,7 @@ const OrderLinkList = () => {
                                     onClick={() =>
                                       handleViewDetail(link.linkId)
                                     }
-                                    className="flex items-center gap-1 bg-orange-500 text-white px-2 py-1 rounded-md text-xs hover:bg-orange-600 transition-colors"
+                                    className="flex items-center gap-1 bg-purple-500 text-white px-2 py-1 rounded-md text-xs hover:bg-purple-600 transition-colors"
                                   >
                                     <Eye className="w-2.5 h-2.5" />
                                     Chi tiết
@@ -513,8 +514,11 @@ const OrderLinkList = () => {
 
             <div className="flex items-center gap-1.5">
               <span className="text-xs text-gray-500">Trang</span>
-              <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-lg text-sm font-semibold">
+              <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-sm font-semibold">
                 {pagination.pageNumber + 1}
+              </span>
+              <span className="text-xs text-gray-500">
+                / {pagination.totalPages}
               </span>
             </div>
 
@@ -534,8 +538,8 @@ const OrderLinkList = () => {
         )}
       </div>
 
-      {/* Modals */}
-      <CreatePurchase
+      {/* ✅ MODALS - SỬ DỤNG CreateAuctionPurchase */}
+      <CreateAuctionPurchase
         isOpen={showCreatePurchase}
         onClose={handleCloseCreatePurchase}
         orderCode={selectedOrderForPurchase?.orderCode}
@@ -550,4 +554,4 @@ const OrderLinkList = () => {
   );
 };
 
-export default OrderLinkList;
+export default OrderAuctionList;

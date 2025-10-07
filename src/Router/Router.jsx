@@ -65,10 +65,6 @@ import OrderLinkList from "../components/StaffPurchaser/OrderLinkList";
 import CreateAccountStaff from "../components/Admin/CreateAccountStaff";
 import AccountSearch from "../components/Order/AccountSearch";
 import CreateOrderForm from "../components/Order/CreateOrderForm";
-// import OrderCustomerList from "../components/PaymentOrder/OrderCustomerList";
-// import OrderPaymentList from "../components/PaymentOrder/OrderPaymentList";
-// import CreateOrderPayment from "../components/PaymentOrder/CreateOrderPayment";
-
 import ManagerWebsite from "../components/Manager/ManagerWebsite";
 import WarehouseShipment from "../components/WarehouseForeign/WarehouseShipment";
 import WarehouseList from "../components/WarehouseForeign/WarehouseList";
@@ -88,6 +84,9 @@ import PaymentShipList from "../components/PaymentOrder/PaymentShipList";
 import MergedPaymentShip from "../components/PaymentOrder/MergedPaymentShip";
 import MergedPaymentOrder from "../components/PaymentOrder/MergedPaymentOrder";
 import PaymentOrderList from "../components/PaymentOrder/PaymentOrderList";
+import CreateAuctionForm from "../components/Order/CreateAuctionForm";
+import OrderAuctionList from "../components/StaffPurchaser/OrderAuctionList";
+import AuctionPayment from "../Services/Payment/AuctionPayment";
 
 const Router = createBrowserRouter([
   {
@@ -188,9 +187,8 @@ const Router = createBrowserRouter([
       },
       { path: "profile", element: <ProfilePage /> },
       { path: "createorder", element: <CreateOrderForm /> },
-      { path: "deposit", element: <CreateDepositForm /> }, // Chưa triển khai
-      { path: "auction", element: <NotFound /> }, // Chưa triển khai
-
+      { path: "deposit", element: <CreateDepositForm /> },
+      { path: "auction", element: <CreateAuctionForm /> },
       { path: "createaccountuser", element: <CreateAccountUser /> },
       { path: "prospects", element: <NotFound /> },
       { path: "dashboard", element: <DashboardLeadSale /> },
@@ -205,6 +203,7 @@ const Router = createBrowserRouter([
       { path: "orders/tracking", element: <ManagerOrder /> },
       { path: "order-payment", element: <PaymentOrderList /> },
       { path: "ship-payment", element: <PaymentShipList /> },
+      { path: "auction-payment", element: <AuctionPayment /> },
       { path: "createpaymentsupport", element: <MergedPaymentOrder /> },
       { path: "createpaymentshipping", element: <MergedPaymentShip /> },
       { path: "warehouse-staff", element: <NotFound /> },
@@ -231,7 +230,7 @@ const Router = createBrowserRouter([
       { path: "create-invoice", element: <CreateOrderForm /> },
       { path: "quotations", element: <PaymentOrderList /> },
       { path: "deposit", element: <CreateDepositForm /> },
-      { path: "auction", element: <NotFound /> }, // Chưa triển khai
+      { path: "auction", element: <CreateAuctionForm /> },
       { path: "order-payment", element: <PaymentOrderList /> },
       { path: "ship-payment", element: <PaymentShipList /> },
       { path: "createpaymentsupport", element: <MergedPaymentOrder /> },
@@ -268,6 +267,7 @@ const Router = createBrowserRouter([
       { path: "profile", element: <ProfilePage /> },
       { path: "dashboard", element: <NotFound /> },
       { path: "orders", element: <OrderLinkList /> },
+      { path: "auction", element: <OrderAuctionList /> },
       { path: "suppliers", element: <NotFound /> },
       { path: "inventory", element: <NotFound /> },
       { path: "inventory/audit", element: <NotFound /> },
@@ -289,7 +289,6 @@ const Router = createBrowserRouter([
       { path: "packings", element: <CreatePacking /> },
       { path: "outbound/packingeligible", element: <PackingEligibleList /> },
       { path: "outbound/packingawaiting", element: <PackingAwaitList /> },
-
       { path: "outbound/orders", element: <NotFound /> },
       { path: "outbound/packinginwarehouse", element: <NotFound /> },
       { path: "stock/serial", element: <NotFound /> },

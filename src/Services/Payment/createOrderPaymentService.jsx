@@ -270,6 +270,20 @@ const createOrderPaymentService = {
       throw error;
     }
   },
+
+  //  NEW: Lấy danh sách payments đấu giá (Auction Payments)
+  getAuctionPayments: async () => {
+    try {
+      const response = await api.get(`/payments/auction`);
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Error fetching auction payments:",
+        error.response || error
+      );
+      throw error;
+    }
+  },
 };
 
 // Export both object and backward compatibility functions
@@ -289,3 +303,4 @@ export const getAllFilteredOrders =
 export const getOrdersByStatus = createOrderPaymentService.getOrdersByStatus;
 export const getAvailableStatuses =
   createOrderPaymentService.getAvailableStatuses;
+export const getAuctionPayments = createOrderPaymentService.getAuctionPayments;

@@ -12,7 +12,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 
-const ProductManager = ({
+const AuctionManager = ({
   products,
   setProducts,
   productTypes,
@@ -268,7 +268,7 @@ const ProductManager = ({
         purchaseImage: "",
         website: "",
         productTypeId: "",
-        groupTag: "",
+        groupTag: null,
         note: "",
       },
     ]);
@@ -506,7 +506,7 @@ const ProductManager = ({
                       {/* Section 3: Chi phí */}
                       <div className="bg-gray-50 rounded-lg p-4">
                         <div className="grid grid-cols-12 gap-4">
-                          <div className="col-span-3">
+                          <div className="col-span-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                               Giá sản phẩm{" "}
                               <span className="text-red-500">*</span>
@@ -524,7 +524,7 @@ const ProductManager = ({
                               placeholder="0"
                             />
                           </div>
-                          <div className="col-span-3">
+                          <div className="col-span-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                               Phí ship <span className="text-red-500">*</span>
                             </label>
@@ -541,7 +541,7 @@ const ProductManager = ({
                               placeholder="0"
                             />
                           </div>
-                          <div className="col-span-3">
+                          <div className="col-span-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                               Phí mua hộ (%)
                             </label>
@@ -556,20 +556,6 @@ const ProductManager = ({
                               className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
                               disabled={!isFormEnabled}
                               placeholder="Nhập %"
-                            />
-                          </div>
-                          <div className="col-span-3">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Group Tag
-                            </label>
-                            <input
-                              type="text"
-                              name="groupTag"
-                              value={product.groupTag}
-                              onChange={(e) => handleProductChange(index, e)}
-                              className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                              disabled={!isFormEnabled}
-                              placeholder="A, B, C..."
                             />
                           </div>
                         </div>
@@ -699,4 +685,4 @@ const ProductManager = ({
   );
 };
 
-export default ProductManager;
+export default AuctionManager;

@@ -504,7 +504,7 @@ const CreateDepositForm = () => {
                       Loại đơn
                     </label>
                     <div className="px-4 py-3 bg-red-100 border border-red-200 rounded-md text-sm font-medium text-red-700">
-                      Ký gửi
+                      Ký Gửi
                     </div>
                   </div>
                   <div>

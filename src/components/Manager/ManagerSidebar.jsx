@@ -71,7 +71,7 @@ const ManagerSidebar = () => {
       title: t("pages"),
       items: [
         {
-          text: t("quote"),
+          text: t("Báo giá"),
           icon: <FileText />,
           path: "/manager/quote",
         },
@@ -86,7 +86,7 @@ const ManagerSidebar = () => {
       title: t("management"),
       items: [
         {
-          text: t("payment"),
+          text: t("Thanh toán"),
           icon: <CreditCard />,
           hasSubmenu: true,
           isOpen: openCost,
@@ -97,17 +97,17 @@ const ManagerSidebar = () => {
           ],
         },
         {
-          text: t("routes"),
+          text: t("Tuyến vận chuyển"),
           icon: <Truck />,
           path: "/manager/routes",
         },
         {
-          text: t("transfer"),
+          text: t("Điểm đến"),
           icon: <MapPin />,
           path: "/manager/transfer",
         },
         {
-          text: t("producttype"),
+          text: t("Loại sản phẩm"),
           icon: <Box />,
           path: "/manager/producttype",
         },

@@ -14,10 +14,10 @@ import managerDestinationService from "../../Services/Manager/managerDestination
 import { getAllProductTypes } from "../../Services/Manager/managerProductTypeService";
 import toast from "react-hot-toast";
 import AccountSearch from "./AccountSearch";
-import ProductManager from "./ProducManager";
-import ConfirmDialog from "../../common/ConfirmDialog"; // IMPORT COMPONENT CHUNG
+import AuctionManager from "./AuctionManager";
+import ConfirmDialog from "../../common/ConfirmDialog";
 
-const CreateOrderForm = () => {
+const CreateAuctionForm = () => {
   // Consolidated states
   const [preliminary, setPreliminary] = useState({
     customerCode: "",
@@ -27,7 +27,7 @@ const CreateOrderForm = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   const [form, setForm] = useState({
-    orderType: "MUA_HO",
+    orderType: "DAU_GIA",
     destinationId: "",
     exchangeRate: "",
     checkRequired: false,
@@ -285,7 +285,7 @@ const CreateOrderForm = () => {
       setPreliminary({ customerCode: "", routeId: "" });
       setSelectedCustomer(null);
       setForm({
-        orderType: "MUA_HO",
+        orderType: "DAU_GIA",
         destinationId: "",
         exchangeRate: "",
         checkRequired: false,
@@ -371,7 +371,9 @@ const CreateOrderForm = () => {
         <div className="bg-white rounded-xl shadow-md p-4 mb-6">
           <div className="flex items-center gap-2">
             <FileText className="w-6 h-6 text-blue-600" />
-            <h1 className="text-xl font-bold text-gray-800">Tạo đơn mua hộ </h1>
+            <h1 className="text-xl font-bold text-gray-800">
+              Tạo đơn đấu giá{" "}
+            </h1>
           </div>
 
           {ui.error && (
@@ -461,7 +463,7 @@ const CreateOrderForm = () => {
                       Loại đơn
                     </label>
                     <div className="px-4 py-3 bg-red-100 border border-red-200 rounded-md text-sm font-medium text-red-700">
-                      Mua Hộ
+                      Đấu Giá
                     </div>
                   </div>
 
@@ -531,7 +533,7 @@ const CreateOrderForm = () => {
           </div>
           {/* Right Panel - Products */}
           <div className="col-span-12 lg:col-span-8">
-            <ProductManager
+            <AuctionManager
               products={products}
               setProducts={setProducts}
               productTypes={masterData.productTypes}
@@ -625,4 +627,4 @@ const CreateOrderForm = () => {
   );
 };
 
-export default CreateOrderForm;
+export default CreateAuctionForm;
