@@ -323,7 +323,7 @@ const ProductManager = ({
   return (
     <div className="w-full">
       {/* Header Section - Compact */}
-      <div className="bg-white shadow-sm p-3 mb-4 border-b border-gray-200">
+      <div className="bg-gray-100 shadow-sm p-3 mb-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-600">
@@ -364,7 +364,6 @@ const ProductManager = ({
                     <div className="bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm shadow">
                       {index + 1}
                     </div>
-
                     {collapsed ? (
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-semibold text-gray-800 text-base">

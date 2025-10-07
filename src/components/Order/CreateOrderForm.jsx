@@ -1,5 +1,13 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { HiChevronDown, HiExclamation, HiCheckCircle } from "react-icons/hi";
+import { useState, useEffect, useCallback } from "react";
+import {
+  ChevronDown,
+  AlertCircle,
+  CheckCircle,
+  User,
+  MapPin,
+  FileText,
+  Banknote,
+} from "lucide-react";
 import orderService from "../../Services/LeadSale/orderService";
 import routesService from "../../Services/StaffSale/routeService";
 import managerDestinationService from "../../Services/Manager/managerDestinationService";
@@ -358,100 +366,107 @@ const CreateOrderForm = () => {
 
   return (
     <div className="min-h-screen p-4">
-      {/* <div className="max-w-7xl mx-auto"> */}
-      <div className=" mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-1 mb-1">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
-            Tạo đơn hàng
-          </h1>
+        <div className="bg-white rounded-xl shadow-md p-4 mb-6">
+          <div className="flex items-center gap-2">
+            <FileText className="w-6 h-6 text-blue-600" />
+            <h1 className="text-xl font-bold text-gray-800">Tạo đơn mua hộ </h1>
+          </div>
 
           {ui.error && (
-            <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
-              {ui.error}
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <span className="text-sm">{ui.error}</span>
             </div>
           )}
         </div>
 
         <div className="grid grid-cols-12 gap-6">
-          {/* Left Panel */}
-          <div className="col-span-12 lg:col-span-4 space-y-6">
-            {/* Customer Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                Thông tin khách hàng <span className="text-red-500">*</span>
-              </h3>
-              <AccountSearch
-                onSelectAccount={handleSelectCustomer}
-                value={preliminary.customerCode}
-                onChange={handleCustomerCodeChange}
-                onClear={handleClearCustomer}
-              />
-
-              {selectedCustomer && (
-                <div className="mt-4 bg-blue-50 border border-blue-200 rounded-md p-4">
-                  <p className="text-sm font-medium text-blue-900">
-                    {selectedCustomer.name}
-                  </p>
-                  <p className="text-sm text-blue-600">
-                    {selectedCustomer.email} - {selectedCustomer.phone}
-                  </p>
+          {/* Left Column - Form Info */}
+          <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
+            {/* Customer & Route & Order Details - Combined into ONE Card */}
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <div className="space-y-6">
+                {/* Customer Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <User className="w-4 h-4 text-blue-500" />
+                    Thông tin khách hàng <span className="text-red-500">*</span>
+                  </h3>
+                  <AccountSearch
+                    onSelectAccount={handleSelectCustomer}
+                    value={preliminary.customerCode}
+                    onChange={handleCustomerCodeChange}
+                    onClear={handleClearCustomer}
+                  />
+                  {selectedCustomer && (
+                    <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-sm font-semibold text-blue-900">
+                        {selectedCustomer.name}
+                      </p>
+                      <p className="text-xs text-blue-600 mt-1">
+                        {selectedCustomer.email}
+                      </p>
+                      <p className="text-xs text-blue-600">
+                        {selectedCustomer.phone}
+                      </p>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Route Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                Tuyến đường <span className="text-red-500">*</span>
-              </h3>
-              <div className="relative">
-                <select
-                  name="routeId"
-                  value={preliminary.routeId}
-                  onChange={handlePreliminaryChange}
-                  className="w-full px-4 py-3 pr-10 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
-                  required
-                  disabled={ui.error}
-                >
-                  <option value="">
-                    {ui.error
-                      ? "Không thể tải tuyến đường"
-                      : "Chọn tuyến đường"}
-                  </option>
-                  {masterData.routes.map((route) => (
-                    <option key={route.routeId} value={route.routeId}>
-                      {route.name} ({route.shipTime} ngày,{" "}
-                      {route.unitBuyingPrice.toLocaleString()} đ)
-                    </option>
-                  ))}
-                </select>
+                {/* Divider */}
+                <div className="border-t border-gray-200"></div>
 
-                <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                  <HiChevronDown className="w-4 h-4 text-gray-400" />
+                {/* Route Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-green-500" />
+                    Tuyến đường <span className="text-red-500">*</span>
+                  </h3>
+                  <div className="relative">
+                    <select
+                      name="routeId"
+                      value={preliminary.routeId}
+                      onChange={handlePreliminaryChange}
+                      className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-all"
+                      required
+                      disabled={ui.error}
+                    >
+                      <option value="">
+                        {ui.error
+                          ? "Không thể tải tuyến đường"
+                          : "Chọn tuyến đường"}
+                      </option>
+                      {masterData.routes.map((route) => (
+                        <option key={route.routeId} value={route.routeId}>
+                          {route.name} ({route.shipTime} ngày,{" "}
+                          {route.unitBuyingPrice.toLocaleString()} đ)
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Order Details */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                Thông tin đơn hàng
-              </h3>
+                {/* Divider */}
+                <div className="border-t border-gray-200"></div>
 
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                {/* Order Details Section */}
+                <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-2">
                       Loại đơn
                     </label>
-                    <div className="px-4 py-3 bg-green-50 border border-green-200 rounded-md text-sm font-medium text-green-700">
+                    <div className="px-4 py-3 bg-red-100 border border-red-200 rounded-md text-sm font-medium text-red-700">
                       Mua hộ
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Điểm đến <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
@@ -459,7 +474,7 @@ const CreateOrderForm = () => {
                         name="destinationId"
                         value={form.destinationId}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 pr-10 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+                        className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-all"
                         disabled={!isFormEnabled}
                       >
                         <option value="">Chọn điểm đến</option>
@@ -472,46 +487,48 @@ const CreateOrderForm = () => {
                           </option>
                         ))}
                       </select>
-
                       <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                        <HiChevronDown className="w-4 h-4 text-gray-400" />
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">
-                    Tỷ giá (VND)
-                  </label>
-                  <input
-                    type="number"
-                    name="exchangeRate"
-                    value={form.exchangeRate}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Viet Nam Dong (VND)"
-                    disabled={!isFormEnabled}
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Tỷ giá (VND) <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Banknote className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="number"
+                        name="exchangeRate"
+                        value={form.exchangeRate}
+                        onChange={handleChange}
+                        className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="Viet Nam Dong (VND)"
+                        disabled={!isFormEnabled}
+                        min="1"
+                      />
+                    </div>
+                  </div>
 
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="checkRequired"
-                    checked={form.checkRequired}
-                    onChange={handleChange}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    disabled={!isFormEnabled}
-                  />
-                  <span className="ml-3 text-sm text-gray-700">
-                    Kiểm hàng trước khi giao
-                  </span>
+                  <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                    <input
+                      type="checkbox"
+                      name="checkRequired"
+                      checked={form.checkRequired}
+                      onChange={handleChange}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      disabled={!isFormEnabled}
+                    />
+                    <span className="ml-3 text-sm text-gray-700 font-medium">
+                      Kiểm hàng trước khi giao
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-
           {/* Right Panel - Products */}
           <div className="col-span-12 lg:col-span-8">
             <ProductManager
@@ -529,17 +546,17 @@ const CreateOrderForm = () => {
             <div className="text-sm text-gray-600">
               {!isFormEnabled && (
                 <span className="text-amber-600 flex items-center space-x-2">
-                  <HiExclamation className="w-5 h-5" />
-                  <span>
+                  <AlertCircle className="w-5 h-5" />
+                  <span className="font-medium">
                     Vui lòng chọn khách hàng và tuyến đường để tiếp tục
                   </span>
                 </span>
               )}
               {isFormEnabled && (
-                <span className="text-green-600 flex items-center space-x-2">
-                  <HiCheckCircle className="w-5 h-5" />
-                  <span>Sẵn sàng tạo đơn hàng</span>
-                </span>
+                <div className="flex items-center gap-2 text-green-600">
+                  <CheckCircle className="w-5 h-5" />
+                  <span className="font-medium">Sẵn sàng tạo đơn ký gửi</span>
+                </div>
               )}
             </div>
             <button
@@ -553,7 +570,10 @@ const CreateOrderForm = () => {
                   <span>Đang xử lý...</span>
                 </>
               ) : (
-                <span>Hoàn thành tạo đơn</span>
+                <>
+                  <CheckCircle className="w-5 h-5" />
+                  <span>Hoàn thành tạo đơn</span>
+                </>
               )}
             </button>
           </div>

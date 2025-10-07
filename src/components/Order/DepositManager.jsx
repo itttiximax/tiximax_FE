@@ -219,7 +219,7 @@ const DepositManager = ({
   return (
     <div className="w-full">
       {/* Header Section - Compact */}
-      <div className="bg-white shadow-sm p-3 mb-4 border-b border-gray-200">
+      <div className="bg-gray-100 shadow-sm p-3 mb-4 border-b border-gray-200 rounded-lg">
         <div className="flex items-center justify-between ">
           <div>
             <p className="text-sm text-gray-600">

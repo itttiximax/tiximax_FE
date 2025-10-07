@@ -407,22 +407,18 @@ const CreateDepositForm = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br  p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex items-center gap-3">
-            <FileText className="w-8 h-8 text-blue-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">
-                Tạo đơn ký gửi
-              </h1>
-            </div>
+        <div className="bg-white rounded-xl shadow-md p-4 mb-6">
+          <div className="flex items-center gap-2">
+            <FileText className="w-6 h-6 text-blue-600" />
+            <h1 className="text-xl font-bold text-gray-800">Tạo đơn ký gửi</h1>
           </div>
 
           {ui.error && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <span className="text-sm">{ui.error}</span>
             </div>
           )}
@@ -430,8 +426,9 @@ const CreateDepositForm = () => {
 
         <div className="grid grid-cols-12 gap-6 items-start">
           {/* Left Column - Form Info */}
+
           <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-            {/* Customer & Route Info - Combined */}
+            {/* Customer & Route & Order Details - Combined into ONE Card */}
             <div className="bg-white rounded-xl shadow-md p-6">
               <div className="space-y-6">
                 {/* Customer Section */}
@@ -496,71 +493,80 @@ const CreateDepositForm = () => {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Order Details */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Điểm đến <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <select
-                      name="destinationId"
-                      value={form.destinationId}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-all"
-                      disabled={!isFormEnabled}
-                    >
-                      <option value="">Chọn điểm đến</option>
-                      {masterData.destinations.map((destination) => (
-                        <option
-                          key={destination.destinationId}
-                          value={destination.destinationId}
-                        >
-                          {destination.destinationName}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                {/* Divider */}
+                <div className="border-t border-gray-200"></div>
+
+                {/* Order Details Section */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                      Loại đơn
+                    </label>
+                    <div className="px-4 py-3 bg-red-100 border border-red-200 rounded-md text-sm font-medium text-red-700">
+                      Ký gửi
                     </div>
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Tỷ giá (VND) <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Banknote className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="number"
-                      name="exchangeRate"
-                      value={form.exchangeRate}
-                      onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                      placeholder="Viet Nam Dong (VND)"
-                      disabled={!isFormEnabled}
-                      min="1"
-                    />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Điểm đến <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <select
+                        name="destinationId"
+                        value={form.destinationId}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-all"
+                        disabled={!isFormEnabled}
+                      >
+                        <option value="">Chọn điểm đến</option>
+                        {masterData.destinations.map((destination) => (
+                          <option
+                            key={destination.destinationId}
+                            value={destination.destinationId}
+                          >
+                            {destination.destinationName}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center p-3 bg-gray-50 rounded-lg">
-                  <input
-                    type="checkbox"
-                    name="checkRequired"
-                    checked={form.checkRequired}
-                    onChange={handleChange}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    disabled={!isFormEnabled}
-                  />
-                  <span className="ml-3 text-sm text-gray-700 font-medium">
-                    Kiểm hàng trước khi giao
-                  </span>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Tỷ giá (VND) <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Banknote className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="number"
+                        name="exchangeRate"
+                        value={form.exchangeRate}
+                        onChange={handleChange}
+                        className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="Viet Nam Dong (VND)"
+                        disabled={!isFormEnabled}
+                        min="1"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                    <input
+                      type="checkbox"
+                      name="checkRequired"
+                      checked={form.checkRequired}
+                      onChange={handleChange}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      disabled={!isFormEnabled}
+                    />
+                    <span className="ml-3 text-sm text-gray-700 font-medium">
+                      Kiểm hàng trước khi giao
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -598,8 +604,7 @@ const CreateDepositForm = () => {
             </div>
             <button
               onClick={handleSubmitClick}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center gap-2 shadow-md hover:shadow-lg transition-all duration-200"
-              disabled={!isFormEnabled || isSubmitting}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium flex items-center space-x-2"
             >
               {isSubmitting ? (
                 <>

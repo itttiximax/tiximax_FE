@@ -61,7 +61,7 @@ const StaffSaleSidebar = () => {
             {
               to: "/staff-sale/create-invoice",
               icon: FileText,
-              label: "Tạo hóa đơn",
+              label: "Mua hộ",
             },
             {
               to: "/staff-sale/deposit",

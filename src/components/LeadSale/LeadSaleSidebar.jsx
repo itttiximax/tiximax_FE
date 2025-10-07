@@ -63,7 +63,7 @@ const LeadSaleSideBar = () => {
             {
               to: "/lead-sale/createorder",
               icon: FileText,
-              label: "Tạo hóa đơn",
+              label: "Mua hộ",
             },
             {
               to: "/lead-sale/deposit",

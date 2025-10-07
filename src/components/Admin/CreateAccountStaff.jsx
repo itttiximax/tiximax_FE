@@ -1,7 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { UserPlus, CheckCircle, AlertTriangle, Loader2, X } from "lucide-react";
+import {
+  UserPlus,
+  CheckCircle,
+  AlertTriangle,
+  Loader2,
+  X,
+  Eye,
+  EyeOff,
+  Shield,
+  Briefcase,
+  Mail,
+  Phone,
+  MapPin,
+  Building2,
+  Route,
+  ChevronDown,
+} from "lucide-react";
 import registrationService from "../../Services/Auth/Registration";
 import managerRoutesService from "../../Services/Manager/managerRoutesService";
+import ConfirmDialog from "../../common/ConfirmDialog";
+import toast from "react-hot-toast";
 
 const CreateAccountStaff = () => {
   const [formData, setFormData] = useState({
@@ -21,8 +39,9 @@ const CreateAccountStaff = () => {
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState("");
   const [routes, setRoutes] = useState([]);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [showRouteDropdown, setShowRouteDropdown] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   useEffect(() => {
     fetchRoutes();
@@ -32,13 +51,9 @@ const CreateAccountStaff = () => {
     try {
       const data = await managerRoutesService.getRoutes();
       setRoutes(data);
-      console.log("Routes loaded:", data);
     } catch (error) {
       console.error("Error fetching routes:", error);
-      setErrors((prev) => ({
-        ...prev,
-        general: "Không thể tải danh sách tuyến đường",
-      }));
+      toast.error("Không thể tải danh sách tuyến đường");
     }
   };
 
@@ -48,6 +63,7 @@ const CreateAccountStaff = () => {
       ...prev,
       [name]: value,
     }));
+
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -68,14 +84,13 @@ const CreateAccountStaff = () => {
     }));
   };
 
-  const handleRouteSelect = (routeId) => {
+  const handleRouteToggle = (routeId) => {
     setFormData((prev) => ({
       ...prev,
       routeIds: prev.routeIds.includes(routeId)
         ? prev.routeIds.filter((id) => id !== routeId)
         : [...prev.routeIds, routeId],
     }));
-    setShowRouteDropdown(false);
   };
 
   const getRoleDisplayName = (role) => {
@@ -86,38 +101,35 @@ const CreateAccountStaff = () => {
       STAFF_WAREHOUSE_FOREIGN: "Nhân viên kho ngoại",
       STAFF_WAREHOUSE_DOMESTIC: "Nhân viên kho nội",
       MANAGER: "Quản lý",
-      ADMIN: "Quản trị viên",
     };
     return roleNames[role] || role;
   };
 
-  const isFieldRequired = (fieldName) => {
-    const requiredFields =
-      registrationService.getRequiredFieldsByRole(selectedRole);
-    return requiredFields.includes(fieldName);
+  const handleSubmitClick = () => {
+    setShowConfirmDialog(true);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleConfirmSubmit = async () => {
     try {
       setLoading(true);
       setErrors({});
-      setSuccessMessage("");
 
       const validation =
         registrationService.validateStaffRegistrationData(formData);
       if (!validation.isValid) {
         setErrors(validation.errors);
+        setShowConfirmDialog(false);
         return;
       }
 
       const { confirmPassword, ...registrationData } = formData;
       const result = await registrationService.registerStaff(registrationData);
 
-      setSuccessMessage(
+      toast.success(
         `Tạo tài khoản thành công! Mã nhân viên: ${result.staffCode}`
       );
 
+      // Reset form
       setFormData({
         username: "",
         password: "",
@@ -134,14 +146,13 @@ const CreateAccountStaff = () => {
     } catch (error) {
       console.error("Registration failed:", error);
       if (error.response?.data?.message) {
-        setErrors({ general: error.response.data.message });
-      } else if (error.message) {
-        setErrors({ general: error.message });
+        toast.error(error.response.data.message);
       } else {
-        setErrors({ general: "Có lỗi xảy ra khi tạo tài khoản" });
+        toast.error("Có lỗi xảy ra khi tạo tài khoản");
       }
     } finally {
       setLoading(false);
+      setShowConfirmDialog(false);
     }
   };
 
@@ -160,501 +171,512 @@ const CreateAccountStaff = () => {
     });
     setSelectedRole("");
     setErrors({});
-    setSuccessMessage("");
   };
 
+  // Calculate form completion percentage
+  const calculateProgress = () => {
+    const fields = Object.keys(formData).filter((key) => key !== "routeIds");
+    const filled = fields.filter((key) => formData[key]).length;
+    return Math.round((filled / fields.length) * 100);
+  };
+
+  const progress = calculateProgress();
+
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden">
-        {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-indigo-500 to-blue-600 text-white px-6 py-4">
-          <h2 className="text-2xl font-bold flex items-center">
-            <UserPlus className="w-6 h-6 mr-2" />
-            Tạo tài khoản nhân viên
-          </h2>
-          <p className="text-indigo-100 mt-1">
-            Điền thông tin để tạo tài khoản mới cho nhân viên
-          </p>
+    <div className="min-h-screen bg-gradient-to-br to-indigo-50 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header với Progress */}
+        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-100 rounded-lg">
+                <UserPlus className="w-6 h-6 text-indigo-600" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800">
+                  Tạo tài khoản nhân viên
+                </h1>
+                <p className="text-sm text-gray-600 mt-1">
+                  Điền đầy đủ thông tin để tạo tài khoản mới
+                </p>
+              </div>
+            </div>
+            {/* Progress Circle */}
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="text-xs text-gray-500">Tiến độ</p>
+                <p className="text-lg font-bold text-indigo-600">{progress}%</p>
+              </div>
+              <div className="relative w-16 h-16">
+                <svg className="transform -rotate-90 w-16 h-16">
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="28"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                    className="text-gray-200"
+                  />
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="28"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                    strokeDasharray={`${2 * Math.PI * 28}`}
+                    strokeDashoffset={`${
+                      2 * Math.PI * 28 * (1 - progress / 100)
+                    }`}
+                    className="text-indigo-600 transition-all duration-500"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <CheckCircle className="w-6 h-6 text-indigo-600" />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 animate-fade-in">
-          {/* Success Message */}
-          {successMessage && (
-            <div
-              className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-800 rounded-r-lg flex items-center transition-all duration-300"
-              role="alert"
-              aria-live="assertive"
-            >
-              <CheckCircle className="w-5 h-5 mr-2" />
-              <span>{successMessage}</span>
-              <button
-                onClick={() => setSuccessMessage("")}
-                className="ml-auto text-green-600 hover:text-green-800"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          )}
-
-          {/* General Error */}
-          {errors.general && (
-            <div
-              className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-800 rounded-r-lg flex items-center transition-all duration-300"
-              role="alert"
-              aria-live="assertive"
-            >
-              <AlertTriangle className="w-5 h-5 mr-2" />
-              <span>{errors.general}</span>
-              <button
-                onClick={() => setErrors({})}
-                className="ml-auto text-red-600 hover:text-red-800"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          )}
-
-          {/* Basic Information Section */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
-              Thông tin cơ bản
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Username */}
-              <div className="relative">
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 ${
-                    errors.username
-                      ? "border-red-500"
-                      : formData.username
-                      ? "border-indigo-300"
-                      : "border-gray-300"
-                  }`}
-                  placeholder=" "
-                  aria-describedby="username-error"
-                />
-                <label
-                  htmlFor="username"
-                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-indigo-600"
-                >
-                  Tên đăng nhập <span className="text-red-500">*</span>
-                </label>
-                {errors.username && (
-                  <p
-                    id="username-error"
-                    className="mt-1 text-sm text-red-600"
-                    aria-live="polite"
-                  >
-                    {errors.username}
-                  </p>
-                )}
+        <div className="grid grid-cols-12 gap-6">
+          {/* Left Column - Account Info */}
+          <div className="col-span-12 lg:col-span-6 space-y-6">
+            {/* Thông tin tài khoản */}
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <div className="flex items-center gap-2 mb-6">
+                <Shield className="w-5 h-5 text-indigo-600" />
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Thông tin tài khoản
+                </h3>
               </div>
 
-              {/* Name */}
-              <div className="relative">
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 ${
-                    errors.name
-                      ? "border-red-500"
-                      : formData.name
-                      ? "border-indigo-300"
-                      : "border-gray-300"
-                  }`}
-                  placeholder=" "
-                  aria-describedby="name-error"
-                />
-                <label
-                  htmlFor="name"
-                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-indigo-600"
-                >
-                  Họ và tên <span className="text-red-500">*</span>
-                </label>
-                {errors.name && (
-                  <p
-                    id="name-error"
-                    className="mt-1 text-sm text-red-600"
-                    aria-live="polite"
-                  >
-                    {errors.name}
-                  </p>
-                )}
-              </div>
-
-              {/* Email */}
-              <div className="relative">
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 ${
-                    errors.email
-                      ? "border-red-500"
-                      : formData.email
-                      ? "border-indigo-300"
-                      : "border-gray-300"
-                  }`}
-                  placeholder=" "
-                  aria-describedby="email-error"
-                />
-                <label
-                  htmlFor="email"
-                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-indigo-600"
-                >
-                  Email <span className="text-red-500">*</span>
-                </label>
-                {errors.email && (
-                  <p
-                    id="email-error"
-                    className="mt-1 text-sm text-red-600"
-                    aria-live="polite"
-                  >
-                    {errors.email}
-                  </p>
-                )}
-              </div>
-
-              {/* Phone */}
-              <div className="relative">
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 ${
-                    errors.phone
-                      ? "border-red-500"
-                      : formData.phone
-                      ? "border-indigo-300"
-                      : "border-gray-300"
-                  }`}
-                  placeholder=" "
-                  aria-describedby="phone-error"
-                />
-                <label
-                  htmlFor="phone"
-                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-indigo-600"
-                >
-                  Số điện thoại <span className="text-red-500">*</span>
-                </label>
-                {errors.phone && (
-                  <p
-                    id="phone-error"
-                    className="mt-1 text-sm text-red-600"
-                    aria-live="polite"
-                  >
-                    {errors.phone}
-                  </p>
-                )}
-              </div>
-
-              {/* Password */}
-              <div className="relative">
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 ${
-                    errors.password
-                      ? "border-red-500"
-                      : formData.password
-                      ? "border-indigo-300"
-                      : "border-gray-300"
-                  }`}
-                  placeholder=" "
-                  aria-describedby="password-error"
-                />
-                <label
-                  htmlFor="password"
-                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-indigo-600"
-                >
-                  Mật khẩu <span className="text-red-500">*</span>
-                </label>
-                {errors.password && (
-                  <p
-                    id="password-error"
-                    className="mt-1 text-sm text-red-600"
-                    aria-live="polite"
-                  >
-                    {errors.password}
-                  </p>
-                )}
-              </div>
-
-              {/* Confirm Password */}
-              <div className="relative">
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 ${
-                    errors.confirmPassword
-                      ? "border-red-500"
-                      : formData.confirmPassword
-                      ? "border-indigo-300"
-                      : "border-gray-300"
-                  }`}
-                  placeholder=" "
-                  aria-describedby="confirmPassword-error"
-                />
-                <label
-                  htmlFor="confirmPassword"
-                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-indigo-600"
-                >
-                  Xác nhận mật khẩu <span className="text-red-500">*</span>
-                </label>
-                {errors.confirmPassword && (
-                  <p
-                    id="confirmPassword-error"
-                    className="mt-1 text-sm text-red-600"
-                    aria-live="polite"
-                  >
-                    {errors.confirmPassword}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Work Information Section */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
-              Thông tin công việc
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Role */}
-              <div className="relative">
-                <select
-                  id="role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleRoleChange}
-                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 appearance-none ${
-                    errors.role
-                      ? "border-red-500"
-                      : formData.role
-                      ? "border-indigo-300"
-                      : "border-gray-300"
-                  }`}
-                  aria-describedby="role-error"
-                >
-                  <option value="">Chọn vai trò</option>
-                  <option value="STAFF_SALE">Nhân viên bán hàng</option>
-                  <option value="LEAD_SALE">Trưởng nhóm bán hàng</option>
-                  <option value="STAFF_PURCHASER">Nhân viên mua hàng</option>
-                  <option value="STAFF_WAREHOUSE_FOREIGN">
-                    Nhân viên kho ngoại
-                  </option>
-                  <option value="STAFF_WAREHOUSE_DOMESTIC">
-                    Nhân viên kho nội
-                  </option>
-                  <option value="MANAGER">Quản lý</option>
-                </select>
-                <label
-                  htmlFor="role"
-                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1"
-                >
-                  Vai trò <span className="text-red-500">*</span>
-                </label>
-                {errors.role && (
-                  <p
-                    id="role-error"
-                    className="mt-1 text-sm text-red-600"
-                    aria-live="polite"
-                  >
-                    {errors.role}
-                  </p>
-                )}
-              </div>
-
-              {/* Department */}
-              <div className="relative">
-                <input
-                  type="text"
-                  id="department"
-                  name="department"
-                  value={formData.department}
-                  onChange={handleInputChange}
-                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 ${
-                    errors.department
-                      ? "border-red-500"
-                      : formData.department
-                      ? "border-indigo-300"
-                      : "border-gray-300"
-                  }`}
-                  placeholder=" "
-                  aria-describedby="department-error"
-                />
-                <label
-                  htmlFor="department"
-                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-indigo-600"
-                >
-                  Phòng ban
-                </label>
-                {errors.department && (
-                  <p
-                    id="department-error"
-                    className="mt-1 text-sm text-red-600"
-                    aria-live="polite"
-                  >
-                    {errors.department}
-                  </p>
-                )}
-                <p className="mt-1 text-xs text-gray-500">
-                  Các phòng ban: SALE, WAREHOUSE, PURCHASING, MANAGEMENT
-                </p>
-              </div>
-
-              {/* Location */}
-              <div className="relative">
-                <input
-                  type="text"
-                  id="location"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  className={`peer w-full px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 ${
-                    errors.location
-                      ? "border-red-500"
-                      : formData.location
-                      ? "border-indigo-300"
-                      : "border-gray-300"
-                  }`}
-                  placeholder=" "
-                  aria-describedby="location-error"
-                />
-                <label
-                  htmlFor="location"
-                  className="absolute left-3 -top-2.5 text-sm text-gray-600 bg-white px-1 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-indigo-600"
-                >
-                  Địa điểm làm việc
-                </label>
-                {errors.location && (
-                  <p
-                    id="location-error"
-                    className="mt-1 text-sm text-red-600"
-                    aria-live="polite"
-                  >
-                    {errors.location}
-                  </p>
-                )}
-              </div>
-
-              {/* Route IDs */}
-              <div className="sm:col-span-2 lg:col-span-3">
-                <label
-                  htmlFor="routeIds"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Tuyến đường phụ trách (chỉ cho nhân viên bán hàng)
-                </label>
-                <div className="relative">
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {formData.routeIds.map((routeId) => {
-                      const route = routes.find((r) => r.routeId === routeId);
-                      return (
-                        <span
-                          key={routeId}
-                          className="inline-flex items-center px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm"
-                        >
-                          {route?.name || `Tuyến ${routeId}`}
-                          <button
-                            type="button"
-                            onClick={() => handleRouteSelect(routeId)}
-                            className="ml-2 text-indigo-600 hover:text-indigo-800"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </span>
-                      );
-                    })}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowRouteDropdown(!showRouteDropdown)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-left text-gray-600 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
-                  >
-                    {formData.routeIds.length === 0
-                      ? "Chọn tuyến đường"
-                      : "Thêm tuyến đường"}
-                  </button>
-                  {showRouteDropdown && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                      {routes.map((route) => (
-                        <button
-                          key={route.routeId}
-                          type="button"
-                          onClick={() => handleRouteSelect(route.routeId)}
-                          className={`w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-indigo-50 transition-all duration-200 ${
-                            formData.routeIds.includes(route.routeId)
-                              ? "bg-indigo-100"
-                              : ""
-                          }`}
-                        >
-                          {route.name} -{" "}
-                          {route.note || `Tuyến ${route.routeId}`}
-                        </button>
-                      ))}
-                    </div>
+              <div className="space-y-5">
+                {/* Username */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tên đăng nhập <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
+                      errors.username ? "border-red-500" : "border-gray-300"
+                    }`}
+                    placeholder="Nhập tên đăng nhập"
+                  />
+                  {errors.username && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.username}
+                    </p>
                   )}
                 </div>
-                <p className="mt-1 text-xs text-gray-500">
-                  Nhấp để chọn hoặc bỏ chọn tuyến đường
-                </p>
-                {errors.routeIds && (
-                  <p className="mt-1 text-sm text-red-600" aria-live="polite">
-                    {errors.routeIds}
-                  </p>
-                )}
+
+                {/* Password */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Mật khẩu <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
+                        errors.password ? "border-red-500" : "border-gray-300"
+                      }`}
+                      placeholder="Nhập mật khẩu"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.password}
+                    </p>
+                  )}
+                </div>
+
+                {/* Confirm Password */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Xác nhận mật khẩu <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
+                        errors.confirmPassword
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
+                      placeholder="Nhập lại mật khẩu"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.confirmPassword}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Thông tin cá nhân */}
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <div className="flex items-center gap-2 mb-6">
+                <Mail className="w-5 h-5 text-blue-600" />
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Thông tin cá nhân
+                </h3>
+              </div>
+
+              <div className="space-y-5">
+                {/* Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Họ và tên <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
+                      errors.name ? "border-red-500" : "border-gray-300"
+                    }`}
+                    placeholder="Nguyễn Văn A"
+                  />
+                  {errors.name && (
+                    <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
+                      errors.email ? "border-red-500" : "border-gray-300"
+                    }`}
+                    placeholder="email@example.com"
+                  />
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                  )}
+                </div>
+
+                {/* Phone */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Số điện thoại <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
+                      errors.phone ? "border-red-500" : "border-gray-300"
+                    }`}
+                    placeholder="0912345678"
+                  />
+                  {errors.phone && (
+                    <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={handleReset}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
-            >
-              Đặt lại
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className={`px-6 py-2 border border-transparent rounded-lg text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ${
-                loading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-indigo-600 hover:bg-indigo-700"
-              }`}
-            >
-              {loading ? (
-                <div className="flex items-center">
-                  <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
-                  Đang tạo...
+          {/* Right Column - Work Info */}
+          <div className="col-span-12 lg:col-span-6 space-y-6">
+            {/* Thông tin công việc */}
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <div className="flex items-center gap-2 mb-6">
+                <Briefcase className="w-5 h-5 text-green-600" />
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Thông tin công việc
+                </h3>
+              </div>
+
+              <div className="space-y-5">
+                {/* Role */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Vai trò <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      name="role"
+                      value={formData.role}
+                      onChange={handleRoleChange}
+                      className={`w-full px-4 py-3 pr-10 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none transition-all ${
+                        errors.role ? "border-red-500" : "border-gray-300"
+                      }`}
+                    >
+                      <option value="">Chọn vai trò</option>
+                      <option value="STAFF_SALE">Nhân viên bán hàng</option>
+                      <option value="LEAD_SALE">Trưởng nhóm bán hàng</option>
+                      <option value="STAFF_PURCHASER">
+                        Nhân viên mua hàng
+                      </option>
+                      <option value="STAFF_WAREHOUSE_FOREIGN">
+                        Nhân viên kho ngoại
+                      </option>
+                      <option value="STAFF_WAREHOUSE_DOMESTIC">
+                        Nhân viên kho nội
+                      </option>
+                      <option value="MANAGER">Quản lý</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                  </div>
+                  {errors.role && (
+                    <p className="mt-1 text-sm text-red-600">{errors.role}</p>
+                  )}
                 </div>
-              ) : (
-                "Tạo tài khoản"
+
+                {/* Department */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phòng ban
+                  </label>
+                  <div className="relative">
+                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      name="department"
+                      value={formData.department}
+                      onChange={handleInputChange}
+                      className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                      placeholder="VD: SALE, WAREHOUSE, PURCHASING"
+                    />
+                  </div>
+                </div>
+
+                {/* Location */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Địa điểm làm việc
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleInputChange}
+                      className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                      placeholder="Hà Nội, Hồ Chí Minh..."
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tuyến đường */}
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <div className="flex items-center gap-2 mb-6">
+                <Route className="w-5 h-5 text-purple-600" />
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Tuyến đường phụ trách
+                </h3>
+              </div>
+
+              {/* Selected Routes Pills */}
+              {formData.routeIds.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {formData.routeIds.map((routeId) => {
+                    const route = routes.find((r) => r.routeId === routeId);
+                    return (
+                      <span
+                        key={routeId}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium transition-all hover:bg-indigo-200"
+                      >
+                        {route?.name || `Tuyến ${routeId}`}
+                        <button
+                          type="button"
+                          onClick={() => handleRouteToggle(routeId)}
+                          className="hover:text-indigo-900"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
               )}
-            </button>
+
+              {/* Routes Grid - Hiển thị TẤT CẢ routes */}
+              <div className="space-y-2 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-3">
+                {routes.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    Không có tuyến đường nào
+                  </p>
+                ) : (
+                  routes.map((route) => (
+                    <label
+                      key={route.routeId}
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.routeIds.includes(route.routeId)}
+                        onChange={() => handleRouteToggle(route.routeId)}
+                        className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-700">
+                          {route.name}
+                        </p>
+                        {route.note && (
+                          <p className="text-xs text-gray-500">{route.note}</p>
+                        )}
+                      </div>
+                    </label>
+                  ))
+                )}
+              </div>
+              <p className="mt-3 text-xs text-gray-500">
+                Chỉ áp dụng cho nhân viên bán hàng
+              </p>
+            </div>
           </div>
-        </form>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-6 bg-white rounded-xl shadow-md p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {errors.general && (
+                <div className="flex items-center gap-2 text-red-600">
+                  <AlertTriangle className="w-5 h-5" />
+                  <span className="text-sm font-medium">{errors.general}</span>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleReset}
+                className="px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
+              >
+                Đặt lại
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmitClick}
+                disabled={loading || progress < 80}
+                className={`px-6 py-3 rounded-lg text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all flex items-center gap-2 ${
+                  loading || progress < 80
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-md hover:shadow-lg"
+                }`}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Đang tạo...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    Tạo tài khoản
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Confirm Dialog */}
+        <ConfirmDialog
+          isOpen={showConfirmDialog}
+          onClose={() => setShowConfirmDialog(false)}
+          onConfirm={handleConfirmSubmit}
+          title="Xác nhận tạo tài khoản nhân viên"
+          message={
+            <div className="space-y-3">
+              <p className="text-gray-700">
+                Bạn có chắc chắn muốn tạo tài khoản với thông tin sau:
+              </p>
+              <div className="bg-gray-50 p-4 rounded-lg text-sm space-y-2 border border-gray-200">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Tên đăng nhập:</span>
+                  <span className="font-semibold text-gray-900">
+                    {formData.username}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Họ và tên:</span>
+                  <span className="font-semibold text-gray-900">
+                    {formData.name}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Email:</span>
+                  <span className="font-semibold text-gray-900">
+                    {formData.email}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Vai trò:</span>
+                  <span className="font-semibold text-gray-900">
+                    {getRoleDisplayName(formData.role)}
+                  </span>
+                </div>
+                {formData.routeIds.length > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Số tuyến đường:</span>
+                    <span className="font-semibold text-gray-900">
+                      {formData.routeIds.length}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          }
+          confirmText="Tạo tài khoản"
+          cancelText="Hủy"
+          loading={loading}
+          loadingText="Đang tạo tài khoản"
+          type="info"
+        />
       </div>
     </div>
   );
