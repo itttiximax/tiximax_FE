@@ -87,6 +87,7 @@ import PaymentOrderList from "../components/PaymentOrder/PaymentOrderList";
 import CreateAuctionForm from "../components/Order/CreateAuctionForm";
 import OrderAuctionList from "../components/StaffPurchaser/OrderAuctionList";
 import AuctionPayment from "../Services/Payment/AuctionPayment";
+import ManagerTeam from "../components/LeadSale/ManagerTeam";
 
 const Router = createBrowserRouter([
   {
@@ -192,7 +193,7 @@ const Router = createBrowserRouter([
       { path: "createaccountuser", element: <CreateAccountUser /> },
       { path: "prospects", element: <NotFound /> },
       { path: "dashboard", element: <DashboardLeadSale /> },
-      { path: "team", element: <NotFound /> },
+      { path: "team", element: <ManagerTeam /> },
       { path: "salesreport", element: <NotFound /> },
       { path: "team-performance", element: <NotFound /> },
       { path: "customers", element: <CustomerStaffList /> },

@@ -294,20 +294,21 @@ const PaymentShipList = () => {
             </div>
           ) : (
             <>
-              {/* Header */}
+              {/* Header - Updated với thêm cột Khách hàng */}
               <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
                   <div className="lg:col-span-2">Mã đơn hàng</div>
-                  <div className="lg:col-span-2">Mã thanh toán</div>
+                  <div className="lg:col-span-2">Khách hàng</div>
+                  <div className="lg:col-span-1">Mã thanh toán</div>
                   <div className="lg:col-span-1">Loại đơn</div>
                   <div className="lg:col-span-2">Trạng thái</div>
                   <div className="lg:col-span-1">Trọng lượng</div>
-                  <div className="lg:col-span-2">Tổng tiền</div>
+                  <div className="lg:col-span-1">Tổng tiền</div>
                   <div className="lg:col-span-2">Thao tác</div>
                 </div>
               </div>
 
-              {/* Orders List */}
+              {/* Orders List - Updated với thêm hiển thị customer name */}
               <div className="divide-y divide-gray-200">
                 {orders.map((order) => (
                   <div
@@ -325,10 +326,20 @@ const PaymentShipList = () => {
                         </span>
                       </div>
 
-                      {/* Payment Code */}
+                      {/* Customer Name - MỚI THÊM */}
                       <div className="lg:col-span-2">
                         <span className="font-medium lg:hidden text-gray-500">
-                          Mã thanh toán:{" "}
+                          Khách hàng:{" "}
+                        </span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {order.customer?.name || "N/A"}
+                        </span>
+                      </div>
+
+                      {/* Payment Code */}
+                      <div className="lg:col-span-1">
+                        <span className="font-medium lg:hidden text-gray-500">
+                          Mã TT:{" "}
                         </span>
                         <span className="text-sm text-gray-600">
                           {order.paymentCode || "Chưa có"}
@@ -358,7 +369,7 @@ const PaymentShipList = () => {
                       </div>
 
                       {/* Final Price */}
-                      <div className="lg:col-span-2">
+                      <div className="lg:col-span-1">
                         <span className="font-medium lg:hidden text-gray-500">
                           Tổng tiền:{" "}
                         </span>

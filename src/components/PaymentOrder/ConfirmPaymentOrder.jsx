@@ -196,8 +196,15 @@ const ConfirmPaymentOrder = ({
                   </div>
                 </div>
 
-                {/* Payment Code */}
+                {/* Customer Name - MỚI THÊM */}
                 <div className="col-span-2">
+                  <div className="text-sm font-medium text-gray-900">
+                    {order.customer?.name || "N/A"}
+                  </div>
+                </div>
+
+                {/* Payment Code */}
+                <div className="col-span-1">
                   {order.paymentCode && (
                     <div className="text-sm text-blue-600 font-medium">
                       {order.paymentCode}
@@ -223,7 +230,7 @@ const ConfirmPaymentOrder = ({
                 </div>
 
                 {/* Total Amount */}
-                <div className="col-span-2">
+                <div className="col-span-1">
                   <div className="font-medium text-gray-900">
                     {formatCurrency(order.finalPriceOrder)}
                   </div>
@@ -342,7 +349,7 @@ const ConfirmPaymentOrder = ({
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Khách hàng:</span>
                     <span className="font-medium">
-                      {confirmDialog.order.customer?.name}
+                      {confirmDialog.order.customer?.name || "N/A"}
                     </span>
                   </div>
                 </div>

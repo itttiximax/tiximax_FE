@@ -147,9 +147,6 @@ const CreateDepositForm = () => {
             ...prev,
             exchangeRate: selectedRoute.exchangeRate,
           }));
-          toast.success(
-            `Tỷ giá hôm nay: ${selectedRoute.exchangeRate.toLocaleString()} VND`
-          );
         }
       } else {
         setPreliminary((prev) => ({ ...prev, [name]: value }));
@@ -337,7 +334,6 @@ const CreateDepositForm = () => {
       setForm({
         orderType: "KY_GUI",
         destinationId: "",
-        exchangeRate: "",
         checkRequired: false,
       });
       setProducts([
@@ -534,26 +530,6 @@ const CreateDepositForm = () => {
                       </div>
                     </div>
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tỷ giá (VND) <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <Banknote className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input
-                        type="number"
-                        name="exchangeRate"
-                        value={form.exchangeRate}
-                        onChange={handleChange}
-                        className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                        placeholder="Viet Nam Dong (VND)"
-                        disabled={!isFormEnabled}
-                        min="1"
-                      />
-                    </div>
-                  </div>
-
                   <div className="flex items-center p-3 bg-gray-50 rounded-lg">
                     <input
                       type="checkbox"
@@ -666,7 +642,7 @@ const CreateDepositForm = () => {
                     {products.length}
                   </span>
                 </div>
-                <div className="flex justify-between pt-2 border-t border-gray-300">
+                {/* <div className="flex justify-between pt-2 border-t border-gray-300">
                   <span className="text-gray-600">Số tiền ký gửi:</span>
                   <span className="font-bold text-blue-600">
                     {products
@@ -680,7 +656,7 @@ const CreateDepositForm = () => {
                       .toLocaleString() || "N/A"}{" "}
                     VND
                   </span>
-                </div>
+                </div> */}
               </div>
             </div>
           }

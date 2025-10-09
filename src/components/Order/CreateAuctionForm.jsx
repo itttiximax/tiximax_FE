@@ -586,40 +586,54 @@ const CreateAuctionForm = () => {
           isOpen={showConfirmDialog}
           onClose={handleCloseDialog}
           onConfirm={handleConfirmSubmit}
-          title="Xác nhận tạo đơn hàng"
+          title="Xác nhận tạo đơn đấu giá"
           message={
-            <div className="space-y-2">
-              <p>Bạn có chắc chắn muốn tạo đơn hàng với thông tin sau:</p>
-              <div className="bg-gray-50 p-3 rounded-md text-sm">
-                <p>
-                  <strong>Khách hàng:</strong> {selectedCustomer?.name} (
-                  {selectedCustomer?.customerCode})
-                </p>
-                <p>
-                  <strong>Tuyến đường:</strong> {selectedRoute?.name}
-                </p>
+            <div className="space-y-3">
+              <p className="text-gray-700">
+                Bạn có chắc chắn muốn tạo đơn đấu giá với thông tin sau:
+              </p>
+              <div className="bg-gray-50 p-4 rounded-lg text-sm space-y-2 border border-gray-200">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Khách hàng:</span>
+                  <span className="font-semibold text-gray-900">
+                    {selectedCustomer?.name} ({selectedCustomer?.customerCode})
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Tuyến đường:</span>
+                  <span className="font-semibold text-gray-900">
+                    {selectedRoute?.name}
+                  </span>
+                </div>
                 {selectedDestination && (
-                  <p>
-                    <strong>Điểm đến:</strong>{" "}
-                    {selectedDestination.destinationName}
-                  </p>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Điểm đến:</span>
+                    <span className="font-semibold text-gray-900">
+                      {selectedDestination.destinationName}
+                    </span>
+                  </div>
                 )}
-                <p>
-                  <strong>Số sản phẩm:</strong> {products.length}
-                </p>
                 {form.exchangeRate && (
-                  <p>
-                    <strong>Tỷ giá:</strong>{" "}
-                    {Number(form.exchangeRate).toLocaleString()} VND
-                  </p>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Tỷ giá:</span>
+                    <span className="font-semibold text-gray-900">
+                      {Number(form.exchangeRate).toLocaleString()} VND
+                    </span>
+                  </div>
                 )}
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Số sản phẩm:</span>
+                  <span className="font-semibold text-gray-900">
+                    {products.length}
+                  </span>
+                </div>
               </div>
             </div>
           }
-          confirmText="Tạo đơn hàng"
+          confirmText="Tạo đơn đấu giá"
           cancelText="Hủy"
           loading={isSubmitting}
-          loadingText="Đang tạo đơn "
+          loadingText="Đang tạo đơn"
           type="info"
         />
       </div>

@@ -145,17 +145,29 @@ const CreateOrderPayment = ({
         <div key={order.orderId}>
           <div className="px-6 py-4 hover:bg-gray-50 transition-colors">
             <div className="grid grid-cols-12 gap-4 items-center">
+              {/* Mã đơn hàng */}
               <div className="col-span-2">
                 <div className="font-medium text-gray-900">
                   {order.orderCode}
                 </div>
               </div>
+
+              {/* Tên khách hàng - MỚI THÊM */}
+              <div className="col-span-2">
+                <div className="text-sm font-medium text-gray-900">
+                  {order.customer?.name || "N/A"}
+                </div>
+              </div>
+
+              {/* Loại đơn */}
               <div className="col-span-1">
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                   {order.orderType === "MUA_HO" ? "Mua hộ" : order.orderType}
                 </span>
               </div>
-              <div className="col-span-2">
+
+              {/* Trạng thái */}
+              <div className="col-span-1">
                 <span
                   className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
                     order.status
@@ -164,22 +176,30 @@ const CreateOrderPayment = ({
                   {getStatusText(order.status)}
                 </span>
               </div>
+
+              {/* Tỷ giá */}
               <div className="col-span-1">
                 <div className="text-sm font-medium text-gray-900">
                   {order.exchangeRate}
                 </div>
                 <div className="text-xs text-gray-500">VND/CNY</div>
               </div>
+
+              {/* Tổng tiền */}
               <div className="col-span-2">
                 <div className="text-sm font-medium text-gray-900">
                   {formatCurrency(order.finalPriceOrder)}
                 </div>
               </div>
-              <div className="col-span-2">
+
+              {/* Ngày tạo */}
+              <div className="col-span-1">
                 <div className="text-sm text-gray-900">
                   {formatDate(order.createdAt)}
                 </div>
               </div>
+
+              {/* Thao tác */}
               {activeTab === "DA_XAC_NHAN" && (
                 <div className="col-span-2">
                   {!paymentResults[order.orderCode] ? (
@@ -221,6 +241,8 @@ const CreateOrderPayment = ({
                 </div>
               )}
             </div>
+
+            {/* Payment Results section */}
             {paymentResults[order.orderCode] && (
               <div
                 className={`mt-3 bg-green-50 border border-green-200 rounded p-3 transition-all duration-500 ${
@@ -290,6 +312,8 @@ const CreateOrderPayment = ({
           </div>
         </div>
       ))}
+
+      {/* Payment Modal */}
       {showPaymentModal && selectedPaymentResult && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-screen overflow-y-auto">
@@ -414,6 +438,3 @@ const CreateOrderPayment = ({
 };
 
 export default CreateOrderPayment;
-
-///
-//ok cpde

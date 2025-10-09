@@ -117,12 +117,18 @@ const PaymentOrderList = () => {
     }
   };
 
-  // Render appropriate component based on active tab
+  // Render appropriate component based on active tab - UPDATED để truyền customer name
   const renderOrderComponent = () => {
+    // Thêm customer name vào orders trước khi truyền xuống components
+    const ordersWithCustomer = orders.map((order) => ({
+      ...order,
+      customerName: order.customer?.name || "N/A",
+    }));
+
     if (activeTab === "CHO_THANH_TOAN") {
       return (
         <ConfirmPaymentOrder
-          orders={orders}
+          orders={ordersWithCustomer}
           paymentResults={paymentResults}
           setPaymentResults={setPaymentResults}
           fetchOrders={fetchOrders}
@@ -134,7 +140,7 @@ const PaymentOrderList = () => {
     // For other tabs, use the original CreateOrderPayment component
     return (
       <CreateOrderPayment
-        orders={orders}
+        orders={ordersWithCustomer}
         paymentResults={paymentResults}
         setPaymentResults={setPaymentResults}
         activeTab={activeTab}
@@ -144,30 +150,32 @@ const PaymentOrderList = () => {
     );
   };
 
-  // Get header columns based on active tab
+  // Get header columns based on active tab - UPDATED với cột Khách hàng
   const getHeaderColumns = () => {
     if (activeTab === "CHO_THANH_TOAN") {
       // Special headers for CHO_THANH_TOAN tab with separate payment code column
       return [
         { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
-        { key: "paymentCode", label: "Mã giao dịch", colSpan: "col-span-2" },
+        { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" }, // MỚI THÊM
+        { key: "paymentCode", label: "Mã giao dịch", colSpan: "col-span-1" },
         { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
         { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
         { key: "exchangeRate", label: "Tỷ giá", colSpan: "col-span-1" },
-        { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-2" },
+        { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-1" },
         { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-1" },
         { key: "actions", label: "Thao tác", colSpan: "col-span-2" },
       ];
     }
 
-    // Default headers for other tabs
+    // Default headers for other tabs - UPDATED với cột Khách hàng
     const baseColumns = [
       { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
+      { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" }, // MỚI THÊM
       { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
-      { key: "status", label: "Trạng thái", colSpan: "col-span-2" },
+      { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
       { key: "exchangeRate", label: "Tỷ giá", colSpan: "col-span-1" },
       { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-2" },
-      { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-2" },
+      { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-1" },
     ];
 
     // Add actions column for specific tabs

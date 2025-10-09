@@ -27,6 +27,7 @@ import {
   CreditCard,
   Menu,
   X,
+  Wallet,
 } from "lucide-react";
 
 const LeadSaleSideBar = () => {
@@ -96,7 +97,7 @@ const LeadSaleSideBar = () => {
             },
             {
               to: "/lead-sale/auction-payment",
-              icon: Truck,
+              icon: Wallet,
               label: "Thanh toán đấu giá ",
             },
           ],
