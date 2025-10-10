@@ -299,18 +299,9 @@ const Permission = () => {
                 </>
               ) : (
                 <>
-                  <span>📌</span>
-                  <span>Gán Route</span>
+                  <span>Gán Tuyến</span>
                 </>
               )}
-            </button>
-
-            <button
-              onClick={handleClearSelection}
-              disabled={loading}
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium"
-            >
-              Làm mới
             </button>
           </div>
         </div>

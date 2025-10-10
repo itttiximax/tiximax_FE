@@ -14,10 +14,12 @@ import {
   ChevronUp,
   ExternalLink,
   Truck,
+  XCircle,
 } from "lucide-react";
 import orderlinkService from "../../Services/StaffPurchase/orderlinkService";
 import DetailOrderLink from "./DetailOrderLink";
-import CreateAuctionPurchase from "./CreateAuctionPurchase"; // ✅ IMPORT CreateAuctionPurchase
+import CreateAuctionPurchase from "./CreateAuctionPurchase";
+import CancelPurchase from "./CancelPurchase";
 
 const OrderAuctionList = () => {
   const [orders, setOrders] = useState([]);
@@ -38,6 +40,10 @@ const OrderAuctionList = () => {
     useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState("");
+
+  // ✅ NEW: Cancel Purchase States
+  const [showCancelPurchase, setShowCancelPurchase] = useState(false);
+  const [selectedLinkForCancel, setSelectedLinkForCancel] = useState(null);
 
   // ✅ LUÔN FILTER DAU_GIA
   const fetchOrders = useCallback(async (page = 0, size = 15) => {
@@ -133,6 +139,30 @@ const OrderAuctionList = () => {
   }, []);
 
   const handlePurchaseSuccess = useCallback(() => {
+    fetchOrders(pagination.pageNumber, pagination.pageSize);
+  }, [fetchOrders, pagination.pageNumber, pagination.pageSize]);
+
+  // ✅ NEW: Cancel Purchase Handlers
+  const handleCancelPurchase = useCallback((order, link) => {
+    setSelectedLinkForCancel({
+      orderId: order.orderId,
+      linkId: link.linkId,
+      orderCode: order.orderCode,
+      linkInfo: {
+        productName: link.productName,
+        trackingCode: link.trackingCode,
+        status: link.status,
+      },
+    });
+    setShowCancelPurchase(true);
+  }, []);
+
+  const handleCloseCancelPurchase = useCallback(() => {
+    setShowCancelPurchase(false);
+    setSelectedLinkForCancel(null);
+  }, []);
+
+  const handleCancelSuccess = useCallback(() => {
     fetchOrders(pagination.pageNumber, pagination.pageSize);
   }, [fetchOrders, pagination.pageNumber, pagination.pageSize]);
 
@@ -464,15 +494,31 @@ const OrderAuctionList = () => {
                                   >
                                     {getStatusText(link.status)}
                                   </span>
-                                  <button
-                                    onClick={() =>
-                                      handleViewDetail(link.linkId)
-                                    }
-                                    className="flex items-center gap-1 bg-purple-500 text-white px-2 py-1 rounded-md text-xs hover:bg-purple-600 transition-colors"
-                                  >
-                                    <Eye className="w-2.5 h-2.5" />
-                                    Chi tiết
-                                  </button>
+                                  <div className="flex gap-1.5">
+                                    <button
+                                      onClick={() =>
+                                        handleViewDetail(link.linkId)
+                                      }
+                                      className="flex items-center gap-1 bg-purple-500 text-white px-2 py-1 rounded-md text-xs hover:bg-purple-600 transition-colors"
+                                    >
+                                      <Eye className="w-2.5 h-2.5" />
+                                      Chi tiết
+                                    </button>
+                                    {/* ✅ NEW: Cancel Button */}
+                                    {link.status !== "HUY" &&
+                                      link.status !== "DA_MUA" && (
+                                        <button
+                                          onClick={() =>
+                                            handleCancelPurchase(order, link)
+                                          }
+                                          className="flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-md text-xs hover:bg-red-600 transition-colors"
+                                          title="Hủy đơn hàng"
+                                        >
+                                          <XCircle className="w-2.5 h-2.5" />
+                                          Hủy
+                                        </button>
+                                      )}
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -538,13 +584,24 @@ const OrderAuctionList = () => {
         )}
       </div>
 
-      {/* ✅ MODALS - SỬ DỤNG CreateAuctionPurchase */}
+      {/* Modals */}
       <CreateAuctionPurchase
         isOpen={showCreatePurchase}
         onClose={handleCloseCreatePurchase}
         orderCode={selectedOrderForPurchase?.orderCode}
         orderLinks={selectedOrderForPurchase?.orderLinks || []}
         onSuccess={handlePurchaseSuccess}
+      />
+
+      {/* ✅ NEW: Cancel Purchase Modal */}
+      <CancelPurchase
+        isOpen={showCancelPurchase}
+        onClose={handleCloseCancelPurchase}
+        orderId={selectedLinkForCancel?.orderId}
+        linkId={selectedLinkForCancel?.linkId}
+        orderCode={selectedLinkForCancel?.orderCode}
+        linkInfo={selectedLinkForCancel?.linkInfo}
+        onSuccess={handleCancelSuccess}
       />
 
       {selectedLinkId && (

@@ -172,6 +172,7 @@ const Router = createBrowserRouter([
       { path: "producttype", element: <ManagerProductType /> },
       { path: "order", element: <ManagerOrder /> },
       { path: "website", element: <ManagerWebsite /> },
+      { path: "notifications", element: <NotFound /> },
     ],
   },
   {

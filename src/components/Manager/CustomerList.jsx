@@ -332,7 +332,7 @@ const CustomerList = () => {
                             {customer.name}
                           </div>
                           <div className="text-xs text-gray-500">
-                            @{customer.username}
+                            {customer.username}
                           </div>
                         </div>
                       </div>

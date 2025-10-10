@@ -130,12 +130,6 @@ const StaffListPermission = () => {
 
     const loadingToast = toast.loading("Đang xóa quyền...");
     try {
-      // TODO: Call API to remove route
-      // await createAccountRoutesService.removeRouteFromAccount(
-      //   selectedStaff.accountId,
-      //   routeId
-      // );
-
       setStaffRoutes(staffRoutes.filter((r) => r.routeId !== routeId));
       toast.success("Đã xóa quyền thành công!", { id: loadingToast });
     } catch {
@@ -256,14 +250,6 @@ const StaffListPermission = () => {
                 </option>
               ))}
             </select>
-
-            <button
-              onClick={() => fetchStaffData(currentPage, pageSize)}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center gap-2 font-medium"
-            >
-              <span>🔄</span>
-              <span>Làm mới</span>
-            </button>
           </div>
 
           {/* Loading */}
@@ -474,8 +460,8 @@ const StaffListPermission = () => {
                       )
                       .map((route) => (
                         <option key={route.routeId} value={route.routeId}>
-                          #{route.routeId} - {route.name} ({route.shipTime}) -
-                          Tỷ giá: {formatCurrency(route.exchangeRate)}
+                          {route.name} ({route.shipTime}) - Tỷ giá:{" "}
+                          {formatCurrency(route.exchangeRate)}
                         </option>
                       ))}
                   </select>

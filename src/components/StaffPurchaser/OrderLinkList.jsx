@@ -1,3 +1,4 @@
+// src/Components/StaffPurchase/OrderLinkList.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Search,
@@ -13,10 +14,12 @@ import {
   ChevronUp,
   ExternalLink,
   Truck,
+  XCircle,
 } from "lucide-react";
 import orderlinkService from "../../Services/StaffPurchase/orderlinkService";
 import DetailOrderLink from "./DetailOrderLink";
 import CreatePurchase from "./CreatePurchase";
+import CancelPurchase from "./CancelPurchase";
 
 const OrderLinkList = () => {
   const [orders, setOrders] = useState([]);
@@ -38,6 +41,10 @@ const OrderLinkList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState("");
 
+  // ✅ Cancel Purchase States
+  const [showCancelPurchase, setShowCancelPurchase] = useState(false);
+  const [selectedLinkForCancel, setSelectedLinkForCancel] = useState(null);
+
   // ✅ LUÔN FILTER MUA_HO
   const fetchOrders = useCallback(async (page = 0, size = 15) => {
     try {
@@ -46,7 +53,6 @@ const OrderLinkList = () => {
 
       console.log(`Fetching MUA_HO orders - Page: ${page}, Size: ${size}`);
 
-      // ✅ HARDCODE orderType = "MUA_HO"
       const response = await orderlinkService.getOrdersWithLinks(
         page,
         size,
@@ -135,6 +141,63 @@ const OrderLinkList = () => {
     fetchOrders(pagination.pageNumber, pagination.pageSize);
   }, [fetchOrders, pagination.pageNumber, pagination.pageSize]);
 
+  // ✅ Cancel Purchase Handlers
+  const handleCancelPurchase = useCallback((order, link) => {
+    setSelectedLinkForCancel({
+      orderId: order.orderId,
+      linkId: link.linkId,
+      orderCode: order.orderCode,
+      linkInfo: {
+        productName: link.productName,
+        trackingCode: link.trackingCode,
+        status: link.status,
+      },
+    });
+    setShowCancelPurchase(true);
+  }, []);
+
+  const handleCloseCancelPurchase = useCallback(() => {
+    setShowCancelPurchase(false);
+    setSelectedLinkForCancel(null);
+  }, []);
+
+  // ✅ OPTION 1: Chỉ Refetch - Load lại từ server (100% accurate)
+  const handleCancelSuccess = useCallback(
+    (linkId, orderId) => {
+      console.log(`Cancel success for linkId: ${linkId}, orderId: ${orderId}`);
+      // Refetch lại trang hiện tại để lấy data mới từ server
+      fetchOrders(pagination.pageNumber, pagination.pageSize);
+    },
+    [fetchOrders, pagination.pageNumber, pagination.pageSize]
+  );
+
+  /* 
+  // ✅ OPTION 2: Optimistic Update + Refetch (Best UX + Accurate)
+  const handleCancelSuccess = useCallback((linkId, orderId) => {
+    console.log(`Cancel success for linkId: ${linkId}, orderId: ${orderId}`);
+    
+    // 1. Update UI ngay lập tức (Optimistic)
+    setOrders((prevOrders) =>
+      prevOrders.map((order) => {
+        if (order.orderId === orderId) {
+          return {
+            ...order,
+            orderLinks: order.orderLinks.map((link) =>
+              link.linkId === linkId ? { ...link, status: "HUY" } : link
+            ),
+          };
+        }
+        return order;
+      })
+    );
+    
+    // 2. Refetch sau 500ms để sync với server (background)
+    setTimeout(() => {
+      fetchOrders(pagination.pageNumber, pagination.pageSize);
+    }, 500);
+  }, [fetchOrders, pagination.pageNumber, pagination.pageSize]);
+  */
+
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleString("vi-VN", {
@@ -176,7 +239,6 @@ const OrderLinkList = () => {
     return texts[status] || status;
   };
 
-  // Filter orders based on search term
   const filteredOrders = orders.filter((order) =>
     order.orderCode.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -226,7 +288,6 @@ const OrderLinkList = () => {
         {/* Controls Section */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
           <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between">
-            {/* Search and Filter */}
             <div className="flex flex-col sm:flex-row gap-3 flex-1">
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -463,15 +524,30 @@ const OrderLinkList = () => {
                                   >
                                     {getStatusText(link.status)}
                                   </span>
-                                  <button
-                                    onClick={() =>
-                                      handleViewDetail(link.linkId)
-                                    }
-                                    className="flex items-center gap-1 bg-orange-500 text-white px-2 py-1 rounded-md text-xs hover:bg-orange-600 transition-colors"
-                                  >
-                                    <Eye className="w-2.5 h-2.5" />
-                                    Chi tiết
-                                  </button>
+                                  <div className="flex gap-1.5">
+                                    <button
+                                      onClick={() =>
+                                        handleViewDetail(link.linkId)
+                                      }
+                                      className="flex items-center gap-1 bg-orange-500 text-white px-2 py-1 rounded-md text-xs hover:bg-orange-600 transition-colors"
+                                    >
+                                      <Eye className="w-2.5 h-2.5" />
+                                      Chi tiết
+                                    </button>
+                                    {link.status !== "HUY" &&
+                                      link.status !== "DA_MUA" && (
+                                        <button
+                                          onClick={() =>
+                                            handleCancelPurchase(order, link)
+                                          }
+                                          className="flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-md text-xs hover:bg-red-600 transition-colors"
+                                          title="Hủy đơn hàng"
+                                        >
+                                          <XCircle className="w-2.5 h-2.5" />
+                                          Hủy
+                                        </button>
+                                      )}
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -541,6 +617,16 @@ const OrderLinkList = () => {
         orderCode={selectedOrderForPurchase?.orderCode}
         orderLinks={selectedOrderForPurchase?.orderLinks || []}
         onSuccess={handlePurchaseSuccess}
+      />
+
+      <CancelPurchase
+        isOpen={showCancelPurchase}
+        onClose={handleCloseCancelPurchase}
+        orderId={selectedLinkForCancel?.orderId}
+        linkId={selectedLinkForCancel?.linkId}
+        orderCode={selectedLinkForCancel?.orderCode}
+        linkInfo={selectedLinkForCancel?.linkInfo}
+        onSuccess={handleCancelSuccess}
       />
 
       {selectedLinkId && (
