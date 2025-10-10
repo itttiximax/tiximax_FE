@@ -4,8 +4,8 @@ import StaffWarehouseDomesticSidebar from "./StaffWarehouseDomesticSidebar";
 const StaffWarehouseDomesticLayout = () => {
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Sidebar */}
-      <div className="w-64 bg-blue-100 border-r border-blue-300 shadow-md">
+      {/* Sidebar - Bỏ width cố định */}
+      <div className="bg-blue-100 border-r border-blue-300 shadow-md">
         <StaffWarehouseDomesticSidebar />
       </div>
 

@@ -321,8 +321,8 @@ const AdminSidebar = () => {
     return (isActiveItem) =>
       `w-full group flex items-center px-4 py-3 rounded-xl transition-all duration-300 ease-out text-sm font-medium relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-50 ${
         isActiveItem
-          ? "bg-gradient-to-r from-yellow-500 to-yellow-600 text-black shadow-xl transform scale-[1.02]"
-          : "text-gray-200 hover:text-yellow-300 hover:bg-yellow-500/20 hover:translate-x-1 hover:shadow-md"
+          ? "bg-gradient-to-r from-yellow-500 to-yellow-600 text-black shadow-xl"
+          : "text-gray-200 hover:text-yellow-300 hover:bg-yellow-500/20 hover:shadow-md"
       }`;
   }, []);
 
@@ -383,10 +383,10 @@ const AdminSidebar = () => {
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-yellow-400 to-yellow-600 opacity-60 rounded-r"></div>
 
                 <div className="flex items-center relative z-10">
-                  <span className="w-4 h-4 mr-3 text-yellow-400 group-hover:text-yellow-300 transition-all duration-300 group-hover:scale-110 drop-shadow-sm">
+                  <span className="w-4 h-4 mr-3 text-yellow-400 group-hover:text-yellow-300 transition-all duration-300 drop-shadow-sm">
                     {section.icon}
                   </span>
-                  <span className="transition-all duration-300 group-hover:translate-x-1 text-shadow-sm group-hover:text-yellow-100">
+                  <span className="transition-all duration-300 text-shadow-sm group-hover:text-yellow-100">
                     {section.title}
                   </span>
                 </div>
@@ -470,7 +470,7 @@ const AdminSidebar = () => {
         <button
           onClick={handleLogout}
           onKeyDown={(e) => handleKeyDown(e, handleLogout)}
-          className="w-full group flex items-center justify-center px-4 py-2 rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black transition-all duration-300 ease-out transform hover:scale-[1.02] shadow-lg hover:shadow-xl relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-50"
+          className="w-full group flex items-center justify-center px-4 py-2 rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black transition-all duration-300 ease-out shadow-lg hover:shadow-xl relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-50"
           aria-label="Đăng xuất khỏi hệ thống"
         >
           <div className="relative flex items-center">

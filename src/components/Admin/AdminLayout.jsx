@@ -4,10 +4,8 @@ import AdminSidebar from "./AdminSideBar";
 const AdminLayout = () => {
   return (
     <div className="flex h-screen overflow-hidden bg-gray-900">
-      {/* Sidebar: width 256px (w-64) để match với sidebar component */}
-      <div className="flex-shrink-0 w-64">
-        <AdminSidebar />
-      </div>
+      {/* Sidebar với hamburger button đã được tích hợp bên trong AdminSidebar */}
+      <AdminSidebar />
 
       {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -16,8 +14,9 @@ const AdminLayout = () => {
           {/* Content container with proper spacing */}
           <div className="mx-auto">
             {/* Outlet wrapper with enhanced styling */}
-            <div className="bg-black/20 backdrop-blur-sm overflow-hidden ">
-              <div className="p-6 md:p-8">
+            <div className="bg-black/20 backdrop-blur-sm overflow-hidden">
+              {/* Thêm padding top trên mobile để tránh hamburger button */}
+              <div className="p-6 md:p-8 pt-20 lg:pt-6">
                 <Outlet />
               </div>
             </div>

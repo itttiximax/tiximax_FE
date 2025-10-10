@@ -24,6 +24,7 @@
     "browser-image-compression": "^2.0.2",
     "chart.js": "^4.5.0",
     "dbr": "^6.4.0",
+    "framer-motion": "^12.23.22",
     "i18next": "^25.5.2",
     "lodash": "^4.17.21",
     "lucide-react": "^0.540.0",

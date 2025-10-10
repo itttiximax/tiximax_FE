@@ -25,14 +25,15 @@ import {
   UserStar,
   PackageSearch,
   CreditCard,
-  Menu,
-  X,
   Wallet,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 const LeadSaleSideBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isExpanded, setIsExpanded] = useState(true);
   const [isStaffDropdownOpen, setIsStaffDropdownOpen] = useState(false);
   const [isCustomerDropdownOpen, setIsCustomerDropdownOpen] = useState(false);
   const [isOrderDropdownOpen, setIsOrderDropdownOpen] = useState(false);
@@ -41,7 +42,6 @@ const LeadSaleSideBar = () => {
   const [isQuotationDropdownOpen, setIsQuotationDropdownOpen] = useState(false);
   const [isPaymentSupportDropdownOpen, setIsPaymentSupportDropdownOpen] =
     useState(false);
-  const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -49,8 +49,6 @@ const LeadSaleSideBar = () => {
   };
 
   const isActive = (path) => location.pathname === path;
-
-  const toggleSidebar = () => setIsOpen(!isOpen);
 
   const menuItems = [
     {
@@ -271,25 +269,37 @@ const LeadSaleSideBar = () => {
         <div key={itemIndex} className="space-y-1">
           <button
             onClick={item.onToggle}
-            className={`flex items-center gap-3 px-4 py-2 w-full text-left rounded-lg transition-colors duration-200 ${
+            className={`flex items-center py-3 pl-4 pr-4 w-full text-left rounded-lg transition-colors duration-200 ${
               isDropdownActive
                 ? "bg-sky-100 text-sky-700 font-semibold shadow-sm"
                 : "text-slate-700 hover:bg-slate-200"
             }`}
           >
             <Icon
-              size={20}
-              className={isDropdownActive ? "text-sky-600" : "text-gray-500"}
+              size={24}
+              className={`flex-shrink-0 ${
+                isDropdownActive ? "text-sky-600" : "text-gray-500"
+              }`}
             />
-            <span className="flex-1 text-sm font-medium">{item.label}</span>
+            <span
+              className={`text-base font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ml-3 ${
+                isExpanded
+                  ? "opacity-100 max-w-[200px]"
+                  : "opacity-0 max-w-0 ml-0"
+              }`}
+            >
+              {item.label}
+            </span>
             <ChevronDown
               size={16}
-              className={`transition-transform duration-200 ${
+              className={`flex-shrink-0 transition-all duration-300 ${
                 item.isOpen ? "rotate-180" : ""
-              } ${isDropdownActive ? "text-sky-600" : "text-gray-500"}`}
+              } ${isDropdownActive ? "text-sky-600" : "text-gray-500"} ${
+                isExpanded ? "opacity-100 ml-auto" : "opacity-0 ml-0"
+              }`}
             />
           </button>
-          {item.isOpen && (
+          {item.isOpen && isExpanded && (
             <div className="ml-6 space-y-1 border-l-2 border-gray-200 pl-3">
               {item.dropdownItems?.map((dropdownItem, dropdownIndex) => {
                 const DropdownIcon = dropdownItem.icon;
@@ -299,20 +309,19 @@ const LeadSaleSideBar = () => {
                   <Link
                     key={dropdownIndex}
                     to={dropdownItem.to}
-                    className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors duration-200 ${
+                    className={`flex items-center py-2 pl-4 pr-4 rounded-lg transition-colors duration-200 ${
                       dropdownActive
                         ? "bg-sky-100 text-sky-700 font-semibold shadow-sm"
                         : "text-slate-700 hover:bg-slate-200"
                     }`}
-                    onClick={() => setIsOpen(false)}
                   >
                     <DropdownIcon
-                      size={18}
-                      className={
+                      size={20}
+                      className={`flex-shrink-0 ${
                         dropdownActive ? "text-sky-600" : "text-gray-500"
-                      }
+                      }`}
                     />
-                    <span className="text-sm font-medium">
+                    <span className="text-sm font-medium ml-3">
                       {dropdownItem.label}
                     </span>
                   </Link>
@@ -330,95 +339,116 @@ const LeadSaleSideBar = () => {
       <Link
         key={itemIndex}
         to={item.to}
-        className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors duration-200 ${
+        className={`flex items-center py-3 pl-4 pr-4 rounded-lg transition-colors duration-200 ${
           active
             ? "bg-sky-100 text-sky-700 font-semibold shadow-sm"
             : "text-slate-700 hover:bg-slate-200"
         }`}
-        onClick={() => setIsOpen(false)}
       >
-        <Icon size={20} className={active ? "text-sky-600" : "text-gray-500"} />
-        <span className="text-sm font-medium">{item.label}</span>
+        <Icon
+          size={24}
+          className={`flex-shrink-0 ${
+            active ? "text-sky-600" : "text-gray-500"
+          }`}
+        />
+        <span
+          className={`text-base font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ml-3 ${
+            isExpanded ? "opacity-100 max-w-[200px]" : "opacity-0 max-w-0 ml-0"
+          }`}
+        >
+          {item.label}
+        </span>
       </Link>
     );
   };
 
   return (
-    <>
-      {/* Hamburger Menu Button for Mobile */}
-      <button
-        className="md:hidden fixed top-4 left-4 z-50 text-slate-700 p-2 rounded-lg bg-slate-50 shadow-md hover:bg-slate-100 transition-colors duration-200"
-        onClick={toggleSidebar}
-      >
-        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-      </button>
-
-      {/* Sidebar */}
-      <div
-        className={`fixed md:static inset-y-0 left-0 w-64 bg-slate-50 shadow-lg flex flex-col transform transition-transform duration-300 ease-in-out z-40 ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 h-screen`}
-      >
-        {/* Header */}
-        <div className="p-4 border-b border-gray-200 flex-shrink-0">
-          <Link
-            to="/lead-sale/profile"
-            className={`flex flex-col items-center gap-2 p-2 rounded-lg transition-colors duration-200 ${
-              isActive("/lead-sale/profile")
-                ? "bg-sky-100 text-sky-700 shadow-sm"
-                : "text-slate-700 hover:bg-slate-200"
-            }`}
-            onClick={() => setIsOpen(false)}
-          >
-            <User
-              className={`w-8 h-8 ${
-                isActive("/lead-sale/profile")
-                  ? "text-sky-600"
-                  : "text-gray-500"
-              }`}
-            />
-            <span className="text-sm font-semibold text-slate-800">
-              Trưởng nhóm bán hàng
-            </span>
-          </Link>
-        </div>
-
-        {/* Navigation with hidden scrollbar */}
-        <nav className="flex-1 p-3 space-y-4 overflow-y-auto hide-scrollbar">
-          {menuItems.map((section, sectionIndex) => (
-            <div key={sectionIndex} className="space-y-2">
-              <h3 className="px-4 text-xs font-semibold uppercase text-slate-500 tracking-wide">
-                {section.section}
-              </h3>
-              <div className="space-y-1">
-                {section.items.map((item, itemIndex) =>
-                  renderMenuItem(item, itemIndex)
-                )}
-              </div>
-            </div>
-          ))}
-        </nav>
-
-        {/* Fixed Footer with Logout */}
-        <div className="p-3 border-t border-gray-200 flex-shrink-0 bg-slate-50 sticky bottom-0">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm"
-          >
-            <LogOut size={16} />
-            <span className="text-sm font-medium">Đăng xuất</span>
-          </button>
-        </div>
+    <div
+      className={`${
+        isExpanded ? "w-72" : "w-20"
+      } bg-slate-50 shadow-lg flex flex-col h-screen transition-all duration-300`}
+    >
+      {/* Toggle Button */}
+      <div className="p-2 border-b border-gray-200 flex justify-end flex-shrink-0">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors"
+          title={isExpanded ? "Thu gọn sidebar" : "Mở rộng sidebar"}
+        >
+          {isExpanded ? (
+            <ChevronLeft className="w-6 h-6 text-slate-600" />
+          ) : (
+            <ChevronRight className="w-6 h-6 text-slate-600" />
+          )}
+        </button>
       </div>
 
-      {/* Mobile overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-60 z-30 md:hidden"
-          onClick={toggleSidebar}
-        />
-      )}
-    </>
+      {/* Header */}
+      <div className="p-4 border-b border-gray-200 flex-shrink-0">
+        <Link
+          to="/lead-sale/profile"
+          className={`flex flex-col items-center gap-2 p-3 rounded-lg transition-colors duration-200 ${
+            isActive("/lead-sale/profile")
+              ? "bg-sky-100 text-sky-700 shadow-sm"
+              : "text-slate-700 hover:bg-slate-200"
+          }`}
+        >
+          <User
+            className={`w-10 h-10 ${
+              isActive("/lead-sale/profile") ? "text-sky-600" : "text-gray-500"
+            }`}
+          />
+          <span
+            className={`text-base font-semibold text-slate-800 text-center whitespace-nowrap overflow-hidden transition-all duration-300 ${
+              isExpanded
+                ? "opacity-100 max-h-10 translate-y-0"
+                : "opacity-0 max-h-0 -translate-y-2"
+            }`}
+          >
+            Trưởng nhóm bán hàng
+          </span>
+        </Link>
+      </div>
+
+      {/* Navigation with hidden scrollbar */}
+      <nav className="flex-1 p-3 space-y-4 overflow-y-auto hide-scrollbar">
+        {menuItems.map((section, sectionIndex) => (
+          <div key={sectionIndex} className="space-y-2">
+            <h3
+              className={`px-4 text-xs font-semibold uppercase text-slate-500 tracking-wide whitespace-nowrap overflow-hidden transition-all duration-300 ${
+                isExpanded ? "opacity-100 max-h-10" : "opacity-0 max-h-0"
+              }`}
+            >
+              {section.section}
+            </h3>
+            <div className="space-y-1">
+              {section.items.map((item, itemIndex) =>
+                renderMenuItem(item, itemIndex)
+              )}
+            </div>
+          </div>
+        ))}
+      </nav>
+
+      {/* Fixed Footer with Logout */}
+      <div className="p-3 border-t border-gray-200 flex-shrink-0 bg-slate-50 sticky bottom-0">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center py-3 pl-4 pr-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm"
+        >
+          <LogOut size={20} className="flex-shrink-0" />
+          <span
+            className={`text-base font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ml-2 ${
+              isExpanded
+                ? "opacity-100 max-w-[200px]"
+                : "opacity-0 max-w-0 ml-0"
+            }`}
+          >
+            Đăng xuất
+          </span>
+        </button>
+      </div>
+    </div>
   );
 };
 

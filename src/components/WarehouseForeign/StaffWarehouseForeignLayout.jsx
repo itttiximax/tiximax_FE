@@ -4,8 +4,8 @@ import StaffWarehouseForeignSidebar from "./StaffWarehouseForeignSidebar";
 const StaffWarehouseForeignLayout = () => {
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
-      {/* Sidebar - Light blue background */}
-      <div className="w-64 bg-blue-100 shadow-md">
+      {/* Sidebar - Bỏ width cố định để sidebar tự điều chỉnh */}
+      <div className="bg-blue-100 shadow-md">
         <StaffWarehouseForeignSidebar />
       </div>
 
