@@ -32,8 +32,6 @@ const CreatePurchase = ({
     }
   }, [isOpen]);
 
-  // ============ FORMAT CURRENCY - GIỐNG PRODUCTMANAGER ============
-
   // Helper function để format số tiền với dấu phẩy cho hiển thị (giữ nguyên phần thập phân)
   const formatCurrency = (value) => {
     if (!value || value === "") return "";
@@ -101,8 +99,6 @@ const CreatePurchase = ({
       }
     }
   };
-
-  // ============ END FORMAT CURRENCY ============
 
   // Handle image upload from UploadImg component
   const handleImageUpload = (imageUrl) => {
@@ -192,8 +188,6 @@ const CreatePurchase = ({
     } catch (error) {
       console.error("Error creating purchase:", error);
       console.error("Error response:", error.response);
-
-      // ============ XỬ LÝ LỖI TỪ BE CHI TIẾT ============
 
       let errorMessage = "Có lỗi xảy ra khi tạo purchase";
 
@@ -454,12 +448,9 @@ const CreatePurchase = ({
                   onChange={handlePurchaseTotalChange}
                   onBlur={handlePurchaseTotalBlur}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="0"
+                  placeholder="000000"
                   required
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  Nhập số tiền (ví dụ: 1000000 hoặc 1,000,000)
-                </p>
               </div>
 
               <div>
@@ -476,7 +467,7 @@ const CreatePurchase = ({
                     }))
                   }
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="SP-VN908000"
+                  placeholder="SPX-123456789"
                   required
                 />
               </div>

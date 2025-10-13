@@ -230,9 +230,6 @@ const PaymentShipList = () => {
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
           Quản lý thanh toán vận chuyển
         </h1>
-        <p className="text-gray-600">
-          Danh sách đơn hàng cần thanh toán phí vận chuyển
-        </p>
       </div>
 
       {/* Tabs with Status Counts */}

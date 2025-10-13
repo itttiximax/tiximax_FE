@@ -33,8 +33,6 @@ const CreateAuctionPurchase = ({
     }
   }, [isOpen]);
 
-  // ============ FORMAT CURRENCY - GIỐNG PRODUCTMANAGER ============
-
   // Helper function để format số tiền với dấu phẩy cho hiển thị (giữ nguyên phần thập phân)
   const formatCurrency = (value) => {
     if (!value || value === "") return "";
@@ -103,8 +101,6 @@ const CreateAuctionPurchase = ({
     }
   };
 
-  // ============ END FORMAT CURRENCY ============
-
   // Handle image upload from UploadImg component
   const handleImageUpload = (imageUrl) => {
     setPurchaseData((prev) => ({
@@ -136,7 +132,7 @@ const CreateAuctionPurchase = ({
     setSelectedTrackingCodes(isSelectAll ? allTrackingCodes : []);
   };
 
-  // ✅ Handle AUCTION purchase creation
+  //  Handle AUCTION purchase creation
   const handleSubmitPurchase = async () => {
     try {
       setCreatingPurchase(true);
@@ -185,7 +181,6 @@ const CreateAuctionPurchase = ({
 
       console.log("Payload đấu giá gửi lên:", payload);
 
-      // ✅ GỌI API AUCTION
       await createPurchaseService.createAuctionPurchase(
         orderCode,
         payload,
@@ -302,6 +297,7 @@ const CreateAuctionPurchase = ({
       DANG_MUA: "bg-blue-100 text-blue-800",
       DA_MUA: "bg-red-600 text-white",
       HUY: "bg-red-100 text-red-800",
+      DA_HUY: "bg-red-100 text-red-800",
       HOAT_DONG: "bg-green-100 text-green-800",
     };
     return colors[status] || "bg-gray-100 text-gray-800";
@@ -454,7 +450,7 @@ const CreateAuctionPurchase = ({
           <div className="space-y-4">
             <h4 className="text-lg font-medium text-gray-900 flex items-center gap-2">
               <span className="inline-block w-1 h-5 bg-purple-600 rounded"></span>
-              Thông tin Purchase Đấu Giá
+              Thông tin Đấu Giá
             </h4>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -468,12 +464,9 @@ const CreateAuctionPurchase = ({
                   onChange={handlePurchaseTotalChange}
                   onBlur={handlePurchaseTotalBlur}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                  placeholder="0"
+                  placeholder="000000"
                   required
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  Nhập số tiền (ví dụ: 1000000 hoặc 1,000,000)
-                </p>
               </div>
 
               <div>
@@ -490,7 +483,7 @@ const CreateAuctionPurchase = ({
                     }))
                   }
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                  placeholder="A1"
+                  placeholder="SPX-123456789"
                   required
                 />
               </div>
@@ -501,7 +494,7 @@ const CreateAuctionPurchase = ({
               imageUrl={purchaseData.image}
               onImageUpload={handleImageUpload}
               onImageRemove={handleImageRemove}
-              label="Hình ảnh Purchase Đấu Giá"
+              label="Hình ảnh  Đấu Giá"
               required={true}
               maxSizeMB={3}
               placeholder="Chưa có ảnh purchase"
@@ -546,7 +539,7 @@ const CreateAuctionPurchase = ({
               {creatingPurchase && (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
               )}
-              {creatingPurchase ? "Đang tạo..." : "Tạo Purchase Đấu Giá"}
+              {creatingPurchase ? "Đang tạo..." : "Tạo Đấu Giá"}
             </button>
           </div>
         </div>
