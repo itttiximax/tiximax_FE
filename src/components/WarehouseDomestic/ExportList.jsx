@@ -11,6 +11,7 @@ import {
   Package,
   MapPin,
   Phone,
+  X,
 } from "lucide-react";
 import domesticService from "../../Services/Warehouse/domesticService";
 
@@ -18,12 +19,13 @@ const ExportList = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(20); // ✅ Tăng default lên 20
+  const [pageSize, setPageSize] = useState(20);
   const [totalOrders, setTotalOrders] = useState(0);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState("");
-  const [expandedRows, setExpandedRows] = useState({}); // Track expanded rows
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   const pageSizeOptions = [10, 20, 30, 50, 100];
 
@@ -58,12 +60,16 @@ const ExportList = () => {
     );
   };
 
-  // Toggle row expansion
-  const toggleRow = (index) => {
-    setExpandedRows((prev) => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
+  // Handle view details
+  const handleViewDetails = (order) => {
+    setSelectedOrder(order);
+    setShowModal(true);
+  };
+
+  // Close modal
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedOrder(null);
   };
 
   useEffect(() => {
@@ -102,13 +108,13 @@ const ExportList = () => {
   return (
     <div className="min-h-screen p-3">
       <div className="mx-auto">
-        {/* ✅ COMPACT HEADER */}
+        {/* ✅ BLUE HEADER */}
         <div className="mb-3">
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-1.5 bg-purple-100 rounded-lg">
-              <Package2 className="w-4 h-4 text-purple-600" />
+            <div className="p-1.5 bg-blue-100 rounded-lg">
+              <Package2 className="w-4 h-4 text-blue-600" />
             </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
               Đơn Hàng Nội Địa
             </h1>
           </div>
@@ -127,7 +133,7 @@ const ExportList = () => {
           </div>
         )}
 
-        {/* ✅ COMPACT CONTROLS */}
+        {/* ✅ BLUE CONTROLS */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-3">
           <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-3 flex-1">
@@ -138,7 +144,7 @@ const ExportList = () => {
                   placeholder="Tìm tên KH, SĐT, mã packing..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -148,7 +154,7 @@ const ExportList = () => {
                   type="date"
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
-                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -156,7 +162,7 @@ const ExportList = () => {
                 value={pageSize}
                 onChange={handlePageSizeChange}
                 disabled={loading}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all disabled:bg-gray-100"
+                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-100"
               >
                 {pageSizeOptions.map((size) => (
                   <option key={size} value={size}>
@@ -171,8 +177,8 @@ const ExportList = () => {
         {/* Loading State */}
         {loading && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-purple-600">
-              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-600" />
+            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-blue-600">
+              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" />
               Đang tải dữ liệu...
             </div>
           </div>
@@ -196,7 +202,7 @@ const ExportList = () => {
                   setSearchTerm("");
                   setFilterDate("");
                 }}
-                className="mt-3 px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all"
+                className="mt-3 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
               >
                 Xóa bộ lọc
               </button>
@@ -204,7 +210,7 @@ const ExportList = () => {
           </div>
         )}
 
-        {/* ✅ TABLE LAYOUT - COMPACT & EXPANDABLE */}
+        {/* ✅ BLUE TABLE */}
         {filteredOrders.length > 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {/* Table Header Info */}
@@ -219,7 +225,7 @@ const ExportList = () => {
               </div>
             </div>
 
-            {/* ✅ TABLE */}
+            {/* TABLE */}
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -252,165 +258,67 @@ const ExportList = () => {
                       </div>
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Chi Tiết
+                      Thao Tác
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredOrders.map((order, index) => {
-                    const isExpanded = expandedRows[index];
                     const rowNumber = currentPage * pageSize + index + 1;
 
                     return (
-                      <React.Fragment key={index}>
-                        {/* Main Row */}
-                        <tr className="hover:bg-purple-50 transition-colors">
-                          {/* STT */}
-                          <td className="px-3 py-2.5 whitespace-nowrap">
-                            <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
-                              <span className="text-xs font-semibold text-purple-600">
-                                {rowNumber}
-                              </span>
-                            </div>
-                          </td>
-
-                          {/* Customer Name */}
-                          <td className="px-3 py-2.5 whitespace-nowrap">
-                            <span className="text-sm font-semibold text-gray-900">
-                              {order.customerName}
+                      <tr
+                        key={index}
+                        className="hover:bg-blue-50 transition-colors"
+                      >
+                        {/* STT */}
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span className="text-xs font-semibold text-blue-600">
+                              {rowNumber}
                             </span>
-                          </td>
+                          </div>
+                        </td>
 
-                          {/* Phone */}
-                          <td className="px-3 py-2.5 whitespace-nowrap">
-                            <span className="text-sm text-gray-700">
-                              {order.customerPhone}
-                            </span>
-                          </td>
+                        {/* Customer Name */}
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          <span className="text-sm font-semibold text-gray-900">
+                            {order.customerName}
+                          </span>
+                        </td>
 
-                          {/* Packings Count */}
-                          <td className="px-3 py-2.5 whitespace-nowrap">
-                            <span className="text-sm font-bold text-purple-600">
-                              {order.packings.length} kiện
-                            </span>
-                          </td>
+                        {/* Phone */}
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          <span className="text-sm text-gray-700">
+                            {order.customerPhone}
+                          </span>
+                        </td>
 
-                          {/* Total Tracking Codes */}
-                          <td className="px-3 py-2.5 whitespace-nowrap">
-                            <span className="text-sm font-bold text-blue-600">
-                              {getTotalTrackingCodes(order.packings)} mã
-                            </span>
-                          </td>
+                        {/* Packings Count */}
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          <span className="text-sm font-bold text-blue-600">
+                            {order.packings.length} kiện
+                          </span>
+                        </td>
 
-                          {/* Expand Button */}
-                          <td className="px-3 py-2.5 whitespace-nowrap">
-                            <button
-                              onClick={() => toggleRow(index)}
-                              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-purple-600 hover:bg-purple-100 rounded transition-all"
-                            >
-                              {isExpanded ? (
-                                <>
-                                  <Eye className="w-3 h-3" />
-                                  Ẩn
-                                </>
-                              ) : (
-                                <>
-                                  <Eye className="w-3 h-3" />
-                                  Xem
-                                </>
-                              )}
-                            </button>
-                          </td>
-                        </tr>
+                        {/* Total Tracking Codes */}
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          <span className="text-sm font-bold text-blue-600">
+                            {getTotalTrackingCodes(order.packings)} mã
+                          </span>
+                        </td>
 
-                        {/* ✅ EXPANDED ROW - Show Details */}
-                        {isExpanded && (
-                          <tr className="bg-purple-50">
-                            <td colSpan="6" className="px-3 py-3">
-                              <div className="space-y-3">
-                                {/* Customer Details */}
-                                <div className="bg-white rounded-lg p-3 border border-purple-200">
-                                  <h4 className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
-                                    <MapPin className="w-3 h-3" />
-                                    Thông tin khách hàng
-                                  </h4>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-                                    <div>
-                                      <span className="text-gray-500">
-                                        Tên:{" "}
-                                      </span>
-                                      <span className="font-medium text-gray-900">
-                                        {order.customerName}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span className="text-gray-500">
-                                        SĐT:{" "}
-                                      </span>
-                                      <span className="font-medium text-gray-900">
-                                        {order.customerPhone}
-                                      </span>
-                                    </div>
-                                    <div className="md:col-span-2">
-                                      <span className="text-gray-500">
-                                        Địa chỉ:{" "}
-                                      </span>
-                                      <span className="font-medium text-gray-900">
-                                        {order.customerAddress !== "string"
-                                          ? order.customerAddress
-                                          : "Chưa có địa chỉ"}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Packings Details */}
-                                <div className="bg-white rounded-lg p-3 border border-purple-200">
-                                  <h4 className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
-                                    <Package className="w-3 h-3" />
-                                    Chi tiết kiện hàng ({
-                                      order.packings.length
-                                    }{" "}
-                                    kiện)
-                                  </h4>
-                                  <div className="space-y-2">
-                                    {order.packings.map((packing, pIndex) => (
-                                      <div
-                                        key={pIndex}
-                                        className="flex items-start justify-between p-2 bg-gray-50 rounded border border-gray-200"
-                                      >
-                                        <div className="flex-1">
-                                          <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-xs font-semibold text-purple-600">
-                                              {packing.packingCode}
-                                            </span>
-                                            <span className="text-xs text-gray-500">
-                                              ({packing.trackingCodes.length}{" "}
-                                              tracking)
-                                            </span>
-                                          </div>
-                                          <div className="flex flex-wrap gap-1">
-                                            {packing.trackingCodes.map(
-                                              (code, cIndex) => (
-                                                <span
-                                                  key={cIndex}
-                                                  className="inline-block px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded font-mono"
-                                                >
-                                                  {code}
-                                                </span>
-                                              )
-                                            )}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-                          </tr>
-                        )}
-                      </React.Fragment>
+                        {/* View Details Button */}
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          <button
+                            onClick={() => handleViewDetails(order)}
+                            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all"
+                          >
+                            <Eye className="w-3 h-3" />
+                            Xem
+                          </button>
+                        </td>
+                      </tr>
                     );
                   })}
                 </tbody>
@@ -419,7 +327,7 @@ const ExportList = () => {
           </div>
         )}
 
-        {/* ✅ COMPACT PAGINATION */}
+        {/* ✅ BLUE PAGINATION */}
         {filteredOrders.length > 0 && (
           <div className="flex items-center justify-between mt-3 bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-2.5">
             <button
@@ -437,7 +345,7 @@ const ExportList = () => {
 
             <div className="flex items-center gap-1.5">
               <span className="text-xs text-gray-500">Trang</span>
-              <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-sm font-semibold">
+              <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold">
                 {currentPage + 1}
               </span>
               <span className="text-xs text-gray-500">/ {totalPages}</span>
@@ -458,6 +366,166 @@ const ExportList = () => {
           </div>
         )}
       </div>
+
+      {/* ✅ BLUE MODAL */}
+      {showModal && selectedOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            {/* Modal Header - Blue Gradient */}
+            <div className="px-5 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white bg-opacity-20 rounded-lg">
+                    <Package2 className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">
+                      Chi Tiết Đơn Hàng
+                    </h3>
+                    <p className="text-sm text-blue-100">
+                      {selectedOrder.customerName}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCloseModal}
+                  className="p-1.5 hover:bg-white hover:bg-opacity-20 rounded-lg transition-all"
+                >
+                  <X className="w-5 h-5 text-white" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 overflow-y-auto max-h-[calc(90vh-80px)]">
+              {/* Customer Information - Blue Box */}
+              <div className="bg-blue-50 rounded-lg p-4 mb-4 border border-blue-200">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <User className="w-4 h-4 text-blue-600" />
+                  Thông Tin Khách Hàng
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-start gap-2">
+                    <User className="w-4 h-4 text-gray-400 mt-0.5" />
+                    <div>
+                      <span className="text-gray-500 text-xs">Tên:</span>
+                      <p className="font-semibold text-gray-900">
+                        {selectedOrder.customerName}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Phone className="w-4 h-4 text-gray-400 mt-0.5" />
+                    <div>
+                      <span className="text-gray-500 text-xs">SĐT:</span>
+                      <p className="font-semibold text-gray-900">
+                        {selectedOrder.customerPhone}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="md:col-span-2 flex items-start gap-2">
+                    <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
+                    <div>
+                      <span className="text-gray-500 text-xs">Địa chỉ:</span>
+                      <p className="font-semibold text-gray-900">
+                        {selectedOrder.customerAddress !== "string"
+                          ? selectedOrder.customerAddress
+                          : "Chưa có địa chỉ"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Packings Summary - Blue Box */}
+              <div className="bg-blue-50 rounded-lg p-4 mb-4 border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                    <Package className="w-4 h-4 text-blue-600" />
+                    Tổng Quan
+                  </h4>
+                  <div className="flex gap-4 text-sm">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {selectedOrder.packings.length}
+                      </div>
+                      <div className="text-xs text-gray-500">Kiện hàng</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {getTotalTrackingCodes(selectedOrder.packings)}
+                      </div>
+                      <div className="text-xs text-gray-500">Mã tracking</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Packings Details */}
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <Package2 className="w-4 h-4 text-blue-600" />
+                  Chi Tiết Kiện Hàng ({selectedOrder.packings.length} kiện)
+                </h4>
+                <div className="space-y-3">
+                  {selectedOrder.packings.map((packing, pIndex) => (
+                    <div
+                      key={pIndex}
+                      className="bg-white rounded-lg p-4 border border-gray-200 hover:border-blue-300 transition-all"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span className="text-xs font-bold text-blue-600">
+                              {pIndex + 1}
+                            </span>
+                          </div>
+                          <div>
+                            <div className="text-sm font-bold text-gray-900">
+                              {packing.packingCode}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {packing.trackingCodes.length} tracking code
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs font-medium text-gray-600 mb-2">
+                          Tracking Codes:
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {packing.trackingCodes.map((code, cIndex) => (
+                            <span
+                              key={cIndex}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-100 text-blue-700 text-xs rounded-lg font-mono font-medium"
+                            >
+                              <Package className="w-3 h-3" />
+                              {code}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer - Blue Button */}
+            <div className="px-5 py-4 border-t border-gray-200 bg-gray-50">
+              <div className="flex justify-end">
+                <button
+                  onClick={handleCloseModal}
+                  className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-all"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

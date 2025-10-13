@@ -12,29 +12,45 @@ export const ROLES = {
   CUSTOMER: "CUSTOMER",
 };
 
-
 export const login = async (username, password) => {
-  const response = await api.post("/accounts/login", { username, password });
-  const userData = response.data;
-  if (userData?.token) {
-    localStorage.setItem("jwt", userData.token);
-    localStorage.setItem("user", JSON.stringify(userData));
+  try {
+    const response = await api.post("/accounts/login", { username, password });
+    const userData = response.data;
+
+    if (userData?.token) {
+      localStorage.setItem("jwt", userData.token);
+      localStorage.setItem("user", JSON.stringify(userData));
+    }
+
+    return userData;
+  } catch (error) {
+    console.error("Login Error:", error);
+
+    if (error.code === "ERR_NETWORK") {
+      throw new Error("Không thể kết nối tới server!");
+    }
+
+    throw error;
   }
-  return userData;
 };
 
-// 🔹 Gửi token Supabase lên backend để xác thực và lấy JWT
 export const verifySupabaseToken = async (token) => {
-  const response = await api.post("/accounts/verify", null, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const data = response.data;
-  localStorage.setItem("jwt", data.jwt);
-  localStorage.setItem("user", JSON.stringify(data.user));
-  return data;
+  try {
+    const response = await api.post("/accounts/verify", null, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = response.data;
+
+    localStorage.setItem("jwt", data.jwt);
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    return data;
+  } catch (error) {
+    console.error("Verify Token Error:", error);
+    throw error;
+  }
 };
 
-// 🔹 Google login qua Supabase
 export const googleLogin = async () => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
@@ -43,13 +59,13 @@ export const googleLogin = async () => {
   if (error) throw error;
 };
 
-// 🔹 Helpers
 export const logout = () => {
   localStorage.removeItem("jwt");
   localStorage.removeItem("user");
 };
 
 export const getToken = () => localStorage.getItem("jwt");
+
 export const getCurrentUser = () => {
   const user = localStorage.getItem("user");
   return user ? JSON.parse(user) : null;
