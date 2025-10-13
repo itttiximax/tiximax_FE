@@ -223,6 +223,7 @@ const OrderLinkList = () => {
       DANG_MUA: "bg-blue-100 text-blue-800",
       DA_MUA: "bg-red-600 text-white",
       HUY: "bg-red-100 text-red-800",
+      DA_HUY: "bg-red-600 text-white",
       HOAT_DONG: "bg-green-100 text-green-800",
     };
     return colors[status] || "bg-gray-100 text-gray-800";
@@ -235,6 +236,7 @@ const OrderLinkList = () => {
       DA_MUA: "Đã mua",
       HUY: "Đã hủy",
       HOAT_DONG: "Hoạt động",
+      DA_HUY: "Đã hủy",
     };
     return texts[status] || status;
   };

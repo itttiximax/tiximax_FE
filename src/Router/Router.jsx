@@ -88,6 +88,7 @@ import CreateAuctionForm from "../components/Order/CreateAuctionForm";
 import OrderAuctionList from "../components/StaffPurchaser/OrderAuctionList";
 import AuctionPayment from "../Services/Payment/AuctionPayment";
 import ManagerTeam from "../components/LeadSale/ManagerTeam";
+import DashboardPurchase from "../components/StaffPurchaser/DashboardPurchase";
 
 const Router = createBrowserRouter([
   {
@@ -240,6 +241,7 @@ const Router = createBrowserRouter([
       { path: "orders/pending", element: <ManagerOrder /> },
       { path: "createaccountuser", element: <CreateAccountUser /> },
       { path: "customers", element: <CustomerStaffList /> },
+      { path: "auction-payment", element: <AuctionPayment /> },
       { path: "prospects", element: <NotFound /> },
       { path: "orders", element: <NotFound /> },
       { path: "orders/pending", element: <NotFound /> }, // Chưa triển khai
@@ -267,10 +269,9 @@ const Router = createBrowserRouter([
         element: <StaffPurchaserPage />,
       },
       { path: "profile", element: <ProfilePage /> },
-      { path: "dashboard", element: <NotFound /> },
+      { path: "dashboard", element: <DashboardPurchase /> },
       { path: "orders", element: <OrderLinkList /> },
       { path: "auction", element: <OrderAuctionList /> },
-      { path: "suppliers", element: <NotFound /> },
       { path: "inventory", element: <NotFound /> },
       { path: "inventory/audit", element: <NotFound /> },
     ],

@@ -10,24 +10,23 @@ import {
   Calendar,
   RefreshCw,
 } from "lucide-react";
-import packingsService from "../../Services/Warehouse/packingsService"; // Import service
+import packingsService from "../../Services/Warehouse/packingsService";
 
 const PackingAwaitList = () => {
-  const [orders, setOrders] = useState([]); // Lưu danh sách orders
-  const [page, setPage] = useState(0); // Trang hiện tại
-  const [limit, setLimit] = useState(10); // Số item mỗi trang
-  const [loading, setLoading] = useState(false); // Trạng thái loading
-  const [error, setError] = useState(null); // Lưu lỗi nếu có
-  const [selectedPackings, setSelectedPackings] = useState([]); // Lưu packingId được chọn
-  const [showModal, setShowModal] = useState(false); // Hiển thị modal
-  const [flightCode, setFlightCode] = useState(""); // flightCode input
-  const [assignLoading, setAssignLoading] = useState(false); // Trạng thái loading khi gán flight
-  const [assignError, setAssignError] = useState(null); // Lỗi khi gán flight
-  const [assignSuccess, setAssignSuccess] = useState(null); // Thông báo thành công
+  const [orders, setOrders] = useState([]);
+  const [page, setPage] = useState(0);
+  const [limit, setLimit] = useState(20); // ✅ Tăng default lên 20
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedPackings, setSelectedPackings] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [flightCode, setFlightCode] = useState("");
+  const [assignLoading, setAssignLoading] = useState(false);
+  const [assignError, setAssignError] = useState(null);
+  const [assignSuccess, setAssignSuccess] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState("");
 
-  // Fetch dữ liệu khi component mount hoặc page thay đổi
   useEffect(() => {
     const fetchOrders = async () => {
       setLoading(true);
@@ -38,7 +37,6 @@ const PackingAwaitList = () => {
           limit
         );
         setOrders(response.content || []);
-        // Reset selectedPackings khi chuyển trang
         setSelectedPackings([]);
       } catch (err) {
         setError(err.message || "Failed to fetch awaiting-flight orders");
@@ -50,18 +48,16 @@ const PackingAwaitList = () => {
     fetchOrders();
   }, [page, limit]);
 
-  // Format ngày giờ cho dễ đọc
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
       day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
   };
 
-  // Handle chuyển trang
   const handleNextPage = () => {
     setPage((prev) => prev + 1);
   };
@@ -70,14 +66,12 @@ const PackingAwaitList = () => {
     if (page > 0) setPage((prev) => prev - 1);
   };
 
-  // Handle thay đổi page size
   const handlePageSizeChange = (e) => {
     const newSize = parseInt(e.target.value);
     setLimit(newSize);
-    setPage(0); // Reset về trang đầu khi thay đổi page size
+    setPage(0);
   };
 
-  // Handle chọn checkbox
   const handleSelectPacking = (packingId) => {
     setSelectedPackings((prev) =>
       prev.includes(packingId)
@@ -86,7 +80,6 @@ const PackingAwaitList = () => {
     );
   };
 
-  // Handle chọn tất cả
   const handleSelectAll = () => {
     if (selectedPackings.length === filteredOrders.length) {
       setSelectedPackings([]);
@@ -95,7 +88,6 @@ const PackingAwaitList = () => {
     }
   };
 
-  // Handle gán chuyến bay
   const handleAssignFlight = async () => {
     if (!flightCode.trim()) {
       setAssignError("Vui lòng nhập mã chuyến bay");
@@ -107,21 +99,19 @@ const PackingAwaitList = () => {
     setAssignSuccess(null);
 
     try {
-      // Gọi API assignFlight với mảng packingIds
       await packingsService.assignFlight(selectedPackings, flightCode);
       setAssignSuccess(
         `Đã gán thành công ${selectedPackings.length} kiện hàng vào chuyến bay ${flightCode}`
       );
 
-      // Làm mới danh sách orders
       const response = await packingsService.getAwaitingFlightOrders(
         page,
         limit
       );
       setOrders(response.content || []);
-      setSelectedPackings([]); // Reset lựa chọn
-      setFlightCode(""); // Reset input
-      setShowModal(false); // Đóng modal
+      setSelectedPackings([]);
+      setFlightCode("");
+      setShowModal(false);
     } catch (err) {
       setAssignError(
         err.response?.status === 405
@@ -133,7 +123,6 @@ const PackingAwaitList = () => {
     }
   };
 
-  // Filter orders based on search term and date
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.packingCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -148,65 +137,64 @@ const PackingAwaitList = () => {
   });
 
   return (
-    <div className="min-h-screen p-4 sm:p-6">
+    <div className="min-h-screen p-3">
       <div className="mx-auto">
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Package className="w-6 h-6 text-blue-600" />
+        {/* ✅ COMPACT HEADER */}
+        <div className="mb-3">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="p-1.5 bg-blue-100 rounded-lg">
+              <Package className="w-4 h-4 text-blue-600" />
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Đơn Hàng Chờ Chuyến Bay
             </h1>
           </div>
-          <p className="text-gray-600 ml-11">
+          <p className="text-gray-600 ml-7 text-sm">
             Quản lý và gán chuyến bay cho các kiện hàng đã đóng gói
           </p>
         </div>
 
         {/* Success/Error Messages */}
         {assignSuccess && (
-          <div className="mb-6 p-4 bg-green-50 border-l-4 border-green-400 rounded-r-lg">
+          <div className="mb-3 p-2.5 bg-green-50 border-l-4 border-green-400 rounded-r-lg">
             <div className="flex items-center">
-              <Check className="w-5 h-5 text-green-400 mr-2" />
-              <p className="text-green-700">{assignSuccess}</p>
+              <Check className="w-4 h-4 text-green-400 mr-2" />
+              <p className="text-green-700 text-sm">{assignSuccess}</p>
             </div>
           </div>
         )}
 
         {assignError && (
-          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-400 rounded-r-lg">
+          <div className="mb-3 p-2.5 bg-red-50 border-l-4 border-red-400 rounded-r-lg">
             <div className="flex items-center">
-              <X className="w-5 h-5 text-red-400 mr-2" />
-              <p className="text-red-700">{assignError}</p>
+              <X className="w-4 h-4 text-red-400 mr-2" />
+              <p className="text-red-700 text-sm">{assignError}</p>
             </div>
           </div>
         )}
 
-        {/* Controls Section */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-            {/* Search and Filter */}
-            <div className="flex flex-col sm:flex-row gap-4 flex-1">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+        {/* ✅ COMPACT CONTROLS */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-3">
+          <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between">
+            <div className="flex flex-col sm:flex-row gap-3 flex-1">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm theo mã kiện hàng..."
+                  placeholder="Tìm mã kiện hàng..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Calendar className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="date"
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
-                  className="pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -214,11 +202,11 @@ const PackingAwaitList = () => {
                 value={limit}
                 onChange={handlePageSizeChange}
                 disabled={loading}
-                className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100"
+                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-100"
               >
-                <option value={5}>5 / trang</option>
                 <option value={10}>10 / trang</option>
                 <option value={20}>20 / trang</option>
+                <option value={30}>30 / trang</option>
                 <option value={50}>50 / trang</option>
                 <option value={100}>100 / trang</option>
               </select>
@@ -228,23 +216,23 @@ const PackingAwaitList = () => {
             <button
               onClick={() => setShowModal(true)}
               disabled={selectedPackings.length === 0}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 selectedPackings.length === 0
                   ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:shadow-lg transform hover:-translate-y-0.5"
+                  : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:shadow-md"
               }`}
             >
-              <Plane className="w-5 h-5" />
-              Gán Chuyến Bay ({selectedPackings.length})
+              <Plane className="w-4 h-4" />
+              Gán Chuyến ({selectedPackings.length})
             </button>
           </div>
         </div>
 
         {/* Loading State */}
         {loading && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
-            <div className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm text-blue-600">
-              <RefreshCw className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" />
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-blue-600">
+              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" />
               Đang tải dữ liệu...
             </div>
           </div>
@@ -252,97 +240,124 @@ const PackingAwaitList = () => {
 
         {/* Error State */}
         {error && (
-          <div className="bg-white rounded-2xl shadow-sm border border-red-200 p-12 text-center">
-            <X className="w-12 h-12 text-red-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <div className="bg-white rounded-xl shadow-sm border border-red-200 p-8 text-center">
+            <X className="w-12 h-12 text-red-400 mx-auto mb-3" />
+            <h3 className="text-base font-medium text-gray-900 mb-2">
               Có lỗi xảy ra
             </h3>
-            <p className="text-red-600">{error}</p>
+            <p className="text-red-600 text-sm">{error}</p>
           </div>
         )}
 
         {/* Empty State */}
         {!loading && !error && filteredOrders.length === 0 && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
-            <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+            <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <h3 className="text-base font-medium text-gray-900 mb-2">
               Không có đơn hàng nào
             </h3>
-            <p className="text-gray-500">
+            <p className="text-gray-500 text-sm">
               {searchTerm || filterDate
-                ? "Không tìm thấy kết quả phù hợp với bộ lọc của bạn."
+                ? "Không tìm thấy kết quả phù hợp."
                 : "Hiện tại không có kiện hàng nào chờ gán chuyến bay."}
             </p>
           </div>
         )}
 
-        {/* Table Section */}
+        {/* ✅ TABLE LAYOUT - COMPACT & SHOW MORE */}
         {filteredOrders.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {/* Table Header */}
-            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={
-                        selectedPackings.length === filteredOrders.length &&
-                        filteredOrders.length > 0
-                      }
-                      onChange={handleSelectAll}
-                      className="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <span className="font-medium text-gray-700">
-                      Chọn tất cả ({filteredOrders.length})
-                    </span>
-                  </label>
-                </div>
-                <div className="text-sm text-gray-500">
-                  Đã chọn: {selectedPackings.length} kiện hàng
-                </div>
+            <div className="px-4 py-2.5 border-b border-gray-200 bg-gray-50">
+              <div className="flex items-center justify-between text-xs">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={
+                      selectedPackings.length === filteredOrders.length &&
+                      filteredOrders.length > 0
+                    }
+                    onChange={handleSelectAll}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="font-medium text-gray-700">
+                    Chọn tất cả ({filteredOrders.length})
+                  </span>
+                </label>
+                <span className="text-gray-500">
+                  Đã chọn: {selectedPackings.length} kiện
+                </span>
               </div>
             </div>
 
-            {/* Table Body */}
-            <div className="divide-y divide-gray-200">
-              {filteredOrders.map((order) => (
-                <div
-                  key={order.packingId}
-                  className={`p-6 hover:bg-gray-50 transition-colors duration-150 ${
-                    selectedPackings.includes(order.packingId)
-                      ? "bg-blue-50 border-l-4 border-blue-400"
-                      : ""
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="checkbox"
-                      checked={selectedPackings.includes(order.packingId)}
-                      onChange={() => handleSelectPacking(order.packingId)}
-                      className="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500"
-                    />
-
-                    <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-4">
-                      {/* Packing Info */}
-                      <div className="lg:col-span-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Package className="w-4 h-4 text-blue-500" />
-                          <span className="font-semibold text-gray-900">
-                            {order.packingCode}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-500">
-                          ID: {order.packingId}
-                        </p>
+            {/* ✅ TABLE */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-3 py-2 text-left w-12">
+                      <span className="sr-only">Checkbox</span>
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <div className="flex items-center gap-1">
+                        <Package className="w-3 h-3" />
+                        Mã Kiện Hàng
                       </div>
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Packing ID
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Danh Sách Hàng Hóa
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        Ngày Đóng Gói
+                      </div>
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Trạng Thái
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredOrders.map((order) => (
+                    <tr
+                      key={order.packingId}
+                      className={`hover:bg-blue-50 transition-colors ${
+                        selectedPackings.includes(order.packingId)
+                          ? "bg-blue-50"
+                          : ""
+                      }`}
+                    >
+                      {/* Checkbox */}
+                      <td className="px-3 py-2.5 whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          checked={selectedPackings.includes(order.packingId)}
+                          onChange={() => handleSelectPacking(order.packingId)}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                      </td>
+
+                      {/* Packing Code */}
+                      <td className="px-3 py-2.5 whitespace-nowrap">
+                        <span className="text-sm font-semibold text-gray-900">
+                          {order.packingCode}
+                        </span>
+                      </td>
+
+                      {/* Packing ID */}
+                      <td className="px-3 py-2.5 whitespace-nowrap">
+                        <span className="text-xs text-gray-500 font-mono">
+                          {order.packingId}
+                        </span>
+                      </td>
 
                       {/* Packing List */}
-                      <div className="lg:col-span-1">
-                        <p className="text-sm font-medium text-gray-700 mb-1">
-                          Danh sách hàng hóa:
-                        </p>
-                        <div className="flex flex-wrap gap-1">
+                      <td className="px-3 py-2.5">
+                        <div className="flex flex-wrap gap-1 max-w-md">
                           {order.packingList && order.packingList.length > 0 ? (
                             <>
                               {order.packingList
@@ -350,85 +365,71 @@ const PackingAwaitList = () => {
                                 .map((item, index) => (
                                   <span
                                     key={index}
-                                    className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full"
+                                    className="inline-block px-1.5 py-0.5 bg-gray-100 text-gray-700 text-xs rounded"
                                   >
                                     {item}
                                   </span>
                                 ))}
                               {order.packingList.length > 2 && (
-                                <span className="inline-block px-2 py-1 bg-gray-200 text-gray-600 text-xs rounded-full">
-                                  +{order.packingList.length - 2} mặt hàng
+                                <span className="inline-block px-1.5 py-0.5 bg-gray-200 text-gray-600 text-xs rounded font-medium">
+                                  +{order.packingList.length - 2}
                                 </span>
                               )}
                             </>
                           ) : (
-                            <span className="text-sm text-gray-400">
-                              Không có thông tin
-                            </span>
+                            <span className="text-xs text-gray-400">N/A</span>
                           )}
                         </div>
-                      </div>
+                      </td>
 
                       {/* Packed Date */}
-                      <div className="lg:col-span-1">
-                        <p className="text-sm font-medium text-gray-700 mb-1">
-                          Ngày đóng gói:
-                        </p>
-                        <p className="text-sm text-gray-600">
+                      <td className="px-3 py-2.5 whitespace-nowrap">
+                        <span className="text-xs text-gray-600">
                           {formatDate(order.packedDate)}
-                        </p>
-                      </div>
+                        </span>
+                      </td>
 
                       {/* Flight Status */}
-                      <div className="lg:col-span-1">
-                        <p className="text-sm font-medium text-gray-700 mb-1">
-                          Trạng thái:
-                        </p>
-                        <div className="flex items-center gap-2">
-                          {order.flightCode ? (
-                            <>
-                              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                              <span className="text-sm text-green-600 font-medium">
-                                {order.flightCode}
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                              <span className="text-sm text-yellow-600 font-medium">
-                                Chờ chuyến bay
-                              </span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                      <td className="px-3 py-2.5 whitespace-nowrap">
+                        {order.flightCode ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">
+                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                            {order.flightCode}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full font-medium">
+                            <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
+                            Chờ CB
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
 
-        {/* Pagination */}
+        {/* ✅ COMPACT PAGINATION */}
         {filteredOrders.length > 0 && (
-          <div className="flex items-center justify-between mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between mt-3 bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-2.5">
             <button
               onClick={handlePrevPage}
               disabled={page === 0}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 page === 0
                   ? "text-gray-400 cursor-not-allowed"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
             >
-              <ChevronLeft className="w-5 h-5" />
-              Trang trước
+              <ChevronLeft className="w-4 h-4" />
+              Trước
             </button>
 
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">Trang</span>
-              <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg font-semibold">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-gray-500">Trang</span>
+              <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold">
                 {page + 1}
               </span>
             </div>
@@ -436,42 +437,42 @@ const PackingAwaitList = () => {
             <button
               onClick={handleNextPage}
               disabled={orders.length < limit}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 orders.length < limit
                   ? "text-gray-400 cursor-not-allowed"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
             >
-              Trang sau
-              <ChevronRight className="w-5 h-5" />
+              Sau
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         )}
 
-        {/* Modal */}
+        {/* ✅ COMPACT MODAL */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Plane className="w-6 h-6 text-blue-600" />
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+              <div className="p-5">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div className="p-1.5 bg-blue-100 rounded-lg">
+                    <Plane className="w-5 h-5 text-blue-600" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">
+                  <h3 className="text-lg font-bold text-gray-900">
                     Gán Chuyến Bay
                   </h3>
                 </div>
 
-                <div className="mb-6">
-                  <p className="text-gray-600 mb-4">
-                    Bạn đang gán chuyến bay cho{" "}
+                <div className="mb-5">
+                  <p className="text-gray-600 text-sm mb-3">
+                    Gán chuyến bay cho{" "}
                     <span className="font-semibold text-blue-600">
                       {selectedPackings.length}
                     </span>{" "}
                     kiện hàng được chọn.
                   </p>
 
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">
                     Mã chuyến bay <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -479,41 +480,41 @@ const PackingAwaitList = () => {
                     value={flightCode}
                     onChange={(e) => setFlightCode(e.target.value)}
                     placeholder="VD: FL123, VN456"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     autoFocus
                   />
 
                   {assignError && (
-                    <p className="text-red-500 text-sm mt-2 flex items-center gap-2">
-                      <X className="w-4 h-4" />
+                    <p className="text-red-500 text-xs mt-2 flex items-center gap-1">
+                      <X className="w-3 h-3" />
                       {assignError}
                     </p>
                   )}
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex gap-2.5">
                   <button
                     onClick={() => {
                       setShowModal(false);
                       setFlightCode("");
                       setAssignError(null);
                     }}
-                    className="flex-1 px-4 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 font-medium transition-colors duration-200"
+                    className="flex-1 px-4 py-2.5 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 font-medium transition-colors"
                   >
                     Hủy
                   </button>
                   <button
                     onClick={handleAssignFlight}
                     disabled={assignLoading || !flightCode.trim()}
-                    className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                    className={`flex-1 px-4 py-2.5 text-sm rounded-lg font-medium transition-all ${
                       assignLoading || !flightCode.trim()
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700"
                     }`}
                   >
                     {assignLoading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <RefreshCw className="animate-spin h-4 w-4" />
+                      <span className="flex items-center justify-center gap-1.5">
+                        <RefreshCw className="animate-spin h-3.5 w-3.5" />
                         Đang xử lý...
                       </span>
                     ) : (

@@ -45,11 +45,7 @@ const StaffPurchaserSidebar = () => {
           icon: Landmark,
           label: "Đơn hàng đấu giá",
         },
-        {
-          to: "/staff-purchaser/suppliers",
-          icon: Users,
-          label: "Nhà cung cấp",
-        },
+
         {
           type: "dropdown",
           icon: Warehouse,

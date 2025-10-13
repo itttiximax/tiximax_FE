@@ -16,7 +16,7 @@ const WarehouseList = () => {
   const [warehouses, setWarehouses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20); // ✅ Tăng default lên 20
   const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -64,9 +64,9 @@ const WarehouseList = () => {
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
       day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -80,56 +80,55 @@ const WarehouseList = () => {
   );
 
   return (
-    <div className="min-h-screen p-4 sm:p-6">
-      <div className=" mx-auto">
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Warehouse className="w-6 h-6 text-purple-600" />
+    <div className="min-h-screen p-3">
+      <div className="mx-auto">
+        {/* ✅ COMPACT HEADER */}
+        <div className="mb-3">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="p-1.5 bg-purple-100 rounded-lg">
+              <Warehouse className="w-4 h-4 text-purple-600" />
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Danh Sách Kho Hàng
             </h1>
           </div>
-          <p className="text-gray-600 ml-11">
+          <p className="text-gray-600 ml-7 text-sm">
             Quản lý thông tin kho hàng sẵn sàng
           </p>
         </div>
 
         {/* Error Messages */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-400 rounded-r-lg">
+          <div className="mb-3 p-2.5 bg-red-50 border-l-4 border-red-400 rounded-r-lg">
             <div className="flex items-center">
-              <Package className="w-5 h-5 text-red-400 mr-2" />
-              <p className="text-red-700">{error}</p>
+              <Package className="w-4 h-4 text-red-400 mr-2" />
+              <p className="text-red-700 text-sm">{error}</p>
             </div>
           </div>
         )}
 
-        {/* Controls Section */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-            {/* Search and Filter */}
-            <div className="flex flex-col sm:flex-row gap-4 flex-1">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+        {/* ✅ COMPACT CONTROLS */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-3">
+          <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between">
+            <div className="flex flex-col sm:flex-row gap-3 flex-1">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm theo mã tracking hoặc mã đơn..."
+                  placeholder="Tìm tracking/mã đơn..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 />
               </div>
 
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Calendar className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="date"
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
-                  className="pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -137,7 +136,7 @@ const WarehouseList = () => {
                 value={pageSize}
                 onChange={changePageSize}
                 disabled={loading}
-                className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100"
+                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all disabled:bg-gray-100"
               >
                 <option value={10}>10 / trang</option>
                 <option value={20}>20 / trang</option>
@@ -151,9 +150,9 @@ const WarehouseList = () => {
 
         {/* Loading State */}
         {loading && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
-            <div className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm text-purple-600">
-              <RefreshCw className="animate-spin -ml-1 mr-3 h-5 w-5 text-purple-600" />
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-purple-600">
+              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-600" />
               Đang tải dữ liệu...
             </div>
           </div>
@@ -161,157 +160,176 @@ const WarehouseList = () => {
 
         {/* Empty State */}
         {!loading && !error && filteredWarehouses.length === 0 && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
-            <Warehouse className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+            <Warehouse className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <h3 className="text-base font-medium text-gray-900 mb-2">
               Không có dữ liệu kho hàng
             </h3>
-            <p className="text-gray-500">
+            <p className="text-gray-500 text-sm">
               {searchTerm
-                ? "Không tìm thấy kết quả phù hợp với từ khóa tìm kiếm."
+                ? "Không tìm thấy kết quả phù hợp."
                 : "Chưa có dữ liệu kho hàng nào."}
             </p>
           </div>
         )}
 
-        {/* Warehouse List */}
+        {/* ✅ TABLE LAYOUT - COMPACT & SHOW MORE */}
         {filteredWarehouses.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-            {/* List Header */}
-            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <span className="font-medium text-gray-700">
-                    Hiển thị: {filteredWarehouses.length} mặt hàng
-                  </span>
-                </div>
-                <div className="text-sm text-gray-500">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            {/* Table Header Info */}
+            <div className="px-4 py-2.5 border-b border-gray-200 bg-gray-50">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-medium text-gray-700">
+                  Hiển thị: {filteredWarehouses.length} mặt hàng
+                </span>
+                <span className="text-gray-500">
                   Trang {currentPage + 1} / {totalPages}
-                </div>
+                </span>
               </div>
             </div>
 
-            {/* List Body */}
-            <div className="divide-y divide-gray-200">
-              {filteredWarehouses.map((item, index) => (
-                <div
-                  key={item.warehouseId}
-                  className="p-6 hover:bg-gray-50 transition-colors duration-150"
-                >
-                  <div className="flex items-start gap-4">
-                    {/* Item Number */}
-                    <div className="flex-shrink-0">
-                      <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-semibold text-purple-600">
-                          {currentPage * pageSize + index + 1}
+            {/* ✅ TABLE */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                      #
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <div className="flex items-center gap-1">
+                        <Package className="w-3 h-3" />
+                        Tracking Code
+                      </div>
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Mã Đơn
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <div className="flex items-center gap-1">
+                        <Weight className="w-3 h-3" />
+                        Cân Nặng
+                      </div>
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <div className="flex items-center gap-1">
+                        <Weight className="w-3 h-3" />
+                        TL Thực
+                      </div>
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <div className="flex items-center gap-1">
+                        <Ruler className="w-3 h-3" />
+                        Dim (m³)
+                      </div>
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        Ngày Tạo
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredWarehouses.map((item, index) => (
+                    <tr
+                      key={item.warehouseId}
+                      className="hover:bg-purple-50 transition-colors"
+                    >
+                      {/* STT */}
+                      <td className="px-3 py-2.5 whitespace-nowrap">
+                        <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+                          <span className="text-xs font-semibold text-purple-600">
+                            {currentPage * pageSize + index + 1}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Tracking Code */}
+                      <td className="px-3 py-2.5 whitespace-nowrap">
+                        <span className="text-sm font-semibold text-gray-900 font-mono">
+                          {item.trackingCode}
                         </span>
-                      </div>
-                    </div>
+                      </td>
 
-                    <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                      {/* Tracking & Order Info */}
-                      <div className="lg:col-span-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Package className="w-4 h-4 text-purple-500" />
-                          <span className="font-semibold text-gray-900 text-lg font-mono">
-                            {item.trackingCode}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-500 mb-1">
-                          Mã đơn:{" "}
-                          <span className="font-medium">{item.orderCode}</span>
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Ngày tạo: {formatDate(item.createdAt)}
-                        </p>
-                      </div>
+                      {/* Order Code */}
+                      <td className="px-3 py-2.5 whitespace-nowrap">
+                        <span className="text-sm text-gray-700">
+                          {item.orderCode}
+                        </span>
+                      </td>
 
-                      {/* Weight Info */}
-                      <div className="lg:col-span-1">
-                        <p className="text-sm font-medium text-gray-700 mb-2">
-                          Trọng lượng:
-                        </p>
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <Weight className="w-4 h-4 text-gray-400" />
-                            <span className="text-sm text-gray-600">
-                              Cân nặng:{" "}
-                              <span className="font-semibold text-purple-600">
-                                {item.weight} kg
-                              </span>
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Weight className="w-4 h-4 text-gray-400" />
-                            <span className="text-sm text-gray-600">
-                              TL thực:{" "}
-                              <span className="font-semibold text-green-600">
-                                {item.netWeight} kg
-                              </span>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                      {/* Weight */}
+                      <td className="px-3 py-2.5 whitespace-nowrap">
+                        <span className="text-sm font-semibold text-purple-600">
+                          {item.weight} kg
+                        </span>
+                      </td>
 
-                      {/* Dimension Info */}
-                      <div className="lg:col-span-1">
-                        <p className="text-sm font-medium text-gray-700 mb-2">
-                          Kích thước:
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <Ruler className="w-4 h-4 text-gray-400" />
-                          <span className="text-2xl font-bold text-purple-600">
-                            {item.dim}
-                          </span>
-                          <span className="text-sm text-gray-500">m³</span>
-                        </div>
+                      {/* Net Weight */}
+                      <td className="px-3 py-2.5 whitespace-nowrap">
+                        <span className="text-sm font-semibold text-green-600">
+                          {item.netWeight} kg
+                        </span>
+                      </td>
 
-                        <div className="mt-2">
-                          <div className="flex items-center gap-2"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                      {/* Dim */}
+                      <td className="px-3 py-2.5 whitespace-nowrap">
+                        <span className="text-sm font-bold text-purple-600">
+                          {item.dim}
+                        </span>
+                      </td>
+
+                      {/* Created At */}
+                      <td className="px-3 py-2.5 whitespace-nowrap">
+                        <span className="text-xs text-gray-500">
+                          {formatDate(item.createdAt)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
 
-        {/* Pagination */}
+        {/* ✅ COMPACT PAGINATION */}
         {filteredWarehouses.length > 0 && (
-          <div className="flex items-center justify-between mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between mt-3 bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-2.5">
             <button
               onClick={prevPage}
               disabled={currentPage === 0}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 currentPage === 0
                   ? "text-gray-400 cursor-not-allowed"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
             >
-              <ChevronLeft className="w-5 h-5" />
-              Trang trước
+              <ChevronLeft className="w-4 h-4" />
+              Trước
             </button>
 
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">Trang</span>
-              <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-lg font-semibold">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-gray-500">Trang</span>
+              <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-sm font-semibold">
                 {currentPage + 1}
               </span>
+              <span className="text-xs text-gray-500">/ {totalPages}</span>
             </div>
 
             <button
               onClick={nextPage}
               disabled={warehouses.length < pageSize}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 warehouses.length < pageSize
                   ? "text-gray-400 cursor-not-allowed"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
             >
-              Trang sau
-              <ChevronRight className="w-5 h-5" />
+              Sau
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         )}

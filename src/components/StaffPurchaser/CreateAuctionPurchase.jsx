@@ -302,7 +302,17 @@ const CreateAuctionPurchase = ({
     };
     return colors[status] || "bg-gray-100 text-gray-800";
   };
-
+  const getStatusText = (status) => {
+    const texts = {
+      CHO_MUA: "Chờ mua",
+      DANG_MUA: "Đang mua",
+      DA_MUA: "Đã mua",
+      HUY: "Đã hủy",
+      DA_HUY: "Đã hủy",
+      HOAT_DONG: "Hoạt động",
+    };
+    return texts[status] || status;
+  };
   if (!isOpen) return null;
 
   const allTrackingCodes = orderLinks.map((link) => link.trackingCode);
@@ -436,7 +446,7 @@ const CreateAuctionPurchase = ({
                             link.status
                           )}`}
                         >
-                          {link.status}
+                          {getStatusText(link.status)}
                         </span>
                       </div>
                     </div>
