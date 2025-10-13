@@ -88,7 +88,11 @@ import CreateAuctionForm from "../components/Order/CreateAuctionForm";
 import OrderAuctionList from "../components/StaffPurchaser/OrderAuctionList";
 import AuctionPayment from "../Services/Payment/AuctionPayment";
 import ManagerTeam from "../components/LeadSale/ManagerTeam";
+<<<<<<< HEAD
+import AuthCallback from "../Services/Auth/AuthCallback";
+=======
 import DashboardPurchase from "../components/StaffPurchaser/DashboardPurchase";
+>>>>>>> a8a88fccf67299051c43fd1ba300919187ecb1e1
 
 const Router = createBrowserRouter([
   {
@@ -100,6 +104,7 @@ const Router = createBrowserRouter([
       { path: "signup", element: <SignUp /> },
       { path: "forgot-password", element: <ForgotPassword /> },
       { path: "profile", element: <ProfilePage /> },
+      { path: "/auth/callback", element:<AuthCallback/>}
     ],
   },
   {

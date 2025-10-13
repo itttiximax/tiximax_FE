@@ -1,8 +1,26 @@
 import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
-import { login, getRole, ROLES } from "../Services/Auth/authService";
 import toast from "react-hot-toast";
+import { supabase } from "../config/supabaseClient";
+import {
+  login,
+  googleLogin,
+  verifySupabaseToken,
+  getRole,
+  ROLES,
+} from "../Services/Auth/authService";
+
+const roleRoutes = {
+  [ROLES.ADMIN]: "/admin",
+  [ROLES.MANAGER]: "/manager",
+  [ROLES.LEAD_SALE]: "/lead-sale",
+  [ROLES.STAFF_SALE]: "/staff-sale",
+  [ROLES.STAFF_PURCHASER]: "/staff-purchaser",
+  [ROLES.STAFF_WAREHOUSE_FOREIGN]: "/staff-warehouse-foreign",
+  [ROLES.STAFF_WAREHOUSE_DOMESTIC]: "/staff-warehouse-domestic",
+  [ROLES.CUSTOMER]: "/",
+};
 
 const SignIn = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +31,7 @@ const SignIn = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // 🔹 Xử lý thay đổi input
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -21,55 +40,75 @@ const SignIn = () => {
     }));
   };
 
-  const roleRoutes = {
-    [ROLES.ADMIN]: "/admin",
-    [ROLES.MANAGER]: "/manager",
-    [ROLES.LEAD_SALE]: "/lead-sale",
-    [ROLES.STAFF_SALE]: "/staff-sale",
-    [ROLES.STAFF_PURCHASER]: "/staff-purchaser",
-    [ROLES.STAFF_WAREHOUSE_FOREIGN]: "/staff-warehouse-foreign",
-    [ROLES.STAFF_WAREHOUSE_DOMESTIC]: "/staff-warehouse-domestic",
-    [ROLES.CUSTOMER]: "/",
-  };
-
+  // 🔹 Login bằng username/password
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      const userData = await login(formData.username, formData.password);
-      console.log("Login success:", userData);
-
-      toast.success(`Xin chào ${userData.name || formData.username}! 🎉`);
+      const data = await login(formData.username, formData.password);
+      toast.success(`Xin chào ${data.name || formData.username}! 🎉`);
 
       const role = getRole();
-      const route = roleRoutes[role] || "/home";
+      const route = roleRoutes[role] || "/";
       navigate(route);
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch (err) {
+      console.error(err);
       toast.error("Đăng nhập thất bại! Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleLogin = () => {
-    // Implement Google login logic here
-    toast.info("Tính năng đăng nhập Google đang được phát triển.");
+  // 🔹 Login bằng Google (cho phép chọn lại tài khoản nếu muốn)
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    try {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+
+      if (error) throw error;
+
+      // Nếu đã có session Supabase
+      if (session?.access_token) {
+        const confirmUseOld = window.confirm(
+          "Bạn đã đăng nhập Google trước đó.\n\nChọn 'OK' để dùng lại tài khoản hiện tại,\nhoặc 'Cancel' để đăng nhập bằng tài khoản khác."
+        );
+
+        if (confirmUseOld) {
+          // Dùng lại tài khoản cũ
+          const data = await verifySupabaseToken(session.access_token);
+          toast.success(`Chào mừng ${data.user.name || data.user.email}! 🎉`);
+          const route = roleRoutes[data.user.role] || "/";
+          navigate(route);
+          return;
+        } else {
+          // Đăng xuất khỏi Supabase để chọn tài khoản khác
+          await supabase.auth.signOut();
+          toast("Bạn có thể chọn tài khoản khác để đăng nhập.");
+        }
+      }
+   
+      await googleLogin();
+     // if (loginError) throw loginError;
+    } catch (err) {
+      console.error("Google login failed:", err.message);
+      toast.error("Đăng nhập Google thất bại!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-xl p-8">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Đăng Nhập</h1>
           <p className="text-gray-600">Chào mừng bạn trở lại</p>
         </div>
 
-        {/* Form */}
-        <div className="space-y-6">
-          {/* Username Field */}
+        <form className="space-y-6" onSubmit={handleLogin}>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Tên đăng nhập
@@ -85,7 +124,6 @@ const SignIn = () => {
             />
           </div>
 
-          {/* Password Field */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Mật khẩu
@@ -101,7 +139,6 @@ const SignIn = () => {
             />
           </div>
 
-          {/* Remember Me & Forgot Password */}
           <div className="flex items-center justify-between">
             <label className="flex items-center cursor-pointer">
               <input
@@ -121,9 +158,8 @@ const SignIn = () => {
             </a>
           </div>
 
-          {/* Login Button */}
           <button
-            onClick={handleLogin}
+            type="submit"
             disabled={loading || !formData.username || !formData.password}
             className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
@@ -136,9 +172,8 @@ const SignIn = () => {
               "Đăng Nhập"
             )}
           </button>
-        </div>
+        </form>
 
-        {/* Divider */}
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300" />
@@ -148,18 +183,17 @@ const SignIn = () => {
           </div>
         </div>
 
-        {/* Google Login */}
         <button
           onClick={handleGoogleLogin}
+          disabled={loading}
           className="w-full flex items-center justify-center gap-3 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 transition-colors duration-200"
         >
           <FcGoogle className="text-xl" />
           <span className="text-gray-700 font-medium">
-            Đăng nhập bằng Google
+            {loading ? "Đang xử lý..." : "Đăng nhập bằng Google"}
           </span>
         </button>
 
-        {/* Sign Up Link */}
         <p className="text-center text-sm text-gray-600 mt-6">
           Chưa có tài khoản?{" "}
           <a
