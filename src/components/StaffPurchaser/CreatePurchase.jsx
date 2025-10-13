@@ -32,8 +32,6 @@ const CreatePurchase = ({
     }
   }, [isOpen]);
 
-  // ============ FORMAT CURRENCY - GIỐNG PRODUCTMANAGER ============
-
   // Helper function để format số tiền với dấu phẩy cho hiển thị (giữ nguyên phần thập phân)
   const formatCurrency = (value) => {
     if (!value || value === "") return "";
@@ -101,8 +99,6 @@ const CreatePurchase = ({
       }
     }
   };
-
-  // ============ END FORMAT CURRENCY ============
 
   // Handle image upload from UploadImg component
   const handleImageUpload = (imageUrl) => {
@@ -192,8 +188,6 @@ const CreatePurchase = ({
     } catch (error) {
       console.error("Error creating purchase:", error);
       console.error("Error response:", error.response);
-
-      // ============ XỬ LÝ LỖI TỪ BE CHI TIẾT ============
 
       let errorMessage = "Có lỗi xảy ra khi tạo purchase";
 
@@ -296,11 +290,22 @@ const CreatePurchase = ({
       DANG_MUA: "bg-blue-100 text-blue-800",
       DA_MUA: "bg-red-600 text-white",
       HUY: "bg-red-100 text-red-800",
+      DA_HUY: "bg-red-100 text-red-800",
       HOAT_DONG: "bg-green-100 text-green-800",
     };
     return colors[status] || "bg-gray-100 text-gray-800";
   };
-
+  const getStatusText = (status) => {
+    const texts = {
+      CHO_MUA: "Chờ mua",
+      DANG_MUA: "Đang mua",
+      DA_MUA: "Đã mua",
+      HUY: "Đã hủy",
+      DA_HUY: "Đã hủy",
+      HOAT_DONG: "Hoạt động",
+    };
+    return texts[status] || status;
+  };
   if (!isOpen) return null;
 
   const allTrackingCodes = orderLinks.map((link) => link.trackingCode);
@@ -427,7 +432,7 @@ const CreatePurchase = ({
                             link.status
                           )}`}
                         >
-                          {link.status}
+                          {getStatusText(link.status)}
                         </span>
                       </div>
                     </div>
@@ -454,12 +459,9 @@ const CreatePurchase = ({
                   onChange={handlePurchaseTotalChange}
                   onBlur={handlePurchaseTotalBlur}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="0"
+                  placeholder="000000"
                   required
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  Nhập số tiền (ví dụ: 1000000 hoặc 1,000,000)
-                </p>
               </div>
 
               <div>
@@ -476,7 +478,7 @@ const CreatePurchase = ({
                     }))
                   }
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="SP-VN908000"
+                  placeholder="SPX-123456789"
                   required
                 />
               </div>

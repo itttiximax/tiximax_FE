@@ -323,7 +323,7 @@ const ProductManager = ({
   return (
     <div className="w-full">
       {/* Header Section - Compact */}
-      <div className="bg-gray-100 shadow-sm p-3 mb-4 border-b border-gray-200  rounded-lg">
+      <div className="bg-gray-100 shadow-sm p-3 mb-4 border-b border-gray-200 rounded-lg">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-600">
@@ -431,243 +431,217 @@ const ProductManager = ({
 
               {/* Product Details */}
               {!collapsed && (
-                <div className="p-6">
-                  <div className="grid grid-cols-12 gap-6">
-                    {/* Left Column - Main Info */}
-                    <div className="col-span-8 space-y-6">
-                      {/* Section 1: Thông tin cơ bản */}
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <div className="grid grid-cols-12 gap-4">
-                          <div className="col-span-6">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Tên sản phẩm{" "}
-                              <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              name="productName"
-                              value={product.productName}
-                              onChange={(e) => handleProductChange(index, e)}
-                              className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                              disabled={!isFormEnabled}
-                              placeholder="Nhập tên sản phẩm..."
-                            />
-                          </div>
-                          <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Số lượng <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              name="quantity"
-                              value={formatCurrency(product.quantity || "")}
-                              onChange={(e) => handleProductChange(index, e)}
-                              onBlur={() => handleQuantityBlur(index)}
-                              className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                              disabled={!isFormEnabled}
-                              placeholder="0"
-                            />
-                          </div>
-                          <div className="col-span-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Website <span className="text-red-500">*</span>
-                            </label>
-                            <SearchWebsite
-                              onSelectWebsite={(website) =>
-                                handleSelectWebsite(index, website)
-                              }
-                              value={product.website}
-                              onChange={(e) =>
-                                handleWebsiteInputChange(index, e)
-                              }
-                              onClear={() => handleClearWebsite(index)}
-                            />
-                          </div>
-                        </div>
-                      </div>
+                <div className="p-6 space-y-4">
+                  {/* Tên sản phẩm, Số lượng, Website */}
+                  <div className="grid grid-cols-12 gap-4">
+                    <div className="col-span-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Tên sản phẩm <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="productName"
+                        value={product.productName}
+                        onChange={(e) => handleProductChange(index, e)}
+                        className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        disabled={!isFormEnabled}
+                        placeholder="Nhập tên sản phẩm..."
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Số lượng <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="quantity"
+                        value={formatCurrency(product.quantity || "")}
+                        onChange={(e) => handleProductChange(index, e)}
+                        onBlur={() => handleQuantityBlur(index)}
+                        className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        disabled={!isFormEnabled}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div className="col-span-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Website <span className="text-red-500">*</span>
+                      </label>
+                      <SearchWebsite
+                        onSelectWebsite={(website) =>
+                          handleSelectWebsite(index, website)
+                        }
+                        value={product.website}
+                        onChange={(e) => handleWebsiteInputChange(index, e)}
+                        onClear={() => handleClearWebsite(index)}
+                      />
+                    </div>
+                  </div>
 
-                      {/* Section 2: Link sản phẩm */}
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <h4 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                          <Link2 className="w-4 h-4 text-purple-500" />
-                          Link sản phẩm
-                        </h4>
+                  {/* Link sản phẩm */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                      <Link2 className="w-4 h-4 text-purple-500" />
+                      Link sản phẩm
+                    </label>
+                    <input
+                      type="text"
+                      name="productLink"
+                      value={product.productLink}
+                      onChange={(e) => handleProductChange(index, e)}
+                      className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      disabled={!isFormEnabled}
+                      placeholder="https://..."
+                    />
+                  </div>
+
+                  {/* Giá sản phẩm, Phí ship, Phí mua, Group Tag */}
+                  <div className="grid grid-cols-12 gap-4">
+                    <div className="col-span-5">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Giá sản phẩm <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="priceWeb"
+                        value={formatCurrency(product.priceWeb || "")}
+                        onChange={(e) => handleProductChange(index, e)}
+                        onBlur={() => handleCurrencyBlur(index, "priceWeb")}
+                        className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        disabled={!isFormEnabled}
+                        placeholder="000000"
+                      />
+                    </div>
+                    <div className="col-span-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Phí ship <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="shipWeb"
+                        value={formatCurrency(product.shipWeb || "")}
+                        onChange={(e) => handleProductChange(index, e)}
+                        onBlur={() => handleCurrencyBlur(index, "shipWeb")}
+                        className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        disabled={!isFormEnabled}
+                        placeholder="000000"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Phí mua
+                      </label>
+                      <input
+                        type="text"
+                        name="purchaseFee"
+                        value={product.purchaseFee || ""}
+                        onChange={(e) => handleProductChange(index, e)}
+                        onBlur={() => handleCurrencyBlur(index, "purchaseFee")}
+                        className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        disabled={!isFormEnabled}
+                        placeholder="%"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Group Tag
+                      </label>
+                      <input
+                        type="text"
+                        name="groupTag"
+                        value={product.groupTag}
+                        onChange={(e) => handleProductChange(index, e)}
+                        className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        disabled={!isFormEnabled}
+                        placeholder="A, B,.."
+                      />
+                    </div>
+                  </div>
+
+                  {/* Loại sản phẩm và Phụ phí */}
+                  <div className="grid grid-cols-12 gap-4">
+                    <div className="col-span-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Loại sản phẩm <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        name="productTypeId"
+                        value={product.productTypeId}
+                        onChange={(e) => handleProductChange(index, e)}
+                        className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        disabled={!isFormEnabled}
+                      >
+                        <option value="">Chọn loại sản phẩm</option>
+                        {productTypes.map((type) => (
+                          <option
+                            key={type.productTypeId}
+                            value={type.productTypeId}
+                          >
+                            {type.productTypeName}{" "}
+                            {type.fee ? "(Có phí)" : "(Miễn phí)"}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-span-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Phụ phí
+                      </label>
+                      {productType?.fee ? (
                         <input
                           type="text"
-                          name="productLink"
-                          value={product.productLink}
+                          name="extraCharge"
+                          value={formatCurrency(product.extraCharge || "")}
                           onChange={(e) => handleProductChange(index, e)}
+                          onBlur={() =>
+                            handleCurrencyBlur(index, "extraCharge")
+                          }
                           className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
                           disabled={!isFormEnabled}
-                          placeholder="https://..."
+                          placeholder="00000"
                         />
-                      </div>
-
-                      {/* Section 3: Chi phí */}
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <div className="grid grid-cols-12 gap-4">
-                          <div className="col-span-5">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Giá sản phẩm{" "}
-                              <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              name="priceWeb"
-                              value={formatCurrency(product.priceWeb || "")}
-                              onChange={(e) => handleProductChange(index, e)}
-                              onBlur={() =>
-                                handleCurrencyBlur(index, "priceWeb")
-                              }
-                              className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                              disabled={!isFormEnabled}
-                              placeholder="0"
-                            />
-                          </div>
-                          <div className="col-span-3">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Phí ship <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              name="shipWeb"
-                              value={formatCurrency(product.shipWeb || "")}
-                              onChange={(e) => handleProductChange(index, e)}
-                              onBlur={() =>
-                                handleCurrencyBlur(index, "shipWeb")
-                              }
-                              className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                              disabled={!isFormEnabled}
-                              placeholder="0"
-                            />
-                          </div>
-                          <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Phí mua
-                            </label>
-                            <input
-                              type="text"
-                              name="purchaseFee"
-                              value={product.purchaseFee || ""}
-                              onChange={(e) => handleProductChange(index, e)}
-                              onBlur={() =>
-                                handleCurrencyBlur(index, "purchaseFee")
-                              }
-                              className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                              disabled={!isFormEnabled}
-                              placeholder="%"
-                            />
-                          </div>
-                          <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Group Tag
-                            </label>
-                            <input
-                              type="text"
-                              name="groupTag"
-                              value={product.groupTag}
-                              onChange={(e) => handleProductChange(index, e)}
-                              className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                              disabled={!isFormEnabled}
-                              placeholder="A, B,.."
-                            />
-                          </div>
+                      ) : (
+                        <div className="w-full px-4 py-2 text-sm border border-gray-200 rounded bg-green-50 text-green-600 font-medium flex items-center justify-center">
+                          Miễn phí
                         </div>
-                      </div>
-
-                      {/* Section 4: Phân loại */}
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <div className="grid grid-cols-12 gap-4">
-                          <div className="col-span-6">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Loại sản phẩm{" "}
-                              <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                              name="productTypeId"
-                              value={product.productTypeId}
-                              onChange={(e) => handleProductChange(index, e)}
-                              className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                              disabled={!isFormEnabled}
-                            >
-                              <option value="">Chọn loại sản phẩm</option>
-                              {productTypes.map((type) => (
-                                <option
-                                  key={type.productTypeId}
-                                  value={type.productTypeId}
-                                >
-                                  {type.productTypeName}{" "}
-                                  {type.fee ? "(Có phí)" : "(Miễn phí)"}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="col-span-6">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Phụ phí
-                            </label>
-                            {productType?.fee ? (
-                              <input
-                                type="text"
-                                name="extraCharge"
-                                value={formatCurrency(
-                                  product.extraCharge || ""
-                                )}
-                                onChange={(e) => handleProductChange(index, e)}
-                                onBlur={() =>
-                                  handleCurrencyBlur(index, "extraCharge")
-                                }
-                                className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                disabled={!isFormEnabled}
-                                placeholder="0"
-                              />
-                            ) : (
-                              <div className="w-full px-4 py-2 text-sm border border-gray-200 rounded bg-green-50 text-green-600 font-medium flex items-center justify-center">
-                                Miễn phí
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Section 5: Ghi chú */}
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <h4 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                          <MessageSquare className="w-4 h-4 text-yellow-500" />
-                          Ghi chú bổ sung
-                        </h4>
-                        <textarea
-                          name="note"
-                          value={product.note}
-                          onChange={(e) => handleProductChange(index, e)}
-                          rows="3"
-                          className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
-                          disabled={!isFormEnabled}
-                          placeholder="Ghi chú cho sản phẩm này (tùy chọn)..."
-                        />
-                      </div>
+                      )}
                     </div>
+                  </div>
 
-                    {/* Right Column - Image Upload */}
-                    <div className="col-span-4">
-                      <div className="bg-gray-50 rounded-lg p-4 h-full">
-                        <h4 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                          <Image className="w-4 h-4 text-purple-500" />
-                          Hình ảnh sản phẩm
-                        </h4>
-                        <UploadImg
-                          imageUrl={product.purchaseImage}
-                          onImageUpload={(imageUrl) =>
-                            handleImageUpload(index, imageUrl)
-                          }
-                          onImageRemove={() => handleImageRemove(index)}
-                          label=""
-                          maxSizeMB={3}
-                          placeholder="Chưa có ảnh sản phẩm"
-                          className=""
-                        />
-                      </div>
-                    </div>
+                  {/* Ghi chú */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-yellow-500" />
+                      Ghi chú bổ sung
+                    </label>
+                    <textarea
+                      name="note"
+                      value={product.note}
+                      onChange={(e) => handleProductChange(index, e)}
+                      rows="3"
+                      className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                      disabled={!isFormEnabled}
+                      placeholder="Ghi chú cho sản phẩm này (tùy chọn)..."
+                    />
+                  </div>
+
+                  {/* Hình ảnh sản phẩm - Phía dưới */}
+                  <div className="border-t pt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                      <Image className="w-4 h-4 text-purple-500" />
+                      Hình ảnh sản phẩm
+                    </label>
+                    <UploadImg
+                      imageUrl={product.purchaseImage}
+                      onImageUpload={(imageUrl) =>
+                        handleImageUpload(index, imageUrl)
+                      }
+                      onImageRemove={() => handleImageRemove(index)}
+                      label=""
+                      maxSizeMB={3}
+                      placeholder="Chưa có ảnh sản phẩm"
+                      className=""
+                    />
                   </div>
                 </div>
               )}

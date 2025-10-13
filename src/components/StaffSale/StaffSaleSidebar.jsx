@@ -23,6 +23,7 @@ import {
   Luggage,
   Banknote,
   CopyPlus,
+  Wallet,
   UserStar,
   ChevronLeft,
   ChevronRight,
@@ -78,17 +79,22 @@ const StaffSaleSidebar = () => {
         {
           type: "dropdown",
           icon: Banknote,
-          label: "Báo giá",
+          label: "Thanh toán",
           dropdownItems: [
             {
               to: "/staff-sale/order-payment",
               icon: Banknote,
-              label: "Báo giá đơn hàng",
+              label: "Thanh toán đơn hàng",
             },
             {
               to: "/staff-sale/ship-payment",
               icon: Truck,
-              label: "Báo giá vận chuyển",
+              label: "Thanh toán vận chuyển",
+            },
+            {
+              to: "/staff-sale/auction-payment",
+              icon: Wallet,
+              label: "Thanh toán đấu giá ",
             },
           ],
           isOpen: isQuotationDropdownOpen,

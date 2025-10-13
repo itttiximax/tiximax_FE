@@ -195,11 +195,8 @@ const PaymentOrderList = () => {
       <Toaster />
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Quản lý đơn hàng
+          Quản lý báo giá đơn hàng
         </h1>
-        <p className="text-gray-600">
-          Danh sách đơn hàng theo các trạng thái khác nhau
-        </p>
       </div>
 
       {/* Tabs with Status Counts */}

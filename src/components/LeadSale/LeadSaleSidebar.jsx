@@ -81,17 +81,17 @@ const LeadSaleSideBar = () => {
         {
           type: "dropdown",
           icon: Banknote,
-          label: "Báo giá",
+          label: "Thanh toán",
           dropdownItems: [
             {
               to: "/lead-sale/order-payment",
               icon: Banknote,
-              label: "Báo giá đơn hàng",
+              label: "Thanh toán đơn hàng",
             },
             {
               to: "/lead-sale/ship-payment",
               icon: Truck,
-              label: "Báo giá vận chuyển",
+              label: "Thanh toán vận chuyển",
             },
             {
               to: "/lead-sale/auction-payment",
@@ -105,7 +105,7 @@ const LeadSaleSideBar = () => {
         {
           type: "dropdown",
           icon: CreditCard,
-          label: "Hỗ trợ thanh toán",
+          label: "Hỗ trợ gộp thanh toán",
           dropdownItems: [
             {
               to: "/lead-sale/createpaymentsupport",
