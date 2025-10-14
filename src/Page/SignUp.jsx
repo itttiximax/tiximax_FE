@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FcGoogle } from "react-icons/fc";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import registrationService from "../Services/Auth/Registration";
+import LoginGoogle from "./LoginGoogle";
 
 const Signup = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState("");
+  const timeoutRef = useRef(null);
+  const isMountedRef = useRef(true);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -27,6 +29,16 @@ const Signup = () => {
     confirmPassword: false,
   });
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -39,6 +51,14 @@ const Signup = () => {
       setErrors((prev) => ({
         ...prev,
         [name]: "",
+      }));
+    }
+
+    // Also clear general error
+    if (errors.general) {
+      setErrors((prev) => ({
+        ...prev,
+        general: "",
       }));
     }
   };
@@ -64,63 +84,64 @@ const Signup = () => {
     setErrors({});
 
     try {
-      // Prepare data for API (exclude confirmPassword)
-      const { confirmPassword, ...registrationData } = formData;
+      // Remove confirmPassword from data
+      const registrationData = { ...formData };
+      delete registrationData.confirmPassword;
 
-      // Only send fields that have values for optional fields
-      const cleanedData = Object.keys(registrationData).reduce((acc, key) => {
-        const value = registrationData[key];
-        const requiredFields = [
-          "username",
-          "password",
-          "email",
-          "phone",
-          "name",
-          "role",
-        ];
+      console.log("Submitting registration data:", registrationData);
 
-        if (requiredFields.includes(key) || (value && value.trim() !== "")) {
-          acc[key] = value;
-        }
-        return acc;
-      }, {});
+      await registrationService.registerCustomer(registrationData);
 
-      console.log("Submitting registration data:", cleanedData);
-
-      await registrationService.registerCustomer(cleanedData);
+      if (!isMountedRef.current) return;
 
       setSuccess("Đăng ký thành công! Chuyển hướng đến trang đăng nhập...");
+      setErrors({}); // Clear any remaining errors
 
       // Redirect to login after 2 seconds
-      setTimeout(() => {
-        navigate("/signin");
+      timeoutRef.current = setTimeout(() => {
+        if (isMountedRef.current) {
+          navigate("/signin", { replace: true });
+        }
       }, 2000);
     } catch (err) {
+      if (!isMountedRef.current) return;
+
       console.error("Registration error:", err);
 
-      if (err.response?.data?.message) {
-        setErrors({ general: err.response.data.message });
-      } else if (err.response?.status === 400) {
+      // Handle specific error cases
+      const status = err.response?.status;
+      const errorMessage = err.response?.data?.message;
+
+      if (errorMessage) {
+        // If backend provides specific field errors
+        if (err.response?.data?.errors) {
+          setErrors(err.response.data.errors);
+        } else {
+          setErrors({ general: errorMessage });
+        }
+      } else if (status === 400) {
         setErrors({
           general: "Dữ liệu đăng ký không hợp lệ. Vui lòng kiểm tra lại.",
         });
-      } else if (err.response?.status === 409) {
+      } else if (status === 409) {
         setErrors({
           general:
             "Tên đăng nhập hoặc email đã tồn tại. Vui lòng chọn tên khác.",
         });
+      } else if (status === 500) {
+        setErrors({
+          general: "Lỗi máy chủ. Vui lòng thử lại sau.",
+        });
       } else {
-        setErrors({ general: "Đăng ký thất bại. Vui lòng thử lại." });
+        setErrors({
+          general: err.message || "Đăng ký thất bại. Vui lòng thử lại.",
+        });
       }
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
-  };
-
-  const handleGoogleSignup = () => {
-    // Implement Google signup logic here
-    console.log("Google signup clicked");
-    // You would typically integrate with Google OAuth here
   };
 
   // Form validation - check if all required fields are filled
@@ -132,7 +153,13 @@ const Signup = () => {
     "password",
     "confirmPassword",
   ];
-  const isFormValid = requiredFields.every((field) => formData[field]?.trim());
+
+  const isFormValid = useMemo(() => {
+    return requiredFields.every((field) => {
+      const value = formData[field];
+      return value && value.trim() !== "";
+    });
+  }, [formData]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
@@ -176,7 +203,8 @@ const Signup = () => {
                 value={formData.username}
                 onChange={handleInputChange}
                 placeholder="Nhập tên đăng nhập"
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200 ${
+                disabled={loading}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed ${
                   errors.username
                     ? "border-red-300 focus:ring-red-200"
                     : "border-gray-300 focus:ring-blue-500"
@@ -198,7 +226,8 @@ const Signup = () => {
                 value={formData.name}
                 onChange={handleInputChange}
                 placeholder="Nhập họ và tên"
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200 ${
+                disabled={loading}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed ${
                   errors.name
                     ? "border-red-300 focus:ring-red-200"
                     : "border-gray-300 focus:ring-blue-500"
@@ -223,7 +252,8 @@ const Signup = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="Nhập email"
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200 ${
+                disabled={loading}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed ${
                   errors.email
                     ? "border-red-300 focus:ring-red-200"
                     : "border-gray-300 focus:ring-blue-500"
@@ -245,7 +275,8 @@ const Signup = () => {
                 value={formData.phone}
                 onChange={handleInputChange}
                 placeholder="VD: 0901234567"
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200 ${
+                disabled={loading}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed ${
                   errors.phone
                     ? "border-red-300 focus:ring-red-200"
                     : "border-gray-300 focus:ring-blue-500"
@@ -271,7 +302,8 @@ const Signup = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="Nhập mật khẩu"
-                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200 ${
+                  disabled={loading}
+                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed ${
                     errors.password
                       ? "border-red-300 focus:ring-red-200"
                       : "border-gray-300 focus:ring-blue-500"
@@ -281,7 +313,8 @@ const Signup = () => {
                 <button
                   type="button"
                   onClick={() => togglePassword("password")}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
+                  disabled={loading}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors disabled:cursor-not-allowed"
                 >
                   {showPasswords.password ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -302,7 +335,8 @@ const Signup = () => {
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   placeholder="Nhập lại mật khẩu"
-                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200 ${
+                  disabled={loading}
+                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed ${
                     errors.confirmPassword
                       ? "border-red-300 focus:ring-red-200"
                       : "border-gray-300 focus:ring-blue-500"
@@ -312,7 +346,8 @@ const Signup = () => {
                 <button
                   type="button"
                   onClick={() => togglePassword("confirmPassword")}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
+                  disabled={loading}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors disabled:cursor-not-allowed"
                 >
                   {showPasswords.confirmPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -340,8 +375,9 @@ const Signup = () => {
                 value={formData.address}
                 onChange={handleInputChange}
                 placeholder="Nhập địa chỉ của bạn"
+                disabled={loading}
                 rows={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200 resize-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200 resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -355,7 +391,8 @@ const Signup = () => {
                 value={formData.source}
                 onChange={handleInputChange}
                 placeholder="Bạn biết đến chúng tôi qua đâu?"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
+                disabled={loading}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
             </div>
           </div>
@@ -363,7 +400,7 @@ const Signup = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading || !isFormValid}
+            disabled={loading || !isFormValid || !!success}
             className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
             {loading ? (
@@ -387,15 +424,11 @@ const Signup = () => {
           </div>
         </div>
 
-        {/* Google Signup */}
-        <button
-          type="button"
-          onClick={handleGoogleSignup}
-          className="w-full flex items-center justify-center gap-3 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-        >
-          <FcGoogle className="text-xl" />
-          <span className="text-gray-700 font-medium">Đăng ký bằng Google</span>
-        </button>
+        {/* Google Signup Component */}
+        <LoginGoogle
+          buttonText="Đăng ký bằng Google"
+          disabled={loading || !!success}
+        />
 
         {/* Sign In Link */}
         <p className="text-center text-sm text-gray-600 mt-6">

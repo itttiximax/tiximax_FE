@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   BarChart2,
@@ -11,7 +11,6 @@ import {
   Box,
   Globe,
   ShoppingCart,
-  LogOut,
   FileText,
   Speaker,
   ChevronDown,
@@ -19,10 +18,10 @@ import {
   UserRoundPlus,
   BookKey,
 } from "lucide-react";
+import Logout from "../../Page/Logout";
 
 const ManagerSidebar = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const location = useLocation();
   const [openCost, setOpenCost] = useState(false);
 
@@ -41,7 +40,7 @@ const ManagerSidebar = () => {
           path: "/manager/order",
         },
         {
-          text: "Danh sách nhân viên",
+          text: t("Danh sách nhân viên"),
           icon: <List />,
           path: "/manager/team",
         },
@@ -119,11 +118,6 @@ const ManagerSidebar = () => {
       ],
     },
   ];
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/signin");
-  };
 
   const isActive = (path) => location.pathname.startsWith(path);
 
@@ -208,14 +202,18 @@ const ManagerSidebar = () => {
       </div>
 
       <div className="p-4 border-t border-gray-200/60 dark:border-gray-700/60">
-        <button
-          onClick={handleLogout}
+        <Logout
           className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500"
-          aria-label={t("aria.logout")}
-        >
-          <LogOut className="w-4 h-4" />
-          <span className="text-sm font-medium">{t("logout")}</span>
-        </button>
+          iconSize={16}
+          buttonText={t("logout")}
+          redirectTo="/signin"
+          useConfirm={true}
+          confirmMessage={t(
+            "confirmLogout",
+            "Bạn có chắc chắn muốn đăng xuất?"
+          )}
+          showIcon={true}
+        />
       </div>
     </div>
   );

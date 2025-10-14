@@ -1,44 +1,250 @@
-import { useEffect } from "react";
-import { supabase } from "../../config/supabaseClient";
-import { verifySupabaseToken } from "./authService";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { ROLES } from "./authService";
+import { supabase } from "../../config/supabaseClient";
+import { verifySupabaseToken, ROLES } from "./authService";
+import { useAuth } from "../../contexts/AuthContext";
+
+const roleRoutes = {
+  [ROLES.ADMIN]: "/admin",
+  [ROLES.MANAGER]: "/manager",
+  [ROLES.LEAD_SALE]: "/lead-sale",
+  [ROLES.STAFF_SALE]: "/staff-sale",
+  [ROLES.STAFF_PURCHASER]: "/staff-purchaser",
+  [ROLES.STAFF_WAREHOUSE_FOREIGN]: "/staff-warehouse-foreign",
+  [ROLES.STAFF_WAREHOUSE_DOMESTIC]: "/staff-warehouse-domestic",
+  [ROLES.CUSTOMER]: "/",
+};
+
+const DEFAULT_ROUTE = "/";
+const REDIRECT_DELAY = 2000;
+const MAX_RETRIES = 2;
+
 export default function AuthCallback() {
-
-    const roleRoutes = {
-      [ROLES.ADMIN]: "/admin",
-      [ROLES.MANAGER]: "/manager",
-      [ROLES.LEAD_SALE]: "/lead-sale",
-      [ROLES.STAFF_SALE]: "/staff-sale",
-      [ROLES.STAFF_PURCHASER]: "/staff-purchaser",
-      [ROLES.STAFF_WAREHOUSE_FOREIGN]: "/staff-warehouse-foreign",
-      [ROLES.STAFF_WAREHOUSE_DOMESTIC]: "/staff-warehouse-domestic",
-      [ROLES.CUSTOMER]: "/",
-    };
-
   const navigate = useNavigate();
-  
+  const { login: setAuthUser } = useAuth();
+  const [error, setError] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(true);
 
-  useEffect(() => {
-    const handleCallback = async () => {
+  // Refs để prevent race conditions
+  const isMountedRef = useRef(true);
+  const hasProcessedRef = useRef(false);
+  const timeoutRef = useRef(null);
+
+  const handleError = useCallback(
+    (err, statusCode) => {
+      if (!isMountedRef.current) return;
+
+      console.error("❌ Auth Callback Error:", err);
+
+      const errorMessage = err.message || "Đăng nhập thất bại";
+      setError(errorMessage);
+      setIsProcessing(false);
+
+      // Show appropriate toast based on error type
+      if (statusCode === 404) {
+        toast.error("Tài khoản không tồn tại trong hệ thống!");
+      } else if (statusCode === 401) {
+        toast.error("Xác thực thất bại!");
+      } else if (statusCode === 403) {
+        toast.error("Bạn không có quyền truy cập!");
+      } else {
+        toast.error(errorMessage);
+      }
+
+      // Cleanup previous timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      // Redirect after delay
+      timeoutRef.current = setTimeout(() => {
+        if (isMountedRef.current) {
+          navigate("/signin", { replace: true });
+        }
+      }, REDIRECT_DELAY);
+    },
+    [navigate]
+  );
+
+  const verifyWithRetry = useCallback(async (accessToken, retries = 0) => {
+    try {
+      return await verifySupabaseToken(accessToken);
+    } catch (err) {
+      if (retries < MAX_RETRIES && err.message?.includes("network")) {
+        console.log(
+          `🔄 Retrying verification... (${retries + 1}/${MAX_RETRIES})`
+        );
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1s
+        return verifyWithRetry(accessToken, retries + 1);
+      }
+      throw err;
+    }
+  }, []);
+
+  const handleCallback = useCallback(async () => {
+    // Prevent double processing (React 18 Strict Mode)
+    if (hasProcessedRef.current) {
+      console.log("⚠️ Callback already processed, skipping...");
+      return;
+    }
+    hasProcessedRef.current = true;
+
+    try {
+      console.log("🔵 Auth Callback started...");
+
+      if (!isMountedRef.current) return;
+
+      // Get session from Supabase with timeout
+      const sessionPromise = supabase.auth.getSession();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Session timeout")), 10000)
+      );
+
       const {
         data: { session },
-      } = await supabase.auth.getSession();
+        error: sessionError,
+      } = await Promise.race([sessionPromise, timeoutPromise]);
 
-      if (session?.access_token) {
-        const data = await verifySupabaseToken(session.access_token);
-        toast.success(`Chào mừng ${data.user.name || data.user.email}! 🎉`);
-        const route = roleRoutes[data.user.role] || "/";
-        navigate(route);
-      } else {
-        toast.error("Không tìm thấy session Supabase!");
-        navigate("/login");
+      if (sessionError) {
+        throw sessionError;
       }
-    };
+
+      if (!session?.access_token) {
+        throw new Error("Không tìm thấy phiên đăng nhập hợp lệ");
+      }
+
+      console.log("✅ Session found:", {
+        user: session.user.email,
+        provider: session.user.app_metadata?.provider,
+        expiresAt: new Date(session.expires_at * 1000).toISOString(),
+      });
+
+      // Check if session is expired
+      if (session.expires_at && Date.now() / 1000 > session.expires_at) {
+        throw new Error("Phiên đăng nhập đã hết hạn");
+      }
+
+      if (!isMountedRef.current) return;
+
+      // Verify token with backend (with retry)
+      const data = await verifyWithRetry(session.access_token);
+
+      if (!data?.user?.role) {
+        throw new Error("Dữ liệu người dùng không hợp lệ");
+      }
+
+      console.log("✅ Backend verification successful");
+
+      if (!isMountedRef.current) return;
+
+      // Update AuthContext
+      setAuthUser({
+        id: data.user.id,
+        username: data.user.username,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role,
+      });
+
+      console.log("🎯 AuthContext updated successfully!");
+
+      // Show success message
+      toast.success(`Chào mừng ${data.user.name || data.user.email}! 🎉`, {
+        duration: 3000,
+      });
+
+      // Navigate to appropriate route
+      const route = roleRoutes[data.user.role] || DEFAULT_ROUTE;
+
+      // Validate route exists (optional)
+      if (data.user.role && !roleRoutes[data.user.role]) {
+        console.warn(
+          `⚠️ Unknown role: ${data.user.role}, redirecting to default`
+        );
+      }
+
+      console.log("🚀 Navigating to:", route);
+
+      if (isMountedRef.current) {
+        navigate(route, { replace: true });
+      }
+    } catch (err) {
+      const statusCode = err.response?.status;
+      handleError(err, statusCode);
+    } finally {
+      if (isMountedRef.current) {
+        setIsProcessing(false);
+      }
+    }
+  }, [navigate, setAuthUser, handleError, verifyWithRetry]);
+
+  useEffect(() => {
+    // Reset processing flag on mount
+    hasProcessedRef.current = false;
+    isMountedRef.current = true;
 
     handleCallback();
-  }, [navigate]);
 
-  return <p>Đang xử lý đăng nhập...</p>;
+    // Cleanup function
+    return () => {
+      isMountedRef.current = false;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [handleCallback]);
+
+  // Error UI
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="max-w-md w-full bg-white rounded-xl shadow-xl p-8 text-center">
+          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-10 h-10 text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Đăng nhập thất bại
+          </h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => navigate("/signin", { replace: true })}
+            className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-yellow-500 hover:to-yellow-600 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!isMountedRef.current}
+          >
+            Quay lại đăng nhập
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading UI
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          Đang xử lý đăng nhập...
+        </h2>
+        <p className="text-gray-600">
+          {isProcessing
+            ? "Vui lòng đợi trong giây lát"
+            : "Đang chuyển hướng..."}
+        </p>
+      </div>
+    </div>
+  );
 }

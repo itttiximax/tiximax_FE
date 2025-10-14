@@ -1,15 +1,10 @@
 import React, { useState } from "react";
-import { FcGoogle } from "react-icons/fc";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import toast from "react-hot-toast";
-import { supabase } from "../config/supabaseClient";
-import {
-  login,
-  googleLogin,
-  verifySupabaseToken,
-  getRole,
-  ROLES,
-} from "../Services/Auth/authService";
+import { login, ROLES } from "../Services/Auth/authService";
+import { useAuth } from "../contexts/AuthContext";
+import LoginGoogle from "./LoginGoogle";
 
 const roleRoutes = {
   [ROLES.ADMIN]: "/admin",
@@ -23,78 +18,78 @@ const roleRoutes = {
 };
 
 const SignIn = () => {
+  const navigate = useNavigate();
+  const { login: setAuthUser } = useAuth(); // Get login function from Context
+
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
     password: "",
-    rememberMe: false,
   });
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
-  // 🔹 Xử lý thay đổi input
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
   };
 
-  // 🔹 Login bằng username/password
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      const data = await login(formData.username, formData.password);
-      toast.success(`Xin chào ${data.name || formData.username}! 🎉`);
 
-      const role = getRole();
-      const route = roleRoutes[role] || "/";
-      navigate(route);
-    } catch (err) {
-      console.error(err);
-      toast.error("Đăng nhập thất bại! Vui lòng thử lại.");
-    } finally {
-      setLoading(false);
+    if (!formData.username || !formData.password) {
+      toast.error("Vui lòng nhập đầy đủ thông tin!");
+      return;
     }
-  };
 
-  // 🔹 Login bằng Google (cho phép chọn lại tài khoản nếu muốn)
-  const handleGoogleLogin = async () => {
     setLoading(true);
+
     try {
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
+      console.log("🔐 Attempting login...");
+      const response = await login(formData.username, formData.password);
+      console.log("✅ Login response:", JSON.stringify(response, null, 2));
 
-      if (error) throw error;
-
-      // Nếu đã có session Supabase
-      if (session?.access_token) {
-        const confirmUseOld = window.confirm(
-          "Bạn đã đăng nhập Google trước đó.\n\nChọn 'OK' để dùng lại tài khoản hiện tại,\nhoặc 'Cancel' để đăng nhập bằng tài khoản khác."
-        );
-
-        if (confirmUseOld) {
-          // Dùng lại tài khoản cũ
-          const data = await verifySupabaseToken(session.access_token);
-          toast.success(`Chào mừng ${data.user.name || data.user.email}! 🎉`);
-          const route = roleRoutes[data.user.role] || "/";
-          navigate(route);
-          return;
-        } else {
-          // Đăng xuất khỏi Supabase để chọn tài khoản khác
-          await supabase.auth.signOut();
-          toast("Bạn có thể chọn tài khoản khác để đăng nhập.");
-        }
+      // Lưu token vào localStorage
+      const token =
+        response.token || response.accessToken || response.user?.token;
+      if (!token) {
+        throw new Error("Token không được trả về từ API!");
       }
-   
-      await googleLogin();
-     // if (loginError) throw loginError;
-    } catch (err) {
-      console.error("Google login failed:", err.message);
-      toast.error("Đăng nhập Google thất bại!");
+      localStorage.setItem("jwt", token); // Lưu token với key "jwt"
+
+      // Cập nhật userData vào AuthContext
+      const userData = {
+        id: response.user?.id || response.id,
+        username: response.user?.username || response.username,
+        name: response.user?.name || response.name,
+        email: response.user?.email || response.email,
+        role: response.user?.role || response.role,
+      };
+
+      console.log("📝 Setting user in context:", userData);
+      setAuthUser(userData);
+
+      // Hiển thị thông báo thành công
+      toast.success(`Chào mừng ${userData.name || userData.username}! 🎉`);
+
+      // Điều hướng theo vai trò
+      const route = roleRoutes[userData.role] || "/";
+      console.log("🚀 Navigating to:", route);
+
+      // Đợi một chút để đảm bảo Context được cập nhật
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      navigate(route, { replace: true });
+    } catch (error) {
+      console.error("❌ Login error:", error);
+      if (error.response?.status === 401) {
+        toast.error("Tên đăng nhập hoặc mật khẩu không đúng!");
+      } else if (error.response?.status === 404) {
+        toast.error("Tài khoản không tồn tại!");
+      } else {
+        toast.error(error.message || "Đăng nhập thất bại. Vui lòng thử lại!");
+      }
     } finally {
       setLoading(false);
     }
@@ -103,12 +98,15 @@ const SignIn = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-xl p-8">
+        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Đăng Nhập</h1>
-          <p className="text-gray-600">Chào mừng bạn trở lại</p>
+          <p className="text-gray-600">Chào mừng bạn trở lại!</p>
         </div>
 
-        <form className="space-y-6" onSubmit={handleLogin}>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Username */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Tên đăng nhập
@@ -116,51 +114,56 @@ const SignIn = () => {
             <input
               type="text"
               name="username"
-              placeholder="Nhập tên đăng nhập"
               value={formData.username}
               onChange={handleInputChange}
+              placeholder="Nhập tên đăng nhập"
+              disabled={loading}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
             />
           </div>
 
+          {/* Password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Mật khẩu
             </label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Nhập mật khẩu"
-              value={formData.password}
-              onChange={handleInputChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                placeholder="Nhập mật khẩu"
+                disabled={loading}
+                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                disabled={loading}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors disabled:cursor-not-allowed"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                name="rememberMe"
-                checked={formData.rememberMe}
-                onChange={handleInputChange}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-              />
-              <span className="ml-2 text-sm text-gray-600">Ghi nhớ tôi</span>
-            </label>
-            <a
-              href="/forgot-password"
+          {/* Forgot Password */}
+          <div className="text-right">
+            <Link
+              to="/forgot-password"
               className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors"
             >
               Quên mật khẩu?
-            </a>
+            </Link>
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading || !formData.username || !formData.password}
+            disabled={loading}
             className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
             {loading ? (
@@ -174,6 +177,7 @@ const SignIn = () => {
           </button>
         </form>
 
+        {/* Divider */}
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300" />
@@ -183,25 +187,18 @@ const SignIn = () => {
           </div>
         </div>
 
-        <button
-          onClick={handleGoogleLogin}
-          disabled={loading}
-          className="w-full flex items-center justify-center gap-3 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-        >
-          <FcGoogle className="text-xl" />
-          <span className="text-gray-700 font-medium">
-            {loading ? "Đang xử lý..." : "Đăng nhập bằng Google"}
-          </span>
-        </button>
+        {/* Google Login */}
+        <LoginGoogle buttonText="Đăng nhập bằng Google" disabled={loading} />
 
+        {/* Sign Up Link */}
         <p className="text-center text-sm text-gray-600 mt-6">
           Chưa có tài khoản?{" "}
-          <a
-            href="/signup"
+          <Link
+            to="/signup"
             className="text-blue-600 font-semibold hover:text-blue-800 hover:underline transition-colors"
           >
-            Đăng ký ngay
-          </a>
+            Đăng ký ngay!
+          </Link>
         </p>
       </div>
     </div>

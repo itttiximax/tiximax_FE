@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   PackageOpen,
@@ -17,9 +17,9 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import Logout from "../../Page/Logout";
 
 const StaffWarehouseForeignSidebar = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -126,11 +126,6 @@ const StaffWarehouseForeignSidebar = () => {
     },
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/signin");
-  };
-
   const isActive = (path) => location.pathname.startsWith(path);
 
   return (
@@ -140,16 +135,20 @@ const StaffWarehouseForeignSidebar = () => {
       } bg-slate-50 shadow-lg flex flex-col h-screen transition-all duration-300`}
     >
       {/* Toggle Button */}
-      <div className="p-2 border-b border-gray-200 flex justify-end">
+      <div className="p-1 border-b border-gray-200 flex flex-shrink-0">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors"
-          title={isExpanded ? "Thu gọn sidebar" : "Mở rộng sidebar"}
+          className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-slate-200 transition-colors"
         >
           {isExpanded ? (
-            <ChevronLeft className="w-6 h-6 text-slate-600" />
+            <>
+              <span className="text-sm font-medium text-slate-700 mx-auto">
+                Nhân viên kho ngoại
+              </span>
+              <ChevronLeft className="w-6 h-6 text-slate-600" />
+            </>
           ) : (
-            <ChevronRight className="w-6 h-6 text-slate-600" />
+            <ChevronRight className="w-6 h-6 text-slate-600 mx-auto" />
           )}
         </button>
       </div>
@@ -178,7 +177,7 @@ const StaffWarehouseForeignSidebar = () => {
                 : "opacity-0 max-h-0 -translate-y-2"
             }`}
           >
-            Foreign Warehouse Staff
+            Lê Thịnh Phát
           </span>
         </Link>
       </div>
@@ -230,23 +229,25 @@ const StaffWarehouseForeignSidebar = () => {
       </nav>
 
       {/* Logout Button */}
-      <div className="p-3 border-t border-gray-200">
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center py-3 pl-4 pr-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm"
-          title={isExpanded ? "" : "Đăng xuất"}
-        >
-          <LogOut className="w-5 h-5 flex-shrink-0" />
-          <span
-            className={`text-base font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ml-2 ${
-              isExpanded
-                ? "opacity-100 max-w-[200px]"
-                : "opacity-0 max-w-0 ml-0"
+      <div className="p-3 border-t border-gray-200 flex-shrink-0 bg-slate-50 sticky bottom-0">
+        <div className="relative w-full">
+          <Logout
+            className={`relative w-full flex items-center py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm ${
+              isExpanded ? "justify-start" : "justify-center"
             }`}
-          >
-            Đăng xuất
-          </span>
-        </button>
+            iconSize={20}
+            buttonText="" // không hiển thị text mặc định
+            redirectTo="/signin"
+            showIcon={true}
+            useConfirm={true}
+            confirmMessage="Bạn có chắc chắn muốn đăng xuất?"
+          />
+          {isExpanded && (
+            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm font-medium text-white">
+              Đăng xuất
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -8,26 +8,22 @@ import {
   LogOut,
   UserCircle,
   History,
-  UserPlus,
   ChevronDown,
   Menu,
   X,
 } from "lucide-react";
-import { getCurrentUser, logout } from "../Services/Auth/authService";
+import { useAuth } from "../contexts/Authcontext";
+import toast from "react-hot-toast";
 
 const Header = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
   const mobileMenuRef = useRef(null);
 
-  // Kiểm tra trạng thái đăng nhập khi component mount
-  useEffect(() => {
-    const user = getCurrentUser();
-    setCurrentUser(user);
-  }, []);
+  // Sử dụng AuthContext để lấy thông tin user
+  const { user, isAuthenticated, logout: authLogout } = useAuth();
 
   // Đóng dropdown khi click outside
   useEffect(() => {
@@ -50,10 +46,15 @@ const Header = () => {
   }, []);
 
   // Hàm xử lý đăng xuất
-  const handleLogout = () => {
-    logout();
-    setCurrentUser(null);
-    setIsProfileDropdownOpen(false);
+  const handleLogout = async () => {
+    try {
+      await authLogout();
+      setIsProfileDropdownOpen(false);
+      toast.success("Đăng xuất thành công!");
+    } catch (error) {
+      console.error("Lỗi khi đăng xuất:", error);
+      toast.error("Đăng xuất thất bại!");
+    }
   };
 
   // Toggle dropdown
@@ -153,7 +154,7 @@ const Header = () => {
               </button>
 
               {/* User Section */}
-              {currentUser ? (
+              {isAuthenticated && user ? (
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={toggleProfileDropdown}
@@ -163,7 +164,7 @@ const Header = () => {
                       <User size={14} className="text-white" />
                     </div>
                     <span className="text-sm font-medium hidden sm:block max-w-20 truncate">
-                      {currentUser.username || currentUser.name}
+                      {user.username || user.name}
                     </span>
                     <ChevronDown
                       size={12}
@@ -178,10 +179,10 @@ const Header = () => {
                     <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
                       <div className="px-3 py-2 border-b border-gray-100">
                         <p className="text-sm font-medium text-gray-900 truncate">
-                          {currentUser.username || currentUser.name}
+                          {user.username || user.name}
                         </p>
                         <p className="text-xs text-gray-500 truncate">
-                          {currentUser.email || "user@example.com"}
+                          {user.email || "user@example.com"}
                         </p>
                       </div>
 
@@ -295,7 +296,7 @@ const Header = () => {
           </nav>
 
           {/* Mobile Auth Buttons */}
-          {!currentUser && (
+          {!isAuthenticated && (
             <div className="px-4 py-3 border-t border-gray-100 space-y-2">
               <Link
                 to="/signin"
@@ -305,7 +306,7 @@ const Header = () => {
                 Đăng nhập
               </Link>
               <Link
-                to="/dang-ky"
+                to="/signup"
                 className="block w-full text-center bg-gradient-to-r from-yellow-400 to-yellow-500 text-white py-2 rounded-lg text-sm font-medium hover:from-yellow-500 hover:to-yellow-600 transition duration-200"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
