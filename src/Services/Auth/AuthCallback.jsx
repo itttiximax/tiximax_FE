@@ -26,9 +26,49 @@ export default function AuthCallback() {
   const [error, setError] = useState(null);
   const [isProcessing, setIsProcessing] = useState(true);
 
+  // Refs to prevent race conditions
   const isMountedRef = useRef(true);
   const hasProcessedRef = useRef(false);
   const timeoutRef = useRef(null);
+
+  // Handle production redirect fix
+  useEffect(() => {
+    // Fix for localhost redirect issue in production
+    if (
+      window.location.hostname === "localhost" &&
+      window.location.hash &&
+      window.location.hash.includes("access_token")
+    ) {
+      console.log("⚠️ Detected localhost redirect in production context");
+
+      // Check if we should be on production
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const stateParam = hashParams.get("state");
+
+      if (stateParam) {
+        try {
+          // Decode the JWT state to check site_url
+          const [, payload] = stateParam.split(".");
+          const decodedPayload = JSON.parse(atob(payload));
+
+          // If state contains a production URL, redirect there
+          if (
+            decodedPayload.site_url?.includes("vercel.app") ||
+            decodedPayload.referrer?.includes("vercel.app")
+          ) {
+            const productionUrl =
+              "https://tiximax-three.vercel.app/auth/callback" +
+              window.location.hash;
+            console.log("🔄 Redirecting to production:", productionUrl);
+            window.location.href = productionUrl;
+            return;
+          }
+        } catch (e) {
+          console.error("Failed to decode state:", e);
+        }
+      }
+    }
+  }, []);
 
   const handleError = useCallback(
     (err, statusCode) => {
@@ -40,6 +80,7 @@ export default function AuthCallback() {
       setError(errorMessage);
       setIsProcessing(false);
 
+      // Show appropriate toast based on error type
       if (statusCode === 404) {
         toast.error("Tài khoản không tồn tại trong hệ thống!");
       } else if (statusCode === 401) {
@@ -50,7 +91,12 @@ export default function AuthCallback() {
         toast.error(errorMessage);
       }
 
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      // Cleanup previous timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      // Redirect after delay
       timeoutRef.current = setTimeout(() => {
         if (isMountedRef.current) {
           navigate("/signin", { replace: true });
@@ -76,6 +122,7 @@ export default function AuthCallback() {
   }, []);
 
   const handleCallback = useCallback(async () => {
+    // Prevent double processing
     if (hasProcessedRef.current) {
       console.log("⚠️ Callback already processed, skipping...");
       return;
@@ -85,31 +132,24 @@ export default function AuthCallback() {
     try {
       console.log("🔵 Auth Callback started...");
 
-      // 🧩 Lấy token từ URL hash nếu có
-      const hashParams = window.location.hash.substring(1);
-      const params = new URLSearchParams(hashParams);
-      const access_token = params.get("access_token");
-      const refresh_token = params.get("refresh_token");
-
-      if (access_token && refresh_token) {
-        console.log("🔐 Setting session from URL token...");
-        const { error: setError } = await supabase.auth.setSession({
-          access_token,
-          refresh_token,
-        });
-        if (setError) throw setError;
-
-        // Xóa hash khỏi URL cho sạch
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname
-        );
-      }
-
       if (!isMountedRef.current) return;
 
-      // 🕒 Lấy session hiện tại từ Supabase
+      // Try to get session from URL hash first (implicit flow)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessTokenFromHash = hashParams.get("access_token");
+      const refreshTokenFromHash = hashParams.get("refresh_token");
+
+      if (accessTokenFromHash) {
+        console.log("📍 Found token in URL hash");
+
+        // Set the session manually if found in hash
+        await supabase.auth.setSession({
+          access_token: accessTokenFromHash,
+          refresh_token: refreshTokenFromHash,
+        });
+      }
+
+      // Get session from Supabase
       const sessionPromise = supabase.auth.getSession();
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Session timeout")), 10000)
@@ -120,9 +160,13 @@ export default function AuthCallback() {
         error: sessionError,
       } = await Promise.race([sessionPromise, timeoutPromise]);
 
-      if (sessionError) throw sessionError;
-      if (!session?.access_token)
+      if (sessionError) {
+        throw sessionError;
+      }
+
+      if (!session?.access_token) {
         throw new Error("Không tìm thấy phiên đăng nhập hợp lệ");
+      }
 
       console.log("✅ Session found:", {
         user: session.user.email,
@@ -130,56 +174,104 @@ export default function AuthCallback() {
         expiresAt: new Date(session.expires_at * 1000).toISOString(),
       });
 
+      // Check if session is expired
       if (session.expires_at && Date.now() / 1000 > session.expires_at) {
         throw new Error("Phiên đăng nhập đã hết hạn");
       }
 
-      // ✅ Xác thực token với backend
-      const data = await verifyWithRetry(session.access_token);
-      if (!data?.user?.role) throw new Error("Dữ liệu người dùng không hợp lệ");
+      if (!isMountedRef.current) return;
 
-      console.log("✅ Backend verification successful");
+      // Verify token with backend (with retry)
+      let userData;
+      try {
+        const data = await verifyWithRetry(session.access_token);
+        userData = data.user;
+      } catch (verifyError) {
+        console.warn("⚠️ Backend verification failed, using Supabase data");
+        // Fallback to Supabase user data
+        userData = {
+          id: session.user.id,
+          email: session.user.email,
+          username: session.user.email?.split("@")[0] || "user",
+          name: session.user.user_metadata?.full_name || session.user.email,
+          role: session.user.user_metadata?.role || ROLES.CUSTOMER,
+        };
+      }
 
-      // 🔐 Lưu thông tin người dùng vào AuthContext
+      if (!userData) {
+        throw new Error("Dữ liệu người dùng không hợp lệ");
+      }
+
+      console.log("✅ User data retrieved:", userData);
+
+      if (!isMountedRef.current) return;
+
+      // Update AuthContext
       setAuthUser({
-        id: data.user.id,
-        username: data.user.username,
-        name: data.user.name,
-        email: data.user.email,
-        role: data.user.role,
+        id: userData.id,
+        username: userData.username,
+        name: userData.name,
+        email: userData.email,
+        role: userData.role,
       });
 
       console.log("🎯 AuthContext updated successfully!");
 
-      // 🎉 Hiển thị chào mừng
-      toast.success(`Chào mừng ${data.user.name || data.user.email}! 🎉`, {
+      // Store user data in localStorage as backup
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      // Show success message
+      toast.success(`Chào mừng ${userData.name || userData.email}! 🎉`, {
         duration: 3000,
       });
 
-      // 🚀 Chuyển hướng
-      const route = roleRoutes[data.user.role] || DEFAULT_ROUTE;
+      // Navigate to appropriate route
+      const route = roleRoutes[userData.role] || DEFAULT_ROUTE;
+
+      // Validate route exists
+      if (userData.role && !roleRoutes[userData.role]) {
+        console.warn(
+          `⚠️ Unknown role: ${userData.role}, redirecting to default`
+        );
+      }
+
       console.log("🚀 Navigating to:", route);
-      navigate(route, { replace: true });
+
+      // Clear the URL hash to clean up
+      if (window.location.hash) {
+        window.history.replaceState(null, null, window.location.pathname);
+      }
+
+      if (isMountedRef.current) {
+        navigate(route, { replace: true });
+      }
     } catch (err) {
       const statusCode = err.response?.status;
       handleError(err, statusCode);
     } finally {
-      if (isMountedRef.current) setIsProcessing(false);
+      if (isMountedRef.current) {
+        setIsProcessing(false);
+      }
     }
   }, [navigate, setAuthUser, handleError, verifyWithRetry]);
 
   useEffect(() => {
+    // Reset processing flag on mount
     hasProcessedRef.current = false;
     isMountedRef.current = true;
+
     handleCallback();
 
+    // Cleanup function
     return () => {
       isMountedRef.current = false;
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
   }, [handleCallback]);
 
-  // ❌ UI khi lỗi
+  // Error UI
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
@@ -206,6 +298,7 @@ export default function AuthCallback() {
           <button
             onClick={() => navigate("/signin", { replace: true })}
             className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-yellow-500 hover:to-yellow-600 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!isMountedRef.current}
           >
             Quay lại đăng nhập
           </button>
@@ -214,7 +307,7 @@ export default function AuthCallback() {
     );
   }
 
-  // ⏳ UI khi loading
+  // Loading UI
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="text-center">
