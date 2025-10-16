@@ -348,7 +348,7 @@ const StaffList = () => {
                               {staff.name}
                             </div>
                             <div className="text-xs text-gray-500">
-                              @{staff.username}
+                              {staff.username}
                             </div>
                           </div>
                         </div>

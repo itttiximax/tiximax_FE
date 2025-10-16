@@ -22,7 +22,6 @@ const CustomerStaffList = () => {
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("ALL");
   const [selectedSource, setSelectedSource] = useState("ALL");
 
   // Pagination states
@@ -85,13 +84,6 @@ const CustomerStaffList = () => {
       );
     }
 
-    // Status filter
-    if (selectedStatus !== "ALL") {
-      filtered = filtered.filter(
-        (customer) => customer.status === selectedStatus
-      );
-    }
-
     // Source filter
     if (selectedSource !== "ALL") {
       filtered = filtered.filter(
@@ -100,7 +92,7 @@ const CustomerStaffList = () => {
     }
 
     return filtered;
-  }, [customerList, searchTerm, selectedStatus, selectedSource]);
+  }, [customerList, searchTerm, selectedSource]);
 
   // Handlers
   const handlePageChange = useCallback(
@@ -124,16 +116,6 @@ const CustomerStaffList = () => {
   // Utility functions
   const formatDate = useCallback((dateString) => {
     return dateString ? new Date(dateString).toLocaleString("vi-VN") : "-";
-  }, []);
-
-  const getStatusBadge = useCallback((status) => {
-    return status === "HOAT_DONG"
-      ? "bg-green-100 text-green-800"
-      : "bg-gray-100 text-gray-800";
-  }, []);
-
-  const getStatusText = useCallback((status) => {
-    return status === "HOAT_DONG" ? "Hoạt động" : "Không hoạt động";
   }, []);
 
   const getSourceColor = useCallback((source) => {
@@ -182,23 +164,23 @@ const CustomerStaffList = () => {
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-green-100 text-sm">Đang hoạt động</p>
+              <p className="text-green-100 text-sm">Trang hiện tại</p>
               <p className="text-3xl font-bold mt-1">
-                {customerList.filter((c) => c.status === "HOAT_DONG").length}
+                {currentPage + 1} / {totalPages || 1}
               </p>
             </div>
-            <Users className="w-12 h-12 text-green-200" />
+            <Tag className="w-12 h-12 text-green-200" />
           </div>
         </div>
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-purple-100 text-sm">Trang hiện tại</p>
+              <p className="text-purple-100 text-sm">Kết quả tìm kiếm</p>
               <p className="text-3xl font-bold mt-1">
-                {currentPage + 1} / {totalPages || 1}
+                {filteredCustomers.length}
               </p>
             </div>
-            <Tag className="w-12 h-12 text-purple-200" />
+            <Users className="w-12 h-12 text-purple-200" />
           </div>
         </div>
       </div>
@@ -210,7 +192,7 @@ const CustomerStaffList = () => {
           <h2 className="text-lg font-semibold text-gray-900">Bộ lọc</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -222,17 +204,6 @@ const CustomerStaffList = () => {
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-
-          {/* Status Filter */}
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="ALL">Tất cả trạng thái</option>
-            <option value="HOAT_DONG">Hoạt động</option>
-            <option value="KHONG_HOAT_DONG">Không hoạt động</option>
-          </select>
 
           {/* Source Filter */}
           <select
@@ -331,9 +302,6 @@ const CustomerStaffList = () => {
                     Nguồn
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Trạng thái
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Ngày tạo
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -359,7 +327,7 @@ const CustomerStaffList = () => {
                             {customer.name}
                           </div>
                           <div className="text-xs text-gray-500">
-                            @{customer.username}
+                            {customer.username}
                           </div>
                         </div>
                       </div>
@@ -402,15 +370,6 @@ const CustomerStaffList = () => {
                       ) : (
                         <span className="text-xs text-gray-400">-</span>
                       )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(
-                          customer.status
-                        )}`}
-                      >
-                        {getStatusText(customer.status)}
-                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {formatDate(customer.createdAt)}

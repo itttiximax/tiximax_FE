@@ -1,34 +1,16 @@
-// src/Services/SharedService/createPaymentShipService.jsx
+// Services/Payment/createPaymentShipService.js
 import api from "../../config/api.js";
 
 const createPaymentShipService = {
-  /**
-   * Tạo thanh toán gộp cho các đơn hàng vận chuyển
-   * @param {string[]} orderIds - Mảng các mã đơn hàng (VD: ["MH-701360", "MH-701361"])
-   * @param {string} token - Bearer token cho Authorization
-   * @returns {Promise<Object>} - Dữ liệu thanh toán được tạo
-   */
-  createMergedShippingPayment: async (orderIds, token) => {
-    // Validation
-    if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
-      throw new Error("Order IDs array is required and must not be empty");
+  createPaymentShipping: async (isUseBalance, voucherId, itemCodes) => {
+    if (!Array.isArray(itemCodes) || itemCodes.length === 0) {
+      throw new Error("itemCodes phải là mảng và không được rỗng.");
     }
-    if (!token) {
-      throw new Error("Authorization token is required");
-    }
-
-    try {
-      const response = await api.post(`/payments/merged-shipping`, orderIds, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error creating merged shipping payment:", error);
-      throw error;
-    }
+    // Ép boolean chuẩn, voucherId để nguyên (số hoặc "null"/0 tùy backend)
+    const flag = Boolean(isUseBalance);
+    const url = `/payments/merged-shipping/${flag}/${voucherId}`;
+    const res = await api.post(url, itemCodes);
+    return res.data;
   },
 };
 

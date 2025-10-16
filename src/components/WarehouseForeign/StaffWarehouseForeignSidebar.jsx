@@ -43,9 +43,14 @@ const StaffWarehouseForeignSidebar = () => {
       title: "Inbound (Nhập kho)",
       items: [
         {
-          text: "Nhập kho",
+          text: "Nhập kho Indonesia",
           icon: <PackagePlus className="w-6 h-6" />,
           path: "/staff-warehouse-foreign/imports",
+        },
+        {
+          text: "Nhập kho",
+          icon: <PackageCheck className="w-6 h-6" />,
+          path: "/staff-warehouse-foreign/importproduct",
         },
         {
           text: "Đóng gói",

@@ -90,7 +90,7 @@ import AuctionPayment from "../Services/Payment/AuctionPayment";
 import ManagerTeam from "../components/LeadSale/ManagerTeam";
 import AuthCallback from "../Services/Auth/AuthCallback";
 import DashboardPurchase from "../components/StaffPurchaser/DashboardPurchase";
-
+import ImportProduct from "../components/WarehouseForeign/ImportProduct";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -165,7 +165,7 @@ const Router = createBrowserRouter([
       { path: "permission", element: <Permission /> },
       { path: "stafflead", element: <StaffListPermission /> },
       { path: "createstaff", element: <CreateAccountStaff /> },
-      { path: "quote", element: <NotFound /> },
+      { path: "quote", element: <PaymentOrderList /> },
       { path: "ads", element: <NotFound /> },
       { path: "cost/paylater", element: <NotFound /> },
       { path: "cost/paybefore", element: <NotFound /> },
@@ -290,6 +290,8 @@ const Router = createBrowserRouter([
       { path: "profile", element: <ProfilePage /> },
       { path: "dashboard", element: <NotFound /> },
       { path: "warehouse", element: <WarehouseList /> },
+      { path: "warehouse", element: <WarehouseList /> },
+      { path: "importproduct", element: <ImportProduct /> },
       { path: "imports", element: <WarehouseShipment /> },
       { path: "packings", element: <CreatePacking /> },
       { path: "outbound/packingeligible", element: <PackingEligibleList /> },

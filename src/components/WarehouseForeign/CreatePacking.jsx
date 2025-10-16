@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { createPackingService } from "../../Services/Warehouse/createpackingService";
 import managerDestinationService from "../../Services/Manager/managerDestinationService";
 
@@ -13,8 +13,25 @@ const CreatePacking = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
+  const inputRefs = useRef([]);
+
   useEffect(() => {
     fetchDestinations();
+  }, []);
+
+  useEffect(() => {
+    // Ensure refs array matches shipmentCodes length
+    inputRefs.current = inputRefs.current.slice(
+      0,
+      formData.shipmentCodes.length
+    );
+  }, [formData.shipmentCodes.length]);
+
+  useEffect(() => {
+    // Auto-focus the first input on mount
+    if (inputRefs.current[0]) {
+      inputRefs.current[0].focus();
+    }
   }, []);
 
   const fetchDestinations = async () => {
@@ -62,6 +79,23 @@ const CreatePacking = () => {
     }));
   };
 
+  const handleKeyDown = (e, index) => {
+    if (e.key === "Enter" && formData.shipmentCodes[index].trim() !== "") {
+      e.preventDefault();
+      const nextIndex = index + 1;
+      if (nextIndex < formData.shipmentCodes.length) {
+        // Focus to next existing field
+        inputRefs.current[nextIndex]?.focus();
+      } else {
+        // Add new field and focus to it
+        addShipmentCode();
+        setTimeout(() => {
+          inputRefs.current[nextIndex]?.focus();
+        }, 0);
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -91,6 +125,10 @@ const CreatePacking = () => {
         destinationId: "",
         shipmentCodes: [""],
       });
+      // Refocus the first input after submit
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 0);
     } catch (err) {
       // Xử lý lỗi từ Backend
       let errorMessage = "Đã xảy ra lỗi không xác định";
@@ -172,17 +210,20 @@ const CreatePacking = () => {
               {/* Shipment Codes */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Shipment Codes
+                  Shipment Codes (Hỗ trợ quét barcode - Quét xong 1 mã tự động
+                  nhảy xuống ô thứ 2)
                 </label>
                 <div className="space-y-3">
                   {formData.shipmentCodes.map((code, index) => (
                     <div key={index} className="flex items-center gap-3">
                       <input
                         type="text"
+                        ref={(el) => (inputRefs.current[index] = el)}
                         value={code}
                         onChange={(e) =>
                           handleShipmentCodeChange(index, e.target.value)
                         }
+                        onKeyDown={(e) => handleKeyDown(e, index)}
                         placeholder={`Shipment code ${index + 1}`}
                         className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
@@ -284,7 +325,10 @@ const CreatePacking = () => {
                 </h3>
                 <ol className="space-y-2 text-blue-700">
                   <li>1. Select a destination from the dropdown</li>
-                  <li>2. Add shipment codes manually</li>
+                  <li>
+                    2. Add shipment codes manually or scan with barcode (quét
+                    xong 1 mã tự động nhảy xuống ô thứ 2)
+                  </li>
                   <li>3. Click create to generate packing</li>
                 </ol>
               </div>
