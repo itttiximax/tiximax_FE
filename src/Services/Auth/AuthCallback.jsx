@@ -26,7 +26,6 @@ export default function AuthCallback() {
   const [error, setError] = useState(null);
   const [isProcessing, setIsProcessing] = useState(true);
 
-  // Refs để prevent race conditions
   const isMountedRef = useRef(true);
   const hasProcessedRef = useRef(false);
   const timeoutRef = useRef(null);
@@ -41,7 +40,6 @@ export default function AuthCallback() {
       setError(errorMessage);
       setIsProcessing(false);
 
-      // Show appropriate toast based on error type
       if (statusCode === 404) {
         toast.error("Tài khoản không tồn tại trong hệ thống!");
       } else if (statusCode === 401) {
@@ -52,12 +50,7 @@ export default function AuthCallback() {
         toast.error(errorMessage);
       }
 
-      // Cleanup previous timeout
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-
-      // Redirect after delay
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
         if (isMountedRef.current) {
           navigate("/signin", { replace: true });
@@ -75,7 +68,7 @@ export default function AuthCallback() {
         console.log(
           `🔄 Retrying verification... (${retries + 1}/${MAX_RETRIES})`
         );
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1s
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         return verifyWithRetry(accessToken, retries + 1);
       }
       throw err;
@@ -83,7 +76,6 @@ export default function AuthCallback() {
   }, []);
 
   const handleCallback = useCallback(async () => {
-    // Prevent double processing (React 18 Strict Mode)
     if (hasProcessedRef.current) {
       console.log("⚠️ Callback already processed, skipping...");
       return;
@@ -93,9 +85,31 @@ export default function AuthCallback() {
     try {
       console.log("🔵 Auth Callback started...");
 
+      // 🧩 Lấy token từ URL hash nếu có
+      const hashParams = window.location.hash.substring(1);
+      const params = new URLSearchParams(hashParams);
+      const access_token = params.get("access_token");
+      const refresh_token = params.get("refresh_token");
+
+      if (access_token && refresh_token) {
+        console.log("🔐 Setting session from URL token...");
+        const { error: setError } = await supabase.auth.setSession({
+          access_token,
+          refresh_token,
+        });
+        if (setError) throw setError;
+
+        // Xóa hash khỏi URL cho sạch
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
+      }
+
       if (!isMountedRef.current) return;
 
-      // Get session from Supabase with timeout
+      // 🕒 Lấy session hiện tại từ Supabase
       const sessionPromise = supabase.auth.getSession();
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Session timeout")), 10000)
@@ -106,13 +120,9 @@ export default function AuthCallback() {
         error: sessionError,
       } = await Promise.race([sessionPromise, timeoutPromise]);
 
-      if (sessionError) {
-        throw sessionError;
-      }
-
-      if (!session?.access_token) {
+      if (sessionError) throw sessionError;
+      if (!session?.access_token)
         throw new Error("Không tìm thấy phiên đăng nhập hợp lệ");
-      }
 
       console.log("✅ Session found:", {
         user: session.user.email,
@@ -120,25 +130,17 @@ export default function AuthCallback() {
         expiresAt: new Date(session.expires_at * 1000).toISOString(),
       });
 
-      // Check if session is expired
       if (session.expires_at && Date.now() / 1000 > session.expires_at) {
         throw new Error("Phiên đăng nhập đã hết hạn");
       }
 
-      if (!isMountedRef.current) return;
-
-      // Verify token with backend (with retry)
+      // ✅ Xác thực token với backend
       const data = await verifyWithRetry(session.access_token);
-
-      if (!data?.user?.role) {
-        throw new Error("Dữ liệu người dùng không hợp lệ");
-      }
+      if (!data?.user?.role) throw new Error("Dữ liệu người dùng không hợp lệ");
 
       console.log("✅ Backend verification successful");
 
-      if (!isMountedRef.current) return;
-
-      // Update AuthContext
+      // 🔐 Lưu thông tin người dùng vào AuthContext
       setAuthUser({
         id: data.user.id,
         username: data.user.username,
@@ -149,53 +151,35 @@ export default function AuthCallback() {
 
       console.log("🎯 AuthContext updated successfully!");
 
-      // Show success message
+      // 🎉 Hiển thị chào mừng
       toast.success(`Chào mừng ${data.user.name || data.user.email}! 🎉`, {
         duration: 3000,
       });
 
-      // Navigate to appropriate route
+      // 🚀 Chuyển hướng
       const route = roleRoutes[data.user.role] || DEFAULT_ROUTE;
-
-      // Validate route exists (optional)
-      if (data.user.role && !roleRoutes[data.user.role]) {
-        console.warn(
-          `⚠️ Unknown role: ${data.user.role}, redirecting to default`
-        );
-      }
-
       console.log("🚀 Navigating to:", route);
-
-      if (isMountedRef.current) {
-        navigate(route, { replace: true });
-      }
+      navigate(route, { replace: true });
     } catch (err) {
       const statusCode = err.response?.status;
       handleError(err, statusCode);
     } finally {
-      if (isMountedRef.current) {
-        setIsProcessing(false);
-      }
+      if (isMountedRef.current) setIsProcessing(false);
     }
   }, [navigate, setAuthUser, handleError, verifyWithRetry]);
 
   useEffect(() => {
-    // Reset processing flag on mount
     hasProcessedRef.current = false;
     isMountedRef.current = true;
-
     handleCallback();
 
-    // Cleanup function
     return () => {
       isMountedRef.current = false;
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [handleCallback]);
 
-  // Error UI
+  // ❌ UI khi lỗi
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
@@ -222,7 +206,6 @@ export default function AuthCallback() {
           <button
             onClick={() => navigate("/signin", { replace: true })}
             className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-yellow-500 hover:to-yellow-600 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!isMountedRef.current}
           >
             Quay lại đăng nhập
           </button>
@@ -231,7 +214,7 @@ export default function AuthCallback() {
     );
   }
 
-  // Loading UI
+  // ⏳ UI khi loading
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="text-center">
