@@ -13,6 +13,7 @@ import {
   CheckSquare,
   Square,
   Truck,
+  Weight,
 } from "lucide-react";
 
 // Helper function to extract error message from backend
@@ -292,6 +293,7 @@ const MergedPaymentShip = () => {
                     <span className="font-medium">Mã KH:</span>{" "}
                     {selectedCustomer.customerCode}
                   </div>
+
                   <div>
                     <span className="font-medium">Email:</span>{" "}
                     {selectedCustomer.email}
@@ -299,6 +301,13 @@ const MergedPaymentShip = () => {
                   <div>
                     <span className="font-medium">SĐT:</span>{" "}
                     {selectedCustomer.phone}
+                  </div>
+                  <div className="inline-flex items-center gap-1 bg-red-50 border border-red-200 rounded-md px-2 py-1 text-sm font-semibold text-red-700 shadow-sm w-auto max-w-max">
+                    <span className="font-medium">Số dư:</span>{" "}
+                    {new Intl.NumberFormat("vi-VN").format(
+                      selectedCustomer.balance
+                    )}{" "}
+                    VND
                   </div>
                 </div>
               </div>
@@ -334,8 +343,8 @@ const MergedPaymentShip = () => {
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                <Truck className="w-5 h-5 mr-2 text-blue-600" />
-                Danh sách đơn hàng vận chuyển
+                {/* <Truck className="w-5 h-5 mr-2 text-blue-600" /> */}
+                Danh sách thanh toán vận chuyển
                 {orders.length > 0 && (
                   <span className="ml-2 text-sm font-normal text-gray-600">
                     ({orders.length} đơn hàng)
@@ -447,14 +456,14 @@ const MergedPaymentShip = () => {
                               <span>Mã GD: {order.paymentCode}</span>
                             </div>
                           )}
-                          <div className="flex items-center">
-                            <span className="font-medium">Tỷ giá:</span>
-                            <span className="ml-1">
-                              {order.exchangeRate
-                                ? order.exchangeRate.toLocaleString("vi-VN")
-                                : "N/A"}
-                            </span>
-                          </div>
+                          {order.totalNetWeight && (
+                            <div className="flex items-center">
+                              <Weight className="w-4 h-4 mr-2" />
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-400 text-white">
+                                Tổng ký: {order.totalNetWeight}kg
+                              </span>
+                            </div>
+                          )}
                         </div>
 
                         {order.note && (

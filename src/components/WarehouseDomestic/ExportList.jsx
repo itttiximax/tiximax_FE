@@ -111,16 +111,10 @@ const ExportList = () => {
         {/* ✅ BLUE HEADER */}
         <div className="mb-3">
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-1.5 bg-blue-100 rounded-lg">
-              <Package2 className="w-4 h-4 text-blue-600" />
-            </div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
               Đơn Hàng Nội Địa
             </h1>
           </div>
-          <p className="text-gray-600 ml-7 text-sm">
-            Danh sách các đơn hàng nội địa đã được giao đến kho
-          </p>
         </div>
 
         {/* Error Messages */}

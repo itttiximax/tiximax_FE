@@ -223,19 +223,13 @@ const OrderAuctionList = () => {
   return (
     <div className="min-h-screen p-4 sm:p-6">
       <div className="mx-auto">
-        {/* Header Section - Purple Theme for Auction */}
+        {/* Header Section - Blue Theme for Auction */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-1.5 bg-purple-100 rounded-lg">
-              <Gavel className="w-4 h-4 text-purple-600" />
-            </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold text-blue-600">
               Danh Sách Đơn Hàng Đấu Giá
             </h1>
           </div>
-          <p className="text-gray-600 ml-7 text-sm">
-            Quản lý và theo dõi các đơn hàng đấu giá
-          </p>
         </div>
 
         {/* Error Messages */}
@@ -268,7 +262,7 @@ const OrderAuctionList = () => {
                   placeholder="Tìm kiếm theo mã đơn hàng..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 />
               </div>
 
@@ -278,7 +272,7 @@ const OrderAuctionList = () => {
                   type="date"
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
-                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 />
               </div>
 
@@ -286,7 +280,7 @@ const OrderAuctionList = () => {
                 value={pagination.pageSize}
                 onChange={handlePageSizeChange}
                 disabled={loading}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100"
+                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100"
               >
                 <option value={10}>10 / trang</option>
                 <option value={15}>15 / trang</option>
@@ -301,8 +295,8 @@ const OrderAuctionList = () => {
         {/* Loading State */}
         {loading && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-purple-600">
-              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-600" />
+            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-blue-600">
+              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" />
               Đang tải dữ liệu...
             </div>
           </div>
@@ -335,8 +329,8 @@ const OrderAuctionList = () => {
                 <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-semibold text-purple-600">
+                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-xs font-semibold text-blue-600">
                           {pagination.pageNumber * pagination.pageSize +
                             index +
                             1}
@@ -344,7 +338,7 @@ const OrderAuctionList = () => {
                       </div>
                       <div>
                         <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                          <Gavel className="w-3 h-3 text-purple-500" />
+                          <Gavel className="w-3 h-3 text-blue-500" />
                           {order.orderCode}
                         </h3>
                         <div className="flex items-center gap-3 text-xs text-gray-600 mt-1">
@@ -352,7 +346,7 @@ const OrderAuctionList = () => {
                             <Calendar className="w-2.5 h-2.5 inline mr-1" />
                             {formatDate(order.createdAt)}
                           </span>
-                          <span className="px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+                          <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
                             Đấu giá
                           </span>
                         </div>
@@ -390,7 +384,7 @@ const OrderAuctionList = () => {
                         {order.orderLinks.length > 2 && (
                           <button
                             onClick={() => toggleExpandOrder(order.orderId)}
-                            className="text-purple-600 hover:text-purple-800 text-xs font-medium flex items-center gap-1"
+                            className="text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center gap-1"
                           >
                             {expandedOrders[order.orderId] ? (
                               <>
@@ -415,7 +409,7 @@ const OrderAuctionList = () => {
                         ).map((link) => (
                           <div
                             key={link.linkId}
-                            className="border border-gray-200 rounded-lg p-3 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-purple-50 hover:to-purple-100 transition-all"
+                            className="border border-gray-200 rounded-lg p-3 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-blue-50 hover:to-blue-100 transition-all"
                           >
                             <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
                               {/* Product Info */}
@@ -501,7 +495,7 @@ const OrderAuctionList = () => {
                                       onClick={() =>
                                         handleViewDetail(link.linkId)
                                       }
-                                      className="flex items-center gap-1 bg-purple-500 text-white px-2 py-1 rounded-md text-xs hover:bg-purple-600 transition-colors"
+                                      className="flex items-center gap-1 bg-blue-600 text-white px-2 py-1 rounded-md text-xs hover:bg-blue-700 transition-colors"
                                     >
                                       <Eye className="w-2.5 h-2.5" />
                                       Chi tiết
@@ -562,7 +556,7 @@ const OrderAuctionList = () => {
 
             <div className="flex items-center gap-1.5">
               <span className="text-xs text-gray-500">Trang</span>
-              <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-sm font-semibold">
+              <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold">
                 {pagination.pageNumber + 1}
               </span>
               <span className="text-xs text-gray-500">

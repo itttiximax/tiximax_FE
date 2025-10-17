@@ -79,16 +79,10 @@ const PackingEligibleList = () => {
         {/* ✅ COMPACT HEADER */}
         <div className="mb-3">
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-1.5 bg-green-100 rounded-lg">
-              <Package2 className="w-4 h-4 text-green-600" />
-            </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold text-blue-600">
               Đơn Hàng Đủ Điều Kiện Đóng Gói
             </h1>
           </div>
-          <p className="text-gray-600 ml-7 text-sm">
-            Danh sách các đơn hàng sẵn sàng để đóng gói và vận chuyển
-          </p>
         </div>
 
         {/* Error Messages */}
@@ -112,7 +106,7 @@ const PackingEligibleList = () => {
                   placeholder="Tìm theo mã đơn hàng..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -122,7 +116,7 @@ const PackingEligibleList = () => {
                   type="date"
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
-                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -130,7 +124,7 @@ const PackingEligibleList = () => {
                 value={pageSize}
                 onChange={handlePageSizeChange}
                 disabled={loading}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all disabled:bg-gray-100"
+                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-100"
               >
                 <option value={10}>10 / trang</option>
                 <option value={20}>20 / trang</option>
@@ -145,8 +139,8 @@ const PackingEligibleList = () => {
         {/* Loading State */}
         {loading && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-green-600">
-              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-green-600" />
+            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-blue-600">
+              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" />
               Đang tải dữ liệu...
             </div>
           </div>
@@ -225,12 +219,12 @@ const PackingEligibleList = () => {
                     return (
                       <tr
                         key={order.orderCode}
-                        className="hover:bg-green-50 transition-colors"
+                        className="hover:bg-blue-50 transition-colors"
                       >
                         {/* STT */}
                         <td className="px-3 py-2.5 whitespace-nowrap">
-                          <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                            <span className="text-xs font-semibold text-green-600">
+                          <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span className="text-xs font-semibold text-blue-600">
                               {currentPage * pageSize + index + 1}
                             </span>
                           </div>
@@ -265,7 +259,7 @@ const PackingEligibleList = () => {
                         {/* Total Products */}
                         <td className="px-3 py-2.5 whitespace-nowrap">
                           <div className="flex items-center gap-1">
-                            <span className="text-lg font-bold text-green-600">
+                            <span className="text-lg font-bold text-blue-600">
                               {totalProducts}
                             </span>
                             <span className="text-xs text-gray-500">SP</span>
@@ -274,8 +268,8 @@ const PackingEligibleList = () => {
 
                         {/* Status */}
                         <td className="px-3 py-2.5 whitespace-nowrap">
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">
-                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                             Sẵn sàng
                           </span>
                         </td>
@@ -306,7 +300,7 @@ const PackingEligibleList = () => {
 
             <div className="flex items-center gap-1.5">
               <span className="text-xs text-gray-500">Trang</span>
-              <span className="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-sm font-semibold">
+              <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold">
                 {currentPage + 1}
               </span>
               <span className="text-xs text-gray-500">/ {totalPages}</span>

@@ -145,9 +145,6 @@ const CustomerStaffList = () => {
             Khách hàng của tôi
           </h1>
         </div>
-        <p className="mt-1 text-sm text-gray-600">
-          Danh sách khách hàng được phân công cho bạn
-        </p>
       </div>
 
       {/* Stats Card */}

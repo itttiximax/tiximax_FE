@@ -5,10 +5,9 @@ import { createShipment } from "../../Services/Warehouse/warehouseShipmentServic
 const normalizeCode = (raw) =>
   String(raw || "")
     .trim()
-    .replace(/\s+/g, "")
-    .toUpperCase();
+    .replace(/\s+/g, "");
 
-const codeIsValid = (code) => /^[A-Z0-9._-]{6,64}$/.test(code);
+const codeIsValid = (code) => /^[A-Za-z0-9._-]{6,64}$/.test(code);
 
 const ImportProduct = () => {
   const [scanValue, setScanValue] = useState("");
@@ -185,17 +184,17 @@ const ImportProduct = () => {
         toastOptions={{
           duration: 3000,
           style: {
-            background: "#363636",
-            color: "#fff",
+            background: "#ffffffff",
+            color: "#222121ff",
           },
           success: {
             style: {
-              background: "#10b981",
+              background: "#f5f5f5ff",
             },
           },
           error: {
             style: {
-              background: "#ef4444",
+              background: "#fafafaff",
             },
           },
         }}

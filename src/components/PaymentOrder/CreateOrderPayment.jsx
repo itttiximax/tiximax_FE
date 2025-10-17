@@ -176,15 +176,6 @@ const CreateOrderPayment = ({
                   {getStatusText(order.status)}
                 </span>
               </div>
-
-              {/* Tỷ giá */}
-              <div className="col-span-1">
-                <div className="text-sm font-medium text-gray-900">
-                  {order.exchangeRate}
-                </div>
-                <div className="text-xs text-gray-500">VND/CNY</div>
-              </div>
-
               {/* Tổng tiền */}
               <div className="col-span-2">
                 <div className="text-sm font-medium text-gray-900">

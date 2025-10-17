@@ -142,16 +142,10 @@ const PackingAwaitList = () => {
         {/* ✅ COMPACT HEADER */}
         <div className="mb-3">
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-1.5 bg-blue-100 rounded-lg">
-              <Package className="w-4 h-4 text-blue-600" />
-            </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold text-blue-600">
               Đơn Hàng Chờ Chuyến Bay
             </h1>
           </div>
-          <p className="text-gray-600 ml-7 text-sm">
-            Quản lý và gán chuyến bay cho các kiện hàng đã đóng gói
-          </p>
         </div>
 
         {/* Success/Error Messages */}
@@ -219,7 +213,7 @@ const PackingAwaitList = () => {
               className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 selectedPackings.length === 0
                   ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:shadow-md"
+                  : "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md"
               }`}
             >
               <Plane className="w-4 h-4" />
@@ -305,9 +299,6 @@ const PackingAwaitList = () => {
                       </div>
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Packing ID
-                    </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Danh Sách Hàng Hóa
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -347,14 +338,6 @@ const PackingAwaitList = () => {
                           {order.packingCode}
                         </span>
                       </td>
-
-                      {/* Packing ID */}
-                      <td className="px-3 py-2.5 whitespace-nowrap">
-                        <span className="text-xs text-gray-500 font-mono">
-                          {order.packingId}
-                        </span>
-                      </td>
-
                       {/* Packing List */}
                       <td className="px-3 py-2.5">
                         <div className="flex flex-wrap gap-1 max-w-md">
@@ -392,13 +375,13 @@ const PackingAwaitList = () => {
                       {/* Flight Status */}
                       <td className="px-3 py-2.5 whitespace-nowrap">
                         {order.flightCode ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">
-                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                             {order.flightCode}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full font-medium">
-                            <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                             Chờ CB
                           </span>
                         )}
@@ -509,7 +492,7 @@ const PackingAwaitList = () => {
                     className={`flex-1 px-4 py-2.5 text-sm rounded-lg font-medium transition-all ${
                       assignLoading || !flightCode.trim()
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700"
+                        : "bg-blue-600 text-white hover:bg-blue-700"
                     }`}
                   >
                     {assignLoading ? (

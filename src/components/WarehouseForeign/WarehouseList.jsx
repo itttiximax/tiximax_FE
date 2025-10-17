@@ -85,16 +85,10 @@ const WarehouseList = () => {
         {/* ✅ COMPACT HEADER */}
         <div className="mb-3">
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-1.5 bg-purple-100 rounded-lg">
-              <Warehouse className="w-4 h-4 text-purple-600" />
-            </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold text-blue-600">
               Danh Sách Kho Hàng
             </h1>
           </div>
-          <p className="text-gray-600 ml-7 text-sm">
-            Quản lý thông tin kho hàng sẵn sàng
-          </p>
         </div>
 
         {/* Error Messages */}
@@ -118,7 +112,7 @@ const WarehouseList = () => {
                   placeholder="Tìm tracking/mã đơn..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -128,7 +122,7 @@ const WarehouseList = () => {
                   type="date"
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
-                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -136,7 +130,7 @@ const WarehouseList = () => {
                 value={pageSize}
                 onChange={changePageSize}
                 disabled={loading}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all disabled:bg-gray-100"
+                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-100"
               >
                 <option value={10}>10 / trang</option>
                 <option value={20}>20 / trang</option>
@@ -151,8 +145,8 @@ const WarehouseList = () => {
         {/* Loading State */}
         {loading && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-purple-600">
-              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-600" />
+            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-blue-600">
+              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" />
               Đang tải dữ liệu...
             </div>
           </div>
@@ -193,8 +187,8 @@ const WarehouseList = () => {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
-                      #
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                      Số TT
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       <div className="flex items-center gap-1">
@@ -235,12 +229,12 @@ const WarehouseList = () => {
                   {filteredWarehouses.map((item, index) => (
                     <tr
                       key={item.warehouseId}
-                      className="hover:bg-purple-50 transition-colors"
+                      className="hover:bg-blue-50 transition-colors"
                     >
                       {/* STT */}
                       <td className="px-3 py-2.5 whitespace-nowrap">
-                        <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
-                          <span className="text-xs font-semibold text-purple-600">
+                        <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                          <span className="text-xs font-semibold text-blue-600">
                             {currentPage * pageSize + index + 1}
                           </span>
                         </div>
@@ -262,7 +256,7 @@ const WarehouseList = () => {
 
                       {/* Weight */}
                       <td className="px-3 py-2.5 whitespace-nowrap">
-                        <span className="text-sm font-semibold text-purple-600">
+                        <span className="text-sm font-semibold text-blue-600">
                           {item.weight} kg
                         </span>
                       </td>
@@ -276,7 +270,7 @@ const WarehouseList = () => {
 
                       {/* Dim */}
                       <td className="px-3 py-2.5 whitespace-nowrap">
-                        <span className="text-sm font-bold text-purple-600">
+                        <span className="text-sm font-bold text-blue-600">
                           {item.dim}
                         </span>
                       </td>
@@ -313,7 +307,7 @@ const WarehouseList = () => {
 
             <div className="flex items-center gap-1.5">
               <span className="text-xs text-gray-500">Trang</span>
-              <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-sm font-semibold">
+              <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold">
                 {currentPage + 1}
               </span>
               <span className="text-xs text-gray-500">/ {totalPages}</span>

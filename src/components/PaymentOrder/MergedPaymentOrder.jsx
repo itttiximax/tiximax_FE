@@ -299,6 +299,13 @@ const MergedPaymentOrder = () => {
                     <span className="font-medium">SĐT:</span>{" "}
                     {selectedCustomer.phone}
                   </div>
+                  <div className="inline-flex items-center gap-1 bg-red-50 border border-red-200 rounded-md px-2 py-1 text-sm font-semibold text-red-700 shadow-sm w-auto max-w-max">
+                    <span className="font-medium">Số dư:</span>{" "}
+                    {new Intl.NumberFormat("vi-VN").format(
+                      selectedCustomer.balance
+                    )}{" "}
+                    VND
+                  </div>
                 </div>
               </div>
             </div>
@@ -331,7 +338,7 @@ const MergedPaymentOrder = () => {
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                <Package className="w-5 h-5 mr-2" />
+                {/* <Package className="w-5 h-5 mr-2" /> */}
                 Danh sách đơn hàng
                 {orders.length > 0 && (
                   <span className="ml-2 text-sm font-normal text-gray-600">

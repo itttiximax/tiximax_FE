@@ -10,7 +10,7 @@ const StaffWarehouseForeignLayout = () => {
       </div>
 
       {/* Black dividing line between Sidebar and Main Content */}
-      <div className="w-[2px] bg-black"></div>
+      <div className="w-[1px] bg-gray-300"></div>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">

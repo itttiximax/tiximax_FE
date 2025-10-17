@@ -91,6 +91,7 @@ import ManagerTeam from "../components/LeadSale/ManagerTeam";
 import AuthCallback from "../Services/Auth/AuthCallback";
 import DashboardPurchase from "../components/StaffPurchaser/DashboardPurchase";
 import ImportProduct from "../components/WarehouseForeign/ImportProduct";
+import DashboardWarehouse from "../components/WarehouseDomestic/DashboardWarehouse";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -288,8 +289,7 @@ const Router = createBrowserRouter([
     children: [
       { index: true, element: <StaffWarehouseForeignPage /> },
       { path: "profile", element: <ProfilePage /> },
-      { path: "dashboard", element: <NotFound /> },
-      { path: "warehouse", element: <WarehouseList /> },
+      { path: "dashboard", element: <DashboardWarehouse /> },
       { path: "warehouse", element: <WarehouseList /> },
       { path: "importproduct", element: <ImportProduct /> },
       { path: "imports", element: <WarehouseShipment /> },
@@ -317,7 +317,7 @@ const Router = createBrowserRouter([
     children: [
       { index: true, element: <StaffWarehouseDomesticPage /> },
       { path: "profile", element: <ProfilePage /> },
-      { path: "dashboard", element: <NotFound /> },
+      { path: "dashboard", element: <DashboardWarehouse /> },
       { path: "inventory", element: <NotFound /> },
       { path: "imports", element: <PackingFlyingList /> },
       { path: "exports", element: <ExportList /> },

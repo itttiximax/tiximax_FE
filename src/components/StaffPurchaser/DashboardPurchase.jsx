@@ -1,231 +1,574 @@
 import React from "react";
 import {
-  ShoppingCart,
-  DollarSign,
-  Calendar,
-  User,
-  Trash2,
-  Edit,
-  ArrowUpRight,
-  ArrowDownRight,
-} from "lucide-react";
-import {
   BarChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
+import { LineChart, Line } from "recharts";
+import { PieChart, Pie, Cell } from "recharts";
 
-const fakePurchases = [
-  {
-    id: 1,
-    product: "Laptop Pro",
-    date: "2023-10-01",
-    quantity: 2,
-    price: 1500,
-    customer: "John Doe",
-  },
-  {
-    id: 2,
-    product: "Smartphone X",
-    date: "2023-10-05",
-    quantity: 1,
-    price: 800,
-    customer: "Jane Smith",
-  },
-  {
-    id: 3,
-    product: "Headphones",
-    date: "2023-10-10",
-    quantity: 3,
-    price: 200,
-    customer: "Alice Johnson",
-  },
-  {
-    id: 4,
-    product: "Monitor 4K",
-    date: "2023-10-15",
-    quantity: 1,
-    price: 400,
-    customer: "Bob Brown",
-  },
-];
+const DashboardPurchaser = () => {
+  // Expanded Supplier Data - Chi tiết và thực tế hơn
+  const purchaseData = [
+    {
+      supplier: "ABC Corp",
+      orders: 145,
+      value: 125000,
+      deliveryRate: 94.5,
+    },
+    {
+      supplier: "XYZ Ltd",
+      orders: 132,
+      value: 118000,
+      deliveryRate: 91.2,
+    },
+    {
+      supplier: "Tech Supplier",
+      orders: 168,
+      value: 242000,
+      deliveryRate: 96.8,
+    },
+    {
+      supplier: "Global Inc",
+      orders: 178,
+      value: 281000,
+      deliveryRate: 93.4,
+    },
+    {
+      supplier: "Local Vendor",
+      orders: 98,
+      value: 62000,
+      deliveryRate: 88.6,
+    },
+    {
+      supplier: "Premium Electronics",
+      orders: 124,
+      value: 198000,
+      deliveryRate: 97.2,
+    },
+    {
+      supplier: "Office Solutions",
+      orders: 156,
+      value: 89000,
+      deliveryRate: 92.1,
+    },
+    {
+      supplier: "Industrial Co",
+      orders: 112,
+      value: 145000,
+      deliveryRate: 89.3,
+    },
+  ];
 
-const chartData = fakePurchases.map((purchase) => ({
-  name: purchase.product,
-  quantity: purchase.quantity,
-  total: purchase.quantity * purchase.price,
-}));
+  // Realistic Monthly Spend Data (2023-2024)
+  const monthlySpendData = [
+    { month: "Jan 2023", spend: 55000, orders: 120, suppliers: 6 },
+    { month: "Feb 2023", spend: 48000, orders: 108, suppliers: 6 },
+    { month: "Mar 2023", spend: 62000, orders: 135, suppliers: 7 },
+    { month: "Apr 2023", spend: 58000, orders: 128, suppliers: 7 },
+    { month: "May 2023", spend: 72000, orders: 155, suppliers: 7 },
+    { month: "Jun 2023", spend: 68000, orders: 148, suppliers: 7 },
+    { month: "Jul 2023", spend: 85000, orders: 180, suppliers: 8 },
+    { month: "Aug 2023", spend: 78000, orders: 165, suppliers: 8 },
+    { month: "Sep 2023", spend: 92000, orders: 195, suppliers: 8 },
+    { month: "Oct 2023", spend: 88000, orders: 185, suppliers: 8 },
+    { month: "Nov 2023", spend: 105000, orders: 220, suppliers: 8 },
+    { month: "Dec 2023", spend: 98000, orders: 205, suppliers: 8 },
+    { month: "Jan 2024", spend: 62000, orders: 130, suppliers: 7 },
+    { month: "Feb 2024", spend: 55000, orders: 118, suppliers: 7 },
+    { month: "Mar 2024", spend: 71000, orders: 152, suppliers: 8 },
+    { month: "Apr 2024", spend: 64000, orders: 138, suppliers: 7 },
+    { month: "May 2024", spend: 81000, orders: 175, suppliers: 8 },
+    { month: "Jun 2024", spend: 76000, orders: 162, suppliers: 8 },
+  ];
 
-const totalPurchases = fakePurchases.length;
-const totalRevenue = fakePurchases.reduce(
-  (sum, p) => sum + p.quantity * p.price,
-  0
-);
-const avgPrice = (totalRevenue / totalPurchases).toFixed(2);
+  // Detailed Category Spend
+  const categorySpend = [
+    { name: "Electronics & IT", value: 32 },
+    { name: "Office Supplies", value: 18 },
+    { name: "Furniture", value: 15 },
+    { name: "Raw Materials", value: 20 },
+    { name: "Stationery", value: 8 },
+    { name: "Other", value: 7 },
+  ];
 
-const DashboardPurchase = () => {
+  // Supplier Performance Details
+  const supplierPerformance = [
+    {
+      name: "Global Inc",
+      avgLeadTime: "3.2 days",
+      qualityScore: 98,
+      costSavings: "12%",
+    },
+    {
+      name: "Tech Supplier",
+      avgLeadTime: "2.8 days",
+      qualityScore: 96,
+      costSavings: "8%",
+    },
+    {
+      name: "ABC Corp",
+      avgLeadTime: "4.1 days",
+      qualityScore: 94,
+      costSavings: "5%",
+    },
+    {
+      name: "Premium Electronics",
+      avgLeadTime: "3.5 days",
+      qualityScore: 97,
+      costSavings: "15%",
+    },
+    {
+      name: "Office Solutions",
+      avgLeadTime: "5.2 days",
+      qualityScore: 92,
+      costSavings: "3%",
+    },
+  ];
+
+  // Top Purchase Orders
+  const topPurchases = [
+    {
+      poNumber: "PO-2024-001",
+      supplier: "Global Inc",
+      amount: 45000,
+      items: 245,
+      status: "Delivered",
+    },
+    {
+      poNumber: "PO-2024-002",
+      supplier: "Tech Supplier",
+      amount: 38500,
+      items: 128,
+      status: "In Transit",
+    },
+    {
+      poNumber: "PO-2024-003",
+      supplier: "Premium Electronics",
+      amount: 52000,
+      items: 98,
+      status: "Delivered",
+    },
+    {
+      poNumber: "PO-2024-004",
+      supplier: "ABC Corp",
+      amount: 28500,
+      items: 156,
+      status: "Processing",
+    },
+    {
+      poNumber: "PO-2024-005",
+      supplier: "Industrial Co",
+      amount: 35000,
+      items: 75,
+      status: "Delivered",
+    },
+  ];
+
+  // Budget Allocation by Category
+  const budgetAllocation = [
+    {
+      category: "Electronics & IT",
+      allocated: 450000,
+      spent: 385000,
+      remaining: 65000,
+    },
+    {
+      category: "Raw Materials",
+      allocated: 350000,
+      spent: 298000,
+      remaining: 52000,
+    },
+    {
+      category: "Office Supplies",
+      allocated: 150000,
+      spent: 142000,
+      remaining: 8000,
+    },
+    {
+      category: "Furniture",
+      allocated: 120000,
+      spent: 98000,
+      remaining: 22000,
+    },
+    {
+      category: "Stationery",
+      allocated: 80000,
+      spent: 72000,
+      remaining: 8000,
+    },
+  ];
+
+  // Custom Tooltip cho Bar Chart
+  const CustomBarTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-black/80 backdrop-blur-sm rounded-lg p-3 text-white text-sm">
+          <p className="font-semibold">{payload[0].payload.supplier}</p>
+          <p>Orders: {payload[0].value}</p>
+          {payload[1] && <p>Value: ${payload[1].value.toLocaleString()}</p>}
+          <p>Delivery Rate: {payload[0].payload.deliveryRate}%</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Custom Tooltip cho Line Chart
+  const CustomLineTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-black/80 backdrop-blur-sm rounded-lg p-3 text-white text-sm">
+          <p className="font-semibold">{payload[0].payload.month}</p>
+          <p>Spend: ${payload[0].value.toLocaleString()}</p>
+          <p>Orders: {payload[0].payload.orders}</p>
+          <p>Suppliers: {payload[0].payload.suppliers}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const totalSpend = monthlySpendData.reduce(
+    (sum, item) => sum + item.spend,
+    0
+  );
+  const totalOrders = monthlySpendData.reduce(
+    (sum, item) => sum + item.orders,
+    0
+  );
+  const avgOrderValue = Math.round(totalSpend / totalOrders);
+
   return (
-    <div className="container mx-auto p-6  min-h-screen">
-      <h1 className="text-3xl font-bold mb-6 flex items-center text-gray-800">
-        <ShoppingCart className="mr-3 text-indigo-600" size={28} /> Dashboard
-        Purchases
-      </h1>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-semibold text-gray-700">
-              Total Purchases
-            </h3>
-            <ShoppingCart className="text-indigo-500" size={24} />
+    <div className="min-h-screen p-6 font-sans">
+      {/* Header */}
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 mb-8 shadow-2xl border border-white/20">
+        <h1 className="text-5xl font-black text-black mb-6">
+          🛒 Purchaser Dashboard
+        </h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl text-center shadow-lg border border-blue-200">
+            <div className="text-3xl font-bold text-blue-700">
+              ${(totalSpend / 1000).toFixed(0)}K
+            </div>
+            <div className="text-sm text-blue-600 font-medium mt-1">
+              Total Spend
+            </div>
+            <div className="text-xs text-blue-500 mt-2">Last 18 months</div>
           </div>
-          <p className="text-3xl font-bold text-indigo-600">{totalPurchases}</p>
-          <p className="text-sm text-green-500 flex items-center mt-2">
-            <ArrowUpRight size={16} className="mr-1" /> +12% from last month
-          </p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-semibold text-gray-700">
-              Total Revenue
-            </h3>
-            <DollarSign className="text-green-500" size={24} />
+          <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl text-center shadow-lg border border-green-200">
+            <div className="text-3xl font-bold text-green-700">
+              {totalOrders}
+            </div>
+            <div className="text-sm text-green-600 font-medium mt-1">
+              Total Orders
+            </div>
+            <div className="text-xs text-green-500 mt-2">Placed</div>
           </div>
-          <p className="text-3xl font-bold text-green-600">${totalRevenue}</p>
-          <p className="text-sm text-green-500 flex items-center mt-2">
-            <ArrowUpRight size={16} className="mr-1" /> +8% from last month
-          </p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-semibold text-gray-700">
-              Average Price
-            </h3>
-            <DollarSign className="text-blue-500" size={24} />
+          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-2xl text-center shadow-lg border border-yellow-200">
+            <div className="text-3xl font-bold text-yellow-700">
+              {purchaseData.length}
+            </div>
+            <div className="text-sm text-yellow-600 font-medium mt-1">
+              Suppliers
+            </div>
+            <div className="text-xs text-yellow-500 mt-2">Active</div>
           </div>
-          <p className="text-3xl font-bold text-blue-600">${avgPrice}</p>
-          <p className="text-sm text-red-500 flex items-center mt-2">
-            <ArrowDownRight size={16} className="mr-1" /> -5% from last month
-          </p>
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-2xl text-center shadow-lg border border-purple-200">
+            <div className="text-3xl font-bold text-purple-700">
+              ${avgOrderValue}
+            </div>
+            <div className="text-sm text-purple-600 font-medium mt-1">
+              Avg Order Value
+            </div>
+            <div className="text-xs text-purple-500 mt-2">Per order</div>
+          </div>
+          <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-2xl text-center shadow-lg border border-red-200">
+            <div className="text-3xl font-bold text-red-700">94.2%</div>
+            <div className="text-sm text-red-600 font-medium mt-1">
+              Avg Delivery
+            </div>
+            <div className="text-xs text-red-500 mt-2">On-time rate</div>
+          </div>
         </div>
       </div>
 
-      {/* Chart */}
-      <div className="bg-white p-6 rounded-xl shadow-md mb-8">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">
-          Purchase Overview
-        </h2>
-        <ResponsiveContainer width="100%" height={350}>
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis dataKey="name" stroke="#6b7280" />
-            <YAxis stroke="#6b7280" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "white",
-                border: "1px solid #d1d5db",
-                borderRadius: "8px",
-              }}
-            />
-            <Legend />
-            <Bar
-              dataKey="quantity"
-              fill="#6366f1"
-              name="Quantity"
-              radius={[4, 4, 0, 0]}
-            />
-            <Bar
-              dataKey="total"
-              fill="#10b981"
-              name="Total ($)"
-              radius={[4, 4, 0, 0]}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Table */}
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800">
-            Recent Purchases
+      {/* Charts Layout */}
+      <div className="space-y-6">
+        {/* 1. Supplier Performance (Full Width) */}
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20">
+          <h2 className="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-3">
+            📋 Supplier Performance Overview
           </h2>
+          <ResponsiveContainer width="100%" height={500}>
+            <BarChart
+              data={purchaseData}
+              margin={{ top: 20, right: 30, left: 0, bottom: 20 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis
+                dataKey="supplier"
+                stroke="#64748b"
+                fontSize={12}
+                angle={-45}
+                textAnchor="end"
+                height={100}
+                tick={{ fill: "#64748b" }}
+              />
+              <YAxis
+                stroke="#64748b"
+                fontSize={12}
+                tick={{ fill: "#64748b" }}
+              />
+              <Tooltip content={<CustomBarTooltip />} />
+              <Bar
+                dataKey="orders"
+                fill="url(#ordersGradient)"
+                radius={[10, 10, 0, 0]}
+                name="Orders"
+              />
+              <Bar
+                dataKey="value"
+                fill="url(#valueGradient)"
+                radius={[10, 10, 0, 0]}
+                name="Value ($)"
+              />
+              <defs>
+                <linearGradient id="ordersGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3b82f6" />
+                  <stop offset="100%" stopColor="#1d4ed8" />
+                </linearGradient>
+                <linearGradient id="valueGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10b981" />
+                  <stop offset="100%" stopColor="#059669" />
+                </linearGradient>
+              </defs>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ID
-                </th>
-                <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Product
-                </th>
-                <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center">
-                  <Calendar className="mr-1" size={14} /> Date
-                </th>
-                <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Quantity
-                </th>
-                <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center">
-                  <DollarSign className="mr-1" size={14} /> Price
-                </th>
-                <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center">
-                  <User className="mr-1" size={14} /> Customer
-                </th>
-                <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {fakePurchases.map((purchase) => (
-                <tr
-                  key={purchase.id}
-                  className="hover:bg-gray-50 transition-colors"
+
+        {/* 2. Two Small Charts Side by Side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Monthly Spend Trend */}
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20">
+            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-3">
+              💰 Monthly Spend Trend (18 Months)
+            </h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={monthlySpendData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis
+                  dataKey="month"
+                  stroke="#64748b"
+                  fontSize={10}
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  tick={{ fill: "#64748b" }}
+                />
+                <YAxis
+                  stroke="#64748b"
+                  fontSize={10}
+                  tick={{ fill: "#64748b" }}
+                />
+                <Tooltip content={<CustomLineTooltip />} />
+                <Line
+                  type="monotone"
+                  dataKey="spend"
+                  stroke="url(#spendGradient)"
+                  strokeWidth={3}
+                  dot={false}
+                  activeDot={{ r: 6, stroke: "#0891b2", strokeWidth: 2 }}
+                />
+                <defs>
+                  <linearGradient
+                    id="spendGradient"
+                    x1="0"
+                    y1="0"
+                    x2="1"
+                    y2="1"
+                  >
+                    <stop offset="0%" stopColor="#06b6d4" />
+                    <stop offset="100%" stopColor="#0284c7" />
+                  </linearGradient>
+                </defs>
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Category Spend Distribution */}
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20">
+            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-3">
+              📦 Category Spend Distribution
+            </h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={categorySpend}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={90}
+                  innerRadius={50}
+                  paddingAngle={2}
+                  label={({ name, value }) => `${name} ${value}%`}
+                  labelLine={false}
+                  labelStyle={{
+                    fontSize: "10px",
+                    fontWeight: "bold",
+                    fill: "#333",
+                  }}
                 >
-                  <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-900">
-                    {purchase.id}
-                  </td>
-                  <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-900">
-                    {purchase.product}
-                  </td>
-                  <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-500">
-                    {purchase.date}
-                  </td>
-                  <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-900">
-                    {purchase.quantity}
-                  </td>
-                  <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-900">
-                    ${purchase.price}
-                  </td>
-                  <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-900">
-                    {purchase.customer}
-                  </td>
-                  <td className="py-4 px-6 whitespace-nowrap text-sm">
-                    <div className="flex space-x-3">
-                      <button className="text-indigo-600 hover:text-indigo-900 transition-colors">
-                        <Edit size={16} />
-                      </button>
-                      <button className="text-red-600 hover:text-red-900 transition-colors">
-                        <Trash2 size={16} />
-                      </button>
+                  {categorySpend.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={
+                        [
+                          "#3b82f6",
+                          "#10b981",
+                          "#f59e0b",
+                          "#8b5cf6",
+                          "#ef4444",
+                          "#06b6d4",
+                        ][index]
+                      }
+                    />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => [`${value}%`, "Share"]} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* 3. Additional Metrics Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Supplier Performance Metrics */}
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              ⭐ Top Suppliers Performance
+            </h2>
+            <div className="space-y-3">
+              {supplierPerformance.map((supplier, idx) => (
+                <div key={idx} className="border-b border-gray-200 pb-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-semibold text-gray-700 text-sm">
+                      #{idx + 1} {supplier.name}
+                    </p>
+                    <div className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-bold">
+                      {supplier.qualityScore}%
                     </div>
-                  </td>
-                </tr>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                    <div>Lead: {supplier.avgLeadTime}</div>
+                    <div>Savings: {supplier.costSavings}</div>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
+
+          {/* Budget Allocation Status */}
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              💳 Budget Allocation Status
+            </h2>
+            <div className="space-y-3">
+              {budgetAllocation.map((cat, idx) => (
+                <div key={idx} className="border-b border-gray-200 pb-3">
+                  <p className="font-semibold text-gray-700 text-sm mb-2">
+                    {cat.category}
+                  </p>
+                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-full"
+                      style={{
+                        width: `${(cat.spent / cat.allocated) * 100}%`,
+                      }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-600 mt-1">
+                    <span>
+                      ${(cat.spent / 1000).toFixed(0)}K / $
+                      {(cat.allocated / 1000).toFixed(0)}K
+                    </span>
+                    <span className="font-semibold text-green-600">
+                      ${(cat.remaining / 1000).toFixed(0)}K left
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* 4. Top Purchase Orders */}
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">
+            📑 Recent Top Purchase Orders
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">
+                    PO Number
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">
+                    Supplier
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">
+                    Amount
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">
+                    Items
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {topPurchases.map((po, idx) => (
+                  <tr
+                    key={idx}
+                    className="border-b border-gray-200 hover:bg-gray-50"
+                  >
+                    <td className="px-4 py-3 text-gray-900 font-mono font-semibold">
+                      {po.poNumber}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">{po.supplier}</td>
+                    <td className="px-4 py-3 text-gray-900 font-semibold">
+                      ${po.amount.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">{po.items}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-bold ${
+                          po.status === "Delivered"
+                            ? "bg-green-100 text-green-700"
+                            : po.status === "In Transit"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {po.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default DashboardPurchase;
+export default DashboardPurchaser;

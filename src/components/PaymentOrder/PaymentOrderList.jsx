@@ -160,7 +160,6 @@ const PaymentOrderList = () => {
         { key: "paymentCode", label: "Mã giao dịch", colSpan: "col-span-1" },
         { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
         { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
-        { key: "exchangeRate", label: "Tỷ giá", colSpan: "col-span-1" },
         { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-1" },
         { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-1" },
         { key: "actions", label: "Thao tác", colSpan: "col-span-2" },
@@ -173,7 +172,6 @@ const PaymentOrderList = () => {
       { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" }, // MỚI THÊM
       { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
       { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
-      { key: "exchangeRate", label: "Tỷ giá", colSpan: "col-span-1" },
       { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-2" },
       { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-1" },
     ];

@@ -257,16 +257,10 @@ const OrderLinkList = () => {
         {/* Header Section */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-1.5 bg-orange-100 rounded-lg">
-              <ShoppingBag className="w-4 h-4 text-orange-600" />
-            </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold text-blue-600">
               Danh Sách Đơn Hàng Mua Hộ
             </h1>
           </div>
-          <p className="text-gray-600 ml-7 text-sm">
-            Quản lý và theo dõi các đơn hàng mua hộ
-          </p>
         </div>
 
         {/* Error Messages */}
@@ -298,7 +292,7 @@ const OrderLinkList = () => {
                   placeholder="Tìm kiếm theo mã đơn hàng..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 />
               </div>
 
@@ -308,7 +302,7 @@ const OrderLinkList = () => {
                   type="date"
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
-                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 />
               </div>
 
@@ -316,7 +310,7 @@ const OrderLinkList = () => {
                 value={pagination.pageSize}
                 onChange={handlePageSizeChange}
                 disabled={loading}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100"
+                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100"
               >
                 <option value={10}>10 / trang</option>
                 <option value={15}>15 / trang</option>
@@ -331,8 +325,8 @@ const OrderLinkList = () => {
         {/* Loading State */}
         {loading && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-orange-600">
-              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-orange-600" />
+            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-blue-600">
+              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" />
               Đang tải dữ liệu...
             </div>
           </div>
@@ -365,8 +359,8 @@ const OrderLinkList = () => {
                 <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-semibold text-orange-600">
+                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-xs font-semibold text-blue-600">
                           {pagination.pageNumber * pagination.pageSize +
                             index +
                             1}
@@ -374,7 +368,7 @@ const OrderLinkList = () => {
                       </div>
                       <div>
                         <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                          <Package className="w-3 h-3 text-orange-500" />
+                          <Package className="w-3 h-3 text-blue-500" />
                           {order.orderCode}
                         </h3>
                         <div className="flex items-center gap-3 text-xs text-gray-600 mt-1">
@@ -420,7 +414,7 @@ const OrderLinkList = () => {
                         {order.orderLinks.length > 2 && (
                           <button
                             onClick={() => toggleExpandOrder(order.orderId)}
-                            className="text-orange-600 hover:text-orange-800 text-xs font-medium flex items-center gap-1"
+                            className="text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center gap-1"
                           >
                             {expandedOrders[order.orderId] ? (
                               <>
@@ -531,7 +525,7 @@ const OrderLinkList = () => {
                                       onClick={() =>
                                         handleViewDetail(link.linkId)
                                       }
-                                      className="flex items-center gap-1 bg-orange-500 text-white px-2 py-1 rounded-md text-xs hover:bg-orange-600 transition-colors"
+                                      className="flex items-center gap-1 bg-blue-600 text-white px-2 py-1 rounded-md text-xs hover:bg-blue-700 transition-colors"
                                     >
                                       <Eye className="w-2.5 h-2.5" />
                                       Chi tiết
@@ -591,7 +585,7 @@ const OrderLinkList = () => {
 
             <div className="flex items-center gap-1.5">
               <span className="text-xs text-gray-500">Trang</span>
-              <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-lg text-sm font-semibold">
+              <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold">
                 {pagination.pageNumber + 1}
               </span>
             </div>
