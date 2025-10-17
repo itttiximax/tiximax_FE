@@ -1,4 +1,11 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+} from "react";
 import { supabase } from "../config/supabaseClient";
 import { getToken, getCurrentUser } from "../Services/Auth/authService";
 
@@ -9,20 +16,49 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = getToken();
-    const userData = getCurrentUser();
+    const checkAuth = async () => {
+      try {
+        setLoading(true);
+        const token = getToken();
+        const userData = getCurrentUser();
 
-    setUser(token && userData ? userData : null);
-    setLoading(false);
+        if (token && userData) {
+          setUser(userData);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Auth check error:", error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
   }, []);
 
-  const login = (userData) => setUser(userData);
+  const login = useCallback((userData) => {
+    setUser(userData);
+  }, []);
 
-  const logout = async () => {
-    localStorage.removeItem("jwt");
-    localStorage.removeItem("user");
-    await supabase.auth.signOut();
-    setUser(null);
+  const logout = useCallback(async () => {
+    try {
+      localStorage.removeItem("jwt");
+      localStorage.removeItem("user");
+      await supabase.auth.signOut();
+      setUser(null);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  }, []);
+
+  const value = {
+    user,
+    loading,
+    isAuthenticated: !!user,
+    login,
+    logout,
   };
 
   if (loading) {
@@ -33,13 +69,7 @@ export function AuthProvider({ children }) {
     );
   }
 
-  return (
-    <AuthContext.Provider
-      value={{ user, loading, isAuthenticated: !!user, login, logout }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

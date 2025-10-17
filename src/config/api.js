@@ -5,32 +5,27 @@ const API_BASE_URL =
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  timeout: 10000,
+  headers: { "Content-Type": "application/json" },
+  timeout: 30000,
 });
 
-// Auto add token
+// Tự động thêm token vào header
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("jwt");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
-});
+}, Promise.reject);
 
-// Handle 401 unauthorized
+// Xử lý lỗi chung
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("jwt");
-      localStorage.removeItem("user");
+  (res) => res,
+  (err) => {
+    const { response } = err;
+    if (response?.status === 401) {
+      localStorage.clear();
       window.location.href = "/login";
     }
-    return Promise.reject(error);
+    return Promise.reject(err);
   }
 );
 
