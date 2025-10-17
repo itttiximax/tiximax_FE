@@ -72,37 +72,18 @@ const StaffSaleSidebar = () => {
         },
         {
           type: "dropdown",
-          icon: Banknote,
-          label: "Thanh toán",
-          dropdownItems: [
-            {
-              to: "/staff-sale/order-payment",
-              icon: Banknote,
-              label: "Thanh toán đơn hàng",
-            },
-            {
-              to: "/staff-sale/ship-payment",
-              icon: Truck,
-              label: "Thanh toán vận chuyển",
-            },
-            {
-              to: "/staff-sale/auction-payment",
-              icon: Wallet,
-              label: "Thanh toán đấu giá ",
-            },
-          ],
-          isOpen: isQuotationDropdownOpen,
-          onToggle: () => setIsQuotationDropdownOpen(!isQuotationDropdownOpen),
-        },
-        {
-          type: "dropdown",
           icon: CreditCard,
-          label: "Hỗ trợ thanh toán",
+          label: "Thanh toán",
           dropdownItems: [
             {
               to: "/staff-sale/createpaymentsupport",
               icon: Package,
               label: "Thanh toán đơn hàng",
+            },
+            {
+              to: "/staff-sale/auction-payment",
+              icon: Wallet,
+              label: "Thanh toán đấu giá ",
             },
             {
               to: "/staff-sale/createpaymentshipping",
@@ -113,6 +94,25 @@ const StaffSaleSidebar = () => {
           isOpen: isPaymentSupportDropdownOpen,
           onToggle: () =>
             setIsPaymentSupportDropdownOpen(!isPaymentSupportDropdownOpen),
+        },
+        {
+          type: "dropdown",
+          icon: Banknote,
+          label: "Theo dõi đơn hàng",
+          dropdownItems: [
+            {
+              to: "/staff-sale/order-payment",
+              icon: Banknote,
+              label: "Quy trình đơn hàng",
+            },
+            {
+              to: "/staff-sale/ship-payment",
+              icon: Truck,
+              label: "Xác nhận vận chuyển",
+            },
+          ],
+          isOpen: isQuotationDropdownOpen,
+          onToggle: () => setIsQuotationDropdownOpen(!isQuotationDropdownOpen),
         },
       ],
     },

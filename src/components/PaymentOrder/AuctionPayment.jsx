@@ -298,16 +298,10 @@ const AuctionPayment = () => {
         {/* Header Section - Purple Theme */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-1.5 bg-purple-100 rounded-lg">
-              <CreditCard className="w-4 h-4 text-purple-600" />
-            </div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-              Thanh Toán Đấu Giá
+              Thanh toán đấu giá
             </h1>
           </div>
-          <p className="text-gray-600 ml-7 text-sm">
-            Quản lý và theo dõi các giao dịch thanh toán đấu giá
-          </p>
         </div>
 
         {/* Error Messages */}

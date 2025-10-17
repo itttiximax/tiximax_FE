@@ -72,13 +72,13 @@ const PaymentDialog = ({
         {/* Body */}
         <div className="px-6 py-6 space-y-4">
           {/* QR Code - TO NHẤT */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-8 border-2 border-blue-200">
+          <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
             <div className="flex flex-col items-center">
-              <div className="bg-white rounded-xl p-6 shadow-lg mb-4">
+              <div className="bg-white rounded-xl shadow-lg mb-4 w-full h-auto">
                 <img
                   src={payment.qrCode}
                   alt="Payment QR Code"
-                  className="w-96 h-96 object-contain"
+                  className="w-full h-auto object-contain"
                 />
               </div>
               <p className="text-xs text-gray-600 mb-3">

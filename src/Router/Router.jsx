@@ -86,7 +86,7 @@ import MergedPaymentOrder from "../components/PaymentOrder/MergedPaymentOrder";
 import PaymentOrderList from "../components/PaymentOrder/PaymentOrderList";
 import CreateAuctionForm from "../components/Order/CreateAuctionForm";
 import OrderAuctionList from "../components/StaffPurchaser/OrderAuctionList";
-import AuctionPayment from "../Services/Payment/AuctionPayment";
+import AuctionPayment from "../components/PaymentOrder/AuctionPayment";
 import ManagerTeam from "../components/LeadSale/ManagerTeam";
 import AuthCallback from "../Services/Auth/AuthCallback";
 import DashboardPurchase from "../components/StaffPurchaser/DashboardPurchase";

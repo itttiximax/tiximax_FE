@@ -1,11 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  useContext,
-  useCallback,
-} from "react";
+import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "../config/supabaseClient";
 import { getToken, getCurrentUser } from "../Services/Auth/authService";
 
@@ -16,49 +9,20 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        setLoading(true);
-        const token = getToken();
-        const userData = getCurrentUser();
+    const token = getToken();
+    const userData = getCurrentUser();
 
-        if (token && userData) {
-          setUser(userData);
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error("Auth check error:", error);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkAuth();
+    setUser(token && userData ? userData : null);
+    setLoading(false);
   }, []);
 
-  const login = useCallback((userData) => {
-    setUser(userData);
-  }, []);
+  const login = (userData) => setUser(userData);
 
-  const logout = useCallback(async () => {
-    try {
-      localStorage.removeItem("jwt");
-      localStorage.removeItem("user");
-      await supabase.auth.signOut();
-      setUser(null);
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
-  }, []);
-
-  const value = {
-    user,
-    loading,
-    isAuthenticated: !!user,
-    login,
-    logout,
+  const logout = async () => {
+    localStorage.removeItem("jwt");
+    localStorage.removeItem("user");
+    await supabase.auth.signOut();
+    setUser(null);
   };
 
   if (loading) {
@@ -69,7 +33,13 @@ export function AuthProvider({ children }) {
     );
   }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{ user, loading, isAuthenticated: !!user, login, logout }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

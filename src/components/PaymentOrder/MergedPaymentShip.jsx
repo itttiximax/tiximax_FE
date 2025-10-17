@@ -102,6 +102,12 @@ const MergedPaymentShip = () => {
     }
   };
 
+  // Handle payment creation error
+  const handlePaymentError = (error) => {
+    console.error("Merged payment ship error:", error);
+    // Error is already handled in CreateMergedPaymentShip component
+  };
+
   // Close payment dialog
   const handleClosePaymentDialog = () => {
     setPaymentDialog({ open: false, payment: null });
@@ -244,13 +250,8 @@ const MergedPaymentShip = () => {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center">
-          <Truck className="w-8 h-8 mr-3 text-blue-600" />
-          Thanh toán vận chuyển gộp
+          Thanh toán vận chuyển
         </h1>
-        <p className="text-gray-600">
-          Tìm kiếm khách hàng để xem danh sách đơn hàng vận chuyển và tạo thanh
-          toán gộp
-        </p>
       </div>
 
       {/* Customer Search */}
@@ -358,13 +359,25 @@ const MergedPaymentShip = () => {
                       : "Chọn tất cả"}
                   </button>
 
-                  <CreateMergedPaymentShip
-                    selectedOrders={selectedOrders}
-                    selectedCount={selectedOrders.length}
-                    totalAmount={calculateSelectedTotal()}
-                    onSuccess={handlePaymentCreated}
-                    formatCurrency={formatCurrency}
-                  />
+                  {selectedOrders.length > 0 && (
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-600">
+                        Đã chọn: {selectedOrders.length} đơn hàng
+                      </span>
+                      <span className="text-sm font-medium text-gray-900">
+                        Tổng: {formatCurrency(calculateSelectedTotal())}
+                      </span>
+
+                      {/* Use CreateMergedPaymentShip Component */}
+                      <CreateMergedPaymentShip
+                        selectedOrders={selectedOrders}
+                        totalAmount={calculateSelectedTotal()}
+                        formatCurrency={formatCurrency}
+                        onSuccess={handlePaymentCreated}
+                        onError={handlePaymentError}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
