@@ -1,3 +1,4 @@
+// Context/AuthContext.jsx - FULL CODE FIXED
 /* eslint-disable react-refresh/only-export-components */
 import React, {
   createContext,
@@ -7,29 +8,47 @@ import React, {
   useCallback,
 } from "react";
 import { supabase } from "../config/supabaseClient";
-import { getToken, getCurrentUser } from "../Services/Auth/authService";
+import {
+  getToken,
+  getCurrentUser,
+  setAuthData,
+  clearAuthData,
+} from "../Services/Auth/authService";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUserState] = useState(null);
+  const [token, setTokenState] = useState(null); // ✅ THÊM: Lưu token
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         setLoading(true);
-        const token = getToken();
-        const userData = getCurrentUser();
+        const savedToken = getToken(); // Lấy từ "jwt"
+        const userData = getCurrentUser(); // Lấy từ "user"
 
-        if (token && userData) {
-          setUser(userData);
+        console.log(
+          "✅ Auth Check - Token:",
+          savedToken ? "Found" : "Not found"
+        );
+        console.log(
+          "✅ Auth Check - User:",
+          userData ? userData.id : "Not found"
+        );
+
+        if (savedToken && userData) {
+          setTokenState(savedToken); // ✅ THÊM: Set token state
+          setUserState(userData);
         } else {
-          setUser(null);
+          setTokenState(null);
+          setUserState(null);
         }
       } catch (error) {
-        console.error("Auth check error:", error);
-        setUser(null);
+        console.error("❌ Auth check error:", error);
+        setTokenState(null);
+        setUserState(null);
       } finally {
         setLoading(false);
       }
@@ -38,25 +57,53 @@ export function AuthProvider({ children }) {
     checkAuth();
   }, []);
 
-  const login = useCallback((userData) => {
-    setUser(userData);
+  // ✅ CẬP NHẬT: Nhận cả token và user, sử dụng setAuthData từ authService
+  const login = useCallback((userData, tokenData) => {
+    console.log("✅ Login - Setting token and user in context");
+
+    try {
+      // ✅ Sử dụng setAuthData từ authService (validation + localStorage + logging)
+      setAuthData(tokenData, userData);
+
+      // Update state
+      setTokenState(tokenData);
+      setUserState(userData);
+    } catch (error) {
+      console.error("❌ Login error:", error);
+      throw error;
+    }
   }, []);
 
   const logout = useCallback(async () => {
     try {
-      localStorage.removeItem("jwt");
-      localStorage.removeItem("user");
+      console.log("🔓 Logging out...");
+
+      // Xóa từ Supabase
       await supabase.auth.signOut();
-      setUser(null);
+
+      // Xóa từ localStorage
+      clearAuthData();
+
+      // Clear state
+      setTokenState(null);
+      setUserState(null);
+
+      console.log("✅ Logout successful");
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("❌ Logout error:", error);
+      // Vẫn clear local state ngay cả khi Supabase error
+      clearAuthData();
+      setTokenState(null);
+      setUserState(null);
     }
   }, []);
 
+  // ✅ CẬP NHẬT: Export token
   const value = {
     user,
+    token, // ✅ THÊM: Token
     loading,
-    isAuthenticated: !!user,
+    isAuthenticated: !!(user && token), // ✅ CẬP NHẬT: Kiểm tra cả user và token
     login,
     logout,
   };

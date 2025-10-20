@@ -1,19 +1,19 @@
-// MergedPaymentShip.jsx
+// MergedPaymentOrder.jsx - FULL CODE FIXED
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { useAuth } from "../../contexts/AuthContext"; // ✅ THÊM: Import useAuth
 import AccountSearch from "../Order/AccountSearch";
 import orderCustomerService from "../../Services/Order/orderCustomerService";
-import CreateMergedPaymentShip from "./CreateMergedPaymentShip";
 import PaymentDialog from "./PaymentDialog";
+import CreateMergedPaymentOrder from "./CreateMergedPaymentOrder";
 import {
   User,
   Calendar,
   CreditCard,
+  Package,
   Search,
   CheckSquare,
   Square,
-  Truck,
-  Weight,
 } from "lucide-react";
 
 // Helper function to extract error message from backend
@@ -46,7 +46,10 @@ const getErrorMessage = (error) => {
   return error.message || "Đã xảy ra lỗi không xác định";
 };
 
-const MergedPaymentShip = () => {
+const MergedPaymentOrder = () => {
+  // ✅ THÊM: Lấy token từ useAuth hook
+  const { token, isAuthenticated, logout } = useAuth();
+
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -63,7 +66,7 @@ const MergedPaymentShip = () => {
     setHasSearched(true);
     setSelectedOrders([]);
     setPaymentDialog({ open: false, payment: null });
-    await fetchCustomerShippingOrders(customer.customerCode);
+    await fetchCustomerOrders(customer.customerCode);
   };
 
   // Clear customer selection
@@ -93,20 +96,19 @@ const MergedPaymentShip = () => {
     }
   };
 
-  // Handle payment creation success
-  const handlePaymentCreated = async (payment) => {
+  // Handle successful merged payment creation
+  const handleMergedPaymentSuccess = (payment) => {
     setPaymentDialog({ open: true, payment });
     setSelectedOrders([]);
-    // Refresh orders list
+    // Optionally refresh orders list
     if (selectedCustomer) {
-      await fetchCustomerShippingOrders(selectedCustomer.customerCode);
+      fetchCustomerOrders(selectedCustomer.customerCode);
     }
   };
 
-  // Handle payment creation error
-  const handlePaymentError = (error) => {
-    console.error("Merged payment ship error:", error);
-    // Error is already handled in CreateMergedPaymentShip component
+  // Handle merged payment creation error
+  const handleMergedPaymentError = (error) => {
+    console.error("Merged payment error:", error);
   };
 
   // Close payment dialog
@@ -122,18 +124,24 @@ const MergedPaymentShip = () => {
     }
   };
 
-  // Fetch shipping orders for selected customer
-  const fetchCustomerShippingOrders = async (customerCode) => {
+  // ✅ CẬP NHẬT: Fetch orders using token from context
+  const fetchCustomerOrders = async (customerCode) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
 
+      // ✅ THAY ĐỔI: Lấy token từ context (key đúng: "jwt")
       if (!token) {
-        toast.error("Không tìm thấy token xác thực lỗi ở mergedPaymentShip");
+        console.warn("❌ Token không tìm thấy trong AuthContext");
+        toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.", {
+          duration: 5000,
+        });
         return;
       }
 
-      const data = await orderCustomerService.getOrdersShippingByCustomer(
+      console.log("✅ Token found, fetching orders for:", customerCode);
+
+      // ✅ Sử dụng token từ context
+      const data = await orderCustomerService.getOrdersByCustomer(
         customerCode,
         token
       );
@@ -142,19 +150,32 @@ const MergedPaymentShip = () => {
 
       if (!data || data.length === 0) {
         toast.info(
-          `Không tìm thấy đơn hàng vận chuyển nào cho khách hàng ${customerCode}`
+          `Không tìm thấy đơn hàng nào cho khách hàng ${customerCode}`
         );
       } else {
         toast.success(
-          `Tìm thấy ${data.length} đơn hàng vận chuyển cho khách hàng ${customerCode}`
+          `Tìm thấy ${data.length} đơn hàng cho khách hàng ${customerCode}`
         );
       }
     } catch (error) {
-      console.error("Error fetching customer shipping orders:", error);
-      const errorMessage = getErrorMessage(error);
-      toast.error(`Không thể tải đơn hàng vận chuyển: ${errorMessage}`, {
-        duration: 5000,
-      });
+      console.error("❌ Error fetching customer orders:", error);
+
+      // ✅ Xử lý lỗi 401 (token hết hạn hoặc không hợp lệ)
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.warn("❌ Token expired or invalid - 401/403 received");
+        toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.", {
+          duration: 5000,
+        });
+        // Optional: Logout and redirect to login
+        // await logout();
+        // window.location.href = "/login";
+      } else {
+        const errorMessage = getErrorMessage(error);
+        toast.error(`Không thể tải đơn hàng: ${errorMessage}`, {
+          duration: 5000,
+        });
+      }
+
       setOrders([]);
     } finally {
       setLoading(false);
@@ -220,103 +241,82 @@ const MergedPaymentShip = () => {
         text: "Đã hủy",
         className: "bg-red-100 text-red-800",
       },
-    };
-
-    const config = statusConfig[status] || {
-      text: status,
-      className: "bg-gray-100 text-gray-800",
+      DANG_SHIP: {
+        text: "Đang vận chuyển",
+        className: "bg-purple-100 text-purple-800",
+      },
     };
 
     return (
       <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.className}`}
+        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+          statusConfig[status]?.className || "bg-gray-100 text-gray-800"
+        }`}
       >
-        {config.text}
+        {statusConfig[status]?.text || status}
       </span>
     );
   };
 
   // Get order type display
-  const getOrderTypeDisplay = (orderType) => {
-    const typeConfig = {
-      MUA_HO: "Mua hộ",
-      VAN_CHUYEN: "Vận chuyển",
-      KY_GUI: "Ký gửi",
+  const getOrderTypeDisplay = (type) => {
+    const typeMap = {
+      THUONG: "Thường",
+      TET: "Tết",
+      BLACK_FRIDAY: "Black Friday",
+      FLASH_SALE: "Flash Sale",
     };
-    return typeConfig[orderType] || orderType;
+    return typeMap[type] || type;
   };
 
   return (
-    <div className="mx-auto p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center">
-          Thanh toán vận chuyển
-        </h1>
-      </div>
+    <div className="space-y-6">
+      {/* Account Search */}
+      <AccountSearch
+        onSelectCustomer={handleSelectCustomer}
+        onClearCustomer={handleClearCustomer}
+      />
 
-      {/* Customer Search */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="flex items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Tìm kiếm khách hàng
-          </h2>
-        </div>
-
-        <div className="max-w-md">
-          <AccountSearch
-            onSelectAccount={handleSelectCustomer}
-            onClear={handleClearCustomer}
-            value={
-              selectedCustomer
-                ? `${selectedCustomer.customerCode} - ${selectedCustomer.name}`
-                : ""
-            }
-          />
-        </div>
-
-        {/* Selected Customer Info */}
-        {selectedCustomer && (
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center space-x-3">
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <User className="w-6 h-6 text-blue-600" />
-                </div>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-medium text-blue-900">
+      {/* Selected Customer Info */}
+      {selectedCustomer && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="px-6 py-4">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <User className="w-5 h-5 mr-2" />
+              Thông tin khách hàng
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <div>
+                  <span className="font-medium">Tên:</span>{" "}
                   {selectedCustomer.name}
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2 text-sm text-blue-700">
-                  <div>
-                    <span className="font-medium">Mã KH:</span>{" "}
-                    {selectedCustomer.customerCode}
-                  </div>
-
-                  <div>
-                    <span className="font-medium">Email:</span>{" "}
-                    {selectedCustomer.email}
-                  </div>
-                  <div>
-                    <span className="font-medium">SĐT:</span>{" "}
-                    {selectedCustomer.phone}
-                  </div>
-                  <div className="inline-flex items-center gap-1 bg-red-50 border border-red-200 rounded-md px-2 py-1 text-sm font-semibold text-red-700 shadow-sm w-auto max-w-max">
-                    <span className="font-medium">Số dư:</span>{" "}
-                    {new Intl.NumberFormat("vi-VN").format(
-                      selectedCustomer.balance
-                    )}{" "}
-                    VND
-                  </div>
+                </div>
+                <div>
+                  <span className="font-medium">Mã khách hàng:</span>{" "}
+                  {selectedCustomer.customerCode}
+                </div>
+                <div>
+                  <span className="font-medium">Email:</span>{" "}
+                  {selectedCustomer.email}
+                </div>
+                <div>
+                  <span className="font-medium">SĐT:</span>{" "}
+                  {selectedCustomer.phone}
+                </div>
+                <div className="inline-flex items-center gap-1 bg-red-50 border border-red-200 rounded-md px-2 py-1 text-sm font-semibold text-red-700 shadow-sm w-auto max-w-max">
+                  <span className="font-medium">Số dư:</span>{" "}
+                  {new Intl.NumberFormat("vi-VN").format(
+                    selectedCustomer.balance
+                  )}{" "}
+                  VND
                 </div>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Payment Dialog */}
+      {/* Payment Dialog - Using reusable component */}
       <PaymentDialog
         open={paymentDialog.open}
         payment={paymentDialog.payment}
@@ -330,9 +330,7 @@ const MergedPaymentShip = () => {
       {loading && (
         <div className="flex justify-center items-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600">
-            Đang tải đơn hàng vận chuyển...
-          </span>
+          <span className="ml-3 text-gray-600">Đang tải đơn hàng...</span>
         </div>
       )}
 
@@ -343,8 +341,7 @@ const MergedPaymentShip = () => {
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                {/* <Truck className="w-5 h-5 mr-2 text-blue-600" /> */}
-                Danh sách thanh toán vận chuyển
+                Danh sách đơn hàng
                 {orders.length > 0 && (
                   <span className="ml-2 text-sm font-normal text-gray-600">
                     ({orders.length} đơn hàng)
@@ -377,13 +374,13 @@ const MergedPaymentShip = () => {
                         Tổng: {formatCurrency(calculateSelectedTotal())}
                       </span>
 
-                      {/* Use CreateMergedPaymentShip Component */}
-                      <CreateMergedPaymentShip
+                      {/* Use CreateMergedPaymentOrder Component */}
+                      <CreateMergedPaymentOrder
                         selectedOrders={selectedOrders}
                         totalAmount={calculateSelectedTotal()}
                         formatCurrency={formatCurrency}
-                        onSuccess={handlePaymentCreated}
-                        onError={handlePaymentError}
+                        onSuccess={handleMergedPaymentSuccess}
+                        onError={handleMergedPaymentError}
                       />
                     </div>
                   )}
@@ -395,12 +392,12 @@ const MergedPaymentShip = () => {
           {/* Orders Content */}
           {orders.length === 0 ? (
             <div className="text-center py-12">
-              <Truck className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Không có đơn hàng vận chuyển
+                Không có đơn hàng
               </h3>
               <p className="text-gray-500">
-                Khách hàng này chưa có đơn hàng vận chuyển nào cần thanh toán
+                Khách hàng này chưa có đơn hàng nào trong hệ thống
               </p>
             </div>
           ) : (
@@ -456,14 +453,14 @@ const MergedPaymentShip = () => {
                               <span>Mã GD: {order.paymentCode}</span>
                             </div>
                           )}
-                          {order.totalNetWeight && (
-                            <div className="flex items-center">
-                              <Weight className="w-4 h-4 mr-2" />
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-400 text-white">
-                                Tổng ký: {order.totalNetWeight}kg
-                              </span>
-                            </div>
-                          )}
+                          <div className="flex items-center">
+                            <span className="font-medium">Tỷ giá:</span>
+                            <span className="ml-1">
+                              {order.exchangeRate
+                                ? order.exchangeRate.toLocaleString("vi-VN")
+                                : "N/A"}
+                            </span>
+                          </div>
                         </div>
 
                         {order.note && (
@@ -483,7 +480,7 @@ const MergedPaymentShip = () => {
                         {formatCurrency(order.finalPriceOrder)}
                       </div>
                       <div className="text-sm text-gray-500 mt-1">
-                        Phí vận chuyển
+                        Tổng đơn hàng
                       </div>
                     </div>
                   </div>
@@ -499,7 +496,7 @@ const MergedPaymentShip = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 text-center py-12">
           <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Chọn khách hàng để xem đơn hàng vận chuyển
+            Chọn khách hàng để xem đơn hàng
           </h3>
           <p className="text-gray-500">
             Sử dụng ô tìm kiếm ở trên để tìm và chọn khách hàng
@@ -510,4 +507,4 @@ const MergedPaymentShip = () => {
   );
 };
 
-export default MergedPaymentShip;
+export default MergedPaymentOrder;
