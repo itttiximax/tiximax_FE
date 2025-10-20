@@ -96,7 +96,7 @@ const ConfirmPaymentOrder = ({
       const token = localStorage.getItem("token");
 
       if (!token) {
-        toast.error("Không tìm thấy token xác thực");
+        toast.error("Không tìm thấy token xác thực confirmPayment");
         return;
       }
 

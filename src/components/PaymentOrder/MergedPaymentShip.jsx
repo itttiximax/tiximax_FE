@@ -129,7 +129,7 @@ const MergedPaymentShip = () => {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        toast.error("Không tìm thấy token xác thực");
+        toast.error("Không tìm thấy token xác thực lỗi ở mergedPaymentShip");
         return;
       }
 
