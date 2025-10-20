@@ -14,7 +14,6 @@ import {
   CheckSquare,
   Square,
 } from "lucide-react";
-
 // Helper function to extract error message from backend
 const getErrorMessage = (error) => {
   if (error.response) {
@@ -125,7 +124,7 @@ const MergedPaymentOrder = () => {
   const fetchCustomerOrders = async (customerCode) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("jwt"); // ✅ ĐÚNG KEY
+      const token = localStorage.getItem("jwt"); // ✅token
 
       if (!token) {
         toast.error("Không tìm thấy token xác thực lỗi ở mergedPaymentOrder");

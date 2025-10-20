@@ -2,7 +2,7 @@ import api from "../../config/api.js";
 
 const orderDepositService = {
   // Create deposit order
-  createDepositOrder: async (customerCode, routeId, orderData, token) => {
+  createDepositOrder: async (customerCode, routeId, orderData) => {
     try {
       // Input validation
       if (!customerCode) {
@@ -16,9 +16,6 @@ const orderDepositService = {
       }
       if (!orderData) {
         throw new Error("Order data is required");
-      }
-      if (!token) {
-        throw new Error("Authorization token is required");
       }
 
       // Validate orderData structure
@@ -35,16 +32,10 @@ const orderDepositService = {
         throw new Error("Consignment link requests must be an array");
       }
 
+      // ✅ FIXED: Không truyền token, để api interceptor xử lý
       const response = await api.post(
-        `/orders/deposit/${customerCode}/${routeId}`, // ✅ FIXED: Changed from depositAmount to routeId
-        orderData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            Accept: "*/*",
-          },
-        }
+        `/orders/deposit/${customerCode}/${routeId}`,
+        orderData
       );
       return response.data;
     } catch (error) {
@@ -60,8 +51,7 @@ const orderDepositService = {
     orderType,
     destinationId,
     checkRequired,
-    consignmentLinkRequests,
-    token
+    consignmentLinkRequests
   ) => {
     try {
       // Build order data
@@ -72,11 +62,11 @@ const orderDepositService = {
         consignmentLinkRequests,
       };
 
+      // ✅ FIXED: Bỏ token parameter
       return await orderDepositService.createDepositOrder(
         customerCode,
-        routeId, // ✅ FIXED: Changed from depositAmount to routeId
-        orderData,
-        token
+        routeId,
+        orderData
       );
     } catch (error) {
       console.error("Error creating bulk deposit order:", error);
@@ -85,10 +75,9 @@ const orderDepositService = {
   },
 };
 
-// Export default service
 export default orderDepositService;
 
-// BACKWARD COMPATIBILITY
+// Backward compatibility
 export const createDepositOrder = orderDepositService.createDepositOrder;
 export const createDepositOrderBulk =
   orderDepositService.createDepositOrderBulk;

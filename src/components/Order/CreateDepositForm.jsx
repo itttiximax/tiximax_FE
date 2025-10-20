@@ -264,7 +264,7 @@ const CreateDepositForm = () => {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("jwt");
       const consignmentLinkRequests = products.map((product) => {
         const quantity = Number(product.quantity);
         const extraCharge = Number(product.extraCharge) || 0;
