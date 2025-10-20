@@ -183,8 +183,8 @@ const CreateAuctionPurchase = ({
 
       await createPurchaseService.createAuctionPurchase(
         orderCode,
-        payload,
-        token
+        payload
+        // token
       );
 
       toast.success("Tạo purchase đấu giá thành công!");

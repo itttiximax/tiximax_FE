@@ -239,6 +239,7 @@ const MergedPaymentOrder = () => {
       MUA_HO: "Mua hộ",
       VAN_CHUYEN: "Vận chuyển",
       KY_GUI: "Ký gửi",
+      DAU_GIA: "Đấu giá",
     };
     return typeConfig[orderType] || orderType;
   };
