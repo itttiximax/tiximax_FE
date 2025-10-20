@@ -126,7 +126,7 @@ const MergedPaymentShip = () => {
   const fetchCustomerShippingOrders = async (customerCode) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("jwt"); // ✅ ĐÚNG KEY
 
       if (!token) {
         toast.error("Không tìm thấy token xác thực lỗi ở mergedPayment");
