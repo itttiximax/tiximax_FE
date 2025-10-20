@@ -3,7 +3,7 @@ import api from "../../config/api.js";
 
 const createPurchaseService = {
   // Create purchase for MUA_HO (Mua hộ)
-  createPurchase: async (orderCode, data, token) => {
+  createPurchase: async (orderCode, data) => {
     // Input validation
     if (!orderCode) {
       throw new Error("Order code is required");
@@ -13,39 +13,20 @@ const createPurchaseService = {
       throw new Error("Purchase data is required");
     }
 
-    if (!token) {
-      throw new Error("Authorization token is required");
-    }
-
-    const response = await api.post(
-      `/purchases/add?orderCode=${orderCode}`,
-      data,
-      {
-        headers: {
-          accept: "*/*",
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        timeout: 30000,
-        validateStatus: (status) => status < 500,
-      }
-    );
-
-    if (response.status >= 200 && response.status < 300) {
+    try {
+      const response = await api.post(
+        `/purchases/add?orderCode=${orderCode}`,
+        data
+      );
       return response.data;
+    } catch (error) {
+      console.error("Error creating purchase:", error);
+      throw error;
     }
-
-    // Handle non-2xx status codes
-    const errorMessage =
-      response.data?.message || response.statusText || "Unknown error";
-    const error = new Error(`HTTP ${response.status}: ${errorMessage}`);
-    error.status = response.status;
-    error.data = response.data;
-    throw error;
   },
 
   // Create purchase for DAU_GIA (Đấu giá)
-  createAuctionPurchase: async (orderCode, data, token) => {
+  createAuctionPurchase: async (orderCode, data) => {
     // Input validation
     if (!orderCode) {
       throw new Error("Order code is required");
@@ -55,39 +36,20 @@ const createPurchaseService = {
       throw new Error("Purchase data is required");
     }
 
-    if (!token) {
-      throw new Error("Authorization token is required");
-    }
-
-    const response = await api.post(
-      `/purchases/auction/add?orderCode=${orderCode}`,
-      data,
-      {
-        headers: {
-          accept: "*/*",
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        timeout: 30000,
-        validateStatus: (status) => status < 500,
-      }
-    );
-
-    if (response.status >= 200 && response.status < 300) {
+    try {
+      const response = await api.post(
+        `/purchases/auction/add?orderCode=${orderCode}`,
+        data
+      );
       return response.data;
+    } catch (error) {
+      console.error("Error creating auction purchase:", error);
+      throw error;
     }
-
-    // Handle non-2xx status codes
-    const errorMessage =
-      response.data?.message || response.statusText || "Unknown error";
-    const error = new Error(`HTTP ${response.status}: ${errorMessage}`);
-    error.status = response.status;
-    error.data = response.data;
-    throw error;
   },
 
-  // ✅ NEW: Cancel order link
-  cancelOrderLink: async (orderId, linkId, token) => {
+  // Cancel order link
+  cancelOrderLink: async (orderId, linkId) => {
     // Input validation
     if (!orderId) {
       throw new Error("Order ID is required");
@@ -97,34 +59,15 @@ const createPurchaseService = {
       throw new Error("Link ID is required");
     }
 
-    if (!token) {
-      throw new Error("Authorization token is required");
-    }
-
-    const response = await api.put(
-      `/orders/order-link/cancel/${orderId}/${linkId}`,
-      null, // PUT request with no body
-      {
-        headers: {
-          accept: "*/*",
-          Authorization: `Bearer ${token}`,
-        },
-        timeout: 30000,
-        validateStatus: (status) => status < 500,
-      }
-    );
-
-    if (response.status >= 200 && response.status < 300) {
+    try {
+      const response = await api.put(
+        `/orders/order-link/cancel/${orderId}/${linkId}`
+      );
       return response.data;
+    } catch (error) {
+      console.error("Error cancelling order link:", error);
+      throw error;
     }
-
-    // Handle non-2xx status codes
-    const errorMessage =
-      response.data?.message || response.statusText || "Unknown error";
-    const error = new Error(`HTTP ${response.status}: ${errorMessage}`);
-    error.status = response.status;
-    error.data = response.data;
-    throw error;
   },
 };
 
