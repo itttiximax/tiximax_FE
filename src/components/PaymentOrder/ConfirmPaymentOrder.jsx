@@ -93,7 +93,7 @@ const ConfirmPaymentOrder = ({
     setProcessingOrders((prev) => ({ ...prev, [order.orderId]: true }));
 
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("jwt");
 
       if (!token) {
         toast.error("Không tìm thấy token xác thực confirmPayment");

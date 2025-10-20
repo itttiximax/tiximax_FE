@@ -39,7 +39,7 @@ const ConfirmPaymentShip = ({ paymentCode, onSuccess }) => {
   const handleConfirmPayment = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("jwt");
 
       if (!token) {
         toast.error("Vui lòng đăng nhập để xác nhận thanh toán");

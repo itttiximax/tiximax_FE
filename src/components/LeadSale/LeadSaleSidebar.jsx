@@ -81,15 +81,16 @@ const LeadSaleSideBar = () => {
               icon: Package,
               label: "Thanh toán đơn hàng",
             },
-            {
-              to: "/lead-sale/auction-payment",
-              icon: Wallet,
-              label: "Thanh toán đấu giá ",
-            },
+
             {
               to: "/lead-sale/createpaymentshipping",
               icon: Truck,
               label: "Thanh toán vận chuyển",
+            },
+            {
+              to: "/lead-sale/auction-payment",
+              icon: Wallet,
+              label: "Thanh toán sau đấu giá ",
             },
           ],
           isOpen: isPaymentSupportDropdownOpen,

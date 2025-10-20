@@ -80,15 +80,16 @@ const StaffSaleSidebar = () => {
               icon: Package,
               label: "Thanh toán đơn hàng",
             },
-            {
-              to: "/staff-sale/auction-payment",
-              icon: Wallet,
-              label: "Thanh toán đấu giá ",
-            },
+
             {
               to: "/staff-sale/createpaymentshipping",
               icon: Truck,
               label: "Thanh toán vận chuyển",
+            },
+            {
+              to: "/staff-sale/auction-payment",
+              icon: Wallet,
+              label: "Thanh toán sau đấu giá ",
             },
           ],
           isOpen: isPaymentSupportDropdownOpen,
