@@ -217,7 +217,7 @@ const AuctionPayment = () => {
     setProcessingPayments((prev) => ({ ...prev, [payment.paymentId]: true }));
 
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("jwt");
 
       if (!token) {
         toast.error("Không tìm thấy token xác thực");
@@ -304,9 +304,6 @@ const AuctionPayment = () => {
                 <h1 className="text-lg font-bold text-slate-800">
                   Quản lý thanh toán đấu giá
                 </h1>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Theo dõi và xác nhận các giao dịch thanh toán
-                </p>
               </div>
             </div>
             <button

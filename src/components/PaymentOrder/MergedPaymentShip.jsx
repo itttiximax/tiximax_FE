@@ -165,7 +165,13 @@ const MergedPaymentShip = () => {
   const calculateSelectedTotal = () => {
     return orders
       .filter((order) => selectedOrders.includes(order.orderCode))
-      .reduce((total, order) => total + (order.finalPriceOrder || 0), 0);
+      .reduce(
+        (total, order) =>
+          total +
+          (Number(order.finalPriceOrder) || 0) +
+          (Number(order.leftoverMoney) || 0),
+        0
+      );
   };
 
   // Format currency
@@ -484,6 +490,12 @@ const MergedPaymentShip = () => {
                       </div>
                       <div className="text-sm text-gray-500 mt-1">
                         Phí vận chuyển
+                      </div>
+                      <div className="text-base font-bold text-gray-900">
+                        {formatCurrency(order.leftoverMoney)}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Tiền thiếu
                       </div>
                     </div>
                   </div>
