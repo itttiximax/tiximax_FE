@@ -61,7 +61,7 @@ const CreateDepositForm = () => {
     const fetchData = async () => {
       try {
         setUi((prev) => ({ ...prev, error: null }));
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("jwt");
 
         const [routesData, destinationsData, productTypesData] =
           await Promise.all([
@@ -264,7 +264,6 @@ const CreateDepositForm = () => {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem("jwt");
       const consignmentLinkRequests = products.map((product) => {
         const quantity = Number(product.quantity);
         const extraCharge = Number(product.extraCharge) || 0;
@@ -317,14 +316,14 @@ const CreateDepositForm = () => {
         routeId: Number(preliminary.routeId),
         depositAmount,
         orderData,
-        token,
+        // token,
       });
 
       await orderDepositService.createDepositOrder(
         preliminary.customerCode,
         Number(preliminary.routeId),
-        orderData,
-        token
+        orderData
+        // token
       );
 
       toast.success("Tạo đơn ký gửi thành công!");

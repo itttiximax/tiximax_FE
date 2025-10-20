@@ -222,13 +222,6 @@ const ConfirmPaymentOrder = ({
                 {/* Status */}
                 <div className="col-span-1">{getStatusBadge(order.status)}</div>
 
-                {/* Exchange Rate */}
-                <div className="col-span-1">
-                  <div className="text-sm text-gray-900">
-                    {order.exchangeRate?.toLocaleString("vi-VN")}
-                  </div>
-                </div>
-
                 {/* Total Amount */}
                 <div className="col-span-1">
                   <div className="font-medium text-gray-900">
