@@ -365,7 +365,7 @@ const OrderAuctionList = () => {
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-xs font-medium hover:from-green-600 hover:to-green-700 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200"
                         >
                           <Plus className="w-3 h-3" />
-                          Tạo Purchase
+                          Mua hộ
                         </button>
                       )}
                     </div>

@@ -329,7 +329,7 @@ const CreateAuctionPurchase = ({
             <div>
               <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                 <span className="inline-block w-1 h-6 bg-purple-600 rounded"></span>
-                Tạo Purchase Đấu Giá
+                Mua hàng đấu giá
               </h3>
               <p className="text-sm text-gray-600 mt-1">
                 Mã đơn hàng:{" "}
@@ -549,7 +549,7 @@ const CreateAuctionPurchase = ({
               {creatingPurchase && (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
               )}
-              {creatingPurchase ? "Đang tạo..." : "Tạo Đấu Giá"}
+              {creatingPurchase ? "Đang tạo..." : "Mua hàng đấu giá "}
             </button>
           </div>
         </div>

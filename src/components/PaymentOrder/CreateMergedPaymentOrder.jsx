@@ -114,7 +114,7 @@ const MergedPaymentConfigModal = ({
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">
-              Cấu hình thanh toán {selectedCount > 1 ? "gộp" : ""}
+              Thanh toán {selectedCount > 1 ? "gộp" : ""}
             </h3>
             <button
               onClick={handleClose}
@@ -247,7 +247,7 @@ const MergedPaymentConfigModal = ({
           {/* Summary */}
           <div className="border-t pt-4">
             <h4 className="text-sm font-semibold text-gray-700 mb-2">
-              Tóm tắt cấu hình:
+              Thông tin xác nhận:
             </h4>
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">

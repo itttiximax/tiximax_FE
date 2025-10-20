@@ -320,7 +320,7 @@ const CreatePurchase = ({
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-semibold text-gray-900">
-              Tạo Purchase - {orderCode}
+              Mua hộ - {orderCode}
             </h3>
             <button
               onClick={handleClose}
@@ -534,7 +534,7 @@ const CreatePurchase = ({
               {creatingPurchase && (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
               )}
-              {creatingPurchase ? "Đang tạo..." : "Tạo Purchase"}
+              {creatingPurchase ? "Đang tạo..." : "Mua hộ"}
             </button>
           </div>
         </div>

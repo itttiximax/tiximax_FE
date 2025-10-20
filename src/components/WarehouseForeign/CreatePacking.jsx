@@ -154,14 +154,14 @@ const CreatePacking = () => {
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Tạo Packing</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Đóng gói</h1>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Form */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-6">
-              Packing Details
+              Chi tiết đóng gói
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -171,14 +171,12 @@ const CreatePacking = () => {
                   htmlFor="destinationId"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Destination
+                  Chọn điểm đến
                 </label>
                 {loadingDestinations ? (
                   <div className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 flex items-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
-                    <span className="text-gray-500">
-                      Loading destinations...
-                    </span>
+                    <span className="text-gray-500">Loading ......</span>
                   </div>
                 ) : (
                   <select
@@ -189,7 +187,7 @@ const CreatePacking = () => {
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                   >
-                    <option value="">Select destination</option>
+                    <option value="">Chọn điểm đến </option>
                     {destinations.map((destination) => (
                       <option
                         key={destination.destinationId}
@@ -201,17 +199,15 @@ const CreatePacking = () => {
                   </select>
                 )}
                 {destinations.length === 0 && !loadingDestinations && (
-                  <p className="text-sm text-red-500 mt-1">
-                    No destinations available
-                  </p>
+                  <p className="text-sm text-red-500 mt-1">Không có điểm đến</p>
                 )}
               </div>
 
               {/* Shipment Codes */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Shipment Codes (Hỗ trợ quét barcode - Quét xong 1 mã tự động
-                  nhảy xuống ô thứ 2)
+                  Mã vận đơn (Hỗ trợ quét barcode - Quét xong 1 mã tự động nhảy
+                  xuống ô thứ 2)
                 </label>
                 <div className="space-y-3">
                   {formData.shipmentCodes.map((code, index) => (
@@ -244,7 +240,7 @@ const CreatePacking = () => {
                     onClick={addShipmentCode}
                     className="w-full py-3 px-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors"
                   >
-                    + Add Another Shipment Code
+                    + Thêm mã vận đơn
                   </button>
                 </div>
               </div>
@@ -254,7 +250,7 @@ const CreatePacking = () => {
                 disabled={loading || !formData.destinationId}
                 className="w-full py-3 px-6 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? "Creating..." : "Create Packing"}
+                {loading ? "Creating..." : "Tạo đóng gói"}
               </button>
             </form>
           </div>
@@ -273,7 +269,7 @@ const CreatePacking = () => {
               <div className="bg-white rounded-lg shadow-lg p-6 border-l-4 border-green-400">
                 <div className="flex items-center mb-4">
                   <h3 className="text-lg font-semibold text-green-800">
-                    Packing Created Successfully!
+                    Hoàn thành đóng đơn!
                   </h3>
                 </div>
 
@@ -321,15 +317,15 @@ const CreatePacking = () => {
             {!result && !error && (
               <div className="bg-blue-50 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-blue-800 mb-3">
-                  Instructions
+                  Hướng dẫn đóng gói
                 </h3>
                 <ol className="space-y-2 text-blue-700">
-                  <li>1. Select a destination from the dropdown</li>
+                  <li>1. Chọn điểm đến từ danh sách thả xuống</li>
                   <li>
-                    2. Add shipment codes manually or scan with barcode (quét
-                    xong 1 mã tự động nhảy xuống ô thứ 2)
+                    2. Nhập mã lô hàng thủ công hoặc quét bằng mã vạch (sau khi
+                    quét xong một mã sẽ tự động chuyển sang ô tiếp theo)
                   </li>
-                  <li>3. Click create to generate packing</li>
+                  <li>3. Nhấn "Tạo" để tạo gói hàng</li>
                 </ol>
               </div>
             )}

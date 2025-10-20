@@ -63,8 +63,7 @@ const MergedPaymentShipConfigModal = ({
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-              <Truck className="w-5 h-5 mr-2 text-blue-600" />
-              Cấu hình thanh toán vận chuyển
+              Thanh toán vận chuyển
             </h3>
             <button
               onClick={handleClose}
@@ -133,7 +132,7 @@ const MergedPaymentShipConfigModal = ({
           {/* Summary */}
           <div className="border-t pt-4">
             <h4 className="text-sm font-semibold text-gray-700 mb-2">
-              Tóm tắt cấu hình:
+              Xác nhận đơn hàng:
             </h4>
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">

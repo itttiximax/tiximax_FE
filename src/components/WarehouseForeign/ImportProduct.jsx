@@ -201,9 +201,7 @@ const ImportProduct = () => {
       />
 
       <div className="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">
-          Import Product
-        </h2>
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">Nhập kho hàng</h2>
 
         <div className="grid lg:grid-cols-5 gap-6">
           {/* Input Section */}
@@ -257,14 +255,14 @@ const ImportProduct = () => {
                       Processing...
                     </span>
                   ) : (
-                    `Submit (${codes.length})`
+                    `Gửi (${codes.length})`
                   )}
                 </button>
                 <button
                   onClick={clearAll}
                   className="px-4 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  Clear
+                  Xóa
                 </button>
               </div>
 

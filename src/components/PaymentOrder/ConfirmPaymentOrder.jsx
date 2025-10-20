@@ -1,6 +1,16 @@
-// ConfirmPaymentOrder.jsx
+// ConfirmPaymentOrder.jsx - REDESIGNED WITH CLEAN BLUE THEME
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import {
+  User,
+  Calendar,
+  DollarSign,
+  AlertTriangle,
+  CheckCircle,
+  FileText,
+  CreditCard,
+  Package,
+} from "lucide-react";
 import confirmPaymentService from "../../Services/Payment/confirmPaymentService";
 
 // Helper function to extract error message from backend
@@ -96,7 +106,7 @@ const ConfirmPaymentOrder = ({
       const token = localStorage.getItem("jwt");
 
       if (!token) {
-        toast.error("Không tìm thấy token xác thực confirmPayment");
+        toast.error("Không tìm thấy token xác thực");
         return;
       }
 
@@ -158,27 +168,37 @@ const ConfirmPaymentOrder = ({
     const statusConfig = {
       CHO_THANH_TOAN: {
         text: "Chờ thanh toán",
-        className: "bg-orange-100 text-orange-800",
+        className: "bg-blue-50 text-blue-700 border border-blue-200",
       },
     };
 
     const config = statusConfig[status] || {
       text: status,
-      className: "bg-gray-100 text-gray-800",
+      className: "bg-slate-50 text-slate-600 border border-slate-200",
     };
 
     return (
       <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.className}`}
+        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${config.className}`}
       >
         {config.text}
       </span>
     );
   };
 
+  // Get order type label
+  const getOrderTypeLabel = (type) => {
+    const typeMap = {
+      DON_HANG: "Đơn hàng",
+      DON_DAU_GIA: "Đơn đấu giá",
+      MUA_HO: "Mua hộ",
+    };
+    return typeMap[type] || type;
+  };
+
   return (
     <>
-      <div className="divide-y divide-gray-200">
+      <div className="divide-y divide-slate-200">
         {orders.map((order) => {
           const isProcessing = processingOrders[order.orderId];
           const paymentResult = paymentResults[order.orderId];
@@ -186,36 +206,43 @@ const ConfirmPaymentOrder = ({
           return (
             <div
               key={order.orderId}
-              className="p-6 hover:bg-gray-50 transition-colors"
+              className="p-4 hover:bg-slate-50 transition-colors"
             >
-              <div className="grid grid-cols-12 gap-4 items-center">
+              <div className="grid grid-cols-12 gap-3 items-center text-sm">
                 {/* Order Code */}
                 <div className="col-span-2">
-                  <div className="font-medium text-gray-900">
+                  <div className="font-bold text-slate-800">
                     {order.orderCode}
                   </div>
                 </div>
 
-                {/* Customer Name - MỚI THÊM */}
+                {/* Customer Name */}
                 <div className="col-span-2">
-                  <div className="text-sm font-medium text-gray-900">
-                    {order.customer?.name || "N/A"}
+                  <div className="flex items-center gap-1.5 text-slate-700">
+                    <User className="w-3 h-3 text-slate-500" />
+                    <span className="text-xs font-medium">
+                      {order.customer?.name || "N/A"}
+                    </span>
                   </div>
                 </div>
 
                 {/* Payment Code */}
                 <div className="col-span-1">
                   {order.paymentCode && (
-                    <div className="text-sm text-blue-600 font-medium">
-                      {order.paymentCode}
+                    <div className="flex items-center gap-1 text-blue-600">
+                      <CreditCard className="w-3 h-3" />
+                      <span className="text-xs font-semibold">
+                        {order.paymentCode}
+                      </span>
                     </div>
                   )}
                 </div>
 
                 {/* Order Type */}
                 <div className="col-span-1">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {order.orderType === "MUA_HO" ? "Mua hộ" : order.orderType}
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                    <Package className="w-3 h-3" />
+                    {getOrderTypeLabel(order.orderType)}
                   </span>
                 </div>
 
@@ -224,48 +251,48 @@ const ConfirmPaymentOrder = ({
 
                 {/* Total Amount */}
                 <div className="col-span-1">
-                  <div className="font-medium text-gray-900">
+                  <div className="text-xs font-bold text-blue-600">
                     {formatCurrency(order.finalPriceOrder)}
                   </div>
                 </div>
 
                 {/* Created Date */}
                 <div className="col-span-1">
-                  <div className="text-sm text-gray-500">
-                    {formatDate(order.createdAt)}
+                  <div className="flex items-center gap-1 text-xs text-slate-500">
+                    <Calendar className="w-3 h-3" />
+                    <span>{formatDate(order.createdAt)}</span>
                   </div>
                 </div>
 
                 {/* Actions */}
                 <div className="col-span-2">
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => showConfirmDialog(order)}
-                      disabled={isProcessing}
-                      className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                        isProcessing
-                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                          : "bg-green-100 text-green-800 hover:bg-green-200"
-                      }`}
-                    >
-                      {isProcessing ? "Đang xử lý..." : "Xác nhận thanh toán"}
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => showConfirmDialog(order)}
+                    disabled={isProcessing}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors w-full justify-center ${
+                      isProcessing
+                        ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                        : "bg-blue-600 text-white hover:bg-blue-700"
+                    }`}
+                  >
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    {isProcessing ? "Đang xử lý..." : "Xác nhận TT"}
+                  </button>
                 </div>
               </div>
 
               {/* Payment Result */}
               {paymentResult && (
                 <div
-                  className={`mt-3 p-3 rounded-md ${
+                  className={`mt-3 p-2.5 rounded-lg border ${
                     paymentResult.success
-                      ? "bg-green-50 border border-green-200"
-                      : "bg-red-50 border border-red-200"
+                      ? "bg-blue-50 border-blue-200"
+                      : "bg-slate-50 border-slate-200"
                   }`}
                 >
                   <div
-                    className={`text-sm font-medium ${
-                      paymentResult.success ? "text-green-800" : "text-red-800"
+                    className={`text-xs font-medium ${
+                      paymentResult.success ? "text-blue-700" : "text-slate-600"
                     }`}
                   >
                     {paymentResult.message}
@@ -275,8 +302,8 @@ const ConfirmPaymentOrder = ({
 
               {/* Note */}
               {order.note && (
-                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                  <div className="text-sm text-yellow-800">
+                <div className="mt-3 p-2.5 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="text-xs text-blue-800">
                     <strong>Ghi chú:</strong> {order.note}
                   </div>
                 </div>
@@ -288,78 +315,100 @@ const ConfirmPaymentOrder = ({
 
       {/* Confirmation Dialog */}
       {confirmDialog.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-            <div className="flex items-center mb-4">
-              <div className="flex-shrink-0">
-                <svg
-                  className="w-6 h-6 text-orange-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                  />
-                </svg>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            {/* Dialog Header */}
+            <div className="flex items-center gap-3 p-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-slate-50">
+              <div className="bg-blue-600 p-2 rounded-lg shadow-lg">
+                <AlertTriangle className="w-5 h-5 text-white" />
               </div>
-              <div className="ml-3">
-                <h3 className="text-lg font-medium text-gray-900">
+              <div className="flex-1">
+                <h3 className="text-sm font-bold text-slate-800">
                   Xác nhận thanh toán
                 </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Vui lòng kiểm tra kỹ thông tin trước khi xác nhận
+                </p>
               </div>
             </div>
 
-            <div className="mb-6">
-              <p className="text-sm text-gray-500 mb-3">
-                Bạn có chắc chắn muốn xác nhận thanh toán cho đơn hàng này
-                không?
-              </p>
+            {/* Dialog Body */}
+            <div className="p-4">
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-3 mb-4">
+                <p className="text-xs text-blue-800 font-medium">
+                  ⚠️ Bạn có chắc chắn muốn xác nhận thanh toán cho đơn hàng này
+                  không?
+                </p>
+              </div>
 
               {confirmDialog.order && (
-                <div className="bg-gray-50 rounded-md p-3 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Mã đơn hàng:</span>
-                    <span className="font-medium">
-                      {confirmDialog.order.orderCode}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Mã giao dịch:</span>
-                    <span className="font-medium text-blue-600">
-                      {confirmDialog.order.paymentCode}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Tổng tiền:</span>
-                    <span className="font-medium text-green-600">
-                      {formatCurrency(confirmDialog.order.finalPriceOrder)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Khách hàng:</span>
-                    <span className="font-medium">
-                      {confirmDialog.order.customer?.name || "N/A"}
-                    </span>
+                <div className="bg-slate-50 rounded-lg p-4 space-y-3 border border-slate-200">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="col-span-2 bg-white rounded-lg p-3 border border-slate-200">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <FileText className="w-4 h-4 text-blue-600" />
+                        <span className="text-xs font-medium text-slate-600">
+                          Mã đơn hàng
+                        </span>
+                      </div>
+                      <span className="text-xs font-bold text-blue-600">
+                        {confirmDialog.order.orderCode}
+                      </span>
+                    </div>
+
+                    <div className="bg-white rounded-lg p-3 border border-slate-200">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <CreditCard className="w-4 h-4 text-blue-600" />
+                        <span className="text-xs font-medium text-slate-600">
+                          Mã giao dịch
+                        </span>
+                      </div>
+                      <span className="text-xs font-semibold text-slate-800">
+                        {confirmDialog.order.paymentCode}
+                      </span>
+                    </div>
+
+                    <div className="bg-white rounded-lg p-3 border border-slate-200">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <User className="w-4 h-4 text-blue-600" />
+                        <span className="text-xs font-medium text-slate-600">
+                          Khách hàng
+                        </span>
+                      </div>
+                      <span className="text-xs font-semibold text-slate-800">
+                        {confirmDialog.order.customer?.name || "N/A"}
+                      </span>
+                    </div>
+
+                    <div className="col-span-2 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg p-3 border-2 border-blue-400 shadow-lg">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <DollarSign className="w-4 h-4 text-white" />
+                        <span className="text-xs font-medium text-blue-100">
+                          Số tiền thanh toán
+                        </span>
+                      </div>
+                      <span className="text-base font-bold text-white">
+                        {formatCurrency(confirmDialog.order.finalPriceOrder)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="flex space-x-3">
+            {/* Dialog Footer */}
+            <div className="flex gap-2 p-4 border-t border-slate-200 bg-slate-50">
               <button
                 onClick={closeConfirmDialog}
-                className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                className="flex-1 px-4 py-2 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-white transition-colors font-medium text-sm"
               >
                 Hủy bỏ
               </button>
               <button
                 onClick={handleConfirmedPayment}
-                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm shadow-lg shadow-blue-200"
               >
+                <CheckCircle className="w-4 h-4" />
                 Xác nhận thanh toán
               </button>
             </div>
