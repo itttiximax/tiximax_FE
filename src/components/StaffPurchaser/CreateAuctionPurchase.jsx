@@ -164,7 +164,7 @@ const CreateAuctionPurchase = ({
         return;
       }
 
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("jwt");
       if (!token) {
         toast.error("Không tìm thấy token. Vui lòng đăng nhập lại.");
         return;
