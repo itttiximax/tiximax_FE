@@ -15,6 +15,7 @@ import {
   Speaker,
   ChevronDown,
   List,
+  Gift,
   UserRoundPlus,
   BookKey,
 } from "lucide-react";
@@ -109,6 +110,11 @@ const ManagerSidebar = () => {
           text: t("Loại sản phẩm"),
           icon: <Box />,
           path: "/manager/producttype",
+        },
+        {
+          text: t("Chương trình khuyến mãi"),
+          icon: <Gift />,
+          path: "/manager/promotion",
         },
         {
           text: t("website"),

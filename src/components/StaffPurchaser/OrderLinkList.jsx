@@ -170,42 +170,12 @@ const OrderLinkList = () => {
     },
     [fetchOrders, pagination.pageNumber, pagination.pageSize]
   );
-
-  /* 
-  // ✅ OPTION 2: Optimistic Update + Refetch (Best UX + Accurate)
-  const handleCancelSuccess = useCallback((linkId, orderId) => {
-    console.log(`Cancel success for linkId: ${linkId}, orderId: ${orderId}`);
-    
-    // 1. Update UI ngay lập tức (Optimistic)
-    setOrders((prevOrders) =>
-      prevOrders.map((order) => {
-        if (order.orderId === orderId) {
-          return {
-            ...order,
-            orderLinks: order.orderLinks.map((link) =>
-              link.linkId === linkId ? { ...link, status: "HUY" } : link
-            ),
-          };
-        }
-        return order;
-      })
-    );
-    
-    // 2. Refetch sau 500ms để sync với server (background)
-    setTimeout(() => {
-      fetchOrders(pagination.pageNumber, pagination.pageSize);
-    }, 500);
-  }, [fetchOrders, pagination.pageNumber, pagination.pageSize]);
-  */
-
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleString("vi-VN", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
     });
   };
 
@@ -491,7 +461,7 @@ const OrderLinkList = () => {
                               <div className="lg:col-span-1">
                                 <div className="space-y-0.5 text-xs text-gray-600">
                                   <div>
-                                    Group:{" "}
+                                    Shop:{" "}
                                     <span className="font-medium">
                                       {link.groupTag !== "string"
                                         ? link.groupTag

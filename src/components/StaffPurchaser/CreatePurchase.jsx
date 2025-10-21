@@ -406,22 +406,36 @@ const CreatePurchase = ({
                             ? link.productName
                             : "Tên sản phẩm"}
                         </div>
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-gray-600 font-medium">
                           Website:{" "}
                           {link.website !== "string" ? link.website : "N/A"}
                         </div>
-                        <div className="text-sm text-blue-600 font-medium">
-                          Tracking: {link.trackingCode}
-                        </div>
                       </div>
-                      <div className="text-sm text-gray-600">
-                        <div>SL: {link.quantity}</div>
-                        <div>
+                      <div className="text-sm text-gray-600 font-medium">
+                        <div>Số lượng: {link.quantity}</div>
+                        <div className="text-sm text-blue-600 font-medium truncate max-w-xs">
+                          Link sản phẩm:{" "}
+                          <a
+                            href={link.productLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                            title={link.productLink}
+                          >
+                            {link.productLink}
+                          </a>
+                        </div>
+                        <div className="text-sm text-gray-600 font-medium">
+                          Shop:{" "}
+                          {link.groupTag !== "string" ? link.groupTag : "N/A"}
+                        </div>
+
+                        {/* <div>
                           Giá web: {link.priceWeb?.toLocaleString() || 0}
                         </div>
                         <div>
                           Giá Ship: {link.shipWeb?.toLocaleString() || 0}
-                        </div>
+                        </div> */}
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-semibold text-gray-900 mb-2">

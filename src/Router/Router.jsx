@@ -92,6 +92,9 @@ import AuthCallback from "../Services/Auth/AuthCallback";
 import DashboardPurchase from "../components/StaffPurchaser/DashboardPurchase";
 import ImportProduct from "../components/WarehouseForeign/ImportProduct";
 import DashboardWarehouse from "../components/WarehouseDomestic/DashboardWarehouse";
+import StaffProfile from "../components/common/StaffProfile";
+import ManagerPromotion from "../components/Manager/ManagerPromotion";
+import ImportPacking from "../components/WarehouseForeign/ImportPacking";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -176,6 +179,7 @@ const Router = createBrowserRouter([
       { path: "producttype", element: <ManagerProductType /> },
       { path: "order", element: <ManagerOrder /> },
       { path: "website", element: <ManagerWebsite /> },
+      { path: "promotion", element: <ManagerPromotion /> },
       { path: "notifications", element: <NotFound /> },
     ],
   },
@@ -191,7 +195,7 @@ const Router = createBrowserRouter([
         index: true,
         element: <LeadSalePage />,
       },
-      { path: "profile", element: <ProfilePage /> },
+      { path: "profile", element: <StaffProfile /> },
       { path: "createorder", element: <CreateOrderForm /> },
       { path: "deposit", element: <CreateDepositForm /> },
       { path: "auction", element: <CreateAuctionForm /> },
@@ -232,7 +236,7 @@ const Router = createBrowserRouter([
         index: true,
         element: <StaffSalePage />,
       },
-      { path: "profile", element: <ProfilePage /> },
+      { path: "profile", element: <StaffProfile /> },
       { path: "create-invoice", element: <CreateOrderForm /> },
       { path: "quotations", element: <PaymentOrderList /> },
       { path: "deposit", element: <CreateDepositForm /> },
@@ -271,7 +275,7 @@ const Router = createBrowserRouter([
         index: true,
         element: <StaffPurchaserPage />,
       },
-      { path: "profile", element: <ProfilePage /> },
+      { path: "profile", element: <StaffProfile /> },
       { path: "dashboard", element: <DashboardPurchase /> },
       { path: "orders", element: <OrderLinkList /> },
       { path: "auction", element: <OrderAuctionList /> },
@@ -288,10 +292,11 @@ const Router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <StaffWarehouseForeignPage /> },
-      { path: "profile", element: <ProfilePage /> },
+      { path: "profile", element: <StaffProfile /> },
       { path: "dashboard", element: <DashboardWarehouse /> },
       { path: "warehouse", element: <WarehouseList /> },
-      { path: "importproduct", element: <ImportProduct /> },
+      // { path: "importproduct", element: <ImportPacking /> },
+      { path: "importproduct", element: <ImportPacking /> },
       { path: "imports", element: <WarehouseShipment /> },
       { path: "packings", element: <CreatePacking /> },
       { path: "outbound/packingeligible", element: <PackingEligibleList /> },
@@ -300,7 +305,7 @@ const Router = createBrowserRouter([
       { path: "outbound/packinginwarehouse", element: <NotFound /> },
       { path: "stock/serial", element: <NotFound /> },
       { path: "stock/location", element: <NotFound /> },
-      { path: "audit/check", element: <NotFound /> },
+      { path: "audit/check", element: <ImportProduct /> },
       { path: "audit/reconcile", element: <NotFound /> },
       { path: "reports/dashboard", element: <NotFound /> },
       { path: "reports/performance", element: <NotFound /> },
@@ -316,7 +321,7 @@ const Router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <StaffWarehouseDomesticPage /> },
-      { path: "profile", element: <ProfilePage /> },
+      { path: "profile", element: <StaffProfile /> },
       { path: "dashboard", element: <DashboardWarehouse /> },
       { path: "inventory", element: <NotFound /> },
       { path: "imports", element: <PackingFlyingList /> },

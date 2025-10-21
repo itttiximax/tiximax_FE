@@ -222,9 +222,6 @@ const StaffListPermission = () => {
           <h2 className="text-xl font-semibold text-gray-800">
             Danh sách nhân viên & Phân quyền
           </h2>
-          <p className="text-sm text-gray-600 mt-1">
-            Quản lý danh sách nhân viên và phân quyền tuyến đường
-          </p>
         </div>
 
         <div className="p-6">

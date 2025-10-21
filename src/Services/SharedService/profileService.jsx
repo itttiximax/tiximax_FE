@@ -1,8 +1,6 @@
-// src/Services/SharedService/profileService.jsx
 import api from "../../config/api.js";
 
 const profileService = {
-  // Get current account profile
   getCurrentAccount: async () => {
     try {
       const response = await api.get("/accounts/accountCurrent");
@@ -13,10 +11,8 @@ const profileService = {
     }
   },
 
-  // Get account by ID
   getAccountById: async (accountId) => {
     try {
-      // Input validation
       if (!accountId) {
         throw new Error("Account ID is required");
       }
@@ -33,13 +29,11 @@ const profileService = {
     }
   },
 
-  // Check if user is authenticated (client-side check)
   isAuthenticated: () => {
     const token = localStorage.getItem("token");
     return !!token;
   },
 
-  // Get token from localStorage
   getToken: () => {
     return localStorage.getItem("token");
   },

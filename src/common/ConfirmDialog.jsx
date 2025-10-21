@@ -47,9 +47,9 @@ const ConfirmDialog = ({
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-            <p className="text-sm text-gray-600 mt-1">
+            {/* <p className="text-sm text-gray-600 mt-1">
               Hành động này không thể hoàn tác
-            </p>
+            </p> */}
           </div>
         </div>
 

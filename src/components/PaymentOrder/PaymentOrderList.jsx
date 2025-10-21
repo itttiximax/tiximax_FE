@@ -5,6 +5,15 @@ import createOrderPaymentService from "../../Services/Payment/createOrderPayment
 import countStatusService from "../../Services/Order/countStatusService";
 import CreateOrderPayment from "./CreateOrderPayment";
 import ConfirmPaymentOrder from "./ConfirmPaymentOrder";
+import {
+  CheckCircle,
+  Clock,
+  Package,
+  Truck,
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+} from "lucide-react";
 
 const PaymentOrderList = () => {
   const validTabs = [
@@ -25,7 +34,6 @@ const PaymentOrderList = () => {
   const [statusCounts, setStatusCounts] = useState({});
   const [statsLoading, setStatsLoading] = useState(false);
 
-  // Fetch orders based on status
   const fetchOrders = async (status, page = 0) => {
     setLoading(true);
     try {
@@ -46,13 +54,9 @@ const PaymentOrderList = () => {
     }
   };
 
-  // Fetch status statistics
   const fetchStatusStatistics = async () => {
-    setStatsLoading(true);
     try {
       const response = await countStatusService.getForPaymentStatistics();
-      console.log("Status statistics response:", response);
-      // Ensure all valid tabs have a count, defaulting to 0 if missing
       const normalizedCounts = validTabs.reduce((acc, tab) => {
         acc[tab] = response[tab] ?? 0;
         return acc;
@@ -61,65 +65,60 @@ const PaymentOrderList = () => {
     } catch (error) {
       console.error("Error fetching payment statistics:", error);
       toast.error(
-        error.message.includes("DA_DU_HANG")
+        error.message?.includes("DA_DU_HANG")
           ? "Không thể tải thống kê cho đơn hàng đã đủ hàng"
           : "Không thể tải thống kê trạng thái"
       );
-      // Set default counts to 0 for all tabs on error
       setStatusCounts(
         validTabs.reduce((acc, tab) => ({ ...acc, [tab]: 0 }), {})
       );
-    } finally {
-      setStatsLoading(false);
     }
   };
 
-  // Update localStorage and fetch data when activeTab changes
+  // Đồng bộ spinner count khi chuyển tab
   useEffect(() => {
     localStorage.setItem("activeTab", activeTab);
-    fetchOrders(activeTab, 0);
     setPaymentResults({});
-    fetchStatusStatistics();
+    setLoading(true);
+    setStatsLoading(true);
+
+    Promise.all([fetchOrders(activeTab, 0), fetchStatusStatistics()])
+      .catch(() => {}) // lỗi đã toast ở từng hàm
+      .finally(() => {
+        setLoading(false);
+        setStatsLoading(false);
+      });
   }, [activeTab]);
 
-  // Tab configurations
   const tabConfigs = [
     {
       key: "DA_XAC_NHAN",
       label: "Đã xác nhận",
-      color: "text-green-700",
-      bgColor: "bg-white",
+      icon: CheckCircle,
+      color: "emerald",
     },
     {
       key: "CHO_THANH_TOAN",
       label: "Chờ thanh toán",
-      color: "text-orange-700",
-      bgColor: "bg-white",
+      icon: Clock,
+      color: "orange",
     },
-    {
-      key: "DA_DU_HANG",
-      label: "Đã đủ hàng",
-      color: "text-blue-700",
-      bgColor: "bg-white",
-    },
+    { key: "DA_DU_HANG", label: "Đã đủ hàng", icon: Package, color: "blue" },
     {
       key: "CHO_THANH_TOAN_SHIP",
       label: "Chờ thanh toán ship",
-      color: "text-yellow-700",
-      bgColor: "bg-white",
+      icon: Truck,
+      color: "purple",
     },
   ];
 
-  // Handle page change
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
       fetchOrders(activeTab, newPage);
     }
   };
 
-  // Render appropriate component based on active tab - UPDATED để truyền customer name
   const renderOrderComponent = () => {
-    // Thêm customer name vào orders trước khi truyền xuống components
     const ordersWithCustomer = orders.map((order) => ({
       ...order,
       customerName: order.customer?.name || "N/A",
@@ -137,7 +136,6 @@ const PaymentOrderList = () => {
       );
     }
 
-    // For other tabs, use the original CreateOrderPayment component
     return (
       <CreateOrderPayment
         orders={ordersWithCustomer}
@@ -150,14 +148,12 @@ const PaymentOrderList = () => {
     );
   };
 
-  // Get header columns based on active tab - UPDATED với cột Khách hàng
   const getHeaderColumns = () => {
     if (activeTab === "CHO_THANH_TOAN") {
-      // Special headers for CHO_THANH_TOAN tab with separate payment code column
       return [
         { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
-        { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" }, // MỚI THÊM
-        { key: "paymentCode", label: "Mã giao dịch", colSpan: "col-span-1" },
+        { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" },
+        { key: "paymentCode", label: "Mã giao dịch", colSpan: "col-span-2" }, // ✨ ĐÃ SỬA: từ col-span-1 → col-span-2
         { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
         { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
         { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-1" },
@@ -166,17 +162,15 @@ const PaymentOrderList = () => {
       ];
     }
 
-    // Default headers for other tabs - UPDATED với cột Khách hàng
     const baseColumns = [
       { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
-      { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" }, // MỚI THÊM
+      { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" },
       { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
       { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
       { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-2" },
       { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-1" },
     ];
 
-    // Add actions column for specific tabs
     if (activeTab === "DA_XAC_NHAN") {
       baseColumns.push({
         key: "actions",
@@ -188,105 +182,209 @@ const PaymentOrderList = () => {
     return baseColumns;
   };
 
+  // Màu tab (active có nền màu + chữ trắng; không hover)
+  const getColorClasses = (color) => {
+    const colors = {
+      emerald: {
+        activeBg: "bg-emerald-600",
+        activeBorder: "border-emerald-600",
+        activeText: "text-white",
+        icon: "text-emerald-600",
+        badge: "bg-emerald-600",
+      },
+      orange: {
+        activeBg: "bg-orange-600",
+        activeBorder: "border-orange-600",
+        activeText: "text-white",
+        icon: "text-orange-600",
+        badge: "bg-orange-600",
+      },
+      blue: {
+        activeBg: "bg-blue-600",
+        activeBorder: "border-blue-600",
+        activeText: "text-white",
+        icon: "text-blue-600",
+        badge: "bg-blue-600",
+      },
+      purple: {
+        activeBg: "bg-purple-600",
+        activeBorder: "border-purple-600",
+        activeText: "text-white",
+        icon: "text-purple-600",
+        badge: "bg-purple-600",
+      },
+    };
+    return colors[color];
+  };
+
   return (
-    <div className="mx-auto p-6">
-      <Toaster />
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Quản lý báo giá đơn hàng
-        </h1>
-      </div>
+    <div className="min-h-screen">
+      <Toaster position="top-right" />
 
-      {/* Tabs with Status Counts */}
-      <div className="flex flex-wrap gap-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
-        {tabConfigs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`relative px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
-              activeTab === tab.key
-                ? `${tab.bgColor} ${tab.color} shadow-sm`
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            {tab.label}
-            {statsLoading ? (
-              <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-800">
-                ...
-              </span>
-            ) : (
-              <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                {statusCounts[tab.key] ?? 0}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Loading */}
-      {loading && (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-2 text-gray-600">Đang tải...</span>
+      <div className="mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Quản lý báo giá đơn hàng
+              </h1>
+            </div>
+          </div>
         </div>
-      )}
 
-      {/* Orders List */}
-      {!loading && (
-        <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-          {orders.length === 0 ? (
-            <div className="text-center py-12">
-              <h3 className="text-lg font-medium text-gray-900 mb-1">
-                Không có đơn hàng
-              </h3>
-              <p className="text-gray-500">
-                Chưa có đơn hàng nào với trạng thái này
+        {/* Tabs */}
+        <div className="bg-white rounded-lg shadow border border-gray-200 mb-6">
+          <div className="grid grid-cols-4 gap-px bg-gray-200">
+            {tabConfigs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.key;
+              const color = getColorClasses(tab.color);
+              const count = statusCounts[tab.key] ?? 0;
+
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`
+                    relative px-6 py-4 text-left border first:rounded-tl-lg last:rounded-tr-lg
+                    ${
+                      isActive
+                        ? `${color.activeBg} ${color.activeText} ${color.activeBorder}`
+                        : "bg-white text-gray-700 border-gray-200"
+                    }
+                    focus:outline-none
+                  `}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Icon
+                        className={`w-5 h-5 ${
+                          isActive ? "text-white" : color.icon
+                        }`}
+                      />
+                      <span className="text-sm font-semibold">{tab.label}</span>
+                    </div>
+
+                    {statsLoading ? (
+                      <div className="h-4 w-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <span
+                        className={`
+                          px-2.5 py-0.5 rounded-full text-xs font-bold
+                          ${
+                            isActive
+                              ? "bg-white/20 text-white"
+                              : "bg-gray-100 text-gray-600"
+                          }
+                        `}
+                      >
+                        {count}
+                      </span>
+                    )}
+                  </div>
+
+                  {isActive && (
+                    <div
+                      className={`absolute bottom-0 left-0 right-0 h-1 ${color.badge}`}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Loading (khung nội dung) */}
+        {loading && (
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-12">
+            <div className="flex flex-col items-center justify-center">
+              <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+              <p className="mt-4 text-sm text-gray-600 font-medium">
+                Đang tải dữ liệu...
               </p>
             </div>
-          ) : (
-            <>
-              {/* Header */}
-              <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
-                <div className="grid grid-cols-12 gap-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {getHeaderColumns().map((column) => (
-                    <div key={column.key} className={column.colSpan}>
-                      {column.label}
-                    </div>
-                  ))}
-                </div>
+          </div>
+        )}
+
+        {/* Orders Table */}
+        {!loading && (
+          <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+            {orders.length === 0 ? (
+              <div className="text-center py-16 px-6">
+                <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  Không có đơn hàng
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Chưa có đơn hàng nào với trạng thái này
+                </p>
               </div>
+            ) : (
+              <>
+                {/* Table Header */}
+                <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
+                  <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    {getHeaderColumns().map((column) => (
+                      <div key={column.key} className={`${column.colSpan}`}>
+                        {column.label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-              {/* Render appropriate order component */}
-              {renderOrderComponent()}
-            </>
-          )}
-        </div>
-      )}
+                {/* Table Body */}
+                {renderOrderComponent()}
+              </>
+            )}
+          </div>
+        )}
 
-      {/* Pagination */}
-      {!loading && totalPages > 1 && (
-        <div className="flex items-center justify-between mt-6">
-          <div className="text-sm text-gray-700">
-            Trang {currentPage + 1} / {totalPages}
+        {/* Pagination (no hover) */}
+        {!loading && totalPages > 1 && (
+          <div className="mt-6 flex items-center justify-between bg-white rounded-lg shadow border border-gray-200 px-6 py-4">
+            <div className="text-sm text-gray-700">
+              Trang <span className="font-semibold">{currentPage + 1}</span> /{" "}
+              <span className="font-semibold">{totalPages}</span>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 0}
+                className={`
+                  flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md border
+                  ${
+                    currentPage === 0
+                      ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
+                      : "bg-white text-gray-700 border-gray-300"
+                  }
+                `}
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Trước
+              </button>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage >= totalPages - 1}
+                className={`
+                  flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md border
+                  ${
+                    currentPage >= totalPages - 1
+                      ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
+                      : "bg-white text-gray-700 border-gray-300"
+                  }
+                `}
+              >
+                Sau
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-          <div className="flex space-x-2">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 0}
-              className="px-3 py-1 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Trước
-            </button>
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage >= totalPages - 1}
-              className="px-3 py-1 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

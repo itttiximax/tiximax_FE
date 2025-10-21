@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -18,11 +18,25 @@ import {
   ChevronRight,
 } from "lucide-react";
 import Logout from "../../Page/Logout";
+import profileService from "../../Services/SharedService/profileService";
 
 const StaffWarehouseForeignSidebar = () => {
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(true);
+  const [profile, setProfile] = useState(null);
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await profileService.getCurrentAccount();
+        setProfile(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchProfile();
+  }, []);
   const menuGroups = [
     {
       title: "Dashboard",
@@ -182,7 +196,7 @@ const StaffWarehouseForeignSidebar = () => {
                 : "opacity-0 max-h-0 -translate-y-2"
             }`}
           >
-            Lê Thịnh Phát
+            {profile?.name || "Đang tải..."}
           </span>
         </Link>
       </div>

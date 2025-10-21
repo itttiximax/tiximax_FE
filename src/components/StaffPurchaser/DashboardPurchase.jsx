@@ -14,36 +14,16 @@ import { PieChart, Pie, Cell } from "recharts";
 const DashboardPurchaser = () => {
   // Expanded Supplier Data - Chi tiết và thực tế hơn
   const purchaseData = [
-    {
-      supplier: "ABC Corp",
-      orders: 145,
-      value: 125000,
-      deliveryRate: 94.5,
-    },
-    {
-      supplier: "XYZ Ltd",
-      orders: 132,
-      value: 118000,
-      deliveryRate: 91.2,
-    },
+    { supplier: "ABC Corp", orders: 145, value: 125000, deliveryRate: 94.5 },
+    { supplier: "XYZ Ltd", orders: 132, value: 118000, deliveryRate: 91.2 },
     {
       supplier: "Tech Supplier",
       orders: 168,
       value: 242000,
       deliveryRate: 96.8,
     },
-    {
-      supplier: "Global Inc",
-      orders: 178,
-      value: 281000,
-      deliveryRate: 93.4,
-    },
-    {
-      supplier: "Local Vendor",
-      orders: 98,
-      value: 62000,
-      deliveryRate: 88.6,
-    },
+    { supplier: "Global Inc", orders: 178, value: 281000, deliveryRate: 93.4 },
+    { supplier: "Local Vendor", orders: 98, value: 62000, deliveryRate: 88.6 },
     {
       supplier: "Premium Electronics",
       orders: 124,
@@ -195,22 +175,29 @@ const DashboardPurchaser = () => {
       spent: 98000,
       remaining: 22000,
     },
-    {
-      category: "Stationery",
-      allocated: 80000,
-      spent: 72000,
-      remaining: 8000,
-    },
+    { category: "Stationery", allocated: 80000, spent: 72000, remaining: 8000 },
   ];
+
+  // Helpers
+  const totalSpend = monthlySpendData.reduce(
+    (sum, item) => sum + item.spend,
+    0
+  );
+  const totalOrders = monthlySpendData.reduce(
+    (sum, item) => sum + item.orders,
+    0
+  );
+  const avgOrderValue = Math.round(totalSpend / totalOrders);
+  const fmt = (n) => n.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
   // Custom Tooltip cho Bar Chart
   const CustomBarTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-black/80 backdrop-blur-sm rounded-lg p-3 text-white text-sm">
+        <div className="bg-black/80 rounded-lg p-3 text-white text-sm shadow-md">
           <p className="font-semibold">{payload[0].payload.supplier}</p>
           <p>Orders: {payload[0].value}</p>
-          {payload[1] && <p>Value: ${payload[1].value.toLocaleString()}</p>}
+          {payload[1] && <p>Value: ${fmt(payload[1].value)}</p>}
           <p>Delivery Rate: {payload[0].payload.deliveryRate}%</p>
         </div>
       );
@@ -222,9 +209,9 @@ const DashboardPurchaser = () => {
   const CustomLineTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-black/80 backdrop-blur-sm rounded-lg p-3 text-white text-sm">
+        <div className="bg-black/80 rounded-lg p-3 text-white text-sm shadow-md">
           <p className="font-semibold">{payload[0].payload.month}</p>
-          <p>Spend: ${payload[0].value.toLocaleString()}</p>
+          <p>Spend: ${fmt(payload[0].value)}</p>
           <p>Orders: {payload[0].payload.orders}</p>
           <p>Suppliers: {payload[0].payload.suppliers}</p>
         </div>
@@ -233,44 +220,34 @@ const DashboardPurchaser = () => {
     return null;
   };
 
-  const totalSpend = monthlySpendData.reduce(
-    (sum, item) => sum + item.spend,
-    0
-  );
-  const totalOrders = monthlySpendData.reduce(
-    (sum, item) => sum + item.orders,
-    0
-  );
-  const avgOrderValue = Math.round(totalSpend / totalOrders);
-
   return (
-    <div className="min-h-screen p-6 font-sans">
+    <div className="min-h-screen p-6 font-sans ">
       {/* Header */}
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 mb-8 shadow-2xl border border-white/20">
-        <h1 className="text-5xl font-black text-black mb-6">
-          🛒 Purchaser Dashboard
+      <div className="bg-white rounded-3xl p-8 mb-8 shadow-md border border-gray-100">
+        <h1 className="text-5xl font-bold text-gray-900 mb-6 tracking-tight">
+          Purchaser Dashboard
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl text-center shadow-lg border border-blue-200">
-            <div className="text-3xl font-bold text-blue-700">
-              ${(totalSpend / 1000).toFixed(0)}K
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl text-center shadow border border-blue-100">
+            <div className="text-3xl font-semibold text-blue-700">
+              ${fmt(totalSpend / 1000)}K
             </div>
             <div className="text-sm text-blue-600 font-medium mt-1">
               Total Spend
             </div>
             <div className="text-xs text-blue-500 mt-2">Last 18 months</div>
           </div>
-          <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl text-center shadow-lg border border-green-200">
-            <div className="text-3xl font-bold text-green-700">
-              {totalOrders}
+          <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl text-center shadow border border-green-100">
+            <div className="text-3xl font-semibold text-green-700">
+              {fmt(totalOrders)}
             </div>
             <div className="text-sm text-green-600 font-medium mt-1">
               Total Orders
             </div>
             <div className="text-xs text-green-500 mt-2">Placed</div>
           </div>
-          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-2xl text-center shadow-lg border border-yellow-200">
-            <div className="text-3xl font-bold text-yellow-700">
+          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-2xl text-center shadow border border-yellow-100">
+            <div className="text-3xl font-semibold text-yellow-700">
               {purchaseData.length}
             </div>
             <div className="text-sm text-yellow-600 font-medium mt-1">
@@ -278,17 +255,17 @@ const DashboardPurchaser = () => {
             </div>
             <div className="text-xs text-yellow-500 mt-2">Active</div>
           </div>
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-2xl text-center shadow-lg border border-purple-200">
-            <div className="text-3xl font-bold text-purple-700">
-              ${avgOrderValue}
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-2xl text-center shadow border border-purple-100">
+            <div className="text-3xl font-semibold text-purple-700">
+              ${fmt(avgOrderValue)}
             </div>
             <div className="text-sm text-purple-600 font-medium mt-1">
               Avg Order Value
             </div>
             <div className="text-xs text-purple-500 mt-2">Per order</div>
           </div>
-          <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-2xl text-center shadow-lg border border-red-200">
-            <div className="text-3xl font-bold text-red-700">94.2%</div>
+          <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-2xl text-center shadow border border-red-100">
+            <div className="text-3xl font-semibold text-red-700">94.2%</div>
             <div className="text-sm text-red-600 font-medium mt-1">
               Avg Delivery
             </div>
@@ -300,23 +277,23 @@ const DashboardPurchaser = () => {
       {/* Charts Layout */}
       <div className="space-y-6">
         {/* 1. Supplier Performance (Full Width) */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20">
-          <h2 className="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-3">
-            📋 Supplier Performance Overview
+        <div className="bg-white rounded-3xl p-8 shadow-md border border-gray-100">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6 tracking-tight">
+            Supplier Performance Overview
           </h2>
-          <ResponsiveContainer width="100%" height={500}>
+          <ResponsiveContainer width="100%" height={480}>
             <BarChart
               data={purchaseData}
-              margin={{ top: 20, right: 30, left: 0, bottom: 20 }}
+              margin={{ top: 16, right: 24, left: 0, bottom: 40 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis
                 dataKey="supplier"
                 stroke="#64748b"
                 fontSize={12}
-                angle={-45}
+                angle={-30}
                 textAnchor="end"
-                height={100}
+                height={60}
                 tick={{ fill: "#64748b" }}
               />
               <YAxis
@@ -328,13 +305,13 @@ const DashboardPurchaser = () => {
               <Bar
                 dataKey="orders"
                 fill="url(#ordersGradient)"
-                radius={[10, 10, 0, 0]}
+                radius={[8, 8, 0, 0]}
                 name="Orders"
               />
               <Bar
                 dataKey="value"
                 fill="url(#valueGradient)"
-                radius={[10, 10, 0, 0]}
+                radius={[8, 8, 0, 0]}
                 name="Value ($)"
               />
               <defs>
@@ -354,25 +331,28 @@ const DashboardPurchaser = () => {
         {/* 2. Two Small Charts Side by Side */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Monthly Spend Trend */}
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20">
-            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-3">
-              💰 Monthly Spend Trend (18 Months)
+          <div className="bg-white rounded-3xl p-6 shadow-md border border-gray-100">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 tracking-tight">
+              Monthly Spend Trend (18 Months)
             </h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={monthlySpendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+            <ResponsiveContainer width="100%" height={320}>
+              <LineChart
+                data={monthlySpendData}
+                margin={{ top: 12, right: 12, left: 0, bottom: 36 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis
                   dataKey="month"
                   stroke="#64748b"
-                  fontSize={10}
-                  angle={-45}
+                  fontSize={11}
+                  angle={-30}
                   textAnchor="end"
-                  height={80}
+                  height={56}
                   tick={{ fill: "#64748b" }}
                 />
                 <YAxis
                   stroke="#64748b"
-                  fontSize={10}
+                  fontSize={11}
                   tick={{ fill: "#64748b" }}
                 />
                 <Tooltip content={<CustomLineTooltip />} />
@@ -401,11 +381,11 @@ const DashboardPurchaser = () => {
           </div>
 
           {/* Category Spend Distribution */}
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20">
-            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-3">
-              📦 Category Spend Distribution
+          <div className="bg-white rounded-3xl p-6 shadow-md border border-gray-100">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 tracking-tight">
+              Category Spend Distribution
             </h2>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={320}>
               <PieChart>
                 <Pie
                   data={categorySpend}
@@ -413,20 +393,15 @@ const DashboardPurchaser = () => {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  outerRadius={90}
-                  innerRadius={50}
+                  outerRadius={96}
+                  innerRadius={56}
                   paddingAngle={2}
                   label={({ name, value }) => `${name} ${value}%`}
                   labelLine={false}
-                  labelStyle={{
-                    fontSize: "10px",
-                    fontWeight: "bold",
-                    fill: "#333",
-                  }}
                 >
-                  {categorySpend.map((entry, index) => (
+                  {categorySpend.map((_, index) => (
                     <Cell
-                      key={`cell-${index}`}
+                      key={index}
                       fill={
                         [
                           "#3b82f6",
@@ -449,15 +424,15 @@ const DashboardPurchaser = () => {
         {/* 3. Additional Metrics Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Supplier Performance Metrics */}
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">
-              ⭐ Top Suppliers Performance
+          <div className="bg-white rounded-3xl p-6 shadow-md border border-gray-100">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 tracking-tight">
+              Top Suppliers Performance
             </h2>
             <div className="space-y-3">
               {supplierPerformance.map((supplier, idx) => (
                 <div key={idx} className="border-b border-gray-200 pb-3">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="font-semibold text-gray-700 text-sm">
+                    <p className="font-semibold text-gray-800 text-sm">
                       #{idx + 1} {supplier.name}
                     </p>
                     <div className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-bold">
@@ -474,43 +449,44 @@ const DashboardPurchaser = () => {
           </div>
 
           {/* Budget Allocation Status */}
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">
-              💳 Budget Allocation Status
+          <div className="bg-white rounded-3xl p-6 shadow-md border border-gray-100">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 tracking-tight">
+              Budget Allocation Status
             </h2>
             <div className="space-y-3">
-              {budgetAllocation.map((cat, idx) => (
-                <div key={idx} className="border-b border-gray-200 pb-3">
-                  <p className="font-semibold text-gray-700 text-sm mb-2">
-                    {cat.category}
-                  </p>
-                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-full"
-                      style={{
-                        width: `${(cat.spent / cat.allocated) * 100}%`,
-                      }}
-                    ></div>
+              {budgetAllocation.map((cat, idx) => {
+                const pct = Math.min(100, (cat.spent / cat.allocated) * 100);
+                return (
+                  <div key={idx} className="border-b border-gray-200 pb-3">
+                    <p className="font-semibold text-gray-800 text-sm mb-2">
+                      {cat.category}
+                    </p>
+                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 h-full"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-600 mt-1">
+                      <span>
+                        ${fmt(cat.spent / 1000)}K / ${fmt(cat.allocated / 1000)}
+                        K
+                      </span>
+                      <span className="font-semibold text-green-600">
+                        ${fmt(cat.remaining / 1000)}K left
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-xs text-gray-600 mt-1">
-                    <span>
-                      ${(cat.spent / 1000).toFixed(0)}K / $
-                      {(cat.allocated / 1000).toFixed(0)}K
-                    </span>
-                    <span className="font-semibold text-green-600">
-                      ${(cat.remaining / 1000).toFixed(0)}K left
-                    </span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
 
         {/* 4. Top Purchase Orders */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">
-            📑 Recent Top Purchase Orders
+        <div className="bg-white rounded-3xl p-6 shadow-md border border-gray-100">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 tracking-tight">
+            Recent Top Purchase Orders
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -544,7 +520,7 @@ const DashboardPurchaser = () => {
                     </td>
                     <td className="px-4 py-3 text-gray-700">{po.supplier}</td>
                     <td className="px-4 py-3 text-gray-900 font-semibold">
-                      ${po.amount.toLocaleString()}
+                      ${fmt(po.amount)}
                     </td>
                     <td className="px-4 py-3 text-gray-700">{po.items}</td>
                     <td className="px-4 py-3">

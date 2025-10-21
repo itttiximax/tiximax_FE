@@ -8,4 +8,10 @@ const createShipment = async (shipmentId, shipmentData) => {
   return response.data;
 };
 
-export { createShipment };
+// ✨ API mới - Lấy danh sách shipment theo IDs
+const listShipments = async (shipmentIds) => {
+  const response = await api.post(`/warehouse/list-shipment`, shipmentIds);
+  return response.data;
+};
+
+export { createShipment, listShipments };

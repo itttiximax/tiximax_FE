@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BarChart,
   Package,
@@ -15,10 +15,25 @@ import {
   ChevronRight,
 } from "lucide-react";
 import Logout from "../../Page/Logout";
+import profileService from "../../Services/SharedService/profileService";
+
 const StaffWarehouseDomesticSidebar = () => {
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(true);
+  const [profile, setProfile] = useState(null);
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await profileService.getCurrentAccount();
+        setProfile(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchProfile();
+  }, []);
   const menuItems = [
     {
       text: "Thống kê",
@@ -122,7 +137,7 @@ const StaffWarehouseDomesticSidebar = () => {
                 : "opacity-0 max-h-0 -translate-y-2"
             }`}
           >
-            Trần Tấn Phát
+            {profile?.name || "Đang tải..."}
           </span>
         </Link>
       </div>

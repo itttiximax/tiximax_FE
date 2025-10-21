@@ -5,6 +5,14 @@ import {
   FileText,
   Loader2,
   Eye,
+  Package,
+  CheckCircle,
+  Clock,
+  XCircle,
+  Search,
+  Filter,
+  Download,
+  RefreshCw,
 } from "lucide-react";
 import managerOrderService from "../../Services/Manager/managerOrderService";
 import DetailOrder from "./DetailOrder";
@@ -159,43 +167,53 @@ const ManagerOrder = () => {
 
   const getStatusColor = useCallback((color) => {
     const colorMap = {
-      gray: "bg-gray-100 text-gray-800",
-      green: "bg-green-100 text-green-800",
-      orange: "bg-orange-100 text-orange-800",
-      blue: "bg-blue-100 text-blue-800",
-      indigo: "bg-indigo-100 text-indigo-800",
-      slate: "bg-slate-100 text-slate-800",
-      purple: "bg-purple-100 text-purple-800",
-      yellow: "bg-yellow-100 text-yellow-800",
-      cyan: "bg-cyan-100 text-cyan-800",
-      pink: "bg-pink-100 text-pink-800",
-      teal: "bg-teal-100 text-teal-800",
-      emerald: "bg-emerald-100 text-emerald-800",
-      red: "bg-red-100 text-red-800",
+      gray: "bg-gray-100 text-gray-800 border-gray-200",
+      green: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      orange: "bg-orange-50 text-orange-700 border-orange-200",
+      blue: "bg-blue-50 text-blue-700 border-blue-200",
+      indigo: "bg-indigo-50 text-indigo-700 border-indigo-200",
+      slate: "bg-slate-50 text-slate-700 border-slate-200",
+      purple: "bg-purple-50 text-purple-700 border-purple-200",
+      yellow: "bg-yellow-50 text-yellow-700 border-yellow-200",
+      cyan: "bg-cyan-50 text-cyan-700 border-cyan-200",
+      pink: "bg-pink-50 text-pink-700 border-pink-200",
+      teal: "bg-teal-50 text-teal-700 border-teal-200",
+      emerald: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      red: "bg-red-50 text-red-700 border-red-200",
     };
-    return colorMap[color] || "bg-gray-100 text-gray-800";
+    return colorMap[color] || "bg-gray-100 text-gray-800 border-gray-200";
   }, []);
 
   const getTabColor = useCallback((color, isActive) => {
     if (isActive) {
       const activeColors = {
-        gray: "bg-gray-600 text-white",
-        green: "bg-green-600 text-white",
-        orange: "bg-orange-600 text-white",
-        blue: "bg-blue-600 text-white",
-        indigo: "bg-indigo-600 text-white",
-        slate: "bg-slate-600 text-white",
-        purple: "bg-purple-600 text-white",
-        yellow: "bg-yellow-600 text-white",
-        cyan: "bg-cyan-600 text-white",
-        pink: "bg-pink-600 text-white",
-        teal: "bg-teal-600 text-white",
-        emerald: "bg-emerald-600 text-white",
-        red: "bg-red-600 text-white",
+        gray: "bg-gradient-to-br from-gray-500 to-gray-600 text-white shadow-lg shadow-gray-500/30 border-gray-600",
+        green:
+          "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/30 border-emerald-600",
+        orange:
+          "bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 border-orange-600",
+        blue: "bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30 border-blue-600",
+        indigo:
+          "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/30 border-indigo-600",
+        slate:
+          "bg-gradient-to-br from-slate-500 to-slate-600 text-white shadow-lg shadow-slate-500/30 border-slate-600",
+        purple:
+          "bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/30 border-purple-600",
+        yellow:
+          "bg-gradient-to-br from-yellow-500 to-yellow-600 text-white shadow-lg shadow-yellow-500/30 border-yellow-600",
+        cyan: "bg-gradient-to-br from-cyan-500 to-cyan-600 text-white shadow-lg shadow-cyan-500/30 border-cyan-600",
+        pink: "bg-gradient-to-br from-pink-500 to-pink-600 text-white shadow-lg shadow-pink-500/30 border-pink-600",
+        teal: "bg-gradient-to-br from-teal-500 to-teal-600 text-white shadow-lg shadow-teal-500/30 border-teal-600",
+        emerald:
+          "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/30 border-emerald-600",
+        red: "bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg shadow-red-500/30 border-red-600",
       };
-      return activeColors[color] || "bg-gray-600 text-white";
+      return (
+        activeColors[color] ||
+        "bg-gradient-to-br from-gray-500 to-gray-600 text-white shadow-lg"
+      );
     }
-    return "bg-white text-gray-700 hover:bg-gray-50";
+    return "bg-white text-gray-700 hover:bg-gray-50 border-gray-200 hover:border-gray-300 hover:shadow-md";
   }, []);
 
   const getOrderTypeText = useCallback((type) => {
@@ -203,6 +221,10 @@ const ManagerOrder = () => {
       ? "Mua hộ"
       : type === "VAN_CHUYEN"
       ? "Vận chuyển"
+      : type === "KY_GUI"
+      ? "Ký gửi"
+      : type === "DAU_GIA"
+      ? "Đấu giá"
       : type;
   }, []);
 
@@ -213,265 +235,385 @@ const ManagerOrder = () => {
 
   // Loading spinner component
   const LoadingSpinner = () => (
-    <div className="flex justify-center items-center py-8">
-      <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      <span className="ml-2 text-gray-600">Đang tải...</span>
+    <div className="flex flex-col justify-center items-center py-16">
+      <div className="relative">
+        <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+        <div className="absolute inset-0 h-12 w-12 animate-ping rounded-full bg-blue-400 opacity-20"></div>
+      </div>
+      <span className="mt-4 text-gray-600 font-medium">
+        Đang tải dữ liệu...
+      </span>
     </div>
   );
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Quản lý trạng thái đơn hàng
-        </h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Quản lí trạng thái đơn hàng, xem chi tiết đơn hàng
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br ">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <div className="p-2 bg-blue-600 rounded-xl shadow-lg">
+                  <Package className="h-7 w-7 text-white" />
+                </div>
+                Quản lý đơn hàng
+              </h1>
+            </div>
 
-      {/* Status Filter Tabs */}
-      <div className="mb-6">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8 overflow-x-auto">
-            {availableStatuses.map((status) => (
+            <div className="flex items-center gap-3">
               <button
-                key={status.key}
-                onClick={() => handleStatusChange(status.key)}
+                onClick={() =>
+                  fetchOrders(pagination.currentPage, activeStatus, pageSize)
+                }
                 disabled={loading}
-                className={`
-                  whitespace-nowrap py-2 px-3 border-b-2 font-medium text-sm rounded-t-lg transition-all duration-200 
-                  ${
-                    activeStatus === status.key
-                      ? `${getTabColor(status.color, true)} border-current`
-                      : `${getTabColor(
-                          status.color,
-                          false
-                        )} border-transparent hover:border-gray-300`
-                  }
-                  ${loading ? "opacity-50 cursor-not-allowed" : ""}
-                `}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {status.label}
-                {loading && activeStatus === status.key && (
-                  <Loader2 className="inline-block ml-2 h-3 w-3 animate-spin" />
-                )}
+                <RefreshCw
+                  className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+                />
+                <span className="font-medium">Làm mới</span>
               </button>
-            ))}
-          </nav>
-        </div>
-      </div>
+            </div>
+          </div>
 
-      {/* Page Size Selector */}
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <label className="text-sm text-gray-700">Hiển thị:</label>
-          <select
-            value={pageSize}
-            onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-            disabled={loading}
-            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {pageSizeOptions.map((size) => (
-              <option key={size} value={size}>
-                {size} đơn/trang
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="text-sm text-gray-600">
-          Tổng:{" "}
-          <span className="font-semibold">{pagination.totalElements}</span> đơn
-          hàng
-        </div>
-      </div>
-
-      {/* Error State */}
-      {error && (
-        <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="flex">
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                Có lỗi xảy ra
-              </h3>
-              <div className="mt-2 text-sm text-red-700">
-                <p>{error}</p>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Tổng đơn hàng
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                    {pagination.totalElements.toLocaleString()}
+                  </p>
+                </div>
+                <div className="p-3 bg-blue-100 rounded-lg">
+                  <Package className="h-6 w-6 text-blue-600" />
+                </div>
               </div>
-              <div className="mt-4">
+            </div>
+
+            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Trạng thái hiện tại
+                  </p>
+                  <p className="text-xl font-bold text-gray-900 mt-1">
+                    {currentStatus?.label}
+                  </p>
+                </div>
+                <div className="p-3 bg-emerald-100 rounded-lg">
+                  <CheckCircle className="h-6 w-6 text-emerald-600" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Trang hiện tại
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                    {pagination.currentPage}/{pagination.totalPages}
+                  </p>
+                </div>
+                <div className="p-3 bg-purple-100 rounded-lg">
+                  <FileText className="h-6 w-6 text-purple-600" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Đơn/trang</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                    {pageSize}
+                  </p>
+                </div>
+                <div className="p-3 bg-orange-100 rounded-lg">
+                  <Clock className="h-6 w-6 text-orange-600" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Status Tabs */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-2">
+            <nav className="flex flex-wrap gap-2">
+              {availableStatuses.map((status) => (
+                <button
+                  key={status.key}
+                  onClick={() => handleStatusChange(status.key)}
+                  disabled={loading}
+                  className={`
+                    relative flex items-center gap-2 px-5 py-3 rounded-lg
+                    font-semibold text-sm border-2 
+                    transition-all duration-300 ease-out
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    ${getTabColor(status.color, activeStatus === status.key)}
+                    ${
+                      activeStatus === status.key
+                        ? "scale-105 -translate-y-0.5"
+                        : "scale-100"
+                    }
+                  `}
+                >
+                  <span>{status.label}</span>
+                  {loading && activeStatus === status.key && (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  )}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+
+        {/* Controls Bar */}
+        <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+          <div className="flex items-center gap-3">
+            <label className="text-sm font-medium text-gray-700">
+              Hiển thị:
+            </label>
+            <select
+              value={pageSize}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+              disabled={loading}
+              className="border-2 border-gray-300 rounded-lg px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed bg-white hover:border-gray-400 transition-colors"
+            >
+              {pageSizeOptions.map((size) => (
+                <option key={size} value={size}>
+                  {size} đơn/trang
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-600">Tổng cộng:</span>
+            <span className="px-3 py-1 bg-blue-100 text-blue-700 font-bold rounded-lg">
+              {pagination.totalElements.toLocaleString()}
+            </span>
+            <span className="text-gray-600">đơn hàng</span>
+          </div>
+        </div>
+
+        {/* Error State */}
+        {error && (
+          <div className="mb-6 bg-red-50 border-2 border-red-200 rounded-xl p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-red-100 rounded-lg">
+                <XCircle className="h-5 w-5 text-red-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-red-900 mb-1">
+                  Có lỗi xảy ra
+                </h3>
+                <p className="text-sm text-red-700 mb-3">{error}</p>
                 <button
                   onClick={() =>
                     fetchOrders(pagination.currentPage, activeStatus, pageSize)
                   }
                   disabled={loading}
-                  className="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-2 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 >
+                  <RefreshCw
+                    className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+                  />
                   {loading ? "Đang tải..." : "Thử lại"}
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Loading State */}
-      {loading && (
-        <div className="bg-white rounded-lg shadow-sm">
-          <LoadingSpinner />
-        </div>
-      )}
+        {/* Loading State */}
+        {loading && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+            <LoadingSpinner />
+          </div>
+        )}
 
-      {/* Orders Table */}
-      {!loading && (
-        <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Mã đơn hàng
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Loại đơn
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Trạng thái
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tỷ giá
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tổng tiền
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ngày tạo
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Thao tác
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {orders.map((order) => {
-                const orderStatus = availableStatuses.find(
-                  (s) => s.key === order.status
-                );
+        {/* Orders Table */}
+        {!loading && (
+          <div className="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      Mã đơn hàng
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      Loại đơn
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      Trạng thái
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      Tỷ giá
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      Tổng tiền
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      Ngày tạo
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      Thao tác
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-100">
+                  {orders.map((order, index) => {
+                    const orderStatus = availableStatuses.find(
+                      (s) => s.key === order.status
+                    );
 
-                return (
-                  <tr key={order.orderId} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {order.orderCode}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        ID: {order.orderId}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {getOrderTypeText(order.orderType)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          orderStatus
-                            ? getStatusColor(orderStatus.color)
-                            : getStatusColor("gray")
+                    return (
+                      <tr
+                        key={order.orderId}
+                        className={`transition-all duration-200 hover:bg-blue-50/50 ${
+                          index % 2 === 0 ? "bg-white" : "bg-gray-50/50"
                         }`}
                       >
-                        {orderStatus ? orderStatus.label : order.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {order.exchangeRate
-                        ? `${order.exchangeRate.toLocaleString("vi-VN")} VNĐ`
-                        : "-"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatPrice(order.finalPriceOrder)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatDate(order.createdAt)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <button
-                        onClick={() => handleViewDetail(order.orderId)}
-                        className="group inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-lg shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      >
-                        <Eye className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                        <span>Xem chi tiết</span>
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Empty State */}
-      {!loading && orders.length === 0 && !error && (
-        <div className="text-center py-12 bg-white rounded-lg">
-          <div className="text-gray-500">
-            <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <p className="text-lg font-medium text-gray-900 mb-2">
-              Không có đơn hàng nào
-            </p>
-            <p className="text-sm text-gray-500">
-              Chưa có đơn hàng nào với trạng thái "{currentStatus?.label}"
-            </p>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-bold text-gray-900">
+                              {order.orderCode}
+                            </span>
+                            <span className="text-xs text-gray-500 mt-0.5">
+                              ID: {order.orderId}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 border border-indigo-200">
+                            {getOrderTypeText(order.orderType)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full border ${
+                              orderStatus
+                                ? getStatusColor(orderStatus.color)
+                                : getStatusColor("gray")
+                            }`}
+                          >
+                            {orderStatus ? orderStatus.label : order.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="text-sm font-semibold text-gray-900">
+                            {order.exchangeRate
+                              ? `${order.exchangeRate.toLocaleString(
+                                  "vi-VN"
+                                )} ₫`
+                              : "-"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="text-sm font-bold text-emerald-600">
+                            {formatPrice(order.finalPriceOrder)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="text-sm text-gray-700">
+                            {formatDate(order.createdAt)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <button
+                            onClick={() => handleViewDetail(order.orderId)}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          >
+                            <Eye className="w-4 h-4" />
+                            <span>Chi tiết</span>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Pagination */}
-      {!loading && orders.length > 0 && (
-        <div className="flex items-center justify-between mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 px-6 py-4">
-          <button
-            onClick={handlePrevPage}
-            disabled={pagination.first || loading}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-              pagination.first || loading
-                ? "text-gray-400 cursor-not-allowed"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            <ChevronLeft className="w-5 h-5" />
-            Trang trước
-          </button>
-
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">Trang</span>
-            <span className="px-3 py-1 bg-green-100 text-green-700 rounded-lg font-semibold">
-              {pagination.currentPage}
-            </span>
-            <span className="text-sm text-gray-500">
-              / {pagination.totalPages}
-            </span>
+        {/* Empty State */}
+        {!loading && orders.length === 0 && !error && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 py-16">
+            <div className="text-center">
+              <div className="inline-flex p-4 bg-gray-100 rounded-full mb-4">
+                <FileText className="h-12 w-12 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                Không có đơn hàng nào
+              </h3>
+              <p className="text-sm text-gray-600 max-w-sm mx-auto">
+                Chưa có đơn hàng nào với trạng thái{" "}
+                <span className="font-semibold">"{currentStatus?.label}"</span>
+              </p>
+            </div>
           </div>
+        )}
 
-          <button
-            onClick={handleNextPage}
-            disabled={pagination.last || loading}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-              pagination.last || loading
-                ? "text-gray-400 cursor-not-allowed"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            Trang sau
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-      )}
+        {/* Pagination */}
+        {!loading && orders.length > 0 && (
+          <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 px-6 py-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <button
+                onClick={handlePrevPage}
+                disabled={pagination.first || loading}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 ${
+                  pagination.first || loading
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-700 border-2 border-gray-300 hover:border-blue-500 shadow-sm hover:shadow"
+                }`}
+              >
+                <ChevronLeft className="w-5 h-5" />
+                Trang trước
+              </button>
 
-      {/* Detail Order Modal */}
-      {showDetailModal && selectedOrder && (
-        <DetailOrder
-          orderData={selectedOrder}
-          onClose={handleCloseDetail}
-          availableStatuses={availableStatuses}
-        />
-      )}
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-600">Trang</span>
+                <div className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg font-bold shadow-md">
+                  <span className="text-lg">{pagination.currentPage}</span>
+                  <span className="text-sm opacity-90">
+                    / {pagination.totalPages}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={handleNextPage}
+                disabled={pagination.last || loading}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 ${
+                  pagination.last || loading
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-700 border-2 border-gray-300 hover:border-blue-500 shadow-sm hover:shadow"
+                }`}
+              >
+                Trang sau
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Detail Order Modal */}
+        {showDetailModal && selectedOrder && (
+          <DetailOrder
+            orderData={selectedOrder}
+            onClose={handleCloseDetail}
+            availableStatuses={availableStatuses}
+          />
+        )}
+      </div>
     </div>
   );
 };

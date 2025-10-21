@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -12,6 +12,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import Logout from "../../Page/Logout";
+import profileService from "../../Services/SharedService/profileService";
 
 const StaffPurchaserSidebar = () => {
   const location = useLocation();
@@ -19,7 +20,20 @@ const StaffPurchaserSidebar = () => {
   const [isInventoryDropdownOpen, setIsInventoryDropdownOpen] = useState(false);
 
   const isActive = (path) => location.pathname === path;
+  const [profile, setProfile] = useState(null);
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await profileService.getCurrentAccount();
+        setProfile(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchProfile();
+  }, []);
   const menuItems = [
     {
       section: "NHÂN VIÊN MUA HÀNG",
@@ -214,7 +228,7 @@ const StaffPurchaserSidebar = () => {
                 : "opacity-0 max-h-0 -translate-y-2"
             }`}
           >
-            Lê Thịnh Phát
+            {profile?.name || "Đang tải..."}
           </span>
         </Link>
       </div>
@@ -236,21 +250,21 @@ const StaffPurchaserSidebar = () => {
       </nav>
 
       {/* Logout Button */}
-      <div className="p-3 border-t border-gray-200 flex-shrink-0 bg-slate-50 sticky bottom-0">
+      <div className="p-3 border-t border-gray-200 flex-shrink-0 bg-white sticky bottom-0">
         <div className="relative w-full">
           <Logout
-            className={`relative w-full flex items-center py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm ${
+            className={`relative w-full flex items-center py-3 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors ${
               isExpanded ? "justify-start" : "justify-center"
             }`}
             iconSize={20}
-            buttonText="" // không hiển thị text mặc định
+            buttonText=""
             redirectTo="/signin"
             showIcon={true}
             useConfirm={true}
             confirmMessage="Bạn có chắc chắn muốn đăng xuất?"
           />
           {isExpanded && (
-            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm font-medium text-white">
+            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm font-medium text-gray-700">
               Đăng xuất
             </span>
           )}

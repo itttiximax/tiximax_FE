@@ -163,9 +163,6 @@ const CustomerList = () => {
           <h1 className="text-2xl font-bold text-gray-900">
             Quản lý khách hàng
           </h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Quản lý thông tin và tài khoản khách hàng
-          </p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
           <UserPlus className="w-5 h-5" />

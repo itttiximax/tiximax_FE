@@ -131,13 +131,13 @@ const OrderList = () => {
     setCurrentPage(0);
   }, []);
 
-  const handleResetFilters = useCallback(() => {
-    setSearchTerm("");
-    setSelectedStatus("ALL");
-    setSelectedOrderType("ALL");
-    setDateFilter({ from: "", to: "" });
-    setCurrentPage(0);
-  }, []);
+  // const handleResetFilters = useCallback(() => {
+  //   setSearchTerm("");
+  //   setSelectedStatus("ALL");
+  //   setSelectedOrderType("ALL");
+  //   setDateFilter({ from: "", to: "" });
+  //   setCurrentPage(0);
+  // }, []);
 
   const handleExport = useCallback(() => {
     if (filteredOrders.length === 0) {
@@ -259,9 +259,6 @@ const OrderList = () => {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Danh sách đơn hàng</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Tìm kiếm và lọc đơn hàng theo nhiều tiêu chí
-        </p>
       </div>
 
       {/* Filters Section */}

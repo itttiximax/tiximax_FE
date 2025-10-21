@@ -43,11 +43,11 @@ const MergedPaymentShipConfigModal = ({
   formatCurrency,
   isCreating,
 }) => {
-  const [voucherId, setVoucherId] = useState("");
+  const [customerVoucherId, setVoucherId] = useState("");
   const [isUseBalance, setIsUseBalance] = useState(true);
 
   const handleSubmit = () => {
-    onConfirm(voucherId, isUseBalance);
+    onConfirm(customerVoucherId, isUseBalance);
   };
 
   const handleClose = () => {
@@ -97,7 +97,7 @@ const MergedPaymentShipConfigModal = ({
             </label>
             <input
               type="text"
-              value={voucherId}
+              value={customerVoucherId}
               onChange={(e) => setVoucherId(e.target.value)}
               disabled={isCreating}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
@@ -147,7 +147,9 @@ const MergedPaymentShipConfigModal = ({
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Mã voucher:</span>
-                <span className="font-medium">{voucherId || "Không có"}</span>
+                <span className="font-medium">
+                  {customerVoucherId || "Không có"}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Sử dụng số dư:</span>
@@ -212,7 +214,10 @@ const CreateMergedPaymentShip = ({
   };
 
   // Create merged payment ship with config
-  const handleConfirmMergedPayment = async (voucherId, isUseBalance) => {
+  const handleConfirmMergedPayment = async (
+    customerVoucherId,
+    isUseBalance
+  ) => {
     setShowConfigModal(false);
 
     try {
@@ -221,7 +226,7 @@ const CreateMergedPaymentShip = ({
       // Call the createPaymentShipService with the correct parameters
       const result = await createPaymentShipService.createPaymentShipping(
         isUseBalance,
-        voucherId || "null",
+        customerVoucherId || "null",
         selectedOrders // This is the array of order codes
       );
 
@@ -289,4 +294,3 @@ const CreateMergedPaymentShip = ({
 };
 
 export default CreateMergedPaymentShip;
-/// okko code
