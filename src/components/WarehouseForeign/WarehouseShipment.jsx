@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { createShipment } from "../../Services/Warehouse/warehouseShipmentService";
 import UploadImg from "../../common/UploadImg";
+import { Package, Ruler, Scale, AlertCircle, CheckCircle } from "lucide-react";
 
 const WarehouseShipment = () => {
   const [formData, setFormData] = useState({
@@ -13,7 +14,7 @@ const WarehouseShipment = () => {
   });
   const [shipmentId, setShipmentId] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "success" });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -41,12 +42,12 @@ const WarehouseShipment = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
-    setMessage("");
+    setMessage({ text: "", type: "success" });
 
     try {
       // Validation
       if (!shipmentId) {
-        setMessage("Vui lòng nhập Shipment ID");
+        setMessage({ text: "Vui lòng nhập Shipment ID", type: "error" });
         setLoading(false);
         return;
       }
@@ -58,7 +59,10 @@ const WarehouseShipment = () => {
         !formData.weight ||
         !formData.netWeight
       ) {
-        setMessage("Vui lòng điền đầy đủ thông tin kích thước và trọng lượng");
+        setMessage({
+          text: "Vui lòng điền đầy đủ thông tin kích thước và trọng lượng",
+          type: "error",
+        });
         setLoading(false);
         return;
       }
@@ -73,7 +77,7 @@ const WarehouseShipment = () => {
       };
 
       const result = await createShipment(shipmentId, shipmentData);
-      setMessage("Shipment created successfully!");
+      setMessage({ text: "Shipment created successfully!", type: "success" });
       console.log("Success:", result);
 
       // Reset form after success
@@ -101,7 +105,7 @@ const WarehouseShipment = () => {
         errorMessage = error.message;
       }
 
-      setMessage(errorMessage);
+      setMessage({ text: errorMessage, type: "error" });
       console.error("Error:", error);
     } finally {
       setLoading(false);
@@ -109,146 +113,157 @@ const WarehouseShipment = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-center">
-        Create Warehouse Shipment
-      </h2>
-
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Shipment ID <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={shipmentId}
-            onChange={(e) => {
-              console.log("Input value:", e.target.value);
-              setShipmentId(e.target.value);
-            }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter shipment ID"
-            required
-          />
+    <div className="min-h-screen  flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-lg w-full bg-white rounded-xl shadow-lg p-8">
+        <div className="flex items-center justify-center mb-8">
+          <Package className="w-8 h-8 text-indigo-600 mr-3" />
+          <h2 className="text-2xl font-bold text-gray-900">Tạo Shipment Kho</h2>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Length <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+              Shipment ID <span className="text-red-500 ml-1">*</span>
             </label>
             <input
-              type="number"
-              name="length"
-              value={formData.length}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="cm"
+              type="text"
+              value={shipmentId}
+              onChange={(e) => {
+                console.log("Input value:", e.target.value);
+                setShipmentId(e.target.value.trim()); // Ensure only one code by trimming
+              }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              placeholder="Nhập một mã Shipment ID duy nhất"
               required
             />
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Chiều dài (cm) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                name="length"
+                value={formData.length}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                placeholder="0"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Chiều rộng (cm) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                name="width"
+                value={formData.width}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                placeholder="0"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Chiều cao (cm) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                name="height"
+                value={formData.height}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                placeholder="0"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                <Scale className="w-4 h-4 mr-2 text-gray-500" />
+                Trọng lượng (kg) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                name="weight"
+                value={formData.weight}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                placeholder="0.00"
+                step="0.01"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                <Scale className="w-4 h-4 mr-2 text-gray-500" />
+                Trọng lượng tịnh (kg) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                name="netWeight"
+                value={formData.netWeight}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                placeholder="0.00"
+                step="0.01"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Upload Image Component */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Width <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              name="width"
-              value={formData.width}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="cm"
-              required
+            <UploadImg
+              imageUrl={formData.image}
+              onImageUpload={handleImageUpload}
+              onImageRemove={handleImageRemove}
+              label="Hình ảnh Shipment"
+              maxSizeMB={3}
+              placeholder="Chưa có ảnh shipment"
             />
           </div>
+
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={loading}
+            className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 flex items-center justify-center transition-colors"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                Đang tạo...
+              </>
+            ) : (
+              "Tạo Shipment"
+            )}
+          </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Height <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              name="height"
-              value={formData.height}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="cm"
-              required
-            />
+        {message.text && (
+          <div
+            className={`mt-6 p-4 rounded-md flex items-center gap-2 ${
+              message.type === "success"
+                ? "bg-green-50 text-green-700 border border-green-200"
+                : "bg-red-50 text-red-700 border border-red-200"
+            }`}
+          >
+            {message.type === "success" ? (
+              <CheckCircle className="w-5 h-5" />
+            ) : (
+              <AlertCircle className="w-5 h-5" />
+            )}
+            {message.text}
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Weight <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              name="weight"
-              value={formData.weight}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="kg"
-              required
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Net Weight <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="number"
-            name="netWeight"
-            value={formData.netWeight}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="kg"
-            required
-          />
-        </div>
-
-        {/* Upload Image Component */}
-        <UploadImg
-          imageUrl={formData.image}
-          onImageUpload={handleImageUpload}
-          onImageRemove={handleImageRemove}
-          label="Hình ảnh Shipment"
-          maxSizeMB={3}
-          placeholder="Chưa có ảnh shipment"
-        />
-
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={loading}
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 flex items-center justify-center"
-        >
-          {loading ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Creating...
-            </>
-          ) : (
-            "Create Shipment"
-          )}
-        </button>
+        )}
       </div>
-
-      {message && (
-        <div
-          className={`mt-4 p-3 rounded-md ${
-            message.includes("successfully")
-              ? "bg-green-100 text-green-700 border border-green-300"
-              : "bg-red-100 text-red-700 border border-red-300"
-          }`}
-        >
-          {message}
-        </div>
-      )}
     </div>
   );
 };

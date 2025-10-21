@@ -295,7 +295,6 @@ const Router = createBrowserRouter([
       { path: "profile", element: <StaffProfile /> },
       { path: "dashboard", element: <DashboardWarehouse /> },
       { path: "warehouse", element: <WarehouseList /> },
-      // { path: "importproduct", element: <ImportPacking /> },
       { path: "importproduct", element: <ImportPacking /> },
       { path: "imports", element: <WarehouseShipment /> },
       { path: "packings", element: <CreatePacking /> },

@@ -58,13 +58,8 @@ const StaffListPermission = () => {
     setLoadingRoutes(true);
 
     try {
-      // Fetch all available routes
       const routes = await managerRoutesService.getRoutes();
       setAvailableRoutes(routes);
-
-      // TODO: Fetch staff's current routes if API exists
-      // const currentRoutes = await userService.getStaffRoutes(staff.accountId);
-      // setStaffRoutes(currentRoutes);
       setStaffRoutes([]); // Placeholder
     } catch {
       toast.error("Không thể tải danh sách tuyến!");
