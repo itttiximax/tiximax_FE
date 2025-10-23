@@ -13,13 +13,17 @@ import {
   ChevronDown,
   ChevronUp,
   ExternalLink,
-  Truck,
   XCircle,
+  Clock,
+  Star,
+  StarOff,
 } from "lucide-react";
 import orderlinkService from "../../Services/StaffPurchase/orderlinkService";
 import DetailOrderLink from "./DetailOrderLink";
 import CreatePurchase from "./CreatePurchase";
 import CancelPurchase from "./CancelPurchase";
+import PurchaseLater from "./PurchaseLater";
+import PinOrder from "./PinOrder"; // NEW
 
 const OrderLinkList = () => {
   const [orders, setOrders] = useState([]);
@@ -41,24 +45,29 @@ const OrderLinkList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState("");
 
-  // ✅ Cancel Purchase States
+  // Cancel Purchase
   const [showCancelPurchase, setShowCancelPurchase] = useState(false);
   const [selectedLinkForCancel, setSelectedLinkForCancel] = useState(null);
 
-  // ✅ LUÔN FILTER MUA_HO
+  // Purchase Later
+  const [showPurchaseLater, setShowPurchaseLater] = useState(false);
+  const [selectedLinkForBuyLater, setSelectedLinkForBuyLater] = useState(null);
+
+  // Pin Order
+  const [showPin, setShowPin] = useState(false);
+  const [pinCtx, setPinCtx] = useState(null);
+
+  // LUÔN FILTER MUA_HO
   const fetchOrders = useCallback(async (page = 0, size = 15) => {
     try {
       setLoading(true);
       setError(null);
-
-      console.log(`Fetching MUA_HO orders - Page: ${page}, Size: ${size}`);
 
       const response = await orderlinkService.getOrdersWithLinks(
         page,
         size,
         "MUA_HO"
       );
-      console.log("API Response:", response);
 
       if (response?.content) {
         setOrders(response.content);
@@ -77,8 +86,8 @@ const OrderLinkList = () => {
     } catch (error) {
       console.error("Error fetching orders:", error);
       const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
+        error?.response?.data?.message ||
+        error?.message ||
         "Không thể tải danh sách đơn hàng";
       setError(errorMessage);
       setOrders([]);
@@ -125,9 +134,7 @@ const OrderLinkList = () => {
   }, []);
 
   const handleCreatePurchase = useCallback((order) => {
-    if (!order.orderLinks?.length) {
-      return;
-    }
+    if (!order.orderLinks?.length) return;
     setSelectedOrderForPurchase(order);
     setShowCreatePurchase(true);
   }, []);
@@ -141,7 +148,7 @@ const OrderLinkList = () => {
     fetchOrders(pagination.pageNumber, pagination.pageSize);
   }, [fetchOrders, pagination.pageNumber, pagination.pageSize]);
 
-  // ✅ Cancel Purchase Handlers
+  // Cancel Purchase
   const handleCancelPurchase = useCallback((order, link) => {
     setSelectedLinkForCancel({
       orderId: order.orderId,
@@ -161,15 +168,64 @@ const OrderLinkList = () => {
     setSelectedLinkForCancel(null);
   }, []);
 
-  // ✅ OPTION 1: Chỉ Refetch - Load lại từ server (100% accurate)
   const handleCancelSuccess = useCallback(
-    (linkId, orderId) => {
-      console.log(`Cancel success for linkId: ${linkId}, orderId: ${orderId}`);
-      // Refetch lại trang hiện tại để lấy data mới từ server
+    (_linkId, _orderId) => {
       fetchOrders(pagination.pageNumber, pagination.pageSize);
     },
     [fetchOrders, pagination.pageNumber, pagination.pageSize]
   );
+
+  // Purchase Later
+  const handleOpenPurchaseLater = useCallback((order, link) => {
+    setSelectedLinkForBuyLater({
+      orderId: order.orderId,
+      linkId: link.linkId,
+      orderCode: order.orderCode,
+      linkInfo: {
+        productName: link.productName,
+        trackingCode: link.trackingCode,
+        status: link.status,
+      },
+    });
+    setShowPurchaseLater(true);
+  }, []);
+
+  const handleClosePurchaseLater = useCallback(() => {
+    setShowPurchaseLater(false);
+    setSelectedLinkForBuyLater(null);
+  }, []);
+
+  const handlePurchaseLaterSuccess = useCallback(() => {
+    fetchOrders(pagination.pageNumber, pagination.pageSize);
+  }, [fetchOrders, pagination.pageNumber, pagination.pageSize]);
+
+  // Pin Order
+  const openPin = useCallback((order) => {
+    setPinCtx({
+      orderId: order.orderId,
+      orderCode: order.orderCode,
+      pinned: !!order.pinnedAt, // NEW: dựa trên pinnedAt
+    });
+    setShowPin(true);
+  }, []);
+
+  const closePin = useCallback(() => {
+    setShowPin(false);
+    setPinCtx(null);
+  }, []);
+
+  const handlePinSuccess = useCallback((orderId, desiredPin) => {
+    setOrders((prev) =>
+      prev.map((o) => {
+        if (o.orderId !== orderId) return o;
+        return {
+          ...o,
+          pinnedAt: desiredPin ? o.pinnedAt || new Date().toISOString() : null,
+        };
+      })
+    );
+  }, []);
+
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleString("vi-VN", {
@@ -180,11 +236,8 @@ const OrderLinkList = () => {
   };
 
   const formatCurrency = (amount) => {
-    if (!amount) return "N/A";
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
+    if (!amount && amount !== 0) return "N/A";
+    return new Intl.NumberFormat("vi-VN").format(amount);
   };
 
   const getStatusColor = (status) => {
@@ -195,6 +248,7 @@ const OrderLinkList = () => {
       HUY: "bg-red-100 text-red-800",
       DA_HUY: "bg-red-600 text-white",
       HOAT_DONG: "bg-green-100 text-green-800",
+      MUA_SAU: "bg-purple-100 text-purple-800",
     };
     return colors[status] || "bg-gray-100 text-gray-800";
   };
@@ -207,13 +261,20 @@ const OrderLinkList = () => {
       HUY: "Đã hủy",
       HOAT_DONG: "Hoạt động",
       DA_HUY: "Đã hủy",
+      MUA_SAU: "Mua sau",
     };
     return texts[status] || status;
   };
 
-  const filteredOrders = orders.filter((order) =>
-    order.orderCode.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredOrders = orders
+    .filter((order) =>
+      order.orderCode.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter((order) =>
+      filterDate
+        ? new Date(order.createdAt).toISOString().slice(0, 10) === filterDate
+        : true
+    );
 
   const handlePageSizeChange = (e) => {
     const newSize = parseInt(e.target.value);
@@ -320,220 +381,259 @@ const OrderLinkList = () => {
         {/* Orders List */}
         {filteredOrders.length > 0 && (
           <div className="space-y-3">
-            {filteredOrders.map((order, index) => (
-              <div
-                key={order.orderId}
-                className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
-              >
-                {/* Order Header */}
-                <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-semibold text-blue-600">
-                          {pagination.pageNumber * pagination.pageSize +
-                            index +
-                            1}
-                        </span>
-                      </div>
-                      <div>
-                        <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                          <Package className="w-3 h-3 text-blue-500" />
-                          {order.orderCode}
-                        </h3>
-                        <div className="flex items-center gap-3 text-xs text-gray-600 mt-1">
-                          <span>
-                            <Calendar className="w-2.5 h-2.5 inline mr-1" />
-                            {formatDate(order.createdAt)}
-                          </span>
-                          <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                            Mua hộ
+            {filteredOrders.map((order, index) => {
+              const isPinned = !!order.pinnedAt;
+              return (
+                <div
+                  key={order.orderId}
+                  className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+                >
+                  {/* Order Header */}
+                  <div
+                    className={`px-4 py-3 border-b border-gray-200 ${
+                      isPinned ? "bg-amber-100" : "bg-blue-100"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                          <span className="text-xs font-semibold text-blue-600">
+                            {pagination.pageNumber * pagination.pageSize +
+                              index +
+                              1}
                           </span>
                         </div>
-                      </div>
-                    </div>
-                    <div className="text-right flex items-center gap-3">
-                      <div>
-                        <div className="text-base font-bold text-gray-900 flex items-center gap-1">
-                          {formatCurrency(order.finalPriceOrder)}
+                        <div>
+                          <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                            {order.orderCode}
+                            {/* Star Button (Pin) */}
+                            <button
+                              onClick={() => openPin(order)}
+                              className={`inline-flex items-center justify-center rounded-full p-1 transition-colors ${
+                                isPinned
+                                  ? "text-amber-600 hover:text-amber-700"
+                                  : "text-gray-400 hover:text-gray-600"
+                              }`}
+                              title={isPinned ? "Bỏ ghim đơn" : "Ghim đơn"}
+                            >
+                              {isPinned ? (
+                                <Star className="w-4 h-4" />
+                              ) : (
+                                <StarOff className="w-4 h-4" />
+                              )}
+                            </button>
+                          </h3>
+                          <div className="flex items-center gap-3 text-xs text-gray-600 mt-1">
+                            <span>{formatDate(order.createdAt)}</span>
+                            <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                              Mua hộ
+                            </span>
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500">Tổng tiền</div>
                       </div>
-                      {order.orderLinks?.length > 0 && (
-                        <button
-                          onClick={() => handleCreatePurchase(order)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-xs font-medium hover:from-green-600 hover:to-green-700 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200"
-                        >
-                          <Plus className="w-3 h-3" />
-                          Mua hộ
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
 
-                {/* Order Content */}
-                <div className="p-4">
-                  {order.orderLinks?.length > 0 ? (
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-xs font-medium text-gray-700 flex items-center gap-1.5">
-                          <Package className="w-3 h-3" />
-                          Sản phẩm ({order.orderLinks.length})
-                        </h4>
-                        {order.orderLinks.length > 2 && (
+                      <div className="text-right flex items-center gap-3">
+                        <div>
+                          <div className="text-base font-bold text-gray-900 flex items-center gap-1">
+                            {formatCurrency(order.finalPriceOrder)}
+                          </div>
+                          <div className="text-xs text-gray-500">Tổng tiền</div>
+                        </div>
+                        {order.orderLinks?.length > 0 && (
                           <button
-                            onClick={() => toggleExpandOrder(order.orderId)}
-                            className="text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center gap-1"
+                            onClick={() => handleCreatePurchase(order)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-xs font-medium hover:from-green-600 hover:to-green-700 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200"
                           >
-                            {expandedOrders[order.orderId] ? (
-                              <>
-                                <ChevronUp className="w-3 h-3" />
-                                Thu gọn
-                              </>
-                            ) : (
-                              <>
-                                <ChevronDown className="w-3 h-3" />
-                                Xem tất cả
-                              </>
-                            )}
+                            <Plus className="w-3 h-3" />
+                            Mua hộ
                           </button>
                         )}
                       </div>
+                    </div>
+                  </div>
 
-                      <div className="space-y-2">
-                        {(order.orderLinks.length <= 2 ||
-                        expandedOrders[order.orderId]
-                          ? order.orderLinks
-                          : order.orderLinks.slice(0, 2)
-                        ).map((link) => (
-                          <div
-                            key={link.linkId}
-                            className="border border-gray-200 rounded-lg p-3 bg-gradient-to-r from-gray-50 to-gray-100"
-                          >
-                            <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
-                              {/* Product Info */}
-                              <div className="lg:col-span-1">
-                                <div className="font-medium text-gray-900 mb-1 text-sm">
-                                  {link.productName !== "string"
-                                    ? link.productName
-                                    : "Tên sản phẩm"}
-                                </div>
-                                <div className="space-y-0.5 text-xs text-gray-600">
-                                  <div className="flex items-center gap-1">
-                                    <ExternalLink className="w-2.5 h-2.5" />
-                                    {link.website !== "string"
-                                      ? link.website
-                                      : "N/A"}
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Truck className="w-2.5 h-2.5" />
-                                    {link.trackingCode}
-                                  </div>
-                                </div>
-                              </div>
+                  {/* Order Content */}
+                  <div className="p-4">
+                    {order.orderLinks?.length > 0 ? (
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-xs font-medium text-gray-700 flex items-center gap-1.5">
+                            <Package className="w-3 h-3" />
+                            Sản phẩm ({order.orderLinks.length})
+                          </h4>
+                          {order.orderLinks.length > 2 && (
+                            <button
+                              onClick={() => toggleExpandOrder(order.orderId)}
+                              className="text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center gap-1"
+                            >
+                              {expandedOrders[order.orderId] ? (
+                                <>
+                                  <ChevronUp className="w-3 h-3" />
+                                  Thu gọn
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="w-3 h-3" />
+                                  Xem tất cả
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </div>
 
-                              {/* Pricing Info */}
-                              <div className="lg:col-span-1">
-                                <div className="space-y-0.5 text-xs">
-                                  <div className="text-gray-600">
-                                    SL:{" "}
-                                    <span className="font-medium">
-                                      {link.quantity}
-                                    </span>
+                        <div className="space-y-2">
+                          {(order.orderLinks.length <= 2 ||
+                          expandedOrders[order.orderId]
+                            ? order.orderLinks
+                            : order.orderLinks.slice(0, 2)
+                          ).map((link) => (
+                            <div
+                              key={link.linkId}
+                              className="border border-gray-200 rounded-lg p-3 bg-gradient-to-r from-gray-50 to-gray-50"
+                            >
+                              <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
+                                {/* Product Info */}
+                                <div className="lg:col-span-1">
+                                  <div className="font-medium text-gray-900 mb-1 text-sm">
+                                    {link.productName !== "string"
+                                      ? link.productName
+                                      : "Tên sản phẩm"}
                                   </div>
-                                  <div className="text-gray-600">
-                                    Giá web:{" "}
-                                    <span className="font-medium">
-                                      {link.priceWeb?.toLocaleString() || 0}
-                                    </span>
-                                  </div>
-                                  <div className="text-gray-600">
-                                    Giá Ship:{" "}
-                                    <span className="font-medium">
-                                      {link.shipWeb?.toLocaleString() || 0}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Additional Info */}
-                              <div className="lg:col-span-1">
-                                <div className="space-y-0.5 text-xs text-gray-600">
-                                  <div>
-                                    Shop:{" "}
-                                    <span className="font-medium">
-                                      {link.groupTag !== "string"
-                                        ? link.groupTag
+                                  <div className="space-y-0.5 text-xs text-gray-600">
+                                    <div className="flex items-center gap-1">
+                                      <ExternalLink className="w-2.5 h-2.5" />
+                                      {link.website !== "string"
+                                        ? link.website
                                         : "N/A"}
-                                    </span>
-                                  </div>
-                                  <div>
-                                    Note:{" "}
-                                    <span className="font-medium">
-                                      {link.note || "N/A"}
-                                    </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      {link.trackingCode}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
 
-                              {/* Actions & Status */}
-                              <div className="lg:col-span-1 text-right">
-                                <div className="text-sm font-semibold text-gray-900 mb-2">
-                                  {formatCurrency(link.finalPriceVnd)}
+                                {/* Pricing Info */}
+                                <div className="lg:col-span-1">
+                                  <div className="space-y-0.5 text-xs">
+                                    <div className="text-gray-600">
+                                      SL:{" "}
+                                      <span className="font-medium">
+                                        {link.quantity}
+                                      </span>
+                                    </div>
+                                    <div className="text-gray-600">
+                                      Giá web:{" "}
+                                      <span className="font-medium">
+                                        {link.priceWeb?.toLocaleString() || 0}
+                                      </span>
+                                    </div>
+                                    <div className="text-gray-600">
+                                      Giá Ship:{" "}
+                                      <span className="font-medium">
+                                        {link.shipWeb?.toLocaleString() || 0}
+                                      </span>
+                                    </div>
+                                  </div>
                                 </div>
-                                <div className="flex flex-col gap-1.5 items-end">
-                                  <span
-                                    className={`inline-block px-1.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                                      link.status
-                                    )}`}
-                                  >
-                                    {getStatusText(link.status)}
-                                  </span>
-                                  <div className="flex gap-1.5">
-                                    <button
-                                      onClick={() =>
-                                        handleViewDetail(link.linkId)
-                                      }
-                                      className="flex items-center gap-1 bg-blue-600 text-white px-2 py-1 rounded-md text-xs hover:bg-blue-700 transition-colors"
+
+                                {/* Additional Info */}
+                                <div className="lg:col-span-1">
+                                  <div className="space-y-0.5 text-xs text-gray-600">
+                                    <div>
+                                      Shop:{" "}
+                                      <span className="font-medium">
+                                        {link.groupTag !== "string"
+                                          ? link.groupTag
+                                          : "N/A"}
+                                      </span>
+                                    </div>
+                                    <div>
+                                      Note:{" "}
+                                      <span className="font-medium">
+                                        {link.note || "N/A"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Actions & Status */}
+                                <div className="lg:col-span-1 text-right">
+                                  <div className="text-sm font-semibold text-gray-900 mb-2">
+                                    {formatCurrency(link.totalWeb)}
+                                  </div>
+                                  <div className="flex flex-col gap-1.5 items-end">
+                                    <span
+                                      className={`inline-block px-1.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                                        link.status
+                                      )}`}
                                     >
-                                      <Eye className="w-2.5 h-2.5" />
-                                      Chi tiết
-                                    </button>
-                                    {link.status !== "HUY" &&
-                                      link.status !== "DA_MUA" && (
-                                        <button
-                                          onClick={() =>
-                                            handleCancelPurchase(order, link)
-                                          }
-                                          className="flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-md text-xs hover:bg-red-600 transition-colors"
-                                          title="Hủy đơn hàng"
-                                        >
-                                          <XCircle className="w-2.5 h-2.5" />
-                                          Hủy
-                                        </button>
-                                      )}
+                                      {getStatusText(link.status)}
+                                    </span>
+                                    <div className="flex gap-1.5">
+                                      <button
+                                        onClick={() =>
+                                          handleViewDetail(link.linkId)
+                                        }
+                                        className="flex items-center gap-1 bg-blue-600 text-white px-2 py-1 rounded-md text-xs hover:bg-blue-700 transition-colors"
+                                      >
+                                        <Eye className="w-2.5 h-2.5" />
+                                        Chi tiết
+                                      </button>
+
+                                      {/* Mua sau */}
+                                      {link.status !== "HUY" &&
+                                        link.status !== "DA_MUA" &&
+                                        link.status !== "MUA_SAU" && (
+                                          <button
+                                            onClick={() =>
+                                              handleOpenPurchaseLater(
+                                                order,
+                                                link
+                                              )
+                                            }
+                                            className="flex items-center gap-1 bg-indigo-500 text-white px-2 py-1 rounded-md text-xs hover:bg-indigo-600 transition-colors"
+                                            title="Đưa link sang Mua sau"
+                                          >
+                                            <Clock className="w-2.5 h-2.5" />
+                                            Mua sau
+                                          </button>
+                                        )}
+
+                                      {link.status !== "HUY" &&
+                                        link.status !== "DA_MUA" && (
+                                          <button
+                                            onClick={() =>
+                                              handleCancelPurchase(order, link)
+                                            }
+                                            className="flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-md text-xs hover:bg-red-600 transition-colors"
+                                            title="Hủy đơn hàng"
+                                          >
+                                            <XCircle className="w-2.5 h-2.5" />
+                                            Hủy
+                                          </button>
+                                        )}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <Package className="w-4 h-4 text-yellow-600" />
-                        <span className="text-xs text-yellow-800">
-                          Đơn hàng chưa có sản phẩm nào
-                        </span>
+                    ) : (
+                      <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Package className="w-4 h-4 text-yellow-600" />
+                          <span className="text-xs text-yellow-800">
+                            Đơn hàng chưa có sản phẩm nào
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -593,6 +693,26 @@ const OrderLinkList = () => {
         orderCode={selectedLinkForCancel?.orderCode}
         linkInfo={selectedLinkForCancel?.linkInfo}
         onSuccess={handleCancelSuccess}
+      />
+
+      <PurchaseLater
+        isOpen={showPurchaseLater}
+        onClose={handleClosePurchaseLater}
+        orderId={selectedLinkForBuyLater?.orderId}
+        linkId={selectedLinkForBuyLater?.linkId}
+        orderCode={selectedLinkForBuyLater?.orderCode}
+        linkInfo={selectedLinkForBuyLater?.linkInfo}
+        onSuccess={handlePurchaseLaterSuccess}
+      />
+
+      {/* NEW: Pin modal */}
+      <PinOrder
+        isOpen={showPin}
+        onClose={closePin}
+        orderId={pinCtx?.orderId}
+        orderCode={pinCtx?.orderCode}
+        pinned={pinCtx?.pinned}
+        onSuccess={handlePinSuccess}
       />
 
       {selectedLinkId && (

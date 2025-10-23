@@ -1,9 +1,9 @@
-// src/Components/StaffPurchase/CancelPurchase.jsx
-import React, { useState } from "react";
-import { X, AlertTriangle, Loader2, CheckCircle2 } from "lucide-react";
+// src/Components/StaffPurchase/PurchaseLater.jsx
+import React, { useState, useEffect } from "react";
+import { X, Clock, Loader2, CheckCircle2 } from "lucide-react";
 import createPurchaseService from "../../Services/StaffPurchase/createPurchaseService";
 
-const CancelPurchase = ({
+const PurchaseLater = ({
   isOpen,
   onClose,
   orderId,
@@ -16,8 +16,7 @@ const CancelPurchase = ({
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
-  // Reset state when modal opens
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       setLoading(false);
       setError(null);
@@ -25,32 +24,32 @@ const CancelPurchase = ({
     }
   }, [isOpen]);
 
-  const handleCancel = async () => {
+  const handleMarkBuyLater = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Get token from localStorage
       const token = localStorage.getItem("jwt");
-
       if (!token) {
         throw new Error(
           "Không tìm thấy token xác thực. Vui lòng đăng nhập lại."
         );
       }
 
-      await createPurchaseService.cancelOrderLink(orderId, linkId, token);
+      await createPurchaseService.markBuyLaterForLink(orderId, linkId);
 
       setSuccess(true);
-
-      // Auto close after 1.5s and trigger success callback
       setTimeout(() => {
         onSuccess?.();
         onClose();
       }, 1500);
     } catch (err) {
-      console.error("Error cancelling order link:", err);
-      setError(err.message || "Không thể hủy đơn hàng. Vui lòng thử lại sau.");
+      console.error("Error marking link as buy later:", err);
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Không thể chuyển sang 'Mua sau'."
+      );
     } finally {
       setLoading(false);
     }
@@ -58,18 +57,27 @@ const CancelPurchase = ({
 
   if (!isOpen) return null;
 
+  const statusBadge = (status) => {
+    const map = {
+      CHO_MUA: "bg-yellow-100 text-yellow-800",
+      DANG_MUA: "bg-blue-100 text-blue-800",
+      DA_MUA: "bg-emerald-100 text-emerald-800",
+      MUA_SAU: "bg-purple-100 text-purple-800",
+      HUY: "bg-red-100 text-red-800",
+    };
+    return map[status] || "bg-gray-100 text-gray-800";
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-              <AlertTriangle className="w-4 h-4 text-red-600" />
+            <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+              <Clock className="w-4 h-4 text-indigo-600" />
             </div>
-            <h2 className="text-base font-semibold text-gray-900">
-              Hủy đơn hàng
-            </h2>
+            <h2 className="text-base font-semibold text-gray-900">Mua sau</h2>
           </div>
           <button
             onClick={onClose}
@@ -88,16 +96,17 @@ const CancelPurchase = ({
                 <CheckCircle2 className="w-6 h-6 text-green-600" />
               </div>
               <h3 className="text-sm font-semibold text-gray-900 mb-1">
-                Hủy đơn thành công!
+                Đã chuyển sang "Mua sau"!
               </h3>
               <p className="text-xs text-gray-600">Đang cập nhật...</p>
             </div>
           ) : (
             <>
-              {/* Warning Message */}
-              <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-3">
-                <p className="text-xs text-red-800">
-                  <strong>Cảnh báo:</strong> Hành động này không thể hoàn tác!
+              {/* Note */}
+              <div className="bg-indigo-50 border border-indigo-200 rounded-md p-3 mb-3">
+                <p className="text-xs text-indigo-800">
+                  Link sẽ không được xử lý trong đợt mua hiện tại cho đến khi
+                  bạn kích hoạt lại.
                 </p>
               </div>
 
@@ -111,14 +120,12 @@ const CancelPurchase = ({
                     </span>
                   </div>
                 )}
-
                 <div className="flex justify-between items-center py-1.5 border-b border-gray-200">
                   <span className="text-xs text-gray-600">Order ID:</span>
                   <span className="text-xs font-semibold text-gray-900">
                     {orderId}
                   </span>
                 </div>
-
                 <div className="flex justify-between items-center py-1.5 border-b border-gray-200">
                   <span className="text-xs text-gray-600">Link ID:</span>
                   <span className="text-xs font-semibold text-gray-900">
@@ -152,17 +159,9 @@ const CancelPurchase = ({
                           Trạng thái:
                         </span>
                         <span
-                          className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                            linkInfo.status === "CHO_MUA"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : linkInfo.status === "DANG_MUA"
-                              ? "bg-blue-100 text-blue-800"
-                              : linkInfo.status === "DA_MUA"
-                              ? "bg-red-100 text-red-800"
-                              : linkInfo.status === "MUA_SAU"
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
+                          className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusBadge(
+                            linkInfo.status
+                          )}`}
                         >
                           {linkInfo.status}
                         </span>
@@ -172,24 +171,24 @@ const CancelPurchase = ({
                 )}
               </div>
 
-              {/* Error Message */}
+              {/* Error */}
               {error && (
                 <div className="mb-3 p-2.5 bg-red-50 border border-red-200 rounded-md">
                   <p className="text-xs text-red-800">{error}</p>
                 </div>
               )}
 
-              {/* Confirmation Question */}
+              {/* Confirm */}
               <div className="bg-gray-50 rounded-md p-3">
                 <p className="text-xs text-gray-700 text-center font-medium">
-                  Bạn có chắc chắn muốn hủy đơn hàng này?
+                  Xác nhận chuyển link này sang "Mua sau"?
                 </p>
               </div>
             </>
           )}
         </div>
 
-        {/* Footer Actions */}
+        {/* Footer */}
         {!success && (
           <div className="flex gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
             <button
@@ -200,20 +199,17 @@ const CancelPurchase = ({
               Hủy
             </button>
             <button
-              onClick={handleCancel}
+              onClick={handleMarkBuyLater}
               disabled={loading}
-              className="flex-1 px-3 py-2 bg-red-600 text-white rounded-md text-xs font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+              className="flex-1 px-3 py-2 bg-indigo-600 text-white rounded-md text-xs font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
             >
               {loading ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  Đang hủy...
+                  Đang xử lý...
                 </>
               ) : (
-                <>
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                  Xác nhận
-                </>
+                <>Xác nhận</>
               )}
             </button>
           </div>
@@ -223,4 +219,4 @@ const CancelPurchase = ({
   );
 };
 
-export default CancelPurchase;
+export default PurchaseLater;

@@ -47,9 +47,7 @@ const SignIn = () => {
     setLoading(true);
 
     try {
-      console.log("🔐 Attempting login...");
       const response = await login(formData.username, formData.password);
-      console.log("✅ Login response:", JSON.stringify(response, null, 2));
 
       // Lưu token vào localStorage
       const token =
@@ -68,7 +66,6 @@ const SignIn = () => {
         role: response.user?.role || response.role,
       };
 
-      console.log("📝 Setting user in context:", userData);
       setAuthUser(userData);
 
       // Hiển thị thông báo thành công
@@ -76,13 +73,12 @@ const SignIn = () => {
 
       // Điều hướng theo vai trò
       const route = roleRoutes[userData.role] || "/";
-      console.log("🚀 Navigating to:", route);
 
       // Đợi một chút để đảm bảo Context được cập nhật
       await new Promise((resolve) => setTimeout(resolve, 100));
       navigate(route, { replace: true });
     } catch (error) {
-      console.error("❌ Login error:", error);
+      console.error("Login error:", error);
       if (error.response?.status === 401) {
         toast.error("Tên đăng nhập hoặc mật khẩu không đúng!");
       } else if (error.response?.status === 404) {
