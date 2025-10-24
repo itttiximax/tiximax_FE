@@ -95,6 +95,7 @@ import DashboardWarehouse from "../components/WarehouseDomestic/DashboardWarehou
 import StaffProfile from "../components/common/StaffProfile";
 import ManagerPromotion from "../components/Manager/ManagerPromotion";
 import ImportPacking from "../components/WarehouseForeign/ImportPacking";
+import ResetPassword from "../Page/ResetPassword";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -105,6 +106,7 @@ const Router = createBrowserRouter([
       { path: "signup", element: <SignUp /> },
       { path: "forgot-password", element: <ForgotPassword /> },
       { path: "profile", element: <ProfilePage /> },
+      { path: "/reset-password", element: <ResetPassword /> },
       { path: "/auth/callback", element: <AuthCallback /> },
     ],
   },

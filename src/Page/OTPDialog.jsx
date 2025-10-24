@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { X, Mail, CheckCircle2, Loader2 } from "lucide-react";
 import registrationService from "../Services/Auth/Registration";
+import LogoTixi from "../assets/TixiLogo.jpg";
+import BgHeader from "../assets/bg.jpg";
 
 const OTPDialog = ({ isOpen, onClose, email, onVerifySuccess }) => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -15,7 +17,7 @@ const OTPDialog = ({ isOpen, onClose, email, onVerifySuccess }) => {
   const endAtRef = useRef(null);
   const timerRef = useRef(null);
 
-  // Reset state khi mở dialog
+  // Reset + khởi tạo timer khi mở dialog
   useEffect(() => {
     if (!isOpen) {
       if (timerRef.current) {
@@ -36,7 +38,6 @@ const OTPDialog = ({ isOpen, onClose, email, onVerifySuccess }) => {
       const remainMs = Math.max(0, (endAtRef.current ?? now) - now);
       const remainSec = Math.ceil(remainMs / 1000);
       setResendTimer(remainSec);
-
       if (remainSec <= 0) {
         setCanResend(true);
         if (timerRef.current) {
@@ -49,7 +50,7 @@ const OTPDialog = ({ isOpen, onClose, email, onVerifySuccess }) => {
     tick();
     timerRef.current = setInterval(tick, 250);
 
-    // Auto focus first input
+    // Auto focus
     setTimeout(() => inputRefs.current[0]?.focus(), 100);
 
     return () => {
@@ -61,33 +62,22 @@ const OTPDialog = ({ isOpen, onClose, email, onVerifySuccess }) => {
   }, [isOpen]);
 
   const handleChange = (index, value) => {
-    // Chỉ cho phép số
     if (!/^\d*$/.test(value)) return;
 
     const newOtp = [...otp];
 
     if (value.length > 1) {
-      // Paste nhiều số
       const digits = value.slice(0, 6).split("");
       digits.forEach((digit, i) => {
-        if (index + i < 6) {
-          newOtp[index + i] = digit;
-        }
+        if (index + i < 6) newOtp[index + i] = digit;
       });
       setOtp(newOtp);
-
-      // Focus vào ô cuối cùng được điền
       const nextIndex = Math.min(index + digits.length, 5);
       inputRefs.current[nextIndex]?.focus();
     } else {
-      // Nhập 1 số
       newOtp[index] = value;
       setOtp(newOtp);
-
-      // Auto focus ô tiếp theo
-      if (value && index < 5) {
-        inputRefs.current[index + 1]?.focus();
-      }
+      if (value && index < 5) inputRefs.current[index + 1]?.focus();
     }
 
     if (error) setError("");
@@ -95,10 +85,7 @@ const OTPDialog = ({ isOpen, onClose, email, onVerifySuccess }) => {
 
   const handleKeyDown = (index, e) => {
     if (e.key === "Backspace") {
-      if (!otp[index] && index > 0) {
-        // Backspace ở ô trống → focus ô trước
-        inputRefs.current[index - 1]?.focus();
-      }
+      if (!otp[index] && index > 0) inputRefs.current[index - 1]?.focus();
     } else if (e.key === "ArrowLeft" && index > 0) {
       inputRefs.current[index - 1]?.focus();
     } else if (e.key === "ArrowRight" && index < 5) {
@@ -109,26 +96,20 @@ const OTPDialog = ({ isOpen, onClose, email, onVerifySuccess }) => {
   const handlePaste = (e) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData("text").replace(/\D/g, "");
+    if (!pastedData) return;
 
-    if (pastedData) {
-      const digits = pastedData.slice(0, 6).split("");
-      const newOtp = [...otp];
+    const digits = pastedData.slice(0, 6).split("");
+    const newOtp = [...otp];
+    digits.forEach((d, i) => {
+      if (i < 6) newOtp[i] = d;
+    });
+    setOtp(newOtp);
 
-      digits.forEach((digit, i) => {
-        if (i < 6) {
-          newOtp[i] = digit;
-        }
-      });
+    const nextEmptyIndex = newOtp.findIndex((val) => !val);
+    const focusIndex = nextEmptyIndex === -1 ? 5 : nextEmptyIndex;
+    inputRefs.current[focusIndex]?.focus();
 
-      setOtp(newOtp);
-
-      // Focus vào ô cuối hoặc ô trống đầu tiên
-      const nextEmptyIndex = newOtp.findIndex((val) => !val);
-      const focusIndex = nextEmptyIndex === -1 ? 5 : nextEmptyIndex;
-      inputRefs.current[focusIndex]?.focus();
-
-      if (error) setError("");
-    }
+    if (error) setError("");
   };
 
   const handleVerify = async (e) => {
@@ -151,7 +132,6 @@ const OTPDialog = ({ isOpen, onClose, email, onVerifySuccess }) => {
       const msg =
         err?.response?.data?.message || "Mã OTP không đúng hoặc đã hết hạn";
       setError(msg);
-      // Clear OTP và focus lại ô đầu
       setOtp(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
     } finally {
@@ -209,50 +189,46 @@ const OTPDialog = ({ isOpen, onClose, email, onVerifySuccess }) => {
   const otpComplete = otp.every((digit) => digit !== "");
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full relative animate-slide-up overflow-hidden">
-        {/* Decorative gradient bar */}
-        <div className="h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-
-        <div className="p-8">
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-all duration-200"
-            disabled={loading}
-            aria-label="Đóng"
-          >
-            <X className="w-5 h-5" />
-          </button>
-
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg transform hover:scale-105 transition-transform duration-300">
+    <div
+      className="fixed inset-0 bg-cover bg-center bg-no-repeat flex items-center justify-center z-50 p-4"
+      style={{ backgroundImage: `url(${LogoTixi})` }}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full relative overflow-hidden border border-gray-100">
+        {/* HEADER: dùng ảnh bg.jpg */}
+        <div
+          className="px-8 py-8 text-center bg-cover bg-center bg-no-repeat relative"
+          style={{ backgroundImage: `url(${BgHeader})` }}
+        >
+          {/* Nếu muốn tăng độ tương phản chữ, có thể bật overlay nhẹ: */}
+          {/* <div className="absolute inset-0 bg-blue-700/30"></div> */}
+          <div className="relative z-10">
+            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-300 to-blue-500 rounded-2xl flex items-center justify-center mb-5 shadow-lg">
               <Mail className="text-white w-10 h-10" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">
+            <h2 className="text-2xl font-bold text-white tracking-tight mb-1">
               Xác Thực Email
             </h2>
-            <p className="text-gray-600 text-sm mb-2">
-              Chúng tôi đã gửi mã xác thực đến
-            </p>
-            <p className="text-blue-600 font-semibold text-base break-all px-4">
+            <p className="text-blue-100 text-sm">Chúng tôi đã gửi mã đến</p>
+            <p className="text-white font-semibold text-sm break-all mt-1">
               {email}
             </p>
           </div>
+        </div>
 
-          {/* Info message */}
+        {/* BODY: trắng, đồng bộ style với SignIn/Signup */}
+        <div className="p-8 bg-white">
+          {/* Info */}
           {info && (
-            <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl text-blue-800 text-sm flex items-start gap-3 animate-slide-down">
-              <CheckCircle2 className="text-blue-500 w-5 h-5 flex-shrink-0 mt-0.5" />
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-sm flex items-start gap-3">
+              <CheckCircle2 className="text-blue-600 w-5 h-5 flex-shrink-0 mt-0.5" />
               <span>{info}</span>
             </div>
           )}
 
-          {/* Error message */}
+          {/* Error */}
           {error && (
             <div
-              className="mb-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl text-red-800 text-sm animate-shake"
+              className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm"
               aria-live="assertive"
             >
               <div className="flex items-start gap-3">
@@ -264,8 +240,8 @@ const OTPDialog = ({ isOpen, onClose, email, onVerifySuccess }) => {
 
           {/* OTP Input */}
           <form onSubmit={handleVerify}>
-            <div className="mb-8">
-              <label className="block text-sm font-semibold text-gray-700 mb-4 text-center">
+            <div className="mb-6">
+              <label className="block text-xs font-semibold text-gray-700 mb-3 text-center">
                 Nhập mã OTP gồm 6 số
               </label>
               <div className="flex justify-center gap-3">
@@ -283,8 +259,8 @@ const OTPDialog = ({ isOpen, onClose, email, onVerifySuccess }) => {
                     disabled={loading}
                     className={`
                       w-12 h-14 text-center text-2xl font-bold rounded-xl
-                      border-2 transition-all duration-200
-                      focus:outline-none focus:ring-4
+                      border transition-all duration-200
+                      focus:outline-none focus:ring-2
                       ${
                         digit
                           ? "border-blue-500 bg-blue-50 text-blue-700 focus:ring-blue-200"
@@ -295,7 +271,6 @@ const OTPDialog = ({ isOpen, onClose, email, onVerifySuccess }) => {
                           ? "opacity-50 cursor-not-allowed"
                           : "hover:border-blue-400"
                       }
-                      disabled:bg-gray-50
                     `}
                     aria-label={`Số thứ ${index + 1}`}
                   />
@@ -303,24 +278,20 @@ const OTPDialog = ({ isOpen, onClose, email, onVerifySuccess }) => {
               </div>
             </div>
 
-            {/* Submit button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={!otpComplete || loading}
-              className={`
-                w-full py-4 rounded-xl font-semibold text-white text-base
-                transition-all duration-300 transform
-                focus:outline-none focus:ring-4 focus:ring-blue-200
+              className={`w-full py-3 rounded-lg font-semibold text-white text-sm transition-all duration-200
                 ${
                   otpComplete && !loading
-                    ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+                    ? "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-md hover:shadow-lg"
                     : "bg-gray-300 cursor-not-allowed"
-                }
-              `}
+                }`}
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   Đang xác thực...
                 </span>
               ) : (
@@ -329,7 +300,7 @@ const OTPDialog = ({ isOpen, onClose, email, onVerifySuccess }) => {
             </button>
           </form>
 
-          {/* Resend section */}
+          {/* Resend */}
           <div className="mt-8 text-center pt-6 border-t border-gray-200">
             <p className="text-sm text-gray-600 mb-3">Không nhận được mã?</p>
             {canResend ? (
@@ -344,50 +315,17 @@ const OTPDialog = ({ isOpen, onClose, email, onVerifySuccess }) => {
             ) : (
               <div className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-100 rounded-lg">
                 <span className="text-sm text-gray-600">Gửi lại sau</span>
-                <span className="inline-flex items-center justify-center min-w-[2.5rem] h-8 px-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-lg text-sm">
+                <span className="inline-flex items-center justify-center min-w-[2.5rem] h-8 px-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-lg text-sm">
                   {resendTimer}s
                 </span>
               </div>
             )}
           </div>
         </div>
-      </div>
 
-      <style>{`
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes slide-up {
-          from { 
-            opacity: 0; 
-            transform: translateY(20px) scale(0.95);
-          }
-          to { 
-            opacity: 1; 
-            transform: translateY(0) scale(1);
-          }
-        }
-        @keyframes slide-down {
-          from { 
-            opacity: 0; 
-            transform: translateY(-10px);
-          }
-          to { 
-            opacity: 1; 
-            transform: translateY(0);
-          }
-        }
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-          20%, 40%, 60%, 80% { transform: translateX(5px); }
-        }
-        .animate-fade-in { animation: fade-in 0.3s ease-out; }
-        .animate-slide-up { animation: slide-up 0.4s ease-out; }
-        .animate-slide-down { animation: slide-down 0.3s ease-out; }
-        .animate-shake { animation: shake 0.5s ease-in-out; }
-      `}</style>
+        {/* Đường kẻ chân hộp thoại đồng bộ */}
+        <div className="h-0.5 bg-gray-100" />
+      </div>
     </div>
   );
 };

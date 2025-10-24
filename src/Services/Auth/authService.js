@@ -81,7 +81,7 @@ export const login = async (username, password) => {
     const { data } = await api.post(
       "/accounts/login",
       { username, password },
-      { timeout: 10000 }
+      { timeout: 20000 }
     );
     const { token, user } = extractTokenUser(data);
     if (!token || !user)
