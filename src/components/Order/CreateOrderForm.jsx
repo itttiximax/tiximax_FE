@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   ChevronDown,
   AlertCircle,
@@ -15,13 +15,15 @@ import { getAllProductTypes } from "../../Services/Manager/managerProductTypeSer
 import toast from "react-hot-toast";
 import AccountSearch from "./AccountSearch";
 import ProductManager from "./ProducManager";
-import ConfirmDialog from "../../common/ConfirmDialog"; // IMPORT COMPONENT CHUNG
+import ConfirmDialog from "../../common/ConfirmDialog";
+import CustomerAddress from "./CustomerAddress";
 
 const CreateOrderForm = () => {
   // Consolidated states
   const [preliminary, setPreliminary] = useState({
     customerCode: "",
     routeId: "",
+    addressId: "", // 👈 quan trọng
   });
 
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -60,9 +62,10 @@ const CreateOrderForm = () => {
     error: null,
   });
 
-  // State for confirm dialog
+  // Confirm
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Fetch data once on mount
   useEffect(() => {
     const fetchData = async () => {
@@ -78,9 +81,9 @@ const CreateOrderForm = () => {
           ]);
 
         setMasterData({
-          routes: routesData,
-          destinations: destinationsData,
-          productTypes: productTypesData,
+          routes: routesData || [],
+          destinations: destinationsData || [],
+          productTypes: productTypesData || [],
         });
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -103,6 +106,7 @@ const CreateOrderForm = () => {
     setPreliminary((prev) => ({
       ...prev,
       customerCode: customer.customerCode,
+      addressId: "", // reset khi đổi khách
     }));
     toast.success(
       `Đã chọn khách hàng: ${customer.name} (${customer.customerCode})`
@@ -112,7 +116,11 @@ const CreateOrderForm = () => {
   const handleCustomerCodeChange = useCallback(
     (e) => {
       const value = e.target.value;
-      setPreliminary((prev) => ({ ...prev, customerCode: value }));
+      setPreliminary((prev) => ({
+        ...prev,
+        customerCode: value,
+        addressId: "",
+      }));
 
       if (
         !value ||
@@ -125,7 +133,7 @@ const CreateOrderForm = () => {
   );
 
   const handleClearCustomer = useCallback(() => {
-    setPreliminary((prev) => ({ ...prev, customerCode: "" }));
+    setPreliminary((prev) => ({ ...prev, customerCode: "", addressId: "" }));
     setSelectedCustomer(null);
     toast("Đã xóa thông tin khách hàng", { icon: "🗑️" });
   }, []);
@@ -135,22 +143,28 @@ const CreateOrderForm = () => {
       const { name, value } = e.target;
 
       if (name === "routeId") {
+        const routeIdNum = Number(value || 0);
         const selectedRoute = masterData.routes.find(
-          (route) => route.routeId === Number(value)
+          (route) => route.routeId === routeIdNum
         );
-        setPreliminary((prev) => ({ ...prev, [name]: value }));
+        setPreliminary((prev) => ({ ...prev, [name]: routeIdNum }));
 
         if (selectedRoute?.exchangeRate) {
           setForm((prev) => ({
             ...prev,
-            exchangeRate: selectedRoute.exchangeRate,
+            exchangeRate: Number(selectedRoute.exchangeRate) || "",
           }));
           toast.success(
-            `Tỷ giá hôm nay: ${selectedRoute.exchangeRate.toLocaleString()} VND`
+            `Tỷ giá hôm nay: ${Number(
+              selectedRoute.exchangeRate || 0
+            ).toLocaleString()} VND`
           );
         }
       } else {
-        setPreliminary((prev) => ({ ...prev, [name]: value }));
+        setPreliminary((prev) => ({
+          ...prev,
+          [name]: name === "addressId" ? Number(value || 0) : value,
+        }));
       }
     },
     [masterData.routes]
@@ -164,6 +178,8 @@ const CreateOrderForm = () => {
         type === "checkbox"
           ? checked
           : name === "destinationId"
+          ? Number(value)
+          : name === "exchangeRate"
           ? Number(value)
           : value,
     }));
@@ -181,79 +197,73 @@ const CreateOrderForm = () => {
 
   // Actual submit function with validation and better error handling
   const handleConfirmSubmit = useCallback(async () => {
-    // Validation trước khi submit
+    // Validation
     if (!preliminary.customerCode) {
       toast.error("Vui lòng chọn khách hàng");
       setShowConfirmDialog(false);
       return;
     }
-
     if (!preliminary.routeId) {
       toast.error("Vui lòng chọn tuyến đường");
       setShowConfirmDialog(false);
       return;
     }
-
     if (!form.destinationId) {
       toast.error("Vui lòng chọn điểm đến");
+      setShowConfirmDialog(false);
+      return;
+    }
+    if (!preliminary.addressId) {
+      toast.error("Vui lòng chọn địa chỉ giao hàng");
+      setShowConfirmDialog(false);
+      return;
+    }
+    const exr = Number(form.exchangeRate || 0);
+    if (!Number.isFinite(exr) || exr <= 0) {
+      toast.error("Tỷ giá phải > 0");
       setShowConfirmDialog(false);
       return;
     }
 
     // Validate products
     for (let i = 0; i < products.length; i++) {
-      const product = products[i];
+      const p = products[i];
+      const q = Number(p.quantity);
+      const w = Number(p.priceWeb);
+      const s = Number(p.shipWeb);
 
-      if (!product.productName?.trim()) {
+      if (!p.productName?.trim()) {
         toast.error(`Sản phẩm ${i + 1}: Thiếu tên sản phẩm`);
         setShowConfirmDialog(false);
         return;
       }
-
-      if (!product.productLink?.trim()) {
+      if (!p.productLink?.trim()) {
         toast.error(`Sản phẩm ${i + 1}: Thiếu link sản phẩm`);
         setShowConfirmDialog(false);
         return;
       }
-
-      if (!product.website?.trim()) {
+      if (!p.website?.trim()) {
         toast.error(`Sản phẩm ${i + 1}: Thiếu thông tin website`);
         setShowConfirmDialog(false);
         return;
       }
-
-      if (!product.productTypeId) {
+      if (!p.productTypeId) {
         toast.error(`Sản phẩm ${i + 1}: Thiếu loại sản phẩm`);
         setShowConfirmDialog(false);
         return;
       }
-
-      if (
-        !product.priceWeb ||
-        product.priceWeb === "0" ||
-        product.priceWeb === ""
-      ) {
-        toast.error(`Sản phẩm ${i + 1}: Thiếu giá sản phẩm`);
+      if (!Number.isFinite(w) || w <= 0) {
+        toast.error(`Sản phẩm ${i + 1}: Giá phải > 0`);
         setShowConfirmDialog(false);
         return;
       }
-
-      if (
-        !product.shipWeb ||
-        product.shipWeb === "0" ||
-        product.shipWeb === ""
-      ) {
-        toast.error(`Sản phẩm ${i + 1}: Thiếu phí ship`);
+      if (!Number.isFinite(s) || s < 0) {
+        toast.error(`Sản phẩm ${i + 1}: Phí ship ≥ 0`);
         setShowConfirmDialog(false);
         return;
       }
-
-      if (
-        !product.quantity ||
-        product.quantity === "0" ||
-        product.quantity === ""
-      ) {
-        toast.error(`Sản phẩm ${i + 1}: Số lượng phải lớn hơn 0`);
+      if (!Number.isFinite(q) || q <= 0) {
+        toast.error(`Sản phẩm ${i + 1}: Số lượng phải > 0`);
         setShowConfirmDialog(false);
         return;
       }
@@ -264,25 +274,28 @@ const CreateOrderForm = () => {
     try {
       const orderData = {
         ...form,
-        orderLinkRequests: products,
-      };
 
-      console.log("Submitting order data:", {
-        customerCode: preliminary.customerCode,
-        routeId: preliminary.routeId,
-        orderData,
-      });
+        shippingAddressId: Number(preliminary.addressId),
+        orderLinkRequests: products.map((p) => ({
+          ...p,
+          quantity: Number(p.quantity || 0),
+          priceWeb: Number(p.priceWeb || 0),
+          shipWeb: Number(p.shipWeb || 0),
+          productTypeId: Number(p.productTypeId || 0),
+        })),
+      };
 
       await orderService.createOrder(
         preliminary.customerCode,
-        preliminary.routeId,
+        Number(preliminary.routeId),
+        Number(preliminary.addressId),
         orderData
       );
 
       toast.success("Tạo đơn hàng thành công!");
 
       // Reset form
-      setPreliminary({ customerCode: "", routeId: "" });
+      setPreliminary({ customerCode: "", routeId: "", addressId: "" });
       setSelectedCustomer(null);
       setForm({
         orderType: "MUA_HO",
@@ -309,9 +322,7 @@ const CreateOrderForm = () => {
     } catch (error) {
       console.error("Error creating order:", error);
 
-      // Hiển thị lỗi chi tiết từ Backend
       let errorMessage = "Tạo đơn hàng thất bại";
-
       if (error.response) {
         const backendError =
           error.response.data?.error ||
@@ -345,9 +356,7 @@ const CreateOrderForm = () => {
         errorMessage = error.message || "Đã xảy ra lỗi không xác định";
       }
 
-      toast.error(errorMessage, {
-        duration: 5000,
-      });
+      toast.error(errorMessage, { duration: 5000 });
     } finally {
       setIsSubmitting(false);
       setShowConfirmDialog(false);
@@ -356,12 +365,21 @@ const CreateOrderForm = () => {
 
   const isFormEnabled = preliminary.customerCode && preliminary.routeId;
 
-  // Get selected route and destination for confirmation
-  const selectedRoute = masterData.routes.find(
-    (route) => route.routeId === Number(preliminary.routeId)
+  // Memo cho selectedRoute/destination (chống re-render thừa)
+  const selectedRoute = useMemo(
+    () =>
+      masterData.routes.find(
+        (route) => route.routeId === Number(preliminary.routeId)
+      ),
+    [masterData.routes, preliminary.routeId]
   );
-  const selectedDestination = masterData.destinations.find(
-    (dest) => dest.destinationId === form.destinationId
+
+  const selectedDestination = useMemo(
+    () =>
+      masterData.destinations.find(
+        (dest) => dest.destinationId === Number(form.destinationId)
+      ),
+    [masterData.destinations, form.destinationId]
   );
 
   return (
@@ -371,7 +389,7 @@ const CreateOrderForm = () => {
         <div className="bg-white rounded-xl shadow-md p-4 mb-6">
           <div className="flex items-center gap-2">
             <FileText className="w-6 h-6 text-blue-600" />
-            <h1 className="text-xl font-bold text-gray-800">Tạo đơn mua hộ </h1>
+            <h1 className="text-xl font-bold text-gray-800">Tạo đơn mua hộ</h1>
           </div>
 
           {ui.error && (
@@ -415,8 +433,7 @@ const CreateOrderForm = () => {
                   )}
                 </div>
 
-                {/* Divider */}
-                <div className="border-t border-gray-200"></div>
+                <div className="border-t border-gray-200" />
 
                 {/* Route Section */}
                 <div>
@@ -431,7 +448,7 @@ const CreateOrderForm = () => {
                       onChange={handlePreliminaryChange}
                       className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-all"
                       required
-                      disabled={ui.error}
+                      disabled={!!ui.error}
                     >
                       <option value="">
                         {ui.error
@@ -441,7 +458,7 @@ const CreateOrderForm = () => {
                       {masterData.routes.map((route) => (
                         <option key={route.routeId} value={route.routeId}>
                           {route.name} ({route.shipTime} ngày,{" "}
-                          {route.unitBuyingPrice.toLocaleString()} đ)
+                          {(route.unitBuyingPrice ?? 0).toLocaleString()} đ)
                         </option>
                       ))}
                     </select>
@@ -451,8 +468,7 @@ const CreateOrderForm = () => {
                   </div>
                 </div>
 
-                {/* Divider */}
-                <div className="border-t border-gray-200"></div>
+                <div className="border-t border-gray-200" />
 
                 {/* Order Details Section */}
                 <div className="space-y-4">
@@ -508,6 +524,7 @@ const CreateOrderForm = () => {
                         placeholder="Viet Nam Dong (VND)"
                         disabled={!isFormEnabled}
                         min="1"
+                        step="1"
                       />
                     </div>
                   </div>
@@ -526,9 +543,23 @@ const CreateOrderForm = () => {
                     </span>
                   </div>
                 </div>
+
+                <div className="border-t border-gray-200" />
+
+                {/* 👇 NEW: Chọn địa chỉ giao hàng (auto theo customerCode) */}
+                <CustomerAddress
+                  customerCode={preliminary.customerCode}
+                  onAddressSelect={(addr) => {
+                    setPreliminary((prev) => ({
+                      ...prev,
+                      addressId: Number(addr.addressId),
+                    }));
+                  }}
+                />
               </div>
             </div>
           </div>
+
           {/* Right Panel - Products */}
           <div className="col-span-12 lg:col-span-8">
             <ProductManager
@@ -555,7 +586,7 @@ const CreateOrderForm = () => {
               {isFormEnabled && (
                 <div className="flex items-center gap-2 text-green-600">
                   <CheckCircle className="w-5 h-5" />
-                  <span className="font-medium">Sẵn sàng tạo đơn ký gửi</span>
+                  <span className="font-medium">Sẵn sàng tạo đơn mua hộ</span>
                 </div>
               )}
             </div>
@@ -579,7 +610,7 @@ const CreateOrderForm = () => {
           </div>
         </div>
 
-        {/* SỬ DỤNG COMPONENT CONFIRMDIALOG CHUNG */}
+        {/* ConfirmDialog */}
         <ConfirmDialog
           isOpen={showConfirmDialog}
           onClose={handleCloseDialog}
@@ -616,6 +647,15 @@ const CreateOrderForm = () => {
                     <span className="text-gray-600">Tỷ giá:</span>
                     <span className="font-semibold text-gray-900">
                       {Number(form.exchangeRate).toLocaleString()} VND
+                    </span>
+                  </div>
+                )}
+                {preliminary.addressId && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Địa chỉ giao:</span>
+                    <span className="font-semibold text-gray-900">
+                      {/* Hiển thị id (đơn giản). Nếu muốn hiển thị tên, bạn có thể truyền tên từ CustomerAddress thông qua 1 state khác */}
+                      #{preliminary.addressId}
                     </span>
                   </div>
                 )}

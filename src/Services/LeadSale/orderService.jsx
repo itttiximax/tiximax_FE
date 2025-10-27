@@ -2,33 +2,19 @@ import api from "../../config/api.js";
 
 const orderService = {
   // Create order
-  createOrder: async (customerCode, routeId, orderData) => {
-    // ← THAY ĐỔI: đổi thành method của object
-    try {
-      // Input validation
-      if (!customerCode) {
-        throw new Error("Customer code is required");
-      }
-      if (!routeId) {
-        throw new Error("Route ID is required");
-      }
-      if (!orderData) {
-        throw new Error("Order data is required");
-      }
 
-      // ← BỎ: token check và manual headers - api tự động xử lý
-      const response = await api.post(
-        `/orders/${customerCode}/${routeId}`,
-        orderData
-      );
+  createOrder: async (customerCode, routeId, addressId, orderData) => {
+    if (!customerCode) throw new Error("Customer code is required");
+    if (!routeId) throw new Error("Route ID is required");
+    if (!addressId) throw new Error("Address ID is required");
+    if (!orderData) throw new Error("Payload is required");
 
-      return response.data;
-    } catch (error) {
-      console.error("Error creating order:", error.response || error);
-      throw error;
-    }
+    const url = `/orders/${encodeURIComponent(customerCode)}/${Number(
+      routeId
+    )}/${Number(addressId)}`;
+    const res = await api.post(url, orderData);
+    return res.data;
   },
-
   // Get order by ID
   getOrder: async (orderId) => {
     try {

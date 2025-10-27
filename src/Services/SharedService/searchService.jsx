@@ -6,12 +6,12 @@ const searchService = {
         throw new Error("Query must be a string");
       }
       const response = await api.get("/accounts/search", {
-        params: { q: query, limit }, // Thêm limit vào query param
+        params: { q: query, limit },
       });
       return response.data || [];
     } catch (error) {
       if (error.response?.status === 404) {
-        return []; // Trả về mảng rỗng nếu không tìm thấy
+        return [];
       }
       console.error("Error searching accounts:", error.response || error);
       throw error;
