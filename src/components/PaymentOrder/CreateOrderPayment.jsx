@@ -13,7 +13,6 @@ import {
   Maximize2,
   X,
 } from "lucide-react";
-import paymentService from "../../Services/Payment/paymentService";
 
 const CreateOrderPayment = ({
   orders,
@@ -23,37 +22,10 @@ const CreateOrderPayment = ({
   fetchOrders,
   currentPage,
 }) => {
-  const [paymentLoading, setPaymentLoading] = useState({});
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPaymentResult, setSelectedPaymentResult] = useState(null);
   const [completingPayment, setCompletingPayment] = useState({});
   const [fadingOut, setFadingOut] = useState({});
-
-  // Handle creating payment
-  const handleCreatePayment = async (orderCode) => {
-    if (!orderCode) {
-      toast.error("Mã đơn hàng không hợp lệ");
-      return;
-    }
-
-    setPaymentLoading((prev) => ({ ...prev, [orderCode]: true }));
-
-    try {
-      const response = await paymentService.createPayment(orderCode);
-      setPaymentResults((prev) => ({ ...prev, [orderCode]: response }));
-      toast.success("Tạo thanh toán thành công!");
-    } catch (error) {
-      console.error("Error creating payment:", error);
-      const errorMessage =
-        error.response?.data?.error ||
-        error.response?.data?.message ||
-        error.message ||
-        "Tạo thanh toán thất bại";
-      toast.error(errorMessage);
-    } finally {
-      setPaymentLoading((prev) => ({ ...prev, [orderCode]: false }));
-    }
-  };
 
   // Handle completing payment
   const handleCompletePayment = async (orderCode) => {
@@ -222,38 +194,9 @@ const CreateOrderPayment = ({
                 </div>
 
                 {/* Thao tác - col-span-2 */}
-                {activeTab === "DA_XAC_NHAN" && (
-                  <div className="col-span-2">
-                    {!paymentResults[order.orderCode] ? (
-                      <button
-                        onClick={() => handleCreatePayment(order.orderCode)}
-                        disabled={paymentLoading[order.orderCode]}
-                        className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-colors w-full ${
-                          paymentLoading[order.orderCode]
-                            ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
-                            : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
-                        }`}
-                      >
-                        {paymentLoading[order.orderCode] ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
-                            Đang tạo...
-                          </>
-                        ) : (
-                          <>
-                            <CreditCard className="w-4 h-4" />
-                            Tạo thanh toán
-                          </>
-                        )}
-                      </button>
-                    ) : (
-                      <div className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 text-sm font-semibold rounded-lg border border-emerald-200">
-                        <CheckCircle className="w-4 h-4" />
-                        Đã tạo thanh toán
-                      </div>
-                    )}
-                  </div>
-                )}
+                <div className="col-span-2">
+                  {/* Removed create payment button */}
+                </div>
               </div>
 
               {/* Payment Results section */}

@@ -48,14 +48,18 @@ const MergedPaymentShipConfigModal = ({
   isCreating,
   accountId, // nhận từ cha để show voucher theo account
 }) => {
-  const [customerVoucherId, setCustomerVoucherId] = useState(null); // number|null
+  const [customerVoucherId, setCustomerVoucherId] = useState(null);
   const [isUseBalance, setIsUseBalance] = useState(true);
+
+  // 🔹 NEW: theo dõi trạng thái tải voucher từ component con
+  const [voucherLoading, setVoucherLoading] = useState(false);
 
   const handleSubmit = () => {
     onConfirm(customerVoucherId ?? null, isUseBalance);
   };
 
   if (!isOpen) return null;
+  const confirmDisabled = isCreating || (Boolean(accountId) && voucherLoading);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
@@ -99,7 +103,16 @@ const MergedPaymentShipConfigModal = ({
             value={customerVoucherId}
             onChange={setCustomerVoucherId}
             className="mb-4"
+            // 🔹 nhận trạng thái loading để khóa nút Confirm
+            onLoadingChange={setVoucherLoading}
           />
+
+          {/* Nếu có accountId & đang tải voucher -> thông báo nhỏ */}
+          {Boolean(accountId) && voucherLoading && (
+            <div className="text-xs text-gray-500 -mt-2 mb-2">
+              Đang tải voucher... vui lòng chờ.
+            </div>
+          )}
 
           {/* Checkbox dùng số dư */}
           <div className="mb-4">
@@ -141,11 +154,10 @@ const MergedPaymentShipConfigModal = ({
               <div className="flex justify-between">
                 <span className="text-gray-600">Voucher áp dụng:</span>
                 <span className="font-medium">
-                  {customerVoucherId
-                    ? `ID KH: ${customerVoucherId}`
-                    : "Không có"}
+                  {customerVoucherId ? "Có" : "Không"}
                 </span>
               </div>
+
               <div className="flex justify-between">
                 <span className="text-gray-600">Sử dụng số dư:</span>
                 <span className="font-medium">
@@ -167,8 +179,15 @@ const MergedPaymentShipConfigModal = ({
           </button>
           <button
             onClick={handleSubmit}
-            disabled={isCreating}
+            disabled={confirmDisabled}
             className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
+            title={
+              confirmDisabled
+                ? voucherLoading
+                  ? "Đang tải voucher, vui lòng chờ..."
+                  : "Không thể xác nhận lúc này"
+                : "Xác nhận tạo thanh toán"
+            }
           >
             {isCreating ? (
               <>
@@ -195,7 +214,7 @@ const CreateMergedPaymentShip = ({
   onSuccess,
   onError,
   disabled = false,
-  accountId, // 🔹 nhận từ cha để show voucher theo account
+  accountId, // nhận từ cha để show voucher theo account
 }) => {
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -222,8 +241,7 @@ const CreateMergedPaymentShip = ({
     try {
       setIsCreating(true);
 
-      // Gọi API tạo thanh toán ship (gộp) — điều chỉnh cho khớp service của bạn
-      // createPaymentShipService.createPaymentShipping(isUseBalance, customerVoucherId, orderCodes[])
+      // Gọi API tạo thanh toán ship (gộp)
       const result = await createPaymentShipService.createPaymentShipping(
         isUseBalance,
         customerVoucherId ?? null,
@@ -288,7 +306,7 @@ const CreateMergedPaymentShip = ({
         totalAmount={totalAmount || 0}
         formatCurrency={formatCurrency || ((v) => v)}
         isCreating={isCreating}
-        accountId={accountId} // 🔹 truyền xuống modal để hiển thị <CustomerVoucherPayment />
+        accountId={accountId} // truyền xuống modal để hiển thị <CustomerVoucherPayment />
       />
     </>
   );

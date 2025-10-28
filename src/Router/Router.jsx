@@ -96,6 +96,7 @@ import StaffProfile from "../components/common/StaffProfile";
 import ManagerPromotion from "../components/Manager/ManagerPromotion";
 import ImportPacking from "../components/WarehouseForeign/ImportPacking";
 import ResetPassword from "../Page/ResetPassword";
+import InventoryWarehouse from "../Services/Warehouse/InventoryWarehouse";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -328,7 +329,7 @@ const Router = createBrowserRouter([
       { path: "imports", element: <PackingFlyingList /> },
       { path: "exports", element: <ExportList /> },
       { path: "eligible-packings", element: <PackingEligibleList /> },
-      { path: "inventory-check", element: <NotFound /> },
+      { path: "inventory-check", element: <InventoryWarehouse /> },
       { path: "product-search", element: <NotFound /> },
       { path: "reports", element: <NotFound /> },
     ],

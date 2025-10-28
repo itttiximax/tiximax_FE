@@ -5,14 +5,15 @@ import managerPromotionService from "../../Services/Manager/managerPromotionServ
 const CustomerVoucherPayment = ({
   accountId,
   disabled = false,
-  value, // customerVoucherId hiện tại (number | null | "")
-  onChange, // (newCustomerVoucherId: number | null) => void
+  value = null, // Default là null thay vì undefined
+  onChange,
   className = "",
-  label = "Chọn voucher (theo tài khoản)",
-  showMeta = true, // hiển thị dòng mô tả accountId
+  label = "Chọn voucher (không bắt buộc)",
+  onLoadingChange,
+  onVouchersChange,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [vouchers, setVouchers] = useState([]); // [{customerVoucherId, voucher:{code, description, ...}}]
+  const [vouchers, setVouchers] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -22,30 +23,45 @@ const CustomerVoucherPayment = ({
       if (!accountId) {
         setVouchers([]);
         setError("");
+        onVouchersChange?.([]);
+        onLoadingChange?.(false);
         return;
       }
+
       try {
         setLoading(true);
+        onLoadingChange?.(true);
         setError("");
+
         const data = await managerPromotionService.getVouchersByCustomer(
           accountId
         );
+
         if (!mounted) return;
-        setVouchers(Array.isArray(data) ? data : []);
+
+        const arr = Array.isArray(data) ? data : [];
+        setVouchers(arr);
+        onVouchersChange?.(arr);
       } catch (e) {
         if (!mounted) return;
+
         setError(
           e?.response?.data?.message ||
             e?.message ||
-            "Không thể tải voucher của tài khoản"
+            "Không thể tải danh sách voucher"
         );
         setVouchers([]);
+        onVouchersChange?.([]);
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+          onLoadingChange?.(false);
+        }
       }
     };
 
     fetchVouchers();
+
     return () => {
       mounted = false;
     };
@@ -53,7 +69,8 @@ const CustomerVoucherPayment = ({
 
   const handleSelect = (e) => {
     const raw = e.target.value;
-    const selected = raw === "" || raw == null ? null : Number(raw);
+    // Chuyển về null nếu không chọn, hoặc convert sang Number
+    const selected = raw === "" ? null : Number(raw);
     onChange?.(selected);
   };
 
@@ -64,42 +81,39 @@ const CustomerVoucherPayment = ({
       </label>
 
       {!accountId ? (
-        <div className="text-sm text-gray-500">
-          Không tìm thấy <span className="font-medium">accountId</span>. Bạn vẫn
-          có thể tiếp tục mà không dùng voucher.
+        <div className="text-sm text-gray-500 italic">
+          Chưa có thông tin tài khoản. Có thể tiếp tục thanh toán mà không sử
+          dụng voucher.
         </div>
-      ) : loading ? (
-        <div className="text-sm text-gray-500">Đang tải voucher…</div>
       ) : error ? (
-        <div className="text-sm text-red-600">{error}</div>
-      ) : vouchers.length === 0 ? (
-        <div className="text-sm text-gray-500">
-          Không có voucher khả dụng cho tài khoản này
+        <div className="text-sm text-red-600 bg-red-50 p-2 rounded border border-red-200">
+          ⚠️ {error}
+        </div>
+      ) : vouchers.length === 0 && !loading ? (
+        <div className="text-sm text-gray-500 italic">
+          Tài khoản này không có voucher khả dụng
         </div>
       ) : (
         <select
-          value={value ?? ""} // null/undefined -> ""
+          value={value ?? ""} // Hiển thị "" nếu value là null/undefined
           onChange={handleSelect}
-          disabled={disabled}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+          disabled={disabled || loading}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
         >
-          <option value="">-- Không sử dụng voucher --</option>
-          {vouchers.map((cv) => (
-            <option key={cv.customerVoucherId} value={cv.customerVoucherId}>
-              {(cv?.voucher?.code ?? "Mã không xác định") +
-                " — " +
-                (cv?.voucher?.description ?? "Không mô tả")}
-            </option>
-          ))}
+          {loading ? (
+            <option>Đang tải danh sách voucher...</option>
+          ) : (
+            <>
+              <option value="">-- Không sử dụng voucher --</option>
+              {vouchers.map((cv) => (
+                <option key={cv.customerVoucherId} value={cv.customerVoucherId}>
+                  {cv?.voucher?.code || "Mã không rõ"} —{" "}
+                  {cv?.voucher?.description || "Không có mô tả"}
+                </option>
+              ))}
+            </>
+          )}
         </select>
-      )}
-
-      {showMeta && (
-        <p className="mt-1 text-xs text-gray-500">
-          {accountId
-            ? `Danh sách hiển thị theo accountId: ${accountId}`
-            : "Không có accountId → không thể tải danh sách voucher."}
-        </p>
       )}
     </div>
   );

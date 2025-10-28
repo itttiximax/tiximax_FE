@@ -3,8 +3,6 @@ import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import createOrderPaymentService from "../../Services/Payment/createOrderPaymentService";
 import countStatusService from "../../Services/Order/countStatusService";
-import CreateOrderPayment from "./CreateOrderPayment";
-import ConfirmPaymentOrder from "./ConfirmPaymentOrder";
 import {
   CheckCircle,
   Clock,
@@ -13,7 +11,83 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
+  CreditCard,
+  AlertTriangle,
+  CheckCircle as CheckIcon,
+  User,
+  Calendar,
 } from "lucide-react";
+import { confirmPaymentOrder } from "./ConfirmPaymentOrder";
+
+/* ===== Helpers ===== */
+const formatCurrency = (v) => {
+  if (v === null || v === undefined || isNaN(Number(v))) return "—";
+  try {
+    return new Intl.NumberFormat("vi-VN").format(Number(v));
+  } catch {
+    return String(v);
+  }
+};
+
+const formatDate = (isoStr) => {
+  if (!isoStr) return "—";
+  try {
+    const d = new Date(isoStr);
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mi = String(d.getMinutes()).padStart(2, "0");
+    return `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
+  } catch {
+    return isoStr;
+  }
+};
+
+const orderTypeLabel = (t) => {
+  switch (t) {
+    case "AUCTION":
+      return "Đấu giá";
+    case "SHOPPING":
+      return "Mua hộ";
+    case "SHIP":
+      return "Vận chuyển";
+    default:
+      return t || "—";
+  }
+};
+
+const statusBadge = (status) => {
+  const map = {
+    DA_XAC_NHAN: {
+      text: "Đã xác nhận",
+      cls: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    },
+    CHO_THANH_TOAN: {
+      text: "Chờ thanh toán",
+      cls: "bg-orange-50 text-orange-700 border-orange-200",
+    },
+    DA_DU_HANG: {
+      text: "Đã đủ hàng",
+      cls: "bg-blue-50 text-blue-700 border-blue-200",
+    },
+    CHO_THANH_TOAN_SHIP: {
+      text: "Chờ thanh toán ship",
+      cls: "bg-purple-50 text-purple-700 border-purple-200",
+    },
+  };
+  const it = map[status] || {
+    text: status || "—",
+    cls: "bg-gray-50 text-gray-700 border-gray-200",
+  };
+  return (
+    <span
+      className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold border rounded-full ${it.cls}`}
+    >
+      {it.text}
+    </span>
+  );
+};
 
 const PaymentOrderList = () => {
   const validTabs = [
@@ -30,9 +104,15 @@ const PaymentOrderList = () => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [paymentResults, setPaymentResults] = useState({});
   const [statusCounts, setStatusCounts] = useState({});
   const [statsLoading, setStatsLoading] = useState(false);
+
+  // trạng thái confirm
+  const [processingMap, setProcessingMap] = useState({}); // { [orderId]: boolean }
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    order: null,
+  });
 
   const fetchOrders = async (status, page = 0) => {
     setLoading(true);
@@ -75,15 +155,13 @@ const PaymentOrderList = () => {
     }
   };
 
-  // Đồng bộ spinner count khi chuyển tab
+  // Đồng bộ khi đổi tab
   useEffect(() => {
     localStorage.setItem("activeTab", activeTab);
-    setPaymentResults({});
     setLoading(true);
     setStatsLoading(true);
-
     Promise.all([fetchOrders(activeTab, 0), fetchStatusStatistics()])
-      .catch(() => {}) // lỗi đã toast ở từng hàm
+      .catch(() => {})
       .finally(() => {
         setLoading(false);
         setStatsLoading(false);
@@ -112,77 +190,6 @@ const PaymentOrderList = () => {
     },
   ];
 
-  const handlePageChange = (newPage) => {
-    if (newPage >= 0 && newPage < totalPages) {
-      fetchOrders(activeTab, newPage);
-    }
-  };
-
-  const renderOrderComponent = () => {
-    const ordersWithCustomer = orders.map((order) => ({
-      ...order,
-      customerName: order.customer?.name || "N/A",
-    }));
-
-    if (activeTab === "CHO_THANH_TOAN") {
-      return (
-        <ConfirmPaymentOrder
-          orders={ordersWithCustomer}
-          paymentResults={paymentResults}
-          setPaymentResults={setPaymentResults}
-          fetchOrders={fetchOrders}
-          currentPage={currentPage}
-        />
-      );
-    }
-
-    return (
-      <CreateOrderPayment
-        orders={ordersWithCustomer}
-        paymentResults={paymentResults}
-        setPaymentResults={setPaymentResults}
-        activeTab={activeTab}
-        fetchOrders={fetchOrders}
-        currentPage={currentPage}
-      />
-    );
-  };
-
-  const getHeaderColumns = () => {
-    if (activeTab === "CHO_THANH_TOAN") {
-      return [
-        { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
-        { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" },
-        { key: "paymentCode", label: "Mã giao dịch", colSpan: "col-span-2" }, // ✨ ĐÃ SỬA: từ col-span-1 → col-span-2
-        { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
-        { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
-        { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-1" },
-        { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-1" },
-        { key: "actions", label: "Thao tác", colSpan: "col-span-2" },
-      ];
-    }
-
-    const baseColumns = [
-      { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
-      { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" },
-      { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
-      { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
-      { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-2" },
-      { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-1" },
-    ];
-
-    if (activeTab === "DA_XAC_NHAN") {
-      baseColumns.push({
-        key: "actions",
-        label: "Thao tác",
-        colSpan: "col-span-2",
-      });
-    }
-
-    return baseColumns;
-  };
-
-  // Màu tab (active có nền màu + chữ trắng; không hover)
   const getColorClasses = (color) => {
     const colors = {
       emerald: {
@@ -215,6 +222,172 @@ const PaymentOrderList = () => {
       },
     };
     return colors[color];
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      fetchOrders(activeTab, newPage);
+    }
+  };
+
+  /* ===== Confirm payment (UI ở đây) ===== */
+  const handleOpenDialog = (order) => {
+    setConfirmDialog({ isOpen: true, order });
+  };
+  const handleCloseDialog = () => {
+    setConfirmDialog({ isOpen: false, order: null });
+  };
+
+  const handleDoConfirm = async () => {
+    const order = confirmDialog.order;
+    handleCloseDialog();
+    if (!order) return;
+
+    const orderId = order.orderId ?? order.id ?? order.code;
+    const paymentCode = order.paymentCode;
+    if (!paymentCode) {
+      toast.error("Không tìm thấy mã thanh toán");
+      return;
+    }
+
+    // Nếu đã có axios interceptor thì không cần token
+    const token = localStorage.getItem("jwt");
+
+    setProcessingMap((s) => ({ ...s, [orderId]: true }));
+    const res = await confirmPaymentOrder({ paymentCode, token });
+    setProcessingMap((s) => ({ ...s, [orderId]: false }));
+
+    if (res.success) {
+      toast.success(
+        `Xác nhận thanh toán thành công cho đơn ${order.orderCode}!`
+      );
+      // refresh list theo tab + page hiện tại
+      await fetchOrders(activeTab, currentPage);
+      await fetchStatusStatistics();
+    } else {
+      toast.error(`Không thể xác nhận thanh toán: ${res.message}`, {
+        duration: 5000,
+      });
+    }
+  };
+
+  // Cột header
+  const getHeaderColumns = () => {
+    if (activeTab === "CHO_THANH_TOAN") {
+      return [
+        { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
+        { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" },
+        { key: "paymentCode", label: "Mã giao dịch", colSpan: "col-span-2" },
+        { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
+        { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
+        { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-1" },
+        { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-1" },
+        { key: "actions", label: "Thao tác", colSpan: "col-span-2" },
+      ];
+    }
+
+    return [
+      { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
+      { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" },
+      { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
+      { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
+      { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-2" },
+      { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-2" },
+      { key: "spacer", label: "", colSpan: "col-span-2" },
+    ];
+  };
+
+  /* ===== Render body rows ===== */
+  const renderRows = () => {
+    const rows = (orders || []).map((order) => {
+      const customerName = order?.customer?.name || "N/A";
+      const code = order?.code || order?.orderCode || "—";
+      const payCode = order?.paymentCode || order?.transactionCode || "—";
+      const typeLabel = orderTypeLabel(order?.orderType);
+      const price = formatCurrency(
+        order?.finalPriceOrder ?? order?.finalPriceOrder
+      );
+      const created = formatDate(order?.createdAt || order?.createdDate);
+      const badge = statusBadge(order?.status || activeTab);
+      const orderId = order.orderId ?? order.id ?? code;
+      const isProcessing = !!processingMap[orderId];
+
+      if (activeTab === "CHO_THANH_TOAN") {
+        return (
+          <div
+            key={orderId}
+            className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-100 items-center"
+          >
+            <div className="col-span-2">
+              <div className="font-semibold text-gray-900">{code}</div>
+              <div className="text-xs text-gray-500">{order?.id || ""}</div>
+            </div>
+            <div className="col-span-2">
+              <div className="text-gray-900">{customerName}</div>
+              <div className="text-xs text-gray-500">
+                {order?.customer?.phone || order?.customer?.email || ""}
+              </div>
+            </div>
+            <div className="col-span-2">
+              {order?.paymentCode ? (
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-semibold text-blue-600 truncate">
+                    {payCode}
+                  </span>
+                </div>
+              ) : (
+                <span className="text-xs text-gray-400">-</span>
+              )}
+            </div>
+            <div className="col-span-1">{typeLabel}</div>
+            <div className="col-span-1">{badge}</div>
+            <div className="col-span-1 font-semibold">{price} đ</div>
+            <div className="col-span-1 text-gray-600">{created}</div>
+            <div className="col-span-2 flex justify-end">
+              <button
+                onClick={() => handleOpenDialog(order)}
+                disabled={isProcessing}
+                className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-colors
+                  ${
+                    isProcessing
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                      : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
+                  }`}
+              >
+                {isProcessing ? "Đang xử lý..." : "Xác nhận thanh toán"}
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      // Các tab còn lại
+      return (
+        <div
+          key={orderId}
+          className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-100 items-center"
+        >
+          <div className="col-span-2">
+            <div className="font-semibold text-gray-900">{code}</div>
+            <div className="text-xs text-gray-500">{order?.id || ""}</div>
+          </div>
+          <div className="col-span-2">
+            <div className="text-gray-900">{customerName}</div>
+            <div className="text-xs text-gray-500">
+              {order?.customer?.phone || order?.customer?.email || ""}
+            </div>
+          </div>
+          <div className="col-span-1">{typeLabel}</div>
+          <div className="col-span-1">{badge}</div>
+          <div className="col-span-2 font-semibold">{price} đ</div>
+          <div className="col-span-2 text-gray-600">{created}</div>
+          <div className="col-span-2">{/* spacer */}</div>
+        </div>
+      );
+    });
+
+    return <div>{rows}</div>;
   };
 
   return (
@@ -296,7 +469,7 @@ const PaymentOrderList = () => {
           </div>
         </div>
 
-        {/* Loading (khung nội dung) */}
+        {/* Loading khung nội dung */}
         {loading && (
           <div className="bg-white rounded-lg shadow border border-gray-200 p-12">
             <div className="flex flex-col items-center justify-center">
@@ -335,13 +508,13 @@ const PaymentOrderList = () => {
                 </div>
 
                 {/* Table Body */}
-                {renderOrderComponent()}
+                {renderRows()}
               </>
             )}
           </div>
         )}
 
-        {/* Pagination (no hover) */}
+        {/* Pagination */}
         {!loading && totalPages > 1 && (
           <div className="mt-6 flex items-center justify-between bg-white rounded-lg shadow border border-gray-200 px-6 py-4">
             <div className="text-sm text-gray-700">
@@ -385,6 +558,117 @@ const PaymentOrderList = () => {
           </div>
         )}
       </div>
+
+      {/* Confirmation Dialog */}
+      {confirmDialog.isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="confirm-title"
+        >
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+            {/* Header */}
+            <div className="flex items-center gap-3 p-5 border-b border-slate-200 bg-slate-50">
+              <div className="bg-blue-600 p-2.5 rounded-lg">
+                <AlertTriangle className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3
+                  id="confirm-title"
+                  className="text-base font-bold text-slate-900"
+                >
+                  Xác nhận thanh toán
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Vui lòng kiểm tra kỹ thông tin trước khi xác nhận
+                </p>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-5">
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                <p className="text-xs text-amber-800 font-medium">
+                  Bạn có chắc chắn muốn xác nhận thanh toán cho đơn hàng này
+                  không?
+                </p>
+              </div>
+
+              {confirmDialog.order && (
+                <div className="space-y-3">
+                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                    <div className="flex items-center gap-2 mb-1">
+                      <FileText className="w-4 h-4 text-slate-600" />
+                      <span className="text-xs font-medium text-slate-600">
+                        Mã đơn hàng
+                      </span>
+                    </div>
+                    <span className="text-sm font-bold text-slate-900">
+                      {confirmDialog.order.orderCode}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                      <div className="flex items-center gap-2 mb-1">
+                        <CreditCard className="w-4 h-4 text-slate-600" />
+                        <span className="text-xs font-medium text-slate-600">
+                          Mã giao dịch
+                        </span>
+                      </div>
+                      <span className="text-sm font-semibold text-blue-600">
+                        {confirmDialog.order.paymentCode}
+                      </span>
+                    </div>
+
+                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                      <div className="flex items-center gap-2 mb-1">
+                        <User className="w-4 h-4 text-slate-600" />
+                        <span className="text-xs font-medium text-slate-600">
+                          Khách hàng
+                        </span>
+                      </div>
+                      <span className="text-sm font-semibold text-slate-900 truncate block">
+                        {confirmDialog.order.customer?.name || "N/A"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-600 rounded-lg p-4 border-2 border-blue-500 shadow-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <CheckIcon className="w-4 h-4 text-white" />
+                      <span className="text-xs font-medium text-blue-100">
+                        Số tiền thanh toán
+                      </span>
+                    </div>
+                    <span className="text-lg font-bold text-white">
+                      {formatCurrency(confirmDialog.order.finalPriceOrder)} đ
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex gap-3 p-5 border-t border-slate-200 bg-slate-50">
+              <button
+                onClick={handleCloseDialog}
+                className="flex-1 px-4 py-2.5 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-white transition-colors font-semibold text-sm"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={handleDoConfirm}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold text-sm shadow-md"
+              >
+                <CheckIcon className="w-4 h-4" />
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

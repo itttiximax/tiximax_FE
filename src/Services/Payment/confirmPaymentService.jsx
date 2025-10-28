@@ -1,33 +1,34 @@
 import api from "../../config/api.js";
 
 const confirmPaymentService = {
-  // Confirm payment by paymentId
-  confirmPayment: async (paymentId, token) => {
+  /**
+   * Xác nhận thanh toán theo paymentId.
+   * JWT sẽ tự động được gắn qua axios interceptor.
+   * @param {string|number} paymentId
+   * @returns {Promise<any>}
+   */
+  confirmPayment: async (paymentId) => {
     try {
-      // Input validation
-      if (!paymentId) {
-        throw new Error("Payment ID is required");
-      }
+      // Kiểm tra đầu vào
+      if (!paymentId) throw new Error("Payment ID is required");
       if (typeof paymentId !== "string" && typeof paymentId !== "number") {
         throw new Error("Payment ID must be a string or number");
       }
-      if (!token) {
-        throw new Error("Authorization token is required");
-      }
 
+      // Gửi PUT request — không cần body, JWT đã gắn tự động
       const response = await api.put(
-        `/payments/confirm/${paymentId}`,
-        {}, // Empty body, as in your curl command
+        `/payments/confirm/${encodeURIComponent(paymentId)}`,
+        {},
         {
           headers: {
-            Authorization: `Bearer ${token}`,
             Accept: "application/json",
           },
         }
       );
+
       return response.data;
     } catch (error) {
-      console.error("Error confirming payment:", error.response || error);
+      console.error("Error confirming payment:", error?.response || error);
       throw error;
     }
   },
