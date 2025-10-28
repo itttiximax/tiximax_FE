@@ -1,14 +1,9 @@
+// src/components/Order/CustomerAddress.jsx
 import React, { useEffect, useState } from "react";
 import addressService from "../../Services/Order/addressService";
-import {
-  ChevronDown,
-  Plus,
-  MapPin,
-  Loader2,
-  AlertCircle,
-  Check,
-  X,
-} from "lucide-react";
+import { ChevronDown, Plus, MapPin, Loader2, AlertCircle } from "lucide-react";
+import AddressDialog from "./AddressDialog";
+import { useWebSocket } from "../../hooks/useWebSocket";
 
 const CustomerAddress = ({
   customerCode,
@@ -21,57 +16,82 @@ const CustomerAddress = ({
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const [showAddressForm, setShowAddressForm] = useState(false);
-  const [newAddress, setNewAddress] = useState("");
+  const [showDialog, setShowDialog] = useState(false);
   const [creatingAddress, setCreatingAddress] = useState(false);
+
+  // ✨ Connect to WebSocket
+  const { messages, isConnected } = useWebSocket("/topic/Tiximax");
 
   const labelOf = (addr) =>
     String(addr?.addressName ?? "")
       .replace(/^["']|["']$/g, "")
       .trim() || `#${addr?.addressId}`;
 
+  // ✨ Fetch addresses function
+  const fetchAddresses = async (code) => {
+    try {
+      setLoading(true);
+      const data = await addressService.getCustomerAddresses(code);
+      const list = Array.isArray(data) ? data : data?.items ?? [];
+      setAddresses(list);
+
+      if (list.length > 0 && autoSelectFirst) {
+        const firstId = Number(list[0].addressId);
+        setSelectedAddressId(firstId);
+        onAddressSelect?.({ ...list[0], addressId: firstId });
+      }
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Không lấy được địa chỉ";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✨ Handle WebSocket messages
+  useEffect(() => {
+    if (messages.length === 0) return;
+
+    const latestMessage = messages[0];
+
+    console.log("=== WebSocket Message Debug ===");
+    console.log("Message:", latestMessage);
+    console.log("Event:", latestMessage.event);
+    console.log("Message Customer:", latestMessage.customerCode);
+    console.log("Current Customer:", customerCode);
+    console.log("===============================");
+
+    if (latestMessage.event === "INSERT") {
+      if (latestMessage.customerCode === customerCode) {
+        console.log("✅ Match! Refreshing addresses...");
+        if (customerCode && customerCode.trim()) {
+          fetchAddresses(customerCode.trim());
+        }
+      } else {
+        console.log("ℹ️ Different customer, skipping...");
+      }
+    }
+  }, [messages, customerCode]);
+
+  // Load addresses when customer changes
   useEffect(() => {
     const code = (customerCode ?? "").trim();
     setError(null);
     setAddresses([]);
     setSelectedAddressId(null);
-    setShowAddressForm(false);
-    setNewAddress("");
+    setShowDialog(false);
 
     if (!code) return;
 
-    const fetchAddresses = async () => {
-      try {
-        setLoading(true);
-        const data = await addressService.getCustomerAddresses(code);
-        const list = Array.isArray(data) ? data : data?.items ?? [];
-        setAddresses(list);
-
-        if (list.length > 0 && autoSelectFirst) {
-          const firstId = Number(list[0].addressId);
-          setSelectedAddressId(firstId);
-          onAddressSelect?.({ ...list[0], addressId: firstId });
-        }
-      } catch (err) {
-        const msg =
-          err?.response?.data?.message ||
-          err?.response?.data?.error ||
-          err?.message ||
-          "Không lấy được địa chỉ";
-        setError(msg);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAddresses();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchAddresses(code);
   }, [customerCode]);
 
-  const handleCreateAddress = async (e) => {
-    e.preventDefault();
-    if (!newAddress.trim()) {
+  const handleDialogSubmit = async (addressText) => {
+    if (!addressText.trim()) {
       setError("Nhập địa chỉ");
       return;
     }
@@ -82,7 +102,7 @@ const CustomerAddress = ({
 
       await addressService.createCustomerAddress(
         customerCode.trim(),
-        newAddress.trim()
+        addressText.trim()
       );
 
       const updatedData = await addressService.getCustomerAddresses(
@@ -100,8 +120,7 @@ const CustomerAddress = ({
         onAddressSelect?.({ ...lastAddr, addressId: lastId });
       }
 
-      setNewAddress("");
-      setShowAddressForm(false);
+      setShowDialog(false);
     } catch (err) {
       const msg =
         err?.response?.data?.message ||
@@ -117,7 +136,6 @@ const CustomerAddress = ({
   const hasData = addresses.length > 0;
   const canAddAddress = customerCode && customerCode.trim() && !disabled;
 
-  // Status badge
   let statusIcon = null;
   let statusColor = "text-gray-400";
   let statusCount = null;
@@ -136,7 +154,6 @@ const CustomerAddress = ({
 
   return (
     <div className="w-full">
-      {/* Header - giống "Điểm đến" */}
       <div className="flex items-center justify-between mb-2">
         <label className="block text-sm font-medium text-gray-700">
           Địa chỉ giao hàng{" "}
@@ -144,6 +161,17 @@ const CustomerAddress = ({
         </label>
 
         <div className="flex items-center gap-2">
+          {/* ✨ WebSocket Status */}
+          {isConnected && (
+            <div
+              className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-50 border border-green-200"
+              title="WebSocket đã kết nối - Tự động cập nhật"
+            >
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-xs text-green-700 font-medium">Live</span>
+            </div>
+          )}
+
           {/* Status Badge */}
           <div
             className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-gray-50 border border-gray-200"
@@ -165,11 +193,10 @@ const CustomerAddress = ({
             )}
           </div>
 
-          {/* Add Button */}
           {canAddAddress && !loading && (
             <button
               type="button"
-              onClick={() => setShowAddressForm(!showAddressForm)}
+              onClick={() => setShowDialog(true)}
               className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
               title="Thêm địa chỉ mới"
               disabled={creatingAddress}
@@ -180,59 +207,6 @@ const CustomerAddress = ({
         </div>
       </div>
 
-      {/* Add Address Form */}
-      {showAddressForm && canAddAddress && (
-        <form
-          onSubmit={handleCreateAddress}
-          className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded space-y-2"
-        >
-          <input
-            type="text"
-            value={newAddress}
-            onChange={(e) => setNewAddress(e.target.value)}
-            placeholder="Nhập địa chỉ giao hàng..."
-            className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            disabled={creatingAddress}
-            autoFocus
-          />
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={creatingAddress || !newAddress.trim()}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              title="Lưu địa chỉ"
-            >
-              {creatingAddress ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Đang lưu...</span>
-                </>
-              ) : (
-                <>
-                  <Check className="w-4 h-4" />
-                  <span>Lưu</span>
-                </>
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowAddressForm(false);
-                setNewAddress("");
-                setError(null);
-              }}
-              className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300 transition-colors flex items-center gap-2"
-              disabled={creatingAddress}
-              title="Hủy"
-            >
-              <X className="w-4 h-4" />
-              <span>Hủy</span>
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Loading */}
       {loading && (
         <div className="space-y-2">
           {[1, 2].map((i) => (
@@ -241,7 +215,6 @@ const CustomerAddress = ({
         </div>
       )}
 
-      {/* Error */}
       {!loading && error && (
         <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded">
           <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
@@ -249,7 +222,6 @@ const CustomerAddress = ({
         </div>
       )}
 
-      {/* No Data */}
       {!loading && !error && !hasData && (
         <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded">
           <AlertCircle className="w-4 h-4 text-gray-400" />
@@ -261,7 +233,6 @@ const CustomerAddress = ({
         </div>
       )}
 
-      {/* Select Address - GIỐNG ĐIỂM ĐẾN */}
       {!loading && !error && hasData && (
         <div className="relative">
           <select
@@ -285,12 +256,18 @@ const CustomerAddress = ({
             ))}
           </select>
 
-          {/* Chevron icon */}
           <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
             <ChevronDown className="w-4 h-4 text-gray-400" />
           </div>
         </div>
       )}
+
+      <AddressDialog
+        isOpen={showDialog}
+        onClose={() => setShowDialog(false)}
+        onSubmit={handleDialogSubmit}
+        loading={creatingAddress}
+      />
     </div>
   );
 };

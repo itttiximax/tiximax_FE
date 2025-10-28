@@ -23,6 +23,10 @@ const managerPromotionService = {
     const res = await api.put(`/vouchers/${id}`, data);
     return res.data;
   },
+  getVouchersByCustomer: async (customerId) => {
+    const res = await api.get(`/vouchers/customer/${customerId}`);
+    return res.data;
+  },
 };
 
 export default managerPromotionService;

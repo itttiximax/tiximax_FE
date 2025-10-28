@@ -1,11 +1,13 @@
+// src/Components/Payment/CreateMergedPaymentShip.jsx
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import { CreditCard as PaymentIcon, X, Info, Truck } from "lucide-react";
+import { X, Info, Truck } from "lucide-react";
 import createPaymentShipService from "../../Services/Payment/createPaymentShipService";
+import CustomerVoucherPayment from "./CustomerVoucherPayment";
 
-// Helper: bóc tách lỗi backend
+/** Helper: Bóc tách lỗi backend để hiện toast dễ hiểu */
 const getErrorMessage = (error) => {
-  if (error.response) {
+  if (error?.response) {
     const backendError =
       error.response.data?.error ||
       error.response.data?.message ||
@@ -27,13 +29,15 @@ const getErrorMessage = (error) => {
     return `Lỗi ${error.response.status}: ${
       error.response.statusText || "Không xác định"
     }`;
-  } else if (error.request) {
+  } else if (error?.request) {
     return "Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng.";
   }
-  return error.message || "Đã xảy ra lỗi không xác định";
+  return error?.message || "Đã xảy ra lỗi không xác định";
 };
 
-// Merged Payment Ship Config Modal Component
+/* =========================
+ * Modal cấu hình tạo thanh toán ship (gộp)
+ * ========================= */
 const MergedPaymentShipConfigModal = ({
   isOpen,
   onClose,
@@ -42,33 +46,31 @@ const MergedPaymentShipConfigModal = ({
   totalAmount,
   formatCurrency,
   isCreating,
+  accountId, // nhận từ cha để show voucher theo account
 }) => {
-  const [customerVoucherId, setVoucherId] = useState("");
+  const [customerVoucherId, setCustomerVoucherId] = useState(null); // number|null
   const [isUseBalance, setIsUseBalance] = useState(true);
 
   const handleSubmit = () => {
-    onConfirm(customerVoucherId, isUseBalance);
-  };
-
-  const handleClose = () => {
-    onClose();
+    onConfirm(customerVoucherId ?? null, isUseBalance);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <h3 className="text-lg font-semibold text-gray-900">
               Thanh toán vận chuyển
             </h3>
             <button
-              onClick={handleClose}
+              onClick={onClose}
               disabled={isCreating}
               className="text-gray-400 hover:text-gray-500 disabled:opacity-50"
+              aria-label="Đóng"
             >
               <X className="w-5 h-5" />
             </button>
@@ -77,7 +79,7 @@ const MergedPaymentShipConfigModal = ({
 
         {/* Body */}
         <div className="px-6 py-4">
-          {/* Info Section */}
+          {/* Thông tin tổng quan */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
             <div className="flex items-start">
               <Info className="w-5 h-5 text-blue-600 mt-0.5 mr-2 flex-shrink-0" />
@@ -90,25 +92,16 @@ const MergedPaymentShipConfigModal = ({
             </div>
           </div>
 
-          {/* Voucher Field */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Mã voucher
-            </label>
-            <input
-              type="text"
-              value={customerVoucherId}
-              onChange={(e) => setVoucherId(e.target.value)}
-              disabled={isCreating}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-              placeholder="Nhập mã voucher (không bắt buộc)"
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              Để trống nếu không có voucher
-            </p>
-          </div>
+          {/* Voucher theo account (component tách riêng) */}
+          <CustomerVoucherPayment
+            accountId={accountId}
+            disabled={isCreating}
+            value={customerVoucherId}
+            onChange={setCustomerVoucherId}
+            className="mb-4"
+          />
 
-          {/* Use Balance Field */}
+          {/* Checkbox dùng số dư */}
           <div className="mb-4">
             <label className="flex items-center space-x-3 cursor-pointer">
               <input
@@ -146,9 +139,11 @@ const MergedPaymentShipConfigModal = ({
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Mã voucher:</span>
+                <span className="text-gray-600">Voucher áp dụng:</span>
                 <span className="font-medium">
-                  {customerVoucherId || "Không có"}
+                  {customerVoucherId
+                    ? `ID KH: ${customerVoucherId}`
+                    : "Không có"}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -164,7 +159,7 @@ const MergedPaymentShipConfigModal = ({
         {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
           <button
-            onClick={handleClose}
+            onClick={onClose}
             disabled={isCreating}
             className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -190,32 +185,36 @@ const MergedPaymentShipConfigModal = ({
   );
 };
 
-// Main CreateMergedPaymentShip Component
+/* =========================
+ * Nút/Tác vụ tạo thanh toán ship (gộp)
+ * ========================= */
 const CreateMergedPaymentShip = ({
-  selectedOrders,
+  selectedOrders, // mảng orderCode
   totalAmount,
   formatCurrency,
   onSuccess,
   onError,
   disabled = false,
+  accountId, // 🔹 nhận từ cha để show voucher theo account
 }) => {
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
-  // Open config modal
-  const handleOpenConfigModal = () => {
-    if (selectedOrders.length < 1) {
-      toast.error(
-        "Vui lòng chọn ít nhất 1 đơn hàng để tạo thanh toán vận chuyển"
-      );
+  const openModal = () => {
+    if (!selectedOrders || selectedOrders.length < 1) {
+      toast.error("Vui lòng chọn ít nhất 1 đơn hàng để tạo thanh toán");
       return;
     }
     setShowConfigModal(true);
   };
 
-  // Create merged payment ship with config
+  const closeModal = () => {
+    if (!isCreating) setShowConfigModal(false);
+  };
+
+  // Xác nhận từ modal: gọi API tạo thanh toán
   const handleConfirmMergedPayment = async (
-    customerVoucherId,
+    customerVoucherId, // number|null
     isUseBalance
   ) => {
     setShowConfigModal(false);
@@ -223,46 +222,48 @@ const CreateMergedPaymentShip = ({
     try {
       setIsCreating(true);
 
-      // Call the createPaymentShipService with the correct parameters
+      // Gọi API tạo thanh toán ship (gộp) — điều chỉnh cho khớp service của bạn
+      // createPaymentShipService.createPaymentShipping(isUseBalance, customerVoucherId, orderCodes[])
       const result = await createPaymentShipService.createPaymentShipping(
         isUseBalance,
-        customerVoucherId || "null",
-        selectedOrders // This is the array of order codes
+        customerVoucherId ?? null,
+        selectedOrders
       );
 
       toast.success(
         `Tạo thanh toán vận chuyển ${
           selectedOrders.length > 1 ? "gộp " : ""
-        }thành công! Mã thanh toán: ${result.paymentCode || result.id || "N/A"}`
+        }thành công! Mã thanh toán: ${
+          result?.paymentCode || result?.id || "N/A"
+        }`
       );
 
-      // Call success callback
-      if (onSuccess) {
-        onSuccess(result);
-      }
+      onSuccess?.(result);
     } catch (error) {
-      console.error("Error creating merged shipping payment:", error);
       const errorMessage = getErrorMessage(error);
       toast.error(`Không thể tạo thanh toán vận chuyển: ${errorMessage}`, {
         duration: 5000,
       });
-
-      // Call error callback
-      if (onError) {
-        onError(error);
-      }
+      onError?.(error);
     } finally {
       setIsCreating(false);
     }
   };
 
+  const buttonDisabled =
+    disabled || isCreating || !selectedOrders || selectedOrders.length < 1;
+
   return (
     <>
-      {/* Create Merged Payment Ship Button */}
       <button
-        onClick={handleOpenConfigModal}
-        disabled={disabled || isCreating || selectedOrders.length < 1}
+        onClick={openModal}
+        disabled={buttonDisabled}
         className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center"
+        title={
+          buttonDisabled
+            ? "Hãy chọn ít nhất một đơn để tạo thanh toán"
+            : "Tạo thanh toán vận chuyển"
+        }
       >
         {isCreating ? (
           <>
@@ -272,22 +273,22 @@ const CreateMergedPaymentShip = ({
         ) : (
           <>
             <Truck className="w-4 h-4 mr-2" />
-            {selectedOrders.length > 1
+            {selectedOrders?.length > 1
               ? "Tạo thanh toán ship gộp"
               : "Tạo thanh toán ship"}
           </>
         )}
       </button>
 
-      {/* Merged Payment Ship Config Modal */}
       <MergedPaymentShipConfigModal
         isOpen={showConfigModal}
-        onClose={() => !isCreating && setShowConfigModal(false)}
+        onClose={closeModal}
         onConfirm={handleConfirmMergedPayment}
-        selectedCount={selectedOrders.length}
-        totalAmount={totalAmount}
-        formatCurrency={formatCurrency}
+        selectedCount={selectedOrders?.length || 0}
+        totalAmount={totalAmount || 0}
+        formatCurrency={formatCurrency || ((v) => v)}
         isCreating={isCreating}
+        accountId={accountId} // 🔹 truyền xuống modal để hiển thị <CustomerVoucherPayment />
       />
     </>
   );

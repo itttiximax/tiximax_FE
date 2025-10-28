@@ -1,5 +1,5 @@
 // MergedPaymentShip.jsx
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import toast from "react-hot-toast";
 import AccountSearch from "../Order/AccountSearch";
 import orderCustomerService from "../../Services/Order/orderCustomerService";
@@ -14,6 +14,7 @@ import {
   Square,
   Truck,
   Weight,
+  AlertTriangle,
 } from "lucide-react";
 
 // Helper function to extract error message from backend
@@ -173,6 +174,29 @@ const MergedPaymentShip = () => {
         0
       );
   };
+
+  // 👉 Lấy danh sách order đã chọn (để suy ra accountId)
+  const selectedOrdersData = useMemo(
+    () => orders.filter((o) => selectedOrders.includes(o.orderCode)),
+    [orders, selectedOrders]
+  );
+
+  // 👉 Lấy các accountId duy nhất từ danh sách đơn đã chọn
+  const uniqueAccountIds = useMemo(() => {
+    const ids = selectedOrdersData
+      .map((o) => o?.customer?.accountId)
+      .filter((v) => v !== null && v !== undefined);
+    return [...new Set(ids)];
+  }, [selectedOrdersData]);
+
+  // 👉 Suy ra accountId dùng cho "CreateMergedPaymentShip"
+  // - Nếu tất cả đơn cùng 1 accountId -> dùng accountId đó
+  // - Nếu không chọn gì -> null
+  // - Nếu chọn lẫn nhiều account -> null (và hiển thị cảnh báo)
+  const derivedAccountId = useMemo(() => {
+    if (uniqueAccountIds.length === 1) return uniqueAccountIds[0];
+    return null;
+  }, [uniqueAccountIds]);
 
   // Format currency
   const formatCurrency = (amount) => {
@@ -349,7 +373,6 @@ const MergedPaymentShip = () => {
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                {/* <Truck className="w-5 h-5 mr-2 text-blue-600" /> */}
                 Danh sách thanh toán vận chuyển
                 {orders.length > 0 && (
                   <span className="ml-2 text-sm font-normal text-gray-600">
@@ -382,6 +405,13 @@ const MergedPaymentShip = () => {
                       <span className="text-sm font-medium text-gray-900">
                         Tổng: {formatCurrency(calculateSelectedTotal())}
                       </span>
+                      {/* Cảnh báo nếu chọn đơn từ nhiều accountId khác nhau */}
+                      {uniqueAccountIds.length > 1 && (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-red-700 bg-red-50 border border-red-200 px-2 py-1 rounded">
+                          <AlertTriangle className="w-3 h-3" />
+                          Đang chọn nhiều tài khoản (accountId khác nhau)
+                        </span>
+                      )}
 
                       {/* Use CreateMergedPaymentShip Component */}
                       <CreateMergedPaymentShip
@@ -390,6 +420,7 @@ const MergedPaymentShip = () => {
                         formatCurrency={formatCurrency}
                         onSuccess={handlePaymentCreated}
                         onError={handlePaymentError}
+                        accountId={derivedAccountId} // 🔹 truyền accountId xuống (null nếu không xác định hoặc mixed)
                       />
                     </div>
                   )}
@@ -413,7 +444,7 @@ const MergedPaymentShip = () => {
             <div className="divide-y divide-gray-200">
               {orders.map((order) => (
                 <div
-                  key={order.orderId}
+                  key={order.orderCode /* đổi sang orderCode để nhất quán */}
                   className={`p-6 hover:bg-gray-50 transition-colors ${
                     selectedOrders.includes(order.orderCode)
                       ? "bg-blue-50 border-l-4 border-blue-500"

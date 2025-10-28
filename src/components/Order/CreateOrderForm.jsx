@@ -23,7 +23,7 @@ const CreateOrderForm = () => {
   const [preliminary, setPreliminary] = useState({
     customerCode: "",
     routeId: "",
-    addressId: "", // 👈 quan trọng
+    addressId: "",
   });
 
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -101,16 +101,27 @@ const CreateOrderForm = () => {
   }, []);
 
   // Memoized handlers
+  const [shouldLoadAddress, setShouldLoadAddress] = useState(false);
   const handleSelectCustomer = useCallback((customer) => {
     setSelectedCustomer(customer);
     setPreliminary((prev) => ({
       ...prev,
       customerCode: customer.customerCode,
-      addressId: "", // reset khi đổi khách
+      addressId: "",
     }));
+
+    // Reset trạng thái load address
+    setShouldLoadAddress(false);
+
+    // Hiện toast TRƯỚC
     toast.success(
       `Đã chọn khách hàng: ${customer.name} (${customer.customerCode})`
     );
+
+    // ⏱️ SAU ĐÓ mới cho phép load address (delay 300-500ms)
+    setTimeout(() => {
+      setShouldLoadAddress(true);
+    }, 400); // Có thể điều chỉnh delay này
   }, []);
 
   const handleCustomerCodeChange = useCallback(
@@ -127,6 +138,7 @@ const CreateOrderForm = () => {
         (selectedCustomer && value !== selectedCustomer.customerCode)
       ) {
         setSelectedCustomer(null);
+        setShouldLoadAddress(false); // ✨ Reset khi clear
       }
     },
     [selectedCustomer]
@@ -546,16 +558,18 @@ const CreateOrderForm = () => {
 
                 <div className="border-t border-gray-200" />
 
-                {/* 👇 NEW: Chọn địa chỉ giao hàng (auto theo customerCode) */}
-                <CustomerAddress
-                  customerCode={preliminary.customerCode}
-                  onAddressSelect={(addr) => {
-                    setPreliminary((prev) => ({
-                      ...prev,
-                      addressId: Number(addr.addressId),
-                    }));
-                  }}
-                />
+                {/* 👇 CHỈ RENDER CustomerAddress khi đã sẵn sàng */}
+                {shouldLoadAddress && preliminary.customerCode && (
+                  <CustomerAddress
+                    customerCode={preliminary.customerCode}
+                    onAddressSelect={(addr) => {
+                      setPreliminary((prev) => ({
+                        ...prev,
+                        addressId: Number(addr.addressId),
+                      }));
+                    }}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -650,15 +664,7 @@ const CreateOrderForm = () => {
                     </span>
                   </div>
                 )}
-                {preliminary.addressId && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Địa chỉ giao:</span>
-                    <span className="font-semibold text-gray-900">
-                      {/* Hiển thị id (đơn giản). Nếu muốn hiển thị tên, bạn có thể truyền tên từ CustomerAddress thông qua 1 state khác */}
-                      #{preliminary.addressId}
-                    </span>
-                  </div>
-                )}
+
                 <div className="flex justify-between">
                   <span className="text-gray-600">Số sản phẩm:</span>
                   <span className="font-semibold text-gray-900">

@@ -23,6 +23,7 @@ const MAX_RETRIES = 2;
 export default function AuthCallback() {
   const navigate = useNavigate();
   const { login: setAuthUser } = useAuth();
+
   const [error, setError] = useState(null);
   const [isProcessing, setIsProcessing] = useState(true);
 
@@ -31,15 +32,15 @@ export default function AuthCallback() {
 
   const handleError = useCallback(
     (err, statusCode) => {
-      setError(err?.message || "Đăng nhập thất bại");
+      const message = err?.message || "Đăng nhập thất bại";
+      setError(message);
       setIsProcessing(false);
 
-      // Thông báo lỗi ngắn gọn
       if (statusCode === 404)
         toast.error("Tài khoản không tồn tại trong hệ thống!");
       else if (statusCode === 401) toast.error("Xác thực thất bại!");
       else if (statusCode === 403) toast.error("Bạn không có quyền truy cập!");
-      else toast.error(err?.message || "Đăng nhập thất bại");
+      else toast.error(message);
 
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(
@@ -57,7 +58,7 @@ export default function AuthCallback() {
         return await verifySupabaseToken(accessToken);
       } catch (e) {
         lastErr = e;
-        const isNetwork = e?.message?.toLowerCase().includes("network");
+        const isNetwork = e?.message?.toLowerCase?.().includes("network");
         if (!isNetwork || i === MAX_RETRIES) break;
         await new Promise((r) => setTimeout(r, 1000));
       }
@@ -70,19 +71,35 @@ export default function AuthCallback() {
     hasProcessedRef.current = true;
 
     try {
-      // 1) Lấy token từ URL hash (nếu có) và set session
-      const hash = new URLSearchParams(window.location.hash.substring(1));
-      const accessTokenFromHash = hash.get("access_token");
-      const refreshTokenFromHash = hash.get("refresh_token");
-
-      if (accessTokenFromHash) {
-        await supabase.auth.setSession({
-          access_token: accessTokenFromHash,
-          refresh_token: refreshTokenFromHash || undefined,
-        });
+      // (0) bắt lỗi từ provider (nếu có) trên query
+      const searchParams = new URLSearchParams(window.location.search);
+      const providerErr =
+        searchParams.get("error_description") || searchParams.get("error");
+      if (providerErr) {
+        throw new Error(decodeURIComponent(providerErr));
       }
 
-      // 2) Lấy session từ Supabase (kèm timeout)
+      // (1) Code flow (PKCE) – Supabase v2
+      const hasCode = searchParams.get("code");
+      if (hasCode) {
+        const { error: xErr } = await supabase.auth.exchangeCodeForSession({
+          currentUrl: window.location.href, // truyền rõ ràng để chắc chắn
+        });
+        if (xErr) throw xErr;
+      } else {
+        // (2) Fallback: hash token flow (một số trường hợp vẫn trả access_token trên hash)
+        const hash = new URLSearchParams(window.location.hash.substring(1));
+        const accessTokenFromHash = hash.get("access_token");
+        const refreshTokenFromHash = hash.get("refresh_token");
+        if (accessTokenFromHash) {
+          await supabase.auth.setSession({
+            access_token: accessTokenFromHash,
+            refresh_token: refreshTokenFromHash || undefined,
+          });
+        }
+      }
+
+      // (3) Lấy session (timeout 10s)
       const sessionPromise = supabase.auth.getSession();
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Session timeout")), 10000)
@@ -100,7 +117,7 @@ export default function AuthCallback() {
         throw new Error("Phiên đăng nhập đã hết hạn");
       }
 
-      // 3) Verify với backend (retry), fallback dùng supabase user
+      // (4) Verify với backend, có retry – fallback dùng dữ liệu supabase user
       let userData;
       try {
         const data = await verifyWithRetry(session.access_token);
@@ -116,7 +133,7 @@ export default function AuthCallback() {
       }
       if (!userData) throw new Error("Dữ liệu người dùng không hợp lệ");
 
-      // 4) Cập nhật AuthContext + localStorage
+      // (5) Cập nhật AuthContext + localStorage
       setAuthUser({
         id: userData.id,
         username: userData.username,
@@ -126,20 +143,15 @@ export default function AuthCallback() {
       });
       localStorage.setItem("user", JSON.stringify(userData));
 
-      // 5) Điều hướng theo role
+      // (6) Điều hướng theo role
       toast.success(`Chào mừng ${userData.name || userData.email}! 🎉`, {
         duration: 3000,
       });
       const route = roleRoutes[userData.role] || DEFAULT_ROUTE;
 
-      // Xoá hash cho sạch URL
-      if (window.location.hash) {
-        window.history.replaceState(
-          null,
-          "",
-          window.location.pathname + window.location.search
-        );
-      }
+      // Dọn sạch query/hash để URL đẹp
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState(null, "", cleanUrl);
 
       navigate(route, { replace: true });
     } catch (err) {
@@ -202,6 +214,10 @@ export default function AuthCallback() {
           {isProcessing
             ? "Vui lòng đợi trong giây lát"
             : "Đang chuyển hướng..."}
+        </p>
+        {/* ⚠️ THÊM DÒng NÀY */}
+        <p className="text-sm text-gray-500">
+          Lần đầu có thể mất 30-60 giây để kết nối server...
         </p>
       </div>
     </div>

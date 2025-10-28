@@ -6,7 +6,6 @@ import {
   User,
   MapPin,
   FileText,
-  Banknote,
 } from "lucide-react";
 import orderDepositService from "../../Services/Order/orderDepositService";
 import routesService from "../../Services/StaffSale/routeService";
