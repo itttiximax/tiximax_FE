@@ -548,12 +548,12 @@ const ProductManager = ({
                       </label>
                       <input
                         type="text"
-                        name="Tên shop"
+                        name="groupTag"
                         value={product.groupTag}
                         onChange={(e) => handleProductChange(index, e)}
                         className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
                         disabled={!isFormEnabled}
-                        placeholder="A, B,.."
+                        placeholder="Tên shop..."
                       />
                     </div>
                   </div>

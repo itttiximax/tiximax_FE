@@ -1,8 +1,9 @@
-// PaymentOrderList.jsx
+// src/Components/Payment/PaymentOrderList.jsx
 import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import createOrderPaymentService from "../../Services/Payment/createOrderPaymentService";
 import countStatusService from "../../Services/Order/countStatusService";
+import confirmPaymentService from "../../Services/Payment/confirmPaymentService";
 import {
   CheckCircle,
   Clock,
@@ -15,7 +16,7 @@ import {
   AlertTriangle,
   CheckCircle as CheckIcon,
   User,
-  Calendar,
+  Loader2,
 } from "lucide-react";
 import { confirmPaymentOrder } from "./ConfirmPaymentOrder";
 
@@ -107,8 +108,8 @@ const PaymentOrderList = () => {
   const [statusCounts, setStatusCounts] = useState({});
   const [statsLoading, setStatsLoading] = useState(false);
 
-  // trạng thái confirm
-  const [processingMap, setProcessingMap] = useState({}); // { [orderId]: boolean }
+  // Processing states
+  const [processingMap, setProcessingMap] = useState({});
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false,
     order: null,
@@ -144,18 +145,13 @@ const PaymentOrderList = () => {
       setStatusCounts(normalizedCounts);
     } catch (error) {
       console.error("Error fetching payment statistics:", error);
-      toast.error(
-        error.message?.includes("DA_DU_HANG")
-          ? "Không thể tải thống kê cho đơn hàng đã đủ hàng"
-          : "Không thể tải thống kê trạng thái"
-      );
+      toast.error("Không thể tải thống kê trạng thái");
       setStatusCounts(
         validTabs.reduce((acc, tab) => ({ ...acc, [tab]: 0 }), {})
       );
     }
   };
 
-  // Đồng bộ khi đổi tab
   useEffect(() => {
     localStorage.setItem("activeTab", activeTab);
     setLoading(true);
@@ -230,10 +226,11 @@ const PaymentOrderList = () => {
     }
   };
 
-  /* ===== Confirm payment (UI ở đây) ===== */
+  /* ===== Confirm payment (CHO_THANH_TOAN) ===== */
   const handleOpenDialog = (order) => {
     setConfirmDialog({ isOpen: true, order });
   };
+
   const handleCloseDialog = () => {
     setConfirmDialog({ isOpen: false, order: null });
   };
@@ -250,7 +247,6 @@ const PaymentOrderList = () => {
       return;
     }
 
-    // Nếu đã có axios interceptor thì không cần token
     const token = localStorage.getItem("jwt");
 
     setProcessingMap((s) => ({ ...s, [orderId]: true }));
@@ -259,9 +255,11 @@ const PaymentOrderList = () => {
 
     if (res.success) {
       toast.success(
-        `Xác nhận thanh toán thành công cho đơn ${order.orderCode}!`
+        `Xác nhận thanh toán thành công cho đơn ${order.orderCode}!`,
+        {
+          duration: 3000,
+        }
       );
-      // refresh list theo tab + page hiện tại
       await fetchOrders(activeTab, currentPage);
       await fetchStatusStatistics();
     } else {
@@ -271,7 +269,78 @@ const PaymentOrderList = () => {
     }
   };
 
-  // Cột header
+  /* ===== Confirm shipping payment (CHO_THANH_TOAN_SHIP) ===== */
+  const handleConfirmShippingPayment = async (order) => {
+    const orderId = order.orderId ?? order.id ?? order.code;
+    const paymentCode = order.paymentCode || order.shippingPaymentCode;
+
+    // Validate
+    if (!paymentCode || !paymentCode.trim()) {
+      toast.error("Không tìm thấy mã thanh toán vận chuyển");
+      return;
+    }
+
+    // Get token
+    const token = localStorage.getItem("jwt");
+    if (!token) {
+      toast.error("Vui lòng đăng nhập để xác nhận thanh toán");
+      return;
+    }
+
+    // Set processing state
+    setProcessingMap((s) => ({ ...s, [orderId]: true }));
+
+    try {
+      const result = await confirmPaymentService.confirmShippingPayment(
+        paymentCode,
+        token
+      );
+
+      // Success message từ backend
+      const successMessage =
+        result?.message ||
+        result?.data?.message ||
+        `Xác nhận thanh toán ship thành công cho đơn ${order.orderCode}!`;
+
+      toast.success(successMessage, {
+        icon: "✅",
+        duration: 3000,
+        style: {
+          background: "#D1FAE5",
+          color: "#065F46",
+          border: "1px solid #6EE7B7",
+        },
+      });
+
+      // Refresh data
+      await fetchOrders(activeTab, currentPage);
+      await fetchStatusStatistics();
+    } catch (error) {
+      console.error("Error confirming shipping payment:", error);
+
+      // ✅ Simple error handling
+      const errorMessage =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        error.response?.data?.detail ||
+        error.message ||
+        "Không thể xác nhận thanh toán vận chuyển";
+
+      toast.error(errorMessage, {
+        icon: "❌",
+        duration: 4000,
+        style: {
+          background: "#FEE2E2",
+          color: "#991B1B",
+          border: "1px solid #FCA5A5",
+        },
+      });
+    } finally {
+      setProcessingMap((s) => ({ ...s, [orderId]: false }));
+    }
+  };
+
+  // Header columns
   const getHeaderColumns = () => {
     if (activeTab === "CHO_THANH_TOAN") {
       return [
@@ -281,6 +350,23 @@ const PaymentOrderList = () => {
         { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
         { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
         { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-1" },
+        { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-1" },
+        { key: "actions", label: "Thao tác", colSpan: "col-span-2" },
+      ];
+    }
+
+    if (activeTab === "CHO_THANH_TOAN_SHIP") {
+      return [
+        { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
+        { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" },
+        {
+          key: "paymentCode",
+          label: "Mã giao dịch ship",
+          colSpan: "col-span-2",
+        },
+        { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
+        { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
+        { key: "finalPrice", label: "Phí ship", colSpan: "col-span-1" },
         { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-1" },
         { key: "actions", label: "Thao tác", colSpan: "col-span-2" },
       ];
@@ -304,19 +390,18 @@ const PaymentOrderList = () => {
       const code = order?.code || order?.orderCode || "—";
       const payCode = order?.paymentCode || order?.transactionCode || "—";
       const typeLabel = orderTypeLabel(order?.orderType);
-      const price = formatCurrency(
-        order?.finalPriceOrder ?? order?.finalPriceOrder
-      );
+      const price = formatCurrency(order?.finalPriceOrder ?? order?.finalPrice);
       const created = formatDate(order?.createdAt || order?.createdDate);
       const badge = statusBadge(order?.status || activeTab);
       const orderId = order.orderId ?? order.id ?? code;
       const isProcessing = !!processingMap[orderId];
 
+      // Tab CHO_THANH_TOAN
       if (activeTab === "CHO_THANH_TOAN") {
         return (
           <div
             key={orderId}
-            className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-100 items-center"
+            className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-100 items-center hover:bg-gray-50 transition-colors"
           >
             <div className="col-span-2">
               <div className="font-semibold text-gray-900">{code}</div>
@@ -343,7 +428,7 @@ const PaymentOrderList = () => {
             <div className="col-span-1">{typeLabel}</div>
             <div className="col-span-1">{badge}</div>
             <div className="col-span-1 font-semibold">{price} đ</div>
-            <div className="col-span-1 text-gray-600">{created}</div>
+            <div className="col-span-1 text-gray-600 text-sm">{created}</div>
             <div className="col-span-2 flex justify-end">
               <button
                 onClick={() => handleOpenDialog(order)}
@@ -355,7 +440,78 @@ const PaymentOrderList = () => {
                       : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
                   }`}
               >
-                {isProcessing ? "Đang xử lý..." : "Xác nhận thanh toán"}
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Đang xử lý...
+                  </>
+                ) : (
+                  <>
+                    <CheckIcon className="w-4 h-4" />
+                    Xác nhận thanh toán
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      // Tab CHO_THANH_TOAN_SHIP
+      if (activeTab === "CHO_THANH_TOAN_SHIP") {
+        return (
+          <div
+            key={orderId}
+            className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-100 items-center hover:bg-gray-50 transition-colors"
+          >
+            <div className="col-span-2">
+              <div className="font-semibold text-gray-900">{code}</div>
+              <div className="text-xs text-gray-500">{order?.id || ""}</div>
+            </div>
+            <div className="col-span-2">
+              <div className="text-gray-900">{customerName}</div>
+              <div className="text-xs text-gray-500">
+                {order?.customer?.phone || order?.customer?.email || ""}
+              </div>
+            </div>
+            <div className="col-span-2">
+              {order?.paymentCode ? (
+                <div className="flex items-center gap-2">
+                  <Truck className="w-4 h-4 text-purple-600" />
+                  <span className="text-sm font-semibold text-purple-600 truncate">
+                    {payCode}
+                  </span>
+                </div>
+              ) : (
+                <span className="text-xs text-gray-400">-</span>
+              )}
+            </div>
+            <div className="col-span-1">{typeLabel}</div>
+            <div className="col-span-1">{badge}</div>
+            <div className="col-span-1 font-semibold">{price} đ</div>
+            <div className="col-span-1 text-gray-600 text-sm">{created}</div>
+            <div className="col-span-2 flex justify-end">
+              <button
+                onClick={() => handleConfirmShippingPayment(order)}
+                disabled={isProcessing}
+                className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-colors
+                  ${
+                    isProcessing
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                      : "bg-purple-600 text-white hover:bg-purple-700 shadow-sm"
+                  }`}
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Đang xử lý...
+                  </>
+                ) : (
+                  <>
+                    <Truck className="w-4 h-4" />
+                    Xác nhận thanh toán ship
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -366,7 +522,7 @@ const PaymentOrderList = () => {
       return (
         <div
           key={orderId}
-          className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-100 items-center"
+          className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-100 items-center hover:bg-gray-50 transition-colors"
         >
           <div className="col-span-2">
             <div className="font-semibold text-gray-900">{code}</div>
@@ -381,7 +537,7 @@ const PaymentOrderList = () => {
           <div className="col-span-1">{typeLabel}</div>
           <div className="col-span-1">{badge}</div>
           <div className="col-span-2 font-semibold">{price} đ</div>
-          <div className="col-span-2 text-gray-600">{created}</div>
+          <div className="col-span-2 text-gray-600 text-sm">{created}</div>
           <div className="col-span-2">{/* spacer */}</div>
         </div>
       );
@@ -391,7 +547,7 @@ const PaymentOrderList = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen  py-6 px-4">
       <Toaster position="top-right" />
 
       <div className="mx-auto">
@@ -400,8 +556,11 @@ const PaymentOrderList = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                Quản lý báo giá đơn hàng
+                Quản lý thanh toán đơn hàng
               </h1>
+              <p className="text-sm text-gray-600 mt-1">
+                Theo dõi và xác nhận các giao dịch thanh toán
+              </p>
             </div>
           </div>
         </div>
@@ -425,9 +584,9 @@ const PaymentOrderList = () => {
                     ${
                       isActive
                         ? `${color.activeBg} ${color.activeText} ${color.activeBorder}`
-                        : "bg-white text-gray-700 border-gray-200"
+                        : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
                     }
-                    focus:outline-none
+                    focus:outline-none transition-all
                   `}
                 >
                   <div className="flex items-center justify-between">
@@ -441,7 +600,7 @@ const PaymentOrderList = () => {
                     </div>
 
                     {statsLoading ? (
-                      <div className="h-4 w-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
                     ) : (
                       <span
                         className={`
@@ -469,11 +628,11 @@ const PaymentOrderList = () => {
           </div>
         </div>
 
-        {/* Loading khung nội dung */}
+        {/* Loading */}
         {loading && (
           <div className="bg-white rounded-lg shadow border border-gray-200 p-12">
             <div className="flex flex-col items-center justify-center">
-              <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+              <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
               <p className="mt-4 text-sm text-gray-600 font-medium">
                 Đang tải dữ liệu...
               </p>
@@ -500,7 +659,7 @@ const PaymentOrderList = () => {
                 <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
                   <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     {getHeaderColumns().map((column) => (
-                      <div key={column.key} className={`${column.colSpan}`}>
+                      <div key={column.key} className={column.colSpan}>
                         {column.label}
                       </div>
                     ))}
@@ -527,11 +686,11 @@ const PaymentOrderList = () => {
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 0}
                 className={`
-                  flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md border
+                  flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md border transition-colors
                   ${
                     currentPage === 0
                       ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
-                      : "bg-white text-gray-700 border-gray-300"
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                   }
                 `}
               >
@@ -543,11 +702,11 @@ const PaymentOrderList = () => {
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage >= totalPages - 1}
                 className={`
-                  flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md border
+                  flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md border transition-colors
                   ${
                     currentPage >= totalPages - 1
                       ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
-                      : "bg-white text-gray-700 border-gray-300"
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                   }
                 `}
               >
@@ -559,7 +718,7 @@ const PaymentOrderList = () => {
         )}
       </div>
 
-      {/* Confirmation Dialog */}
+      {/* Confirmation Dialog (CHO_THANH_TOAN only) */}
       {confirmDialog.isOpen && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
@@ -643,7 +802,11 @@ const PaymentOrderList = () => {
                       </span>
                     </div>
                     <span className="text-lg font-bold text-white">
-                      {formatCurrency(confirmDialog.order.finalPriceOrder)} đ
+                      {formatCurrency(
+                        confirmDialog.order.finalPriceOrder ||
+                          confirmDialog.order.finalPrice
+                      )}{" "}
+                      đ
                     </span>
                   </div>
                 </div>

@@ -439,7 +439,7 @@ const CreatePurchase = ({
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-semibold text-gray-900 mb-2">
-                          {formatCurrencyVND(link.finalPriceVnd)}
+                          {formatCurrencyVND(link.totalWeb)}
                         </div>
                         <span
                           className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(

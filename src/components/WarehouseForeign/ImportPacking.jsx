@@ -6,10 +6,10 @@ import {
   ScanBarcode,
   Trash2,
   Check,
-  AlertCircle,
   X,
   Database,
   Upload,
+  Loader2,
 } from "lucide-react";
 
 const ImportPacking = () => {
@@ -18,12 +18,12 @@ const ImportPacking = () => {
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef(null);
 
-  // Auto focus input
+  // Auto focus input on mount and after scanning
   useEffect(() => {
     inputRef.current?.focus();
   }, [scannedItems]);
 
-  // Always focus on input
+  // Always focus on input when clicking anywhere
   useEffect(() => {
     const handleClickAnywhere = () => {
       inputRef.current?.focus();
@@ -32,7 +32,7 @@ const ImportPacking = () => {
     return () => document.removeEventListener("click", handleClickAnywhere);
   }, []);
 
-  // Handle barcode submit (Enter)
+  // Handle barcode submit (Enter key)
   const handleBarcodeSubmit = (e) => {
     e.preventDefault();
 
@@ -46,7 +46,9 @@ const ImportPacking = () => {
     // Check duplicate
     const isDuplicate = scannedItems.some((item) => item.barcode === barcode);
     if (isDuplicate) {
-      toast.error(`Mã ${barcode} đã tồn tại trong danh sách`);
+      toast.error(`Mã ${barcode} đã tồn tại trong danh sách`, {
+        icon: "⚠️",
+      });
       setBarcodeInput("");
       return;
     }
@@ -59,24 +61,22 @@ const ImportPacking = () => {
 
     setScannedItems((prev) => [newItem, ...prev]);
     setBarcodeInput("");
-    // Không hiển thị message khi add thành công - chỉ để mã xuất hiện trong table
   };
 
   // Remove one item
   const handleRemoveItem = (id) => {
     setScannedItems((prev) => prev.filter((item) => item.id !== id));
-    // Không hiển thị message - chỉ để item biến mất khỏi table
   };
 
-  // Clear all
+  // Clear all items
   const handleClearAll = () => {
     if (window.confirm("Bạn có chắc chắn muốn xóa tất cả mã đã quét?")) {
       setScannedItems([]);
-      // Không hiển thị message - chỉ để table về trạng thái empty
+      toast("Đã xóa tất cả", { icon: "🗑️" });
     }
   };
 
-  // Submit data - Xử lý message từ BE
+  // Submit data to backend
   const handleSubmit = async () => {
     if (scannedItems.length === 0) {
       toast.error("Danh sách trống. Vui lòng quét mã trước khi import");
@@ -90,36 +90,66 @@ const ImportPacking = () => {
 
       console.log("API Response:", response);
 
-      // ✅ Kiểm tra error (ưu tiên response.error trước, sau đó mới response.data.error)
-      if (response?.error || response?.data?.error) {
-        const errorMessage = response?.error || response?.data?.error;
-        toast.error(errorMessage);
+      // ✅ CRITICAL: Check for errors in response
+      // Backend có thể trả về error trong response thành công (status 200)
+      const errorMessage =
+        response?.error || response?.data?.error || response?.message?.error;
+
+      if (errorMessage) {
+        // ✅ Hiển thị lỗi từ backend (ví dụ: "Mục kho đã tồn tại cho mã vận đơn này!")
+        toast.error(errorMessage, {
+          duration: 4000,
+          style: {
+            background: "#ebebebff",
+            color: "#e43333ff",
+            border: "1px solid #f1f1f1ff",
+            fontWeight: "500",
+          },
+        });
         return;
       }
 
-      // ✅ Hiển thị message thành công từ BE (nếu có)
+      // ✅ Show success message
       const successMessage =
         response?.message ||
         response?.data?.message ||
-        `Import thành công ${scannedItems.length} shipment`;
+        `✅ Đã import ${scannedItems.length} shipment thành công`;
 
-      toast.success(successMessage);
+      toast.success(successMessage, {
+        duration: 3000,
+        icon: "✅",
+        style: {
+          background: "#D1FAE5",
+          color: "#065F46",
+          border: "1px solid #6EE7B7",
+          fontWeight: "500",
+        },
+      });
 
-      // Clear danh sách sau 2 giây
+      // Clear list after 2 seconds
       setTimeout(() => {
         setScannedItems([]);
       }, 2000);
     } catch (error) {
-      console.error("API Error:", error);
+      console.error("Import error:", error);
 
-      // ✅ Xử lý lỗi từ response.data - CHỈ 1 TOAST DUY NHẤT
+      // ✅ Xử lý lỗi từ catch block (network error, 4xx, 5xx)
       const errorMessage =
         error.response?.data?.error ||
         error.response?.data?.message ||
+        error.response?.data?.detail ||
         error.message ||
         "Không thể kết nối đến server";
 
-      toast.error(errorMessage);
+      toast.error(errorMessage, {
+        duration: 4000,
+        style: {
+          background: "#fddfdfff",
+          color: "#ee3131ff",
+          border: "1px solid #f0eeeeff",
+          fontWeight: "400",
+        },
+      });
     } finally {
       setIsLoading(false);
     }
@@ -127,7 +157,7 @@ const ImportPacking = () => {
 
   return (
     <div className="min-h-screen ">
-      {/* Compact Header */}
+      {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-3">
@@ -155,7 +185,7 @@ const ImportPacking = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        {/* Compact Scan Input Section */}
+        {/* Scan Input Section */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
           <div className="flex items-center gap-2 mb-3">
             <ScanBarcode className="w-4 h-4 text-gray-600" />
@@ -190,7 +220,7 @@ const ImportPacking = () => {
           </form>
         </div>
 
-        {/* Compact Items Table Section */}
+        {/* Items Table Section */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-4 py-2.5 border-b border-gray-200 flex justify-between items-center bg-gray-50">
             <h2 className="text-sm font-semibold text-gray-900">
@@ -207,7 +237,7 @@ const ImportPacking = () => {
             )}
           </div>
 
-          {/* Compact Empty State */}
+          {/* Empty State */}
           {scannedItems.length === 0 ? (
             <div className="text-center py-8 px-4">
               <div className="inline-flex items-center justify-center w-12 h-12 bg-gray-100 rounded-lg mb-3">
@@ -221,7 +251,7 @@ const ImportPacking = () => {
               </p>
             </div>
           ) : (
-            /* Compact Table */
+            /* Table */
             <div className="overflow-x-auto">
               <table className="w-full min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -241,7 +271,7 @@ const ImportPacking = () => {
                   {scannedItems.map((item, index) => (
                     <tr
                       key={item.id}
-                      className="hover:bg-gray-50 transition-all duration-300"
+                      className="hover:bg-gray-50 transition-colors"
                     >
                       <td className="px-4 py-2.5 whitespace-nowrap text-xs text-gray-700 font-medium">
                         {index + 1}
@@ -269,7 +299,7 @@ const ImportPacking = () => {
           )}
         </div>
 
-        {/* Compact Action Button */}
+        {/* Submit Button */}
         {scannedItems.length > 0 && (
           <div className="mt-4 flex justify-end">
             <button
@@ -279,7 +309,7 @@ const ImportPacking = () => {
             >
               {isLoading ? (
                 <>
-                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   Đang import...
                 </>
               ) : (

@@ -168,14 +168,13 @@ const CustomerAddress = ({
         </label>
 
         <div className="flex items-center gap-2">
-          {/* ✨ WebSocket Status */}
           {isConnected && (
             <div
               className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-50 border border-green-200"
               title="WebSocket đã kết nối - Tự động cập nhật"
             >
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-xs text-green-700 font-medium">Live</span>
+              {/* <span className="text-xs text-green-700 font-medium">Live</span> */}
             </div>
           )}
 

@@ -1,64 +1,69 @@
+// src/Components/Payment/ConfirmPaymentShip.jsx
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle, Truck } from "lucide-react";
 import confirmPaymentService from "../../Services/Payment/confirmPaymentService";
 
-// Helper function to extract error message from backend
-const getErrorMessage = (error) => {
-  if (error.response) {
-    const backendError =
-      error.response.data?.error ||
-      error.response.data?.message ||
-      error.response.data?.detail ||
-      error.response.data?.errors;
-
-    if (backendError) {
-      if (typeof backendError === "object" && !Array.isArray(backendError)) {
-        const errorMessages = Object.entries(backendError)
-          .map(([field, msg]) => `${field}: ${msg}`)
-          .join(", ");
-        return `Lỗi validation: ${errorMessages}`;
-      } else if (Array.isArray(backendError)) {
-        return backendError.join(", ");
-      } else {
-        return backendError;
-      }
-    }
-    return `Lỗi ${error.response.status}: ${
-      error.response.statusText || "Không xác định"
-    }`;
-  } else if (error.request) {
-    return "Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng.";
-  }
-  return error.message || "Đã xảy ra lỗi không xác định";
-};
-
-const ConfirmPaymentShip = ({ paymentCode, onSuccess }) => {
+const ConfirmPaymentShip = ({ paymentCode, orderCode, onSuccess }) => {
   const [loading, setLoading] = useState(false);
 
   const handleConfirmPayment = async () => {
+    // Validate paymentCode
+    if (!paymentCode || !paymentCode.trim()) {
+      toast.error("Mã thanh toán không hợp lệ");
+      return;
+    }
+
+    // Validate token
+    const token = localStorage.getItem("jwt");
+    if (!token) {
+      toast.error("Vui lòng đăng nhập để xác nhận thanh toán");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      setLoading(true);
-      const token = localStorage.getItem("jwt");
+      const result = await confirmPaymentService.confirmShippingPayment(
+        paymentCode,
+        token
+      );
 
-      if (!token) {
-        toast.error("Vui lòng đăng nhập để xác nhận thanh toán");
-        return;
-      }
+      // Success message từ backend
+      const successMessage =
+        result?.message ||
+        result?.data?.message ||
+        `Xác nhận thanh toán ship thành công${
+          orderCode ? ` cho đơn ${orderCode}` : ""
+        }!`;
 
-      await confirmPaymentService.confirmShippingPayment(paymentCode, token);
+      toast.success(successMessage, {
+        duration: 3000,
+        style: {
+          background: "#3bbd2aff",
+          color: "#065F46",
+          border: "1px solid #fafafaff",
+        },
+      });
 
-      toast.success("Xác nhận thanh toán thành công");
-
-      // Call onSuccess callback
-      if (onSuccess) {
-        onSuccess();
-      }
+      onSuccess?.(result);
     } catch (error) {
-      console.error("Error confirming payment:", error);
-      const errorMessage = getErrorMessage(error);
-      toast.error(`Không thể xác nhận thanh toán: ${errorMessage}`, {
-        duration: 5000,
+      console.error("Error confirming shipping payment:", error);
+
+      const errorMessage =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        error.response?.data?.detail ||
+        error.message ||
+        "Không thể xác nhận thanh toán vận chuyển";
+
+      toast.error(errorMessage, {
+        duration: 4000,
+        style: {
+          background: "#fcfcfcff",
+          color: "#f14040ff",
+          border: "1px solid #FCA5A5",
+        },
       });
     } finally {
       setLoading(false);
@@ -68,16 +73,19 @@ const ConfirmPaymentShip = ({ paymentCode, onSuccess }) => {
   return (
     <button
       onClick={handleConfirmPayment}
-      disabled={loading}
-      className="px-3 py-1 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+      disabled={loading || !paymentCode}
+      className="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
     >
       {loading ? (
         <>
-          <Loader2 className="animate-spin h-4 w-4" />
-          Đang xác nhận...
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Đang xử lý...
         </>
       ) : (
-        "Xác nhận thanh toán"
+        <>
+          <Truck className="w-4 h-4" />
+          Xác nhận thanh toán ship
+        </>
       )}
     </button>
   );
