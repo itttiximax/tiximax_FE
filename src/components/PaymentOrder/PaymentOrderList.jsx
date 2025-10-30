@@ -327,12 +327,11 @@ const PaymentOrderList = () => {
         "Không thể xác nhận thanh toán vận chuyển";
 
       toast.error(errorMessage, {
-        icon: "❌",
         duration: 4000,
         style: {
-          background: "#FEE2E2",
-          color: "#991B1B",
-          border: "1px solid #FCA5A5",
+          background: "#fffdfdff",
+          color: "#f53939ff",
+          border: "1px solid #fdf9f9ff",
         },
       });
     } finally {

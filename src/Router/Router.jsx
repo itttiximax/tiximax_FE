@@ -253,7 +253,7 @@ const Router = createBrowserRouter([
       { path: "customers", element: <CustomerStaffList /> },
       { path: "auction-payment", element: <AuctionPayment /> },
       { path: "prospects", element: <NotFound /> },
-      { path: "orders", element: <NotFound /> },
+      { path: "orders", element: <OrderList /> },
       { path: "orders/pending", element: <NotFound /> }, // Chưa triển khai
       { path: "shipping/domestic", element: <NotFound /> }, // Chưa triển khai
       { path: "shipping/international", element: <NotFound /> }, // Chưa triển khai

@@ -297,9 +297,9 @@ const AuctionPayment = () => {
         <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-4 mb-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="bg-blue-600 p-2 rounded-lg">
+              {/* <div className="bg-blue-600 p-2 rounded-lg">
                 <Gavel className="w-5 h-5 text-white" />
-              </div>
+              </div> */}
               <div>
                 <h1 className="text-lg font-bold text-slate-800">
                   Quản lý thanh toán đấu giá
