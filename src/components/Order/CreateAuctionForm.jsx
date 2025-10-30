@@ -16,12 +16,14 @@ import toast from "react-hot-toast";
 import AccountSearch from "./AccountSearch";
 import AuctionManager from "./AuctionManager";
 import ConfirmDialog from "../../common/ConfirmDialog";
+import CustomerAddress from "./CustomerAddress"; // ← ADD: Import CustomerAddress
 
 const CreateAuctionForm = () => {
-  // Consolidated states
+  // ✅ ADD: Thêm addressId vào preliminary
   const [preliminary, setPreliminary] = useState({
     customerCode: "",
     routeId: "",
+    addressId: "", // ← ADD
   });
 
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -60,10 +62,12 @@ const CreateAuctionForm = () => {
     error: null,
   });
 
-  // State for confirm dialog
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Fetch data once on mount
+
+  // ✅ ADD: Kiểm soát render CustomerAddress
+  const [shouldLoadAddress, setShouldLoadAddress] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -78,9 +82,9 @@ const CreateAuctionForm = () => {
           ]);
 
         setMasterData({
-          routes: routesData,
-          destinations: destinationsData,
-          productTypes: productTypesData,
+          routes: routesData || [],
+          destinations: destinationsData || [],
+          productTypes: productTypesData || [],
         });
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -97,36 +101,59 @@ const CreateAuctionForm = () => {
     fetchData();
   }, []);
 
-  // Memoized handlers
+  // ✅ UPDATE: Thêm logic reset addressId và delay
   const handleSelectCustomer = useCallback((customer) => {
     setSelectedCustomer(customer);
     setPreliminary((prev) => ({
       ...prev,
       customerCode: customer.customerCode,
+      addressId: "", // ← ADD: Reset addressId
     }));
+
+    // Reset trạng thái load address
+    setShouldLoadAddress(false);
+
+    // Toast trước
     toast.success(
       `Đã chọn khách hàng: ${customer.name} (${customer.customerCode})`
     );
+
+    // ⏱️ Delay 400ms trước khi cho phép load address
+    setTimeout(() => {
+      setShouldLoadAddress(true);
+    }, 400);
   }, []);
 
+  // ✅ UPDATE: Reset addressId khi thay đổi customerCode
   const handleCustomerCodeChange = useCallback(
     (e) => {
       const value = e.target.value;
-      setPreliminary((prev) => ({ ...prev, customerCode: value }));
+      setPreliminary((prev) => ({
+        ...prev,
+        customerCode: value,
+        addressId: "", // ← ADD: Reset addressId
+      }));
 
       if (
         !value ||
         (selectedCustomer && value !== selectedCustomer.customerCode)
       ) {
         setSelectedCustomer(null);
+        setShouldLoadAddress(false); // ← ADD
       }
     },
     [selectedCustomer]
   );
 
+  // ✅ UPDATE: Reset addressId khi clear customer
   const handleClearCustomer = useCallback(() => {
-    setPreliminary((prev) => ({ ...prev, customerCode: "" }));
+    setPreliminary((prev) => ({
+      ...prev,
+      customerCode: "",
+      addressId: "", // ← ADD: Reset addressId
+    }));
     setSelectedCustomer(null);
+    setShouldLoadAddress(false); // ← ADD
     toast("Đã xóa thông tin khách hàng", { icon: "🗑️" });
   }, []);
 
@@ -135,22 +162,28 @@ const CreateAuctionForm = () => {
       const { name, value } = e.target;
 
       if (name === "routeId") {
+        const routeIdNum = Number(value || 0);
         const selectedRoute = masterData.routes.find(
-          (route) => route.routeId === Number(value)
+          (route) => route.routeId === routeIdNum
         );
-        setPreliminary((prev) => ({ ...prev, [name]: value }));
+        setPreliminary((prev) => ({ ...prev, [name]: routeIdNum }));
 
         if (selectedRoute?.exchangeRate) {
           setForm((prev) => ({
             ...prev,
-            exchangeRate: selectedRoute.exchangeRate,
+            exchangeRate: Number(selectedRoute.exchangeRate) || "",
           }));
           toast.success(
-            `Tỷ giá hôm nay: ${selectedRoute.exchangeRate.toLocaleString()} VND`
+            `Tỷ giá hôm nay: ${Number(
+              selectedRoute.exchangeRate || 0
+            ).toLocaleString()} VND`
           );
         }
       } else {
-        setPreliminary((prev) => ({ ...prev, [name]: value }));
+        setPreliminary((prev) => ({
+          ...prev,
+          [name]: name === "addressId" ? Number(value || 0) : value,
+        }));
       }
     },
     [masterData.routes]
@@ -165,23 +198,23 @@ const CreateAuctionForm = () => {
           ? checked
           : name === "destinationId"
           ? Number(value)
+          : name === "exchangeRate"
+          ? Number(value)
           : value,
     }));
   }, []);
 
-  // Show confirm dialog
   const handleSubmitClick = useCallback(() => {
     setShowConfirmDialog(true);
   }, []);
 
-  // Close confirm dialog
   const handleCloseDialog = useCallback(() => {
     setShowConfirmDialog(false);
   }, []);
 
-  // Actual submit function with validation and better error handling
+  // ✅ UPDATE: Thêm validation addressId và fix service call
   const handleConfirmSubmit = useCallback(async () => {
-    // Validation trước khi submit
+    // Validation
     if (!preliminary.customerCode) {
       toast.error("Vui lòng chọn khách hàng");
       setShowConfirmDialog(false);
@@ -200,60 +233,65 @@ const CreateAuctionForm = () => {
       return;
     }
 
+    // ✅ ADD: Validate addressId
+    if (!preliminary.addressId) {
+      toast.error("Vui lòng chọn địa chỉ giao hàng");
+      setShowConfirmDialog(false);
+      return;
+    }
+
+    const exr = Number(form.exchangeRate || 0);
+    if (!Number.isFinite(exr) || exr <= 0) {
+      toast.error("Tỷ giá phải > 0");
+      setShowConfirmDialog(false);
+      return;
+    }
+
     // Validate products
     for (let i = 0; i < products.length; i++) {
-      const product = products[i];
+      const p = products[i];
+      const q = Number(p.quantity);
+      const w = Number(p.priceWeb);
+      const s = Number(p.shipWeb);
 
-      if (!product.productName?.trim()) {
+      if (!p.productName?.trim()) {
         toast.error(`Sản phẩm ${i + 1}: Thiếu tên sản phẩm`);
         setShowConfirmDialog(false);
         return;
       }
 
-      if (!product.productLink?.trim()) {
+      if (!p.productLink?.trim()) {
         toast.error(`Sản phẩm ${i + 1}: Thiếu link sản phẩm`);
         setShowConfirmDialog(false);
         return;
       }
 
-      if (!product.website?.trim()) {
+      if (!p.website?.trim()) {
         toast.error(`Sản phẩm ${i + 1}: Thiếu thông tin website`);
         setShowConfirmDialog(false);
         return;
       }
 
-      if (!product.productTypeId) {
+      if (!p.productTypeId) {
         toast.error(`Sản phẩm ${i + 1}: Thiếu loại sản phẩm`);
         setShowConfirmDialog(false);
         return;
       }
 
-      if (
-        !product.priceWeb ||
-        product.priceWeb === "0" ||
-        product.priceWeb === ""
-      ) {
-        toast.error(`Sản phẩm ${i + 1}: Thiếu giá sản phẩm`);
+      if (!Number.isFinite(w) || w <= 0) {
+        toast.error(`Sản phẩm ${i + 1}: Giá phải > 0`);
         setShowConfirmDialog(false);
         return;
       }
 
-      if (
-        !product.shipWeb ||
-        product.shipWeb === "0" ||
-        product.shipWeb === ""
-      ) {
-        toast.error(`Sản phẩm ${i + 1}: Thiếu phí ship`);
+      if (!Number.isFinite(s) || s < 0) {
+        toast.error(`Sản phẩm ${i + 1}: Phí ship ≥ 0`);
         setShowConfirmDialog(false);
         return;
       }
 
-      if (
-        !product.quantity ||
-        product.quantity === "0" ||
-        product.quantity === ""
-      ) {
-        toast.error(`Sản phẩm ${i + 1}: Số lượng phải lớn hơn 0`);
+      if (!Number.isFinite(q) || q <= 0) {
+        toast.error(`Sản phẩm ${i + 1}: Số lượng phải > 0`);
         setShowConfirmDialog(false);
         return;
       }
@@ -264,26 +302,29 @@ const CreateAuctionForm = () => {
     try {
       const orderData = {
         ...form,
-        orderLinkRequests: products,
+        orderLinkRequests: products.map((p) => ({
+          ...p,
+          quantity: Number(p.quantity || 0),
+          priceWeb: Number(p.priceWeb || 0),
+          shipWeb: Number(p.shipWeb || 0),
+          productTypeId: Number(p.productTypeId || 0),
+        })),
       };
 
-      console.log("Submitting order data:", {
-        customerCode: preliminary.customerCode,
-        routeId: preliminary.routeId,
-        orderData,
-      });
-
+      // ✅ FIX: Thêm addressId làm tham số thứ 3
       await orderService.createOrder(
         preliminary.customerCode,
-        preliminary.routeId,
+        Number(preliminary.routeId),
+        Number(preliminary.addressId), // ← ADD: Thêm addressId
         orderData
       );
 
-      toast.success("Tạo đơn hàng thành công!");
+      toast.success("Tạo đơn đấu giá thành công!");
 
-      // Reset form
-      setPreliminary({ customerCode: "", routeId: "" });
+      // ✅ UPDATE: Reset bao gồm addressId
+      setPreliminary({ customerCode: "", routeId: "", addressId: "" });
       setSelectedCustomer(null);
+      setShouldLoadAddress(false); // ← ADD
       setForm({
         orderType: "DAU_GIA",
         destinationId: "",
@@ -309,8 +350,7 @@ const CreateAuctionForm = () => {
     } catch (error) {
       console.error("Error creating order:", error);
 
-      // Hiển thị lỗi chi tiết từ Backend
-      let errorMessage = "Tạo đơn hàng thất bại";
+      let errorMessage = "Tạo đơn đấu giá thất bại";
 
       if (error.response) {
         const backendError =
@@ -356,7 +396,6 @@ const CreateAuctionForm = () => {
 
   const isFormEnabled = preliminary.customerCode && preliminary.routeId;
 
-  // Get selected route and destination for confirmation
   const selectedRoute = masterData.routes.find(
     (route) => route.routeId === Number(preliminary.routeId)
   );
@@ -371,9 +410,7 @@ const CreateAuctionForm = () => {
         <div className="bg-white rounded-xl shadow-md p-4 mb-6">
           <div className="flex items-center gap-2">
             <FileText className="w-6 h-6 text-blue-600" />
-            <h1 className="text-xl font-bold text-gray-800">
-              Tạo đơn đấu giá{" "}
-            </h1>
+            <h1 className="text-xl font-bold text-gray-800">Tạo đơn đấu giá</h1>
           </div>
 
           {ui.error && (
@@ -417,8 +454,7 @@ const CreateAuctionForm = () => {
                   )}
                 </div>
 
-                {/* Divider */}
-                <div className="border-t border-gray-200"></div>
+                <div className="border-t border-gray-200" />
 
                 {/* Route Section */}
                 <div>
@@ -433,7 +469,7 @@ const CreateAuctionForm = () => {
                       onChange={handlePreliminaryChange}
                       className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-all"
                       required
-                      disabled={ui.error}
+                      disabled={!!ui.error}
                     >
                       <option value="">
                         {ui.error
@@ -443,7 +479,7 @@ const CreateAuctionForm = () => {
                       {masterData.routes.map((route) => (
                         <option key={route.routeId} value={route.routeId}>
                           {route.name} ({route.shipTime} ngày,{" "}
-                          {route.unitBuyingPrice.toLocaleString()} đ)
+                          {(route.unitBuyingPrice ?? 0).toLocaleString()} đ)
                         </option>
                       ))}
                     </select>
@@ -453,8 +489,7 @@ const CreateAuctionForm = () => {
                   </div>
                 </div>
 
-                {/* Divider */}
-                <div className="border-t border-gray-200"></div>
+                <div className="border-t border-gray-200" />
 
                 {/* Order Details Section */}
                 <div className="space-y-4">
@@ -510,6 +545,7 @@ const CreateAuctionForm = () => {
                         placeholder="Viet Nam Dong (VND)"
                         disabled={!isFormEnabled}
                         min="1"
+                        step="1"
                       />
                     </div>
                   </div>
@@ -528,9 +564,25 @@ const CreateAuctionForm = () => {
                     </span>
                   </div>
                 </div>
+
+                <div className="border-t border-gray-200" />
+
+                {/* ✅ ADD: CustomerAddress component */}
+                {shouldLoadAddress && preliminary.customerCode && (
+                  <CustomerAddress
+                    customerCode={preliminary.customerCode}
+                    onAddressSelect={(addr) => {
+                      setPreliminary((prev) => ({
+                        ...prev,
+                        addressId: Number(addr.addressId),
+                      }));
+                    }}
+                  />
+                )}
               </div>
             </div>
           </div>
+
           {/* Right Panel - Products */}
           <div className="col-span-12 lg:col-span-8">
             <AuctionManager
@@ -557,7 +609,7 @@ const CreateAuctionForm = () => {
               {isFormEnabled && (
                 <div className="flex items-center gap-2 text-green-600">
                   <CheckCircle className="w-5 h-5" />
-                  <span className="font-medium">Sẵn sàng tạo đơn ký gửi</span>
+                  <span className="font-medium">Sẵn sàng tạo đơn đấu giá</span>
                 </div>
               )}
             </div>
@@ -581,7 +633,7 @@ const CreateAuctionForm = () => {
           </div>
         </div>
 
-        {/* SỬ DỤNG COMPONENT CONFIRMDIALOG CHUNG */}
+        {/* ConfirmDialog */}
         <ConfirmDialog
           isOpen={showConfirmDialog}
           onClose={handleCloseDialog}

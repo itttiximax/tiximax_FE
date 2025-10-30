@@ -2,7 +2,7 @@ import api from "../../config/api.js";
 
 const orderDepositService = {
   // Create deposit order
-  createDepositOrder: async (customerCode, routeId, orderData) => {
+  createDepositOrder: async (customerCode, routeId, addressId, orderData) => {
     try {
       // Input validation
       if (!customerCode) {
@@ -34,7 +34,7 @@ const orderDepositService = {
 
       // ✅ FIXED: Không truyền token, để api interceptor xử lý
       const response = await api.post(
-        `/orders/deposit/${customerCode}/${routeId}`,
+        `/orders/deposit/${customerCode}/${routeId}/${addressId}`,
         orderData
       );
       return response.data;

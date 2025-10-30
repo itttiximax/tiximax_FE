@@ -27,15 +27,19 @@ const CustomerAddress = ({
       .replace(/^["']|["']$/g, "")
       .trim() || `#${addr?.addressId}`;
 
-  // ✨ Fetch addresses function
-  const fetchAddresses = async (code) => {
+  // ✅ UPDATE: Thêm tham số silent để tắt loading khi WebSocket refresh
+  const fetchAddresses = async (code, silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) {
+        setLoading(true); // ← Chỉ show loading nếu KHÔNG phải silent refresh
+      }
+
       const data = await addressService.getCustomerAddresses(code);
       const list = Array.isArray(data) ? data : data?.items ?? [];
       setAddresses(list);
 
-      if (list.length > 0 && autoSelectFirst) {
+      // ✅ Chỉ auto-select nếu KHÔNG phải silent refresh
+      if (list.length > 0 && autoSelectFirst && !silent) {
         const firstId = Number(list[0].addressId);
         setSelectedAddressId(firstId);
         onAddressSelect?.({ ...list[0], addressId: firstId });
@@ -48,11 +52,13 @@ const CustomerAddress = ({
         "Không lấy được địa chỉ";
       setError(msg);
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false); // ← Chỉ tắt loading nếu KHÔNG phải silent refresh
+      }
     }
   };
 
-  // ✨ Handle WebSocket messages
+  // ✅ UPDATE: WebSocket refresh với silent = true
   useEffect(() => {
     if (messages.length === 0) return;
 
@@ -67,9 +73,9 @@ const CustomerAddress = ({
 
     if (latestMessage.event === "INSERT") {
       if (latestMessage.customerCode === customerCode) {
-        console.log("✅ Match! Refreshing addresses...");
+        console.log("✅ Match! Silently refreshing addresses...");
         if (customerCode && customerCode.trim()) {
-          fetchAddresses(customerCode.trim());
+          fetchAddresses(customerCode.trim(), true); // ← silent = true
         }
       } else {
         console.log("ℹ️ Different customer, skipping...");
@@ -77,7 +83,7 @@ const CustomerAddress = ({
     }
   }, [messages, customerCode]);
 
-  // Load addresses when customer changes
+  // ✅ Load addresses when customer changes (có loading)
   useEffect(() => {
     const code = (customerCode ?? "").trim();
     setError(null);
@@ -87,7 +93,7 @@ const CustomerAddress = ({
 
     if (!code) return;
 
-    fetchAddresses(code);
+    fetchAddresses(code, false); // ← silent = false (show loading)
   }, [customerCode]);
 
   const handleDialogSubmit = async (addressText) => {
@@ -105,6 +111,7 @@ const CustomerAddress = ({
         addressText.trim()
       );
 
+      // ✅ Refresh sau khi tạo địa chỉ mới (silent refresh)
       const updatedData = await addressService.getCustomerAddresses(
         customerCode.trim()
       );

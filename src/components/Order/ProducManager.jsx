@@ -544,11 +544,11 @@ const ProductManager = ({
                     </div>
                     <div className="col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Group Tag
+                        Shop
                       </label>
                       <input
                         type="text"
-                        name="groupTag"
+                        name="Tên shop"
                         value={product.groupTag}
                         onChange={(e) => handleProductChange(index, e)}
                         className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"

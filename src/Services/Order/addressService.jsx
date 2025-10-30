@@ -14,14 +14,17 @@ const addressService = {
   },
   createCustomerAddress: async (customerCode, address) => {
     try {
-      if (!customerCode) throw new Error("Customer code is required");
-      if (!address || typeof address !== "string")
-        throw new Error("Address must be a valid string");
+      if (!customerCode || !customerCode.trim()) {
+        throw new Error("Customer code is required");
+      }
+      if (!address || typeof address !== "string" || !address.trim()) {
+        throw new Error("Address must be a valid non-empty string");
+      }
 
-      // Gửi chuỗi trực tiếp, không phải object
+      // ✅ ĐÚNG: Gửi object có field addressName
       const response = await api.post(
-        `/addresses/${customerCode}`, // Đổi path
-        `"${address}"`, // Gửi string có dấu ngoặc kép
+        `/addresses/${customerCode}`,
+        { addressName: address.trim() }, // ← Object, không phải string
         {
           headers: {
             "Content-Type": "application/json",
@@ -33,7 +36,7 @@ const addressService = {
     } catch (error) {
       console.error(
         "Error creating customer address:",
-        error.response || error
+        error.response?.data || error.message || error
       );
       throw error;
     }

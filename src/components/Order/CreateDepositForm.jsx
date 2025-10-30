@@ -15,11 +15,13 @@ import toast from "react-hot-toast";
 import AccountSearch from "./AccountSearch";
 import DepositManager from "./DepositManager";
 import ConfirmDialog from "../../common/ConfirmDialog";
+import CustomerAddress from "./CustomerAddress";
 
 const CreateDepositForm = () => {
   const [preliminary, setPreliminary] = useState({
     customerCode: "",
     routeId: "",
+    addressId: "",
   });
 
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -56,6 +58,9 @@ const CreateDepositForm = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // ✅ Kiểm soát render CustomerAddress
+  const [shouldLoadAddress, setShouldLoadAddress] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -69,12 +74,10 @@ const CreateDepositForm = () => {
             getAllProductTypes(),
           ]);
 
-        console.log("Fetched destinations:", destinationsData);
-
         setMasterData({
-          routes: routesData,
-          destinations: destinationsData,
-          productTypes: productTypesData,
+          routes: routesData || [],
+          destinations: destinationsData || [],
+          productTypes: productTypesData || [],
         });
 
         if (!destinationsData || destinationsData.length === 0) {
@@ -104,30 +107,52 @@ const CreateDepositForm = () => {
     setPreliminary((prev) => ({
       ...prev,
       customerCode: customer.customerCode,
+      addressId: "",
     }));
+
+    // Reset trạng thái load address
+    setShouldLoadAddress(false);
+
+    // Toast trước
     toast.success(
       `Đã chọn khách hàng: ${customer.name} (${customer.customerCode})`
     );
+
+    // Delay 400ms trước khi cho phép load address
+    setTimeout(() => {
+      setShouldLoadAddress(true);
+    }, 400);
   }, []);
 
   const handleCustomerCodeChange = useCallback(
     (e) => {
       const value = e.target.value;
-      setPreliminary((prev) => ({ ...prev, customerCode: value }));
+      setPreliminary((prev) => ({
+        ...prev,
+        customerCode: value,
+        addressId: "",
+      }));
 
       if (
         !value ||
         (selectedCustomer && value !== selectedCustomer.customerCode)
       ) {
         setSelectedCustomer(null);
+        setShouldLoadAddress(false);
       }
     },
     [selectedCustomer]
   );
 
   const handleClearCustomer = useCallback(() => {
-    setPreliminary((prev) => ({ ...prev, customerCode: "" }));
+    setPreliminary((prev) => ({
+      ...prev,
+      customerCode: "",
+      routeId: "",
+      addressId: "",
+    }));
     setSelectedCustomer(null);
+    setShouldLoadAddress(false);
     toast("Đã xóa thông tin khách hàng", { icon: "🗑️" });
   }, []);
 
@@ -136,17 +161,25 @@ const CreateDepositForm = () => {
       const { name, value } = e.target;
 
       if (name === "routeId") {
+        const routeIdNum = Number(value || 0);
         const selectedRoute = masterData.routes.find(
-          (route) => route.routeId === Number(value)
+          (route) => route.routeId === routeIdNum
         );
-        setPreliminary((prev) => ({ ...prev, [name]: value }));
+        setPreliminary((prev) => ({ ...prev, [name]: routeIdNum }));
 
         if (selectedRoute?.exchangeRate) {
           setForm((prev) => ({
             ...prev,
-            exchangeRate: selectedRoute.exchangeRate,
+            exchangeRate: Number(selectedRoute.exchangeRate) || "",
           }));
+          toast.success(
+            `Tỷ giá hôm nay: ${Number(
+              selectedRoute.exchangeRate || 0
+            ).toLocaleString()} VND`
+          );
         }
+      } else if (name === "addressId") {
+        setPreliminary((prev) => ({ ...prev, addressId: Number(value) || "" }));
       } else {
         setPreliminary((prev) => ({ ...prev, [name]: value }));
       }
@@ -161,8 +194,10 @@ const CreateDepositForm = () => {
       [name]:
         type === "checkbox"
           ? checked
-          : name === "destinationId" || name === "exchangeRate"
-          ? Number(value) || ""
+          : name === "destinationId"
+          ? Number(value)
+          : name === "exchangeRate"
+          ? Number(value)
           : value,
     }));
   }, []);
@@ -195,12 +230,19 @@ const CreateDepositForm = () => {
       return;
     }
 
+    if (!preliminary.addressId) {
+      toast.error("Vui lòng chọn địa chỉ giao/nhận cho đơn ký gửi");
+      setShowConfirmDialog(false);
+      return;
+    }
+
     if (!form.exchangeRate || Number(form.exchangeRate) <= 0) {
       toast.error("Tỷ giá phải là một số dương");
       setShowConfirmDialog(false);
       return;
     }
 
+    // Validate products
     for (let i = 0; i < products.length; i++) {
       const product = products[i];
       const productType = masterData.productTypes.find(
@@ -244,20 +286,6 @@ const CreateDepositForm = () => {
         setShowConfirmDialog(false);
         return;
       }
-    }
-
-    const depositAmount = products.reduce(
-      (sum, product) =>
-        sum +
-        (Number(product.extraCharge) || 0) +
-        (Number(product.differentFee) || 0),
-      0
-    );
-
-    if (!depositAmount || depositAmount <= 0) {
-      toast.error("Số tiền ký gửi (depositAmount) phải là một số dương");
-      setShowConfirmDialog(false);
-      return;
     }
 
     setIsSubmitting(true);
@@ -310,35 +338,30 @@ const CreateDepositForm = () => {
         consignmentLinkRequests,
       };
 
-      console.log("Submitting deposit order data:", {
-        customerCode: preliminary.customerCode,
-        routeId: Number(preliminary.routeId),
-        depositAmount,
-        orderData,
-        // token,
-      });
-
+      // ✅ FIX: Thêm addressId làm tham số thứ 3
       await orderDepositService.createDepositOrder(
         preliminary.customerCode,
         Number(preliminary.routeId),
+        Number(preliminary.addressId), // ← Thêm addressId
         orderData
-        // token
       );
 
       toast.success("Tạo đơn ký gửi thành công!");
 
-      setPreliminary({ customerCode: "", routeId: "" });
+      // Reset form
+      setPreliminary({ customerCode: "", routeId: "", addressId: "" });
       setSelectedCustomer(null);
+      setShouldLoadAddress(false);
       setForm({
         orderType: "KY_GUI",
         destinationId: "",
+        exchangeRate: "",
         checkRequired: false,
       });
       setProducts([
         {
           quantity: "1",
           productName: "",
-          shipmentCode: "",
           differentFee: "",
           extraCharge: "",
           purchaseImage: "",
@@ -401,7 +424,7 @@ const CreateDepositForm = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br  p-6">
+    <div className="min-h-screen p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-xl shadow-md p-4 mb-6">
@@ -418,9 +441,8 @@ const CreateDepositForm = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-12 gap-6 items-start">
+        <div className="grid grid-cols-12 gap-6">
           {/* Left Column - Form Info */}
-
           <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
             {/* Customer & Route & Order Details - Combined into ONE Card */}
             <div className="bg-white rounded-xl shadow-md p-6">
@@ -452,8 +474,7 @@ const CreateDepositForm = () => {
                   )}
                 </div>
 
-                {/* Divider */}
-                <div className="border-t border-gray-200"></div>
+                <div className="border-t border-gray-200" />
 
                 {/* Route Section */}
                 <div>
@@ -468,7 +489,7 @@ const CreateDepositForm = () => {
                       onChange={handlePreliminaryChange}
                       className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-all"
                       required
-                      disabled={ui.error}
+                      disabled={!!ui.error}
                     >
                       <option value="">
                         {ui.error
@@ -478,7 +499,7 @@ const CreateDepositForm = () => {
                       {masterData.routes.map((route) => (
                         <option key={route.routeId} value={route.routeId}>
                           {route.name} ({route.shipTime} ngày,{" "}
-                          {route.unitBuyingPrice.toLocaleString()} đ)
+                          {(route.unitBuyingPrice ?? 0).toLocaleString()} đ)
                         </option>
                       ))}
                     </select>
@@ -488,8 +509,7 @@ const CreateDepositForm = () => {
                   </div>
                 </div>
 
-                {/* Divider */}
-                <div className="border-t border-gray-200"></div>
+                <div className="border-t border-gray-200" />
 
                 {/* Order Details Section */}
                 <div className="space-y-4">
@@ -501,6 +521,7 @@ const CreateDepositForm = () => {
                       Ký Gửi
                     </div>
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Điểm đến <span className="text-red-500">*</span>
@@ -528,6 +549,7 @@ const CreateDepositForm = () => {
                       </div>
                     </div>
                   </div>
+
                   <div className="flex items-center p-3 bg-gray-50 rounded-lg">
                     <input
                       type="checkbox"
@@ -542,6 +564,21 @@ const CreateDepositForm = () => {
                     </span>
                   </div>
                 </div>
+
+                <div className="border-t border-gray-200" />
+
+                {/* ✅ CustomerAddress - Giống CreateOrderForm */}
+                {shouldLoadAddress && preliminary.customerCode && (
+                  <CustomerAddress
+                    customerCode={preliminary.customerCode}
+                    onAddressSelect={(addr) => {
+                      setPreliminary((prev) => ({
+                        ...prev,
+                        addressId: Number(addr.addressId),
+                      }));
+                    }}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -557,17 +594,17 @@ const CreateDepositForm = () => {
           </div>
         </div>
 
-        {/* Submit Section */}
-        <div className="mt-6 bg-white rounded-xl shadow-md p-6">
+        {/* Submit Button */}
+        <div className="mt-6 bg-white rounded-lg shadow-sm p-6">
           <div className="flex justify-between items-center">
-            <div className="text-sm">
+            <div className="text-sm text-gray-600">
               {!isFormEnabled && (
-                <div className="flex items-center gap-2 text-amber-600">
+                <span className="text-amber-600 flex items-center space-x-2">
                   <AlertCircle className="w-5 h-5" />
                   <span className="font-medium">
                     Vui lòng chọn khách hàng và tuyến đường để tiếp tục
                   </span>
-                </div>
+                </span>
               )}
               {isFormEnabled && (
                 <div className="flex items-center gap-2 text-green-600">
@@ -579,10 +616,11 @@ const CreateDepositForm = () => {
             <button
               onClick={handleSubmitClick}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium flex items-center space-x-2"
+              disabled={!isFormEnabled || isSubmitting}
             >
               {isSubmitting ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   <span>Đang xử lý...</span>
                 </>
               ) : (
@@ -595,6 +633,7 @@ const CreateDepositForm = () => {
           </div>
         </div>
 
+        {/* ConfirmDialog */}
         <ConfirmDialog
           isOpen={showConfirmDialog}
           onClose={handleCloseDialog}
@@ -640,21 +679,6 @@ const CreateDepositForm = () => {
                     {products.length}
                   </span>
                 </div>
-                {/* <div className="flex justify-between pt-2 border-t border-gray-300">
-                  <span className="text-gray-600">Số tiền ký gửi:</span>
-                  <span className="font-bold text-blue-600">
-                    {products
-                      .reduce(
-                        (sum, product) =>
-                          sum +
-                          (Number(product.extraCharge) || 0) +
-                          (Number(product.differentFee) || 0),
-                        0
-                      )
-                      .toLocaleString() || "N/A"}{" "}
-                    VND
-                  </span>
-                </div> */}
               </div>
             </div>
           }
