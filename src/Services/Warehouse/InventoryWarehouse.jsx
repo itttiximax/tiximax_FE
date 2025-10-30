@@ -89,7 +89,6 @@ const InventoryWarehouse = () => {
       const successMsg = `Mã warehouse "${code}" hợp lệ. Nhập thông số bên dưới.`;
       setSuccess(successMsg);
       toast.success(successMsg, {
-        icon: "✅",
         duration: 3000,
       });
     } catch (err) {
@@ -103,12 +102,11 @@ const InventoryWarehouse = () => {
 
       setError(errorMsg);
       toast.error(errorMsg, {
-        icon: "❌",
         duration: 4000,
         style: {
-          background: "#FEE2E2",
-          color: "#991B1B",
-          border: "1px solid #FCA5A5",
+          background: "#ffffffff",
+          color: "#d62929ff",
+          border: "1px solid #ffffffff",
         },
       });
       setWarehouseCode("");
@@ -167,7 +165,7 @@ const InventoryWarehouse = () => {
         style: {
           background: "#ffffffff",
           color: "#0da33fff",
-          border: "1px solid #ecececff",
+          border: "1px solid #ffffffff",
           fontWeight: "500",
         },
       });
@@ -254,7 +252,7 @@ const InventoryWarehouse = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-800">
-                Cập Nhật Warehouse Package
+                Cập nhật kiểm tra đóng gói
               </h1>
             </div>
           </div>
@@ -299,7 +297,7 @@ const InventoryWarehouse = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                   <ScanBarcode className="w-4 h-4 text-blue-500" />
-                  Mã Warehouse <span className="text-red-500">*</span>
+                  Mã vận đơn <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input

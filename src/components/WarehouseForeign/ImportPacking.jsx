@@ -100,9 +100,9 @@ const ImportPacking = () => {
         toast.error(errorMessage, {
           duration: 4000,
           style: {
-            background: "#ebebebff",
+            background: "#ffffffff",
             color: "#e43333ff",
-            border: "1px solid #f1f1f1ff",
+            border: "1px solid #ffffffff",
             fontWeight: "500",
           },
         });
@@ -119,9 +119,9 @@ const ImportPacking = () => {
         duration: 3000,
         icon: "✅",
         style: {
-          background: "#D1FAE5",
+          background: "#fafafaff",
           color: "#065F46",
-          border: "1px solid #6EE7B7",
+          border: "1px solid #ffffffff",
           fontWeight: "500",
         },
       });
@@ -167,7 +167,7 @@ const ImportPacking = () => {
               </div>
               <div>
                 <h1 className="text-base font-semibold text-gray-900">
-                  Import Packing
+                  Quét mã vận đơn nhập kho
                 </h1>
               </div>
             </div>
@@ -224,7 +224,7 @@ const ImportPacking = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-4 py-2.5 border-b border-gray-200 flex justify-between items-center bg-gray-50">
             <h2 className="text-sm font-semibold text-gray-900">
-              Danh sách Shipment
+              Danh sách mã vận đơn
             </h2>
             {scannedItems.length > 0 && (
               <button

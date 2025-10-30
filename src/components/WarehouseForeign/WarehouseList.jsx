@@ -7,8 +7,6 @@ import {
   ChevronRight,
   Calendar,
   RefreshCw,
-  Weight,
-  Ruler,
 } from "lucide-react";
 import warehouseService from "../../Services/Warehouse/warehouseService";
 
@@ -16,7 +14,7 @@ const WarehouseList = () => {
   const [warehouses, setWarehouses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(20); // ✅ Tăng default lên 20
+  const [pageSize, setPageSize] = useState(20);
   const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -192,7 +190,6 @@ const WarehouseList = () => {
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       <div className="flex items-center gap-1">
-                        <Package className="w-3 h-3" />
                         Tracking Code
                       </div>
                     </th>
@@ -200,28 +197,16 @@ const WarehouseList = () => {
                       Mã Đơn
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <div className="flex items-center gap-1">
-                        <Weight className="w-3 h-3" />
-                        Cân Nặng
-                      </div>
+                      <div className="flex items-center gap-1">Cân Nặng</div>
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <div className="flex items-center gap-1">
-                        <Weight className="w-3 h-3" />
-                        TL Thực
-                      </div>
+                      <div className="flex items-center gap-1">TL Thực</div>
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <div className="flex items-center gap-1">
-                        <Ruler className="w-3 h-3" />
-                        Dim (m³)
-                      </div>
+                      <div className="flex items-center gap-1">Dim (m³)</div>
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        Ngày Tạo
-                      </div>
+                      <div className="flex items-center gap-1">Ngày Tạo</div>
                     </th>
                   </tr>
                 </thead>

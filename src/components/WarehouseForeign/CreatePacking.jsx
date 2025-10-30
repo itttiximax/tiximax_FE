@@ -147,7 +147,6 @@ const CreatePacking = () => {
             <Package className="w-8 h-8 text-blue-600" />
             <h1 className="text-3xl font-bold text-gray-800">Đóng gói</h1>
           </div>
-          <p className="text-gray-600">Tạo kiện hàng mới cho vận chuyển</p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">

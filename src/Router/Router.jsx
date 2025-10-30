@@ -325,7 +325,7 @@ const Router = createBrowserRouter([
       { index: true, element: <StaffWarehouseDomesticPage /> },
       { path: "profile", element: <StaffProfile /> },
       { path: "dashboard", element: <DashboardWarehouse /> },
-      { path: "inventory", element: <NotFound /> },
+      { path: "inventory", element: <WarehouseList /> },
       { path: "imports", element: <PackingFlyingList /> },
       { path: "exports", element: <ExportList /> },
       { path: "eligible-packings", element: <PackingEligibleList /> },
