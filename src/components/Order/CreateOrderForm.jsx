@@ -46,6 +46,7 @@ const CreateOrderForm = () => {
       extraCharge: "",
       purchaseImage: "",
       website: "",
+      classify: "",
       productTypeId: "",
       groupTag: "",
       note: "",
@@ -147,7 +148,7 @@ const CreateOrderForm = () => {
   const handleClearCustomer = useCallback(() => {
     setPreliminary((prev) => ({ ...prev, customerCode: "", addressId: "" }));
     setSelectedCustomer(null);
-    toast("Đã xóa thông tin khách hàng", { icon: "🗑️" });
+    toast("Đã xóa thông tin khách hàng");
   }, []);
 
   const handlePreliminaryChange = useCallback(
@@ -326,6 +327,7 @@ const CreateOrderForm = () => {
           extraCharge: "",
           purchaseImage: "",
           website: "",
+          classify: "",
           productTypeId: "",
           groupTag: "",
           note: "",

@@ -268,6 +268,7 @@ const ProductManager = ({
         purchaseImage: "",
         website: "",
         productTypeId: "",
+        classify: "",
         groupTag: "",
         note: "",
       },
@@ -560,7 +561,7 @@ const ProductManager = ({
 
                   {/* Loại sản phẩm và Phụ phí */}
                   <div className="grid grid-cols-12 gap-4">
-                    <div className="col-span-6">
+                    <div className="col-span-4">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Loại sản phẩm <span className="text-red-500">*</span>
                       </label>
@@ -583,7 +584,7 @@ const ProductManager = ({
                         ))}
                       </select>
                     </div>
-                    <div className="col-span-6">
+                    <div className="col-span-4">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Phụ phí
                       </label>
@@ -605,6 +606,21 @@ const ProductManager = ({
                           Miễn phí
                         </div>
                       )}
+                    </div>
+                    <div className="col-span-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Phân loại
+                      </label>
+                      <input
+                        type="text"
+                        name="classify"
+                        value={product.classify || ""}
+                        onChange={(e) => handleProductChange(index, e)}
+                        onBlur={() => handleCurrencyBlur(index, "classify")}
+                        className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        disabled={!isFormEnabled}
+                        placeholder="Phân loại..."
+                      />
                     </div>
                   </div>
 

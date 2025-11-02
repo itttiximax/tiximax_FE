@@ -46,6 +46,7 @@ const CreateAuctionForm = () => {
       extraCharge: "",
       purchaseImage: "",
       website: "",
+      classify: "",
       productTypeId: "",
       groupTag: "",
       note: "",
@@ -101,7 +102,6 @@ const CreateAuctionForm = () => {
     fetchData();
   }, []);
 
-  // ✅ UPDATE: Thêm logic reset addressId và delay
   const handleSelectCustomer = useCallback((customer) => {
     setSelectedCustomer(customer);
     setPreliminary((prev) => ({
@@ -110,7 +110,6 @@ const CreateAuctionForm = () => {
       addressId: "", // ← ADD: Reset addressId
     }));
 
-    // Reset trạng thái load address
     setShouldLoadAddress(false);
 
     // Toast trước
@@ -124,7 +123,6 @@ const CreateAuctionForm = () => {
     }, 400);
   }, []);
 
-  // ✅ UPDATE: Reset addressId khi thay đổi customerCode
   const handleCustomerCodeChange = useCallback(
     (e) => {
       const value = e.target.value;
@@ -233,7 +231,6 @@ const CreateAuctionForm = () => {
       return;
     }
 
-    // ✅ ADD: Validate addressId
     if (!preliminary.addressId) {
       toast.error("Vui lòng chọn địa chỉ giao hàng");
       setShowConfirmDialog(false);
@@ -311,7 +308,6 @@ const CreateAuctionForm = () => {
         })),
       };
 
-      // ✅ FIX: Thêm addressId làm tham số thứ 3
       await orderService.createOrder(
         preliminary.customerCode,
         Number(preliminary.routeId),
@@ -321,7 +317,6 @@ const CreateAuctionForm = () => {
 
       toast.success("Tạo đơn đấu giá thành công!");
 
-      // ✅ UPDATE: Reset bao gồm addressId
       setPreliminary({ customerCode: "", routeId: "", addressId: "" });
       setSelectedCustomer(null);
       setShouldLoadAddress(false); // ← ADD
@@ -343,6 +338,7 @@ const CreateAuctionForm = () => {
           purchaseImage: "",
           website: "",
           productTypeId: "",
+          classify: "",
           groupTag: "",
           note: "",
         },

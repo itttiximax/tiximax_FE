@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { X, Info, Truck } from "lucide-react";
 import createPaymentShipService from "../../Services/Payment/createPaymentShipService";
 import CustomerVoucherPayment from "./CustomerVoucherPayment";
+import BankShipList from "./BankShipList"; // ⬅️ NEW
 
 /** Helper: Bóc tách lỗi backend để hiện toast dễ hiểu */
 const getErrorMessage = (error) => {
@@ -51,15 +52,26 @@ const MergedPaymentShipConfigModal = ({
   const [customerVoucherId, setCustomerVoucherId] = useState(null);
   const [isUseBalance, setIsUseBalance] = useState(true);
 
-  // 🔹 NEW: theo dõi trạng thái tải voucher từ component con
+  // 🔹 Theo dõi trạng thái tải voucher từ component con
   const [voucherLoading, setVoucherLoading] = useState(false);
 
+  // 🔹 NEW: chọn ngân hàng để thanh toán (Revenue)
+  const [bankId, setBankId] = useState(null);
+  const [bankLoading, setBankLoading] = useState(false);
+
   const handleSubmit = () => {
-    onConfirm(customerVoucherId ?? null, isUseBalance);
+    // Bắt buộc phải chọn bank
+    if (!bankId) return;
+    onConfirm(customerVoucherId ?? null, isUseBalance, bankId);
   };
 
   if (!isOpen) return null;
-  const confirmDisabled = isCreating || (Boolean(accountId) && voucherLoading);
+
+  const confirmDisabled =
+    isCreating ||
+    (Boolean(accountId) && voucherLoading) ||
+    bankLoading ||
+    !bankId; // ⬅️ cần có bankId mới cho confirm
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
@@ -96,21 +108,35 @@ const MergedPaymentShipConfigModal = ({
             </div>
           </div>
 
-          {/* Voucher theo account (component tách riêng) */}
+          {/* Voucher theo account */}
           <CustomerVoucherPayment
             accountId={accountId}
             disabled={isCreating}
             value={customerVoucherId}
             onChange={setCustomerVoucherId}
             className="mb-4"
-            // 🔹 nhận trạng thái loading để khóa nút Confirm
             onLoadingChange={setVoucherLoading}
           />
 
-          {/* Nếu có accountId & đang tải voucher -> thông báo nhỏ */}
           {Boolean(accountId) && voucherLoading && (
             <div className="text-xs text-gray-500 -mt-2 mb-2">
               Đang tải voucher... vui lòng chờ.
+            </div>
+          )}
+
+          {/* NEW: Chọn tài khoản ngân hàng (Revenue) */}
+          <BankShipList
+            disabled={isCreating}
+            value={bankId}
+            onChange={setBankId}
+            className="mb-4"
+            label="Chọn tài khoản nhận cước (bắt buộc)"
+            onLoadingChange={setBankLoading}
+            onAccountsChange={() => {}}
+          />
+          {!bankId && (
+            <div className="text-xs text-amber-600 -mt-3 mb-3">
+              Vui lòng chọn tài khoản nhận cước để tiếp tục.
             </div>
           )}
 
@@ -157,7 +183,12 @@ const MergedPaymentShipConfigModal = ({
                   {customerVoucherId ? "Có" : "Không"}
                 </span>
               </div>
-
+              <div className="flex justify-between">
+                <span className="text-gray-600">Tài khoản nhận cước:</span>
+                <span className="font-medium">
+                  {bankId ? "Đã chọn" : "Chưa chọn"}
+                </span>
+              </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Sử dụng số dư:</span>
                 <span className="font-medium">
@@ -183,8 +214,12 @@ const MergedPaymentShipConfigModal = ({
             className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
             title={
               confirmDisabled
-                ? voucherLoading
-                  ? "Đang tải voucher, vui lòng chờ..."
+                ? bankLoading
+                  ? "Đang tải tài khoản ngân hàng…"
+                  : voucherLoading
+                  ? "Đang tải voucher…"
+                  : !bankId
+                  ? "Vui lòng chọn tài khoản nhận cước"
                   : "Không thể xác nhận lúc này"
                 : "Xác nhận tạo thanh toán"
             }
@@ -233,18 +268,20 @@ const CreateMergedPaymentShip = ({
 
   // Xác nhận từ modal: gọi API tạo thanh toán
   const handleConfirmMergedPayment = async (
-    customerVoucherId, // number|null
-    isUseBalance
+    customerVoucherId, // number|string|null
+    isUseBalance,
+    bankId // ⬅️ NEW
   ) => {
     setShowConfigModal(false);
 
     try {
       setIsCreating(true);
 
-      // Gọi API tạo thanh toán ship (gộp)
+      // Gọi API tạo thanh toán ship (gộp) — đã truyền bankId
       const result = await createPaymentShipService.createPaymentShipping(
         isUseBalance,
         customerVoucherId ?? null,
+        bankId,
         selectedOrders
       );
 
@@ -306,7 +343,7 @@ const CreateMergedPaymentShip = ({
         totalAmount={totalAmount || 0}
         formatCurrency={formatCurrency || ((v) => v)}
         isCreating={isCreating}
-        accountId={accountId} // truyền xuống modal để hiển thị <CustomerVoucherPayment />
+        accountId={accountId}
       />
     </>
   );

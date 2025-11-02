@@ -50,6 +50,19 @@ class DomesticService {
 
     return allOrders;
   }
+  // Transfer domestic orders to customer
+  async transferToCustomer() {
+    try {
+      const response = await api.post("/domestics/transfer-to-customer");
+      if (response.data && response.data.error) {
+        throw new Error(`API Error: ${response.data.error}`);
+      }
+      return response.data;
+    } catch (error) {
+      console.error("Error transferring domestic orders to customer:", error);
+      throw error;
+    }
+  }
 }
 
 // Create and export a singleton instance

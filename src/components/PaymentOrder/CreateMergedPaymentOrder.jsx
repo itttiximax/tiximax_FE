@@ -1,12 +1,13 @@
-// CreateMergedPaymentOrder.jsx
+// /src/Components/Payment/CreateMergedPaymentOrder.jsx
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import mergedPaymentService from "../../Services/Payment/mergedPaymentService";
 import { CreditCard as PaymentIcon, X, Info, Edit2, Check } from "lucide-react";
+import BankOrderList from "./BankOrderList";
 
-// Helper function to extract error message from backend
+/** Helper: bóc tách lỗi backend */
 const getErrorMessage = (error) => {
-  if (error.response) {
+  if (error?.response) {
     const backendError =
       error.response.data?.error ||
       error.response.data?.message ||
@@ -28,13 +29,13 @@ const getErrorMessage = (error) => {
     return `Lỗi ${error.response.status}: ${
       error.response.statusText || "Không xác định"
     }`;
-  } else if (error.request) {
+  } else if (error?.request) {
     return "Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng.";
   }
-  return error.message || "Đã xảy ra lỗi không xác định";
+  return error?.message || "Đã xảy ra lỗi không xác định";
 };
 
-// Merged Payment Config Modal Component
+/** Modal cấu hình thanh toán gộp */
 const MergedPaymentConfigModal = ({
   isOpen,
   onClose,
@@ -49,17 +50,18 @@ const MergedPaymentConfigModal = ({
   const [errors, setErrors] = useState({});
   const [isEditingDeposit, setIsEditingDeposit] = useState(false);
 
+  // Bank chọn để thanh toán
+  const [bankId, setBankId] = useState(null);
+  const [bankLoading, setBankLoading] = useState(false);
+
   const validateForm = () => {
     const newErrors = {};
+    const numValue = depositPercent === "" ? 0 : Number(depositPercent);
 
-    const numValue = depositPercent === "" ? 0 : depositPercent;
-
-    if (numValue < 0) {
-      newErrors.depositPercent = "Phần trăm cọc không thể âm";
-    }
-    if (numValue > 100) {
+    if (numValue < 0) newErrors.depositPercent = "Phần trăm cọc không thể âm";
+    if (numValue > 100)
       newErrors.depositPercent = "Phần trăm cọc không thể vượt quá 100%";
-    }
+    if (!bankId) newErrors.bankId = "Vui lòng chọn tài khoản nhận cước";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -67,48 +69,39 @@ const MergedPaymentConfigModal = ({
 
   const handleSubmit = () => {
     if (validateForm()) {
-      const finalDepositPercent = depositPercent === "" ? 0 : depositPercent;
-      onConfirm(finalDepositPercent, isUseBalance);
-      setIsEditingDeposit(false); // Reset edit mode after submit
+      const finalDepositPercent =
+        depositPercent === "" ? 0 : Number(depositPercent);
+      onConfirm(finalDepositPercent, isUseBalance, bankId);
+      setIsEditingDeposit(false);
     }
   };
 
   const handleDepositPercentChange = (e) => {
     const value = e.target.value;
-
-    // Nếu xóa hết thì để trống
     if (value === "") {
       setDepositPercent("");
     } else {
-      const numValue = parseInt(value);
-      if (!isNaN(numValue)) {
-        setDepositPercent(numValue);
-      }
+      const numValue = parseInt(value, 10);
+      if (!isNaN(numValue)) setDepositPercent(numValue);
     }
-
-    if (errors.depositPercent) {
-      setErrors({});
-    }
+    if (errors.depositPercent)
+      setErrors((p) => ({ ...p, depositPercent: undefined }));
   };
 
-  const calculateDepositAmount = () => {
-    const percent = depositPercent === "" ? 0 : depositPercent;
-    return (totalAmount * percent) / 100;
-  };
-
-  const handleToggleEditDeposit = () => {
-    setIsEditingDeposit(!isEditingDeposit);
-  };
+  const calculateDepositAmount = () =>
+    ((depositPercent === "" ? 0 : Number(depositPercent)) *
+      (totalAmount || 0)) /
+    100;
 
   const handleClose = () => {
-    setIsEditingDeposit(false); // Reset edit mode when closing
+    setIsEditingDeposit(false);
     onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200">
@@ -128,21 +121,22 @@ const MergedPaymentConfigModal = ({
 
         {/* Body */}
         <div className="px-6 py-4">
-          {/* Info Section */}
+          {/* Info */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
             <div className="flex items-start">
               <Info className="w-5 h-5 text-blue-600 mt-0.5 mr-2 flex-shrink-0" />
               <div className="text-sm text-blue-800">
                 <p className="font-semibold mb-1">
                   Bạn đã chọn {selectedCount} đơn hàng
-                  {selectedCount > 1 ? "" : ""}
                 </p>
-                <p>Tổng giá trị: {formatCurrency(totalAmount)}</p>
+                <p>
+                  Tổng giá trị: {formatCurrency?.(totalAmount) ?? totalAmount}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Deposit Percent Field */}
+          {/* Deposit percent */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center justify-between">
               <span>
@@ -150,13 +144,13 @@ const MergedPaymentConfigModal = ({
               </span>
               <button
                 type="button"
-                onClick={handleToggleEditDeposit}
+                onClick={() => setIsEditingDeposit((v) => !v)}
                 disabled={isCreating}
                 className={`flex items-center space-x-1 px-2 py-1 rounded-md text-xs transition-colors ${
                   isEditingDeposit
                     ? "bg-green-100 text-green-700 hover:bg-green-200"
                     : "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                } disabled:opacity-50`}
                 title={isEditingDeposit ? "Xác nhận" : "Chỉnh sửa"}
               >
                 {isEditingDeposit ? (
@@ -198,32 +192,51 @@ const MergedPaymentConfigModal = ({
                 {errors.depositPercent}
               </p>
             )}
-            {!isEditingDeposit && (
-              <p className="mt-1 text-xs text-gray-500">
-                Nhấn nút "Sửa" để thay đổi phần trăm tiền cọc
-              </p>
-            )}
 
-            {/* Deposit Amount Preview */}
             {(depositPercent === "" || depositPercent > 0) && (
               <div className="mt-2 p-3 bg-gray-50 rounded-lg">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Số tiền cọc:</span>
                   <span className="font-semibold text-gray-900">
-                    {formatCurrency(calculateDepositAmount())}
+                    {formatCurrency?.(calculateDepositAmount()) ??
+                      calculateDepositAmount()}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm mt-1">
                   <span className="text-gray-600">Còn lại:</span>
                   <span className="font-semibold text-gray-900">
-                    {formatCurrency(totalAmount - calculateDepositAmount())}
+                    {formatCurrency?.(totalAmount - calculateDepositAmount()) ??
+                      totalAmount - calculateDepositAmount()}
                   </span>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Use Balance Field */}
+          {/* Bank select (Revenue) */}
+          <div className="mb-4">
+            <BankOrderList
+              disabled={isCreating}
+              value={bankId}
+              onChange={setBankId}
+              label="Chọn tài khoản nhận cước (bắt buộc)"
+              className="mb-2"
+              onLoadingChange={setBankLoading}
+            />
+            {(errors.bankId || bankLoading) && (
+              <div className="text-xs mt-1">
+                {bankLoading ? (
+                  <span className="text-gray-500">
+                    Đang tải tài khoản ngân hàng…
+                  </span>
+                ) : (
+                  <span className="text-amber-600">{errors.bankId}</span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Use balance */}
           <div className="mb-4">
             <label className="flex items-center space-x-3 cursor-pointer">
               <input
@@ -261,6 +274,12 @@ const MergedPaymentConfigModal = ({
                 </span>
               </div>
               <div className="flex justify-between">
+                <span className="text-gray-600">Tài khoản nhận cước:</span>
+                <span className="font-medium">
+                  {bankId ? "Đã chọn" : "Chưa chọn"}
+                </span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-gray-600">Sử dụng số dư:</span>
                 <span className="font-medium">
                   {isUseBalance ? "Có" : "Không"}
@@ -281,8 +300,17 @@ const MergedPaymentConfigModal = ({
           </button>
           <button
             onClick={handleSubmit}
-            disabled={isCreating}
+            disabled={isCreating || bankLoading || !bankId}
             className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
+            title={
+              isCreating
+                ? "Đang tạo…"
+                : bankLoading
+                ? "Đang tải tài khoản ngân hàng…"
+                : !bankId
+                ? "Vui lòng chọn tài khoản nhận cước"
+                : "Xác nhận tạo thanh toán"
+            }
           >
             {isCreating ? (
               <>
@@ -299,9 +327,9 @@ const MergedPaymentConfigModal = ({
   );
 };
 
-// Main CreateMergedPaymentOrder Component
+/** Nút tạo thanh toán gộp */
 const CreateMergedPaymentOrder = ({
-  selectedOrders,
+  selectedOrders, // string[] hoặc id thanh toán
   totalAmount,
   formatCurrency,
   onSuccess,
@@ -311,51 +339,45 @@ const CreateMergedPaymentOrder = ({
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
-  // Open config modal
   const handleOpenConfigModal = () => {
-    if (selectedOrders.length < 1) {
+    if (!selectedOrders || selectedOrders.length < 1) {
       toast.error("Vui lòng chọn ít nhất 1 đơn hàng để tạo thanh toán");
       return;
     }
     setShowConfigModal(true);
   };
 
-  // Create merged payment with config
-  const handleConfirmMergedPayment = async (depositPercent, isUseBalance) => {
+  const handleConfirmMergedPayment = async (
+    depositPercent,
+    isUseBalance,
+    bankId
+  ) => {
     try {
       setIsCreating(true);
 
-      // Call the mergedPaymentService with the correct parameters
       const result = await mergedPaymentService.mergePayments(
         depositPercent,
         isUseBalance,
-        selectedOrders // This is the array of payment IDs
+        bankId,
+        selectedOrders // body: danh sách paymentIds
       );
 
       toast.success(
         `Tạo thanh toán ${
           selectedOrders.length > 1 ? "gộp " : ""
-        }thành công! Mã thanh toán: ${result.paymentCode || result.id || "N/A"}`
+        }thành công! Mã thanh toán: ${
+          result?.paymentCode || result?.id || "N/A"
+        }`
       );
 
-      // Close modal
       setShowConfigModal(false);
-
-      // Call success callback
-      if (onSuccess) {
-        onSuccess(result);
-      }
+      onSuccess?.(result);
     } catch (error) {
-      console.error("Error creating merged payment:", error);
       const errorMessage = getErrorMessage(error);
       toast.error(`Không thể tạo thanh toán: ${errorMessage}`, {
         duration: 5000,
       });
-
-      // Call error callback
-      if (onError) {
-        onError(error);
-      }
+      onError?.(error);
     } finally {
       setIsCreating(false);
     }
@@ -363,10 +385,11 @@ const CreateMergedPaymentOrder = ({
 
   return (
     <>
-      {/* Create Merged Payment Button */}
       <button
         onClick={handleOpenConfigModal}
-        disabled={disabled || isCreating || selectedOrders.length < 1}
+        disabled={
+          disabled || isCreating || !selectedOrders || selectedOrders.length < 1
+        }
         className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center"
       >
         {isCreating ? (
@@ -377,21 +400,20 @@ const CreateMergedPaymentOrder = ({
         ) : (
           <>
             <PaymentIcon className="w-4 h-4 mr-2" />
-            {selectedOrders.length > 1
+            {selectedOrders?.length > 1
               ? "Tạo thanh toán gộp"
               : "Tạo thanh toán"}
           </>
         )}
       </button>
 
-      {/* Merged Payment Config Modal */}
       <MergedPaymentConfigModal
         isOpen={showConfigModal}
         onClose={() => !isCreating && setShowConfigModal(false)}
         onConfirm={handleConfirmMergedPayment}
-        selectedCount={selectedOrders.length}
-        totalAmount={totalAmount}
-        formatCurrency={formatCurrency}
+        selectedCount={selectedOrders?.length || 0}
+        totalAmount={totalAmount || 0}
+        formatCurrency={formatCurrency || ((v) => v)}
         isCreating={isCreating}
       />
     </>

@@ -95,8 +95,6 @@ const orderService = {
   },
 };
 
-// Export both object and backward compatibility function
 export default orderService;
 
-// BACKWARD COMPATIBILITY: giữ function cũ để không break existing code
 export const createOrderService = orderService.createOrder;
