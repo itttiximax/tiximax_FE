@@ -3,7 +3,6 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
-  Loader2,
   Eye,
   Search,
   Filter,
@@ -43,7 +42,6 @@ const OrderList = () => {
   const fetchAllOrders = useCallback(async () => {
     setError(null);
     setLoading(true);
-
     try {
       const response = await managerOrderService.getAllOrders();
       setAllOrders(Array.isArray(response) ? response : []);
@@ -64,7 +62,7 @@ const OrderList = () => {
   const filteredOrders = useMemo(() => {
     let filtered = [...allOrders];
 
-    // Search filter (orderCode, customer name, etc.)
+    // Search
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -113,7 +111,7 @@ const OrderList = () => {
     return filteredOrders.slice(startIndex, endIndex);
   }, [filteredOrders, currentPage, pageSize]);
 
-  const totalPages = Math.ceil(filteredOrders.length / pageSize);
+  const totalPages = Math.ceil(filteredOrders.length / pageSize) || 1;
 
   // Handlers
   const handlePageChange = useCallback(
@@ -130,14 +128,6 @@ const OrderList = () => {
     setPageSize(newSize);
     setCurrentPage(0);
   }, []);
-
-  // const handleResetFilters = useCallback(() => {
-  //   setSearchTerm("");
-  //   setSelectedStatus("ALL");
-  //   setSelectedOrderType("ALL");
-  //   setDateFilter({ from: "", to: "" });
-  //   setCurrentPage(0);
-  // }, []);
 
   const handleExport = useCallback(() => {
     if (filteredOrders.length === 0) {
@@ -247,13 +237,6 @@ const OrderList = () => {
       : type;
   }, []);
 
-  const LoadingSpinner = () => (
-    <div className="flex justify-center items-center py-8">
-      <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      <span className="ml-2 text-gray-600">Đang tải...</span>
-    </div>
-  );
-
   return (
     <div className="p-6">
       {/* Header */}
@@ -346,7 +329,7 @@ const OrderList = () => {
           <div className="text-sm text-gray-600">
             Hiển thị{" "}
             <span className="font-semibold text-blue-600">
-              {filteredOrders.length}
+              {loading ? "..." : filteredOrders.length}
             </span>{" "}
             trong tổng số{" "}
             <span className="font-semibold">{allOrders.length}</span> đơn hàng
@@ -393,115 +376,142 @@ const OrderList = () => {
         </div>
       )}
 
-      {/* Loading State */}
-      {loading && (
-        <div className="bg-white rounded-lg shadow-sm">
-          <LoadingSpinner />
-        </div>
-      )}
+      {/* Orders Table with loading skeleton */}
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Mã đơn hàng
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Loại đơn
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Trạng thái
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Khách hàng
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tỷ giá
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tổng tiền
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Ngày tạo
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Thao tác
+                </th>
+              </tr>
+            </thead>
 
-      {/* Orders Table */}
-      {!loading && (
-        <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Mã đơn hàng
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Loại đơn
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Trạng thái
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Khách hàng
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tỷ giá
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tổng tiền
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ngày tạo
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Thao tác
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedOrders.map((order) => {
-                  const orderStatus = availableStatuses.find(
-                    (s) => s.key === order.status
-                  );
-
-                  return (
-                    <tr
-                      key={order.orderId}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
+            <tbody className="bg-white divide-y divide-gray-200">
+              {loading
+                ? // Skeleton rows
+                  [...Array(8)].map((_, idx) => (
+                    <tr key={idx} className="animate-pulse">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {order.orderCode}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          ID: {order.orderId}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {getOrderTypeText(order.orderType)}
+                        <div className="h-3 w-28 bg-gray-200 rounded mb-2" />
+                        <div className="h-3 w-20 bg-gray-100 rounded" />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            orderStatus
-                              ? getStatusColor(orderStatus.color)
-                              : getStatusColor("gray")
-                          }`}
-                        >
-                          {orderStatus ? orderStatus.label : order.status}
-                        </span>
+                        <div className="h-3 w-20 bg-gray-200 rounded" />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {order.customer?.name || "-"}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {order.customer?.phone || "-"}
-                        </div>
+                        <div className="h-5 w-24 bg-gray-200 rounded-full" />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {order.exchangeRate
-                          ? `${order.exchangeRate.toLocaleString("vi-VN")} VNĐ`
-                          : "-"}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-3 w-32 bg-gray-200 rounded mb-2" />
+                        <div className="h-3 w-24 bg-gray-100 rounded" />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatPrice(order.finalPriceOrder)}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-3 w-16 bg-gray-200 rounded" />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDate(order.createdAt)}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-3 w-24 bg-gray-200 rounded" />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <button
-                          onClick={() => handleViewDetail(order.orderId, order)}
-                          className="group inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-lg shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-300"
-                        >
-                          <Eye className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                          <span>Xem</span>
-                        </button>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-3 w-28 bg-gray-200 rounded" />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-8 w-16 bg-gray-200 rounded-lg" />
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  ))
+                : paginatedOrders.map((order) => {
+                    const orderStatus = availableStatuses.find(
+                      (s) => s.key === order.status
+                    );
+                    return (
+                      <tr
+                        key={order.orderId}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {order.orderCode}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            ID: {order.orderId}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {getOrderTypeText(order.orderType)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              orderStatus
+                                ? getStatusColor(orderStatus.color)
+                                : getStatusColor("gray")
+                            }`}
+                          >
+                            {orderStatus ? orderStatus.label : order.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {order.customer?.name || "-"}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {order.customer?.phone || "-"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {order.exchangeRate
+                            ? `${order.exchangeRate.toLocaleString(
+                                "vi-VN"
+                              )} VNĐ`
+                            : "-"}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {formatPrice(order.finalPriceOrder)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {formatDate(order.createdAt)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <button
+                            onClick={() =>
+                              handleViewDetail(order.orderId, order)
+                            }
+                            className="group inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-lg shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-300"
+                          >
+                            <Eye className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                            <span>Xem</span>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
 
       {/* Empty State */}
       {!loading && filteredOrders.length === 0 && !error && (

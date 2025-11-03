@@ -25,6 +25,7 @@ import {
   PackageSearch,
   CreditCard,
   Wallet,
+  Rows2,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -105,6 +106,11 @@ const LeadSaleSideBar = () => {
               to: "/lead-sale/auction-payment",
               icon: Wallet,
               label: "Thanh toán sau đấu giá ",
+            },
+            {
+              to: "/lead-sale/divide-payment",
+              icon: Rows2,
+              label: "Thanh toán tách đơn ",
             },
           ],
           isOpen: isPaymentSupportDropdownOpen,

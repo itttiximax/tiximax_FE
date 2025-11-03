@@ -21,9 +21,7 @@ const ManagerDestination = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState({
-    destinationName: "",
-  });
+  const [formData, setFormData] = useState({ destinationName: "" });
   const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
@@ -46,20 +44,17 @@ const ManagerDestination = () => {
 
   const validateForm = () => {
     const errors = {};
-
     if (!formData.destinationName.trim()) {
       errors.destinationName = "Tên điểm đến là bắt buộc";
     } else if (formData.destinationName.trim().length < 2) {
       errors.destinationName = "Tên điểm đến phải có ít nhất 2 ký tự";
     }
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) {
       toast.error("Vui lòng kiểm tra thông tin nhập vào!");
       return;
@@ -86,14 +81,10 @@ const ManagerDestination = () => {
         setDestinations((prev) => [...prev, newItem]);
         toast.success("Tạo mới thành công!", { id: loadingToast });
       }
-
       closeDialog();
     } catch (error) {
       console.error("Error submitting form:", error);
-
-      // Lấy error message từ BE
       let errorMessage = "Có lỗi xảy ra!";
-
       if (error.response?.data) {
         errorMessage =
           error.response.data.error ||
@@ -103,15 +94,8 @@ const ManagerDestination = () => {
       } else if (error.message) {
         errorMessage = error.message;
       }
-
-      toast.error(errorMessage, {
-        id: loadingToast,
-        duration: 5000,
-      });
-
-      if (editingId) {
-        fetchDestinations();
-      }
+      toast.error(errorMessage, { id: loadingToast, duration: 5000 });
+      if (editingId) fetchDestinations();
     } finally {
       setSubmitLoading(false);
     }
@@ -146,9 +130,7 @@ const ManagerDestination = () => {
 
   const confirmDelete = async () => {
     if (!deleteId) return;
-
     setDeleteLoading(true);
-
     try {
       await managerDestinationService.deleteDestination(deleteId);
       setDestinations((prev) =>
@@ -157,9 +139,7 @@ const ManagerDestination = () => {
       toast.success("Xóa thành công!");
     } catch (error) {
       console.error("Error deleting destination:", error);
-
       let errorMessage = "Có lỗi xảy ra khi xóa!";
-
       if (error.response?.data) {
         errorMessage =
           error.response.data.error ||
@@ -167,7 +147,6 @@ const ManagerDestination = () => {
           error.response.data.detail ||
           "Có lỗi xảy ra khi xóa!";
       }
-
       toast.error(errorMessage, { duration: 5000 });
       fetchDestinations();
     } finally {
@@ -181,42 +160,49 @@ const ManagerDestination = () => {
     (e) => {
       const { name, value } = e.target;
       setFormData((prev) => ({ ...prev, [name]: value }));
-
-      if (formErrors[name]) {
-        setFormErrors((prev) => ({ ...prev, [name]: "" }));
-      }
+      if (formErrors[name]) setFormErrors((prev) => ({ ...prev, [name]: "" }));
     },
     [formErrors]
   );
 
+  // ===== Loading Skeleton Rows (6) =====
+  const SkeletonRows = () =>
+    [...Array(6)].map((_, i) => (
+      <tr key={i} className="animate-pulse">
+        <td className="px-3 py-2">
+          <div className="h-3 w-12 bg-gray-200 rounded" />
+        </td>
+        <td className="px-3 py-2">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-4 bg-gray-200 rounded" />
+            <div className="h-3 w-48 bg-gray-200 rounded" />
+          </div>
+        </td>
+        <td className="px-3 py-2">
+          <div className="h-8 w-20 bg-gray-200 rounded mx-auto" />
+        </td>
+      </tr>
+    ));
+
   const renderTableContent = () => {
     if (loading) {
-      return (
-        <tr>
-          <td colSpan="3" className="px-6 py-12">
-            <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-gray-600">Đang tải dữ liệu...</span>
-            </div>
-          </td>
-        </tr>
-      );
+      return <SkeletonRows />;
     }
 
     if (destinations.length === 0) {
       return (
         <tr>
-          <td colSpan="3" className="px-6 py-20 text-center text-gray-500">
-            <FiMapPin className="w-16 h-16 text-gray-400 mb-4 mx-auto" />
-            <p className="text-xl font-medium mb-2">Chưa có dữ liệu điểm đến</p>
-            <p className="text-sm text-gray-400 mb-6">
-              Nhấn "Thêm điểm đến mới" để bắt đầu
+          <td colSpan="3" className="px-4 py-10 text-center text-gray-500">
+            <FiMapPin className="w-12 h-12 text-gray-400 mb-3 mx-auto" />
+            <p className="text-base font-medium mb-1">
+              Chưa có dữ liệu điểm đến
             </p>
+            <p className="text-xs text-gray-400 mb-3">Nhấn "Thêm" để bắt đầu</p>
             <button
               onClick={openCreateDialog}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl mx-auto"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 inline-flex items-center gap-1 shadow-sm"
             >
-              <FiPlus className="w-5 h-5" />
+              <FiPlus className="w-4 h-4" />
               Thêm
             </button>
           </td>
@@ -229,27 +215,27 @@ const ManagerDestination = () => {
         key={item.destinationId}
         className="hover:bg-gray-50 transition-colors"
       >
-        <td className="px-6 py-4 text-sm font-medium text-gray-900">
+        <td className="px-3 py-2 text-sm font-medium text-gray-900 whitespace-nowrap">
           #{item.destinationId}
         </td>
-        <td className="px-6 py-4 font-medium text-gray-900">
+        <td className="px-3 py-2 font-medium text-gray-900">
           <div className="flex items-center gap-2">
             <FiMapPin className="w-4 h-4 text-gray-500" />
-            {item.destinationName}
+            <span className="text-sm">{item.destinationName}</span>
           </div>
         </td>
-        <td className="px-6 py-4">
-          <div className="flex items-center justify-center gap-2">
+        <td className="px-3 py-2">
+          <div className="flex items-center justify-center gap-1.5">
             <button
               onClick={() => handleEdit(item)}
-              className="bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-lg transition-all hover:scale-105"
+              className="bg-amber-500 hover:bg-amber-600 text-white p-1.5 rounded-md transition-all"
               title="Chỉnh sửa"
             >
               <FiEdit2 className="w-4 h-4" />
             </button>
             <button
               onClick={() => handleDelete(item.destinationId)}
-              className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-all hover:scale-105"
+              className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-md transition-all"
               title="Xóa"
             >
               <FiTrash2 className="w-4 h-4" />
@@ -261,67 +247,67 @@ const ManagerDestination = () => {
   };
 
   return (
-    <div className="p-6 bg-white-50 min-h-screen">
+    <div className="p-4 bg-white-50 min-h-screen">
       <Toaster position="top-right" />
 
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">
-          Quản lý Điểm Đến
-        </h1>
+      <div className="mb-4">
+        <h1 className="text-xl font-bold text-gray-800">Quản lý Điểm Đến</h1>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-4">
         <button
           onClick={openCreateDialog}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-1 shadow-sm"
           disabled={loading}
         >
-          <FiPlus className="w-5 h-5" />
+          <FiPlus className="w-4 h-4" />
           Thêm
         </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden relative">
+      <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden relative">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-100 border-b">
+            <thead className="bg-gray-50 border-b">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase">
                   ID
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase">
                   Tên điểm đến
                 </th>
-                <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
+                <th className="px-3 py-2 text-center text-xs font-semibold text-gray-700 uppercase">
                   Thao tác
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200 text-sm">
               {renderTableContent()}
             </tbody>
           </table>
         </div>
 
         {deleteLoading && (
-          <div className="absolute inset-x-0 bottom-0 bg-white bg-opacity-90 flex items-center justify-center py-8 rounded-b-xl">
-            <div className="flex items-center gap-3">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600"></div>
-              <span className="text-red-600 font-medium">Đang xóa...</span>
+          <div className="absolute inset-x-0 bottom-0 bg-white/85 flex items-center justify-center py-6 rounded-b-lg">
+            <div className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-600"></div>
+              <span className="text-red-600 text-sm font-medium">
+                Đang xóa...
+              </span>
             </div>
           </div>
         )}
       </div>
 
       {showDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-3 z-50">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900">
+                <h3 className="text-base font-semibold text-gray-900">
                   {editingId ? "Cập nhật điểm đến" : "Thêm điểm đến mới"}
                 </h3>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-xs text-gray-600 mt-1">
                   {editingId
                     ? "Chỉnh sửa thông tin điểm đến"
                     : "Nhập thông tin điểm đến mới"}
@@ -332,13 +318,13 @@ const ManagerDestination = () => {
                 className="text-gray-400 hover:text-gray-600 transition-colors"
                 disabled={submitLoading}
               >
-                <FiX className="w-6 h-6" />
+                <FiX className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6">
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+            <form onSubmit={handleSubmit} className="p-4">
+              <div className="mb-4">
+                <label className="block text-xs font-medium text-gray-700 mb-1">
                   Tên điểm đến <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -346,7 +332,7 @@ const ManagerDestination = () => {
                   name="destinationName"
                   value={formData.destinationName}
                   onChange={handleInputChange}
-                  className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  className={`w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
                     formErrors.destinationName
                       ? "border-red-500 bg-red-50"
                       : "border-gray-300"
@@ -356,26 +342,26 @@ const ManagerDestination = () => {
                   disabled={submitLoading}
                 />
                 {formErrors.destinationName && (
-                  <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
                     <FiAlertTriangle className="w-4 h-4" />
                     {formErrors.destinationName}
                   </p>
                 )}
               </div>
 
-              <div className="flex gap-3 pt-6 border-t">
+              <div className="flex gap-2 pt-4 border-t">
                 <button
                   type="button"
                   onClick={closeDialog}
                   disabled={submitLoading}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={submitLoading}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-1"
                 >
                   {submitLoading ? (
                     <>

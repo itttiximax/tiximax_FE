@@ -3,7 +3,6 @@ import {
   ChevronLeft,
   ChevronRight,
   UserCircle,
-  Loader2,
   Eye,
   Search,
   Filter,
@@ -48,7 +47,6 @@ const CustomerList = () => {
     async (page = 0, size = pageSize) => {
       setError(null);
       setLoading(true);
-
       try {
         const response = await userService.getCustomerAccounts(page, size);
         setCustomerList(response.content || []);
@@ -148,13 +146,6 @@ const CustomerList = () => {
     return colorMap[source] || "bg-gray-100 text-gray-800";
   }, []);
 
-  const LoadingSpinner = () => (
-    <div className="flex justify-center items-center py-8">
-      <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      <span className="ml-2 text-gray-600">Đang tải...</span>
-    </div>
-  );
-
   return (
     <div className="p-6">
       {/* Header */}
@@ -221,7 +212,7 @@ const CustomerList = () => {
           <div className="text-sm text-gray-600">
             Hiển thị{" "}
             <span className="font-semibold text-blue-600">
-              {filteredCustomers.length}
+              {loading ? "..." : filteredCustomers.length}
             </span>{" "}
             trong <span className="font-semibold">{totalElements}</span> khách
             hàng
@@ -268,157 +259,194 @@ const CustomerList = () => {
         </div>
       )}
 
-      {/* Loading State */}
-      {loading && (
-        <div className="bg-white rounded-lg shadow-sm">
-          <LoadingSpinner />
-        </div>
-      )}
+      {/* Customer Table with loading skeleton */}
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Khách hàng
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Mã KH
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Liên hệ
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Địa chỉ
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Nguồn
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  NV phụ trách
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Trạng thái
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Ngày tạo
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Thao tác
+                </th>
+              </tr>
+            </thead>
 
-      {/* Customer Table */}
-      {!loading && (
-        <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Khách hàng
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Mã KH
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Liên hệ
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Địa chỉ
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nguồn
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    NV phụ trách
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Trạng thái
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ngày tạo
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Thao tác
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredCustomers.map((customer) => (
-                  <tr
-                    key={customer.accountId}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
-                          <span className="text-white font-semibold text-sm">
-                            {customer.name?.charAt(0).toUpperCase() || "?"}
+            <tbody className="bg-white divide-y divide-gray-200">
+              {loading
+                ? // Skeleton rows (8)
+                  [...Array(8)].map((_, idx) => (
+                    <tr key={idx} className="animate-pulse">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 bg-gray-200 rounded-full" />
+                          <div>
+                            <div className="h-3 w-32 bg-gray-200 rounded mb-2" />
+                            <div className="h-3 w-20 bg-gray-100 rounded" />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-3 w-24 bg-gray-200 rounded" />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-3 w-28 bg-gray-200 rounded mb-2" />
+                        <div className="h-3 w-40 bg-gray-100 rounded" />
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="h-3 w-64 bg-gray-200 rounded" />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-5 w-20 bg-gray-200 rounded-full" />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-3 w-24 bg-gray-200 rounded" />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-5 w-24 bg-gray-200 rounded-full" />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-3 w-28 bg-gray-200 rounded" />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <div className="h-8 w-8 bg-gray-200 rounded" />
+                          <div className="h-8 w-8 bg-gray-200 rounded" />
+                          <div className="h-8 w-8 bg-gray-200 rounded" />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                : // Data rows
+                  filteredCustomers.map((customer) => (
+                    <tr
+                      key={customer.accountId}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
+                            <span className="text-white font-semibold text-sm">
+                              {customer.name?.charAt(0).toUpperCase() || "?"}
+                            </span>
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">
+                              {customer.name}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {customer.username}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm font-medium text-purple-600">
+                          {customer.customerCode}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-1 text-sm text-gray-900">
+                            <Phone className="w-3 h-3 text-gray-400" />
+                            {customer.phone}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                            <Mail className="w-3 h-3 text-gray-400" />
+                            {customer.email}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-start gap-1 text-sm text-gray-900 max-w-xs">
+                          <MapPin className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
+                          <span className="line-clamp-2">
+                            {customer.address || "-"}
                           </span>
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {customer.name}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {customer.username}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-medium text-purple-600">
-                        {customer.customerCode}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1 text-sm text-gray-900">
-                          <Phone className="w-3 h-3 text-gray-400" />
-                          {customer.phone}
-                        </div>
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
-                          <Mail className="w-3 h-3 text-gray-400" />
-                          {customer.email}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-start gap-1 text-sm text-gray-900 max-w-xs">
-                        <MapPin className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
-                        <span className="line-clamp-2">
-                          {customer.address || "-"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {customer.source ? (
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${getSourceColor(
+                              customer.source
+                            )}`}
+                          >
+                            <Tag className="w-3 h-3" />
+                            {customer.source}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <span className="text-blue-600 font-medium">
+                          NV #{customer.staffId || "-"}
                         </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {customer.source ? (
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${getSourceColor(
-                            customer.source
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(
+                            customer.status
                           )}`}
                         >
-                          <Tag className="w-3 h-3" />
-                          {customer.source}
+                          {getStatusText(customer.status)}
                         </span>
-                      ) : (
-                        <span className="text-xs text-gray-400">-</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <span className="text-blue-600 font-medium">
-                        NV #{customer.staffId || "-"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(
-                          customer.status
-                        )}`}
-                      >
-                        {getStatusText(customer.status)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatDate(customer.createdAt)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <div className="flex items-center gap-2">
-                        <button
-                          title="Xem chi tiết"
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          title="Chỉnh sửa"
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          title="Xóa"
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {formatDate(customer.createdAt)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <div className="flex items-center gap-2">
+                          <button
+                            title="Xem chi tiết"
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            title="Chỉnh sửa"
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            title="Xóa"
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
 
       {/* Empty State */}
       {!loading && filteredCustomers.length === 0 && !error && (

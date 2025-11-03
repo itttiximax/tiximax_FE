@@ -60,7 +60,7 @@ const StaffListPermission = () => {
     try {
       const routes = await managerRoutesService.getRoutes();
       setAvailableRoutes(routes);
-      setStaffRoutes([]); // Placeholder
+      setStaffRoutes([]); // TODO: nếu có API lấy các tuyến đã gán -> gọi và set vào đây
     } catch {
       toast.error("Không thể tải danh sách tuyến!");
     } finally {
@@ -97,8 +97,8 @@ const StaffListPermission = () => {
         (r) => r.routeId === parseInt(selectedRouteId)
       );
 
-      // Add to staffRoutes (optimistic update)
-      setStaffRoutes([...staffRoutes, assignedRoute]);
+      // Optimistic update
+      setStaffRoutes((prev) => [...prev, assignedRoute]);
       setSelectedRouteId("");
 
       toast.success(
@@ -125,7 +125,8 @@ const StaffListPermission = () => {
 
     const loadingToast = toast.loading("Đang xóa quyền...");
     try {
-      setStaffRoutes(staffRoutes.filter((r) => r.routeId !== routeId));
+      // TODO: gọi API xóa nếu có
+      setStaffRoutes((prev) => prev.filter((r) => r.routeId !== routeId));
       toast.success("Đã xóa quyền thành công!", { id: loadingToast });
     } catch {
       toast.error("Không thể xóa quyền!", { id: loadingToast });
@@ -199,9 +200,8 @@ const StaffListPermission = () => {
   };
 
   // Format date
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString("vi-VN");
-  };
+  const formatDate = (dateString) =>
+    dateString ? new Date(dateString).toLocaleString("vi-VN") : "-";
 
   // Format currency
   const formatCurrency = (amount) =>
@@ -244,140 +244,167 @@ const StaffListPermission = () => {
             </select>
           </div>
 
-          {/* Loading */}
-          {loading && (
-            <div className="text-center py-10">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-blue-500"></div>
-              <p className="mt-2 text-gray-500">Đang tải...</p>
-            </div>
-          )}
+          {/* Table with loading skeleton in tbody */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Mã NV
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Tên nhân viên
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Số điện thoại
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Vai trò
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Phòng ban
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Trạng thái
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Thao tác
+                  </th>
+                </tr>
+              </thead>
 
-          {/* Table */}
-          {!loading && (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Mã NV
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Tên nhân viên
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Số điện thoại
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Vai trò
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Phòng ban
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Trạng thái
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Thao tác
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredData.length > 0 ? (
-                    filteredData.map((staff) => (
-                      <tr
-                        key={staff.accountId}
-                        className="hover:bg-gray-50 transition"
-                      >
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">
-                          {staff.staffCode}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {staff.name}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                          {staff.email}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                          {staff.phone}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm">
-                          <span
-                            className={`inline-flex px-3 py-1 rounded-full text-xs font-medium border ${getRoleColorClass(
-                              staff.role
-                            )}`}
-                          >
-                            {getRoleLabel(staff.role)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                          {staff.department || "-"}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm">
-                          <span
-                            className={`inline-flex px-3 py-1 rounded-full text-xs font-medium border ${getStatusColorClass(
-                              staff.status
-                            )}`}
-                          >
-                            {getStatusLabel(staff.status)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-center">
-                          <button
-                            onClick={() => handleOpenPermissionModal(staff)}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition shadow-sm hover:shadow-md"
-                          >
-                            <Shield className="w-4 h-4" />
-                            Phân quyền
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="8"
-                        className="px-4 py-10 text-center text-gray-500"
-                      >
-                        Không có dữ liệu
+              <tbody className="bg-white divide-y divide-gray-200">
+                {loading ? (
+                  // ===== Skeleton rows (8) =====
+                  [...Array(8)].map((_, idx) => (
+                    <tr key={idx} className="animate-pulse">
+                      <td className="px-4 py-3">
+                        <div className="h-3 w-20 bg-gray-200 rounded" />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="h-3 w-40 bg-gray-200 rounded mb-2" />
+                        <div className="h-3 w-24 bg-gray-100 rounded" />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="h-3 w-48 bg-gray-200 rounded" />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="h-3 w-32 bg-gray-200 rounded" />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="h-5 w-28 bg-gray-200 rounded-full" />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="h-3 w-24 bg-gray-200 rounded" />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="h-5 w-28 bg-gray-200 rounded-full" />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="h-9 w-28 bg-gray-200 rounded" />
+                        </div>
                       </td>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  ))
+                ) : // ===== Data rows =====
+                getFilteredData().length > 0 ? (
+                  getFilteredData().map((staff) => (
+                    <tr
+                      key={staff.accountId}
+                      className="hover:bg-gray-50 transition"
+                    >
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">
+                        {staff.staffCode}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {staff.name}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                        {staff.email}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                        {staff.phone}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm">
+                        <span
+                          className={`inline-flex px-3 py-1 rounded-full text-xs font-medium border ${getRoleColorClass(
+                            staff.role
+                          )}`}
+                        >
+                          {getRoleLabel(staff.role)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                        {staff.department || "-"}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm">
+                        <span
+                          className={`inline-flex px-3 py-1 rounded-full text-xs font-medium border ${getStatusColorClass(
+                            staff.status
+                          )}`}
+                        >
+                          {getStatusLabel(staff.status)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                        <button
+                          onClick={() => handleOpenPermissionModal(staff)}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition shadow-sm hover:shadow-md"
+                        >
+                          <Shield className="w-4 h-4" />
+                          Phân quyền
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="8"
+                      className="px-4 py-10 text-center text-gray-500"
+                    >
+                      Không có dữ liệu
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
           {/* Pagination */}
-          <div className="flex flex-wrap justify-between items-center mt-6 pt-4 border-t border-gray-200 gap-4">
-            <div className="text-sm text-gray-600">
-              Hiển thị {filteredData.length} / {totalElements} nhân viên
+          {!loading && (
+            <div className="flex flex-wrap justify-between items-center mt-6 pt-4 border-t border-gray-200 gap-4">
+              <div className="text-sm text-gray-600">
+                Hiển thị {getFilteredData().length} / {totalElements} nhân viên
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 0}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm font-medium text-gray-700"
+                >
+                  ← Trước
+                </button>
+
+                <span className="text-sm text-gray-600 min-w-[100px] text-center">
+                  Trang {currentPage + 1} / {totalPages}
+                </span>
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage >= totalPages - 1}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm font-medium text-gray-700"
+                >
+                  Sau →
+                </button>
+              </div>
             </div>
-
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 0}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm font-medium text-gray-700"
-              >
-                ← Trước
-              </button>
-
-              <span className="text-sm text-gray-600 min-w-[100px] text-center">
-                Trang {currentPage + 1} / {totalPages}
-              </span>
-
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= totalPages - 1}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm font-medium text-gray-700"
-              >
-                Sau →
-              </button>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 

@@ -8,8 +8,6 @@ import {
   FiGift,
   FiPercent,
   FiDollarSign,
-  FiCalendar,
-  FiFileText,
   FiChevronLeft,
   FiChevronRight,
   FiMapPin,
@@ -20,7 +18,7 @@ import managerPromotionService from "../../Services/Manager/managerPromotionServ
 import managerRoutesService from "../../Services/Manager/managerRoutesService";
 import ConfirmDialog from "../../common/ConfirmDialog";
 
-// Helper: convert datetime-local => ISO
+// Helpers
 const toIso = (v) => {
   if (!v) return v;
   if (typeof v === "string" && v.endsWith("Z")) return v;
@@ -30,13 +28,10 @@ const toIso = (v) => {
     return v;
   }
 };
-
-// Helper: convert ISO => datetime-local format
 const toDatetimeLocal = (isoString) => {
   if (!isoString) return "";
   try {
     const date = new Date(isoString);
-    // Format: YYYY-MM-DDTHH:mm
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
@@ -48,12 +43,10 @@ const toDatetimeLocal = (isoString) => {
   }
 };
 
-// Set cứng option
 const VOUCHER_TYPES = [
   { value: "PHAN_TRAM", label: "PHẦN TRĂM" },
   { value: "CO_DINH", label: "CỐ ĐỊNH" },
 ];
-
 const ASSIGN_TYPES = [
   { value: "THU_CONG", label: "THỦ CÔNG" },
   { value: "DANG_KI_TK", label: "ĐĂNG KÝ TÀI KHOẢN" },
@@ -68,10 +61,10 @@ const ManagerPromotion = () => {
   const [size, setSize] = useState(10);
   const [totalElements, setTotalElements] = useState(0);
 
-  // Create/Edit form
+  // Form in modal
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [editingId, setEditingId] = useState(null); // null = create mode, number = edit mode
+  const [editingId, setEditingId] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [formData, setFormData] = useState({
     code: "",
@@ -95,10 +88,10 @@ const ManagerPromotion = () => {
   const [routes, setRoutes] = useState([]);
   const [loadingRoutes, setLoadingRoutes] = useState(false);
 
-  const totalPages = useMemo(() => {
-    if (!totalElements) return 1;
-    return Math.max(1, Math.ceil(totalElements / size));
-  }, [totalElements, size]);
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil((totalElements || 0) / size)),
+    [totalElements, size]
+  );
 
   const fetchVouchers = async (p = page, s = size) => {
     try {
@@ -120,13 +113,10 @@ const ManagerPromotion = () => {
     }
   };
 
-  // ✨ Lấy chi tiết voucher để edit
   const fetchVoucherDetail = async (id) => {
     try {
       setLoadingDetail(true);
       const data = await managerPromotionService.getVoucherById(id);
-
-      // Chuyển đổi dữ liệu từ API sang format của form
       setFormData({
         code: data.code || "",
         type: data.type || "PHAN_TRAM",
@@ -139,10 +129,7 @@ const ManagerPromotion = () => {
         thresholdAmount: data.thresholdAmount?.toString() || "",
         routeIds: data.routeIds || [],
       });
-
-      console.log("✅ Đã load voucher detail:", data);
-    } catch (error) {
-      console.error("❌ Lỗi khi load voucher detail:", error);
+    } catch {
       toast.error("Không thể tải thông tin voucher");
       setShowForm(false);
     } finally {
@@ -150,24 +137,18 @@ const ManagerPromotion = () => {
     }
   };
 
-  // ✨ Lấy routes từ API thật
   const fetchRoutes = async () => {
     try {
       setLoadingRoutes(true);
       const data = await managerRoutesService.getRoutes();
-
-      // Chuyển đổi format: name → routeName
-      const formattedRoutes = data.map((route) => ({
-        routeId: route.routeId,
-        routeName: route.name || `Tuyến ${route.routeId}`,
-        shipTime: route.shipTime,
-        exchangeRate: route.exchangeRate,
+      const formatted = (data || []).map((r) => ({
+        routeId: r.routeId,
+        routeName: r.name || `Tuyến ${r.routeId}`,
+        shipTime: r.shipTime,
+        exchangeRate: r.exchangeRate,
       }));
-
-      setRoutes(formattedRoutes);
-      console.log("✅ Đã tải", formattedRoutes.length, "tuyến đường");
-    } catch (error) {
-      console.error("❌ Lỗi khi tải routes:", error);
+      setRoutes(formatted);
+    } catch {
       toast.error("Lỗi khi tải danh sách tuyến đường");
     } finally {
       setLoadingRoutes(false);
@@ -196,38 +177,24 @@ const ManagerPromotion = () => {
     setEditingId(null);
   };
 
-  // ✨ Mở form để tạo mới
   const openCreateForm = () => {
     resetForm();
     setShowForm(true);
   };
 
-  // ✨ Mở form để edit
   const openEditForm = async (voucher) => {
     const vid = voucher.id ?? voucher.voucherId;
-    if (!vid) {
-      toast.error("Không tìm thấy ID voucher");
-      return;
-    }
-
+    if (!vid) return toast.error("Không tìm thấy ID voucher");
     setEditingId(vid);
     setShowForm(true);
     await fetchVoucherDetail(vid);
   };
 
-  // ✨ Submit form (tạo mới HOẶC cập nhật)
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validation đơn giản
-    if (!formData.code?.trim()) {
-      toast.error("Vui lòng nhập mã voucher");
-      return;
-    }
-    if (formData.value === "" || isNaN(Number(formData.value))) {
-      toast.error("Vui lòng nhập giá trị hợp lệ");
-      return;
-    }
+    if (!formData.code?.trim()) return toast.error("Vui lòng nhập mã voucher");
+    if (formData.value === "" || isNaN(Number(formData.value)))
+      return toast.error("Vui lòng nhập giá trị hợp lệ");
 
     const payload = {
       ...formData,
@@ -241,26 +208,19 @@ const ManagerPromotion = () => {
       routeIds: formData.routeIds?.length ? formData.routeIds : [],
     };
 
-    const isEditMode = editingId !== null;
+    const isEdit = editingId !== null;
     const loadingToast = toast.loading(
-      isEditMode ? "Đang cập nhật voucher..." : "Đang tạo voucher..."
+      isEdit ? "Đang cập nhật voucher..." : "Đang tạo voucher..."
     );
-
     try {
       setSaving(true);
-
-      if (isEditMode) {
-        // UPDATE mode
+      if (isEdit) {
         await managerPromotionService.updateVoucher(editingId, payload);
         toast.success("Cập nhật voucher thành công!", { id: loadingToast });
-        console.log("✅ Updated voucher ID:", editingId);
       } else {
-        // CREATE mode
         await managerPromotionService.createVoucher(payload);
         toast.success("Tạo voucher thành công!", { id: loadingToast });
-        console.log("✅ Created new voucher");
       }
-
       resetForm();
       setShowForm(false);
       fetchVouchers(page, size);
@@ -268,7 +228,7 @@ const ManagerPromotion = () => {
       const msg =
         err?.response?.data?.message ||
         err?.message ||
-        `Không thể ${isEditMode ? "cập nhật" : "tạo"} voucher`;
+        `Không thể ${isEdit ? "cập nhật" : "tạo"} voucher`;
       toast.error(msg, { id: loadingToast, duration: 5000 });
     } finally {
       setSaving(false);
@@ -276,10 +236,8 @@ const ManagerPromotion = () => {
   };
 
   const openDelete = (id) => {
-    if (id === undefined || id === null) {
-      toast.error("Không tìm thấy ID voucher để xóa");
-      return;
-    }
+    if (id === undefined || id === null)
+      return toast.error("Không tìm thấy ID voucher để xóa");
     setDeleteId(id);
     setShowDeleteDialog(true);
   };
@@ -293,14 +251,9 @@ const ManagerPromotion = () => {
       );
       await managerPromotionService.deleteVoucher(deleteId);
       toast.success("Xóa voucher thành công!");
-
-      // Nếu xóa hết trang hiện tại, lùi về trang trước (nếu có)
       const remaining = vouchers.length - 1;
-      if (remaining <= 0 && page > 0) {
-        setPage((p) => p - 1);
-      } else {
-        fetchVouchers(page, size);
-      }
+      if (remaining <= 0 && page > 0) setPage((p) => p - 1);
+      else fetchVouchers(page, size);
     } catch (err) {
       const msg =
         err?.response?.data?.message || err?.message || "Không thể xóa voucher";
@@ -316,8 +269,7 @@ const ManagerPromotion = () => {
   const formatDate = (str) => {
     if (!str) return "N/A";
     try {
-      const d = new Date(str);
-      return d.toLocaleDateString("vi-VN");
+      return new Date(str).toLocaleDateString("vi-VN");
     } catch {
       return str;
     }
@@ -325,31 +277,50 @@ const ManagerPromotion = () => {
 
   const handleRouteToggle = (routeId) => {
     setFormData((prev) => {
-      const current = prev.routeIds || [];
-      const isChecked = current.includes(routeId);
-      const updated = isChecked
-        ? current.filter((id) => id !== routeId)
-        : [...current, routeId];
-
-      console.log("🔄 Toggle route:", routeId, "| Selected:", updated);
+      const cur = prev.routeIds || [];
+      const updated = cur.includes(routeId)
+        ? cur.filter((id) => id !== routeId)
+        : [...cur, routeId];
       return { ...prev, routeIds: updated };
     });
   };
 
+  // ========= Loading Skeleton =========
+  const SkeletonRow = () => (
+    <tr className="animate-pulse">
+      <td className="px-4 py-3">
+        <div className="h-3 w-24 bg-gray-200 rounded" />
+      </td>
+      <td className="px-4 py-3 text-center">
+        <div className="inline-block h-5 w-16 bg-gray-200 rounded-full" />
+      </td>
+      <td className="px-4 py-3 text-center">
+        <div className="h-3 w-16 bg-gray-200 rounded mx-auto" />
+      </td>
+      <td className="px-4 py-3">
+        <div className="h-3 w-24 bg-gray-200 rounded" />
+      </td>
+      <td className="px-4 py-3">
+        <div className="h-3 w-24 bg-gray-200 rounded" />
+      </td>
+      <td className="px-4 py-3">
+        <div className="h-5 w-24 bg-gray-200 rounded" />
+      </td>
+      <td className="px-4 py-3 text-center">
+        <div className="h-7 w-32 bg-gray-200 rounded mx-auto" />
+      </td>
+    </tr>
+  );
+
+  // ====== UI ======
   const renderTableContent = () => {
     if (loading) {
-      return (
-        <tr>
-          <td colSpan="8" className="px-4 py-6 text-center">
-            <div className="flex items-center justify-center gap-2">
-              <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-sm text-gray-600">Đang tải...</span>
-            </div>
-          </td>
-        </tr>
-      );
+      // Loading skeleton
+      const rows = Math.min(size || 10, 10);
+      return Array.from({ length: rows }).map((_, i) => (
+        <SkeletonRow key={i} />
+      ));
     }
-
     if (vouchers.length === 0) {
       return (
         <tr>
@@ -360,7 +331,6 @@ const ManagerPromotion = () => {
         </tr>
       );
     }
-
     return vouchers.map((v) => {
       const vid = v.id ?? v.voucherId;
       return (
@@ -407,7 +377,6 @@ const ManagerPromotion = () => {
           </td>
           <td className="px-4 py-3 text-center">
             <div className="flex items-center justify-center gap-2">
-              {/* ✨ Nút SỬA */}
               <button
                 onClick={() => openEditForm(v)}
                 className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-blue-600 border border-blue-300 hover:bg-blue-50 transition-all"
@@ -416,8 +385,6 @@ const ManagerPromotion = () => {
                 <FiEdit className="w-3.5 h-3.5" />
                 Sửa
               </button>
-
-              {/* Nút XÓA */}
               <button
                 onClick={() => openDelete(vid)}
                 className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-red-600 border border-red-300 hover:bg-red-50 transition-all"
@@ -437,369 +404,23 @@ const ManagerPromotion = () => {
     <>
       <Toaster
         position="top-center"
-        toastOptions={{
-          duration: 3000,
-          style: { fontSize: "13px" },
-        }}
+        toastOptions={{ duration: 3000, style: { fontSize: "13px" } }}
       />
 
       <div className="p-4 sm:p-6 space-y-5">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-extrabold text-gray-900 flex items-center gap-2">
-              <FiGift className="w-6 h-6 text-blue-600" />
-              Quản Lý Voucher
-            </h1>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Tạo và quản lý mã giảm giá cho hệ thống
-            </p>
-          </div>
+          <h1 className="text-2xl font-extrabold text-gray-900">
+            Quản lý chương trình khuyến mãi
+          </h1>
           <button
-            onClick={() => {
-              if (showForm) {
-                resetForm();
-                setShowForm(false);
-              } else {
-                openCreateForm();
-              }
-            }}
+            onClick={openCreateForm}
             className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all"
           >
-            {showForm ? (
-              <>
-                <FiX className="w-4 h-4" />
-                Đóng Form
-              </>
-            ) : (
-              <>
-                <FiPlus className="w-4 h-4" />
-                Tạo Voucher Mới
-              </>
-            )}
+            <FiPlus className="w-4 h-4" />
+            Tạo Voucher Mới
           </button>
         </div>
-
-        {/* Create/Edit Form */}
-        {showForm && (
-          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FiFileText className="w-4 h-4 text-blue-600" />
-                {editingId ? "Cập Nhật Voucher" : "Tạo Voucher Mới"}
-              </h2>
-              {editingId && (
-                <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-semibold">
-                  ID: {editingId}
-                </span>
-              )}
-            </div>
-
-            {loadingDetail ? (
-              <div className="py-12 text-center">
-                <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm text-gray-500 mt-3">
-                  Đang tải thông tin voucher...
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Code + Type */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                      <FiGift className="inline w-3 h-3 mr-1" />
-                      Mã Voucher
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.code}
-                      onChange={(e) =>
-                        setFormData({ ...formData, code: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
-                      placeholder="VD: SUMMER2024"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                      Loại Giảm Giá
-                    </label>
-                    <select
-                      value={formData.type}
-                      onChange={(e) =>
-                        setFormData({ ...formData, type: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
-                    >
-                      {VOUCHER_TYPES.map((t) => (
-                        <option key={t.value} value={t.value}>
-                          {t.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Value + Min Order */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                      {formData.type === "PHAN_TRAM" ? (
-                        <FiPercent className="inline w-3 h-3 mr-1" />
-                      ) : (
-                        <FiDollarSign className="inline w-3 h-3 mr-1" />
-                      )}
-                      Giá Trị
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.value}
-                      onChange={(e) =>
-                        setFormData({ ...formData, value: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
-                      placeholder={
-                        formData.type === "PHAN_TRAM" ? "VD: 10" : "VD: 50000"
-                      }
-                      min="0"
-                      step={formData.type === "PHAN_TRAM" ? "0.01" : "1"}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                      Giá Trị Đơn Tối Thiểu
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.minOrderValue}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          minOrderValue: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
-                      placeholder="VD: 100000"
-                      min="0"
-                    />
-                  </div>
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                    <FiFileText className="inline w-3 h-3 mr-1" />
-                    Mô Tả
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none resize-none"
-                    placeholder="Mô tả chi tiết về voucher..."
-                    rows="3"
-                  />
-                </div>
-
-                {/* Date Range */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                      <FiCalendar className="inline w-3 h-3 mr-1" />
-                      Ngày Bắt Đầu
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={formData.startDate}
-                      onChange={(e) =>
-                        setFormData({ ...formData, startDate: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                      <FiCalendar className="inline w-3 h-3 mr-1" />
-                      Ngày Kết Thúc
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={formData.endDate}
-                      onChange={(e) =>
-                        setFormData({ ...formData, endDate: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Assign Type */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                      Kiểu Phân Phối
-                    </label>
-                    <select
-                      value={formData.assignType}
-                      onChange={(e) =>
-                        setFormData({ ...formData, assignType: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
-                    >
-                      {ASSIGN_TYPES.map((t) => (
-                        <option key={t.value} value={t.value}>
-                          {t.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {formData.assignType === "DAT_CHI_TIEU" && (
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                        Ngưỡng Chỉ Tiêu (₫)
-                      </label>
-                      <input
-                        type="number"
-                        value={formData.thresholdAmount}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            thresholdAmount: e.target.value,
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
-                        placeholder="VD: 1000000"
-                        min="0"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Route Selection */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
-                    <FiMapPin className="inline w-3 h-3 mr-1" />
-                    Áp Dụng Cho Tuyến Đường
-                    <span className="ml-1 text-xs font-normal text-gray-500 normal-case">
-                      ({formData.routeIds?.length || 0} đã chọn)
-                    </span>
-                  </label>
-
-                  {loadingRoutes ? (
-                    <div className="p-4 bg-gray-50 rounded-lg text-center">
-                      <div className="inline-block w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                      <p className="text-xs text-gray-500 mt-2">
-                        Đang tải danh sách tuyến đường từ API...
-                      </p>
-                    </div>
-                  ) : routes.length === 0 ? (
-                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <p className="text-xs text-yellow-700">
-                        ⚠️ Không có tuyến đường nào. Vui lòng kiểm tra API hoặc
-                        thêm tuyến đường mới.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1 border border-gray-200 rounded-lg bg-gray-50">
-                      {routes.map((route) => {
-                        const isSelected = formData.routeIds?.includes(
-                          route.routeId
-                        );
-                        return (
-                          <label
-                            key={route.routeId}
-                            className={`flex items-center gap-2 p-2.5 border-2 rounded-lg cursor-pointer transition-all ${
-                              isSelected
-                                ? "border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm"
-                                : "border-gray-200 bg-white hover:border-gray-300"
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => handleRouteToggle(route.routeId)}
-                              className="sr-only"
-                            />
-                            <div
-                              className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center ${
-                                isSelected
-                                  ? "border-blue-500 bg-blue-500"
-                                  : "border-gray-300 bg-white"
-                              }`}
-                            >
-                              <FiCheck
-                                className={`w-3 h-3 ${
-                                  isSelected ? "text-white" : "text-transparent"
-                                }`}
-                              />
-                            </div>
-                            <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                              <FiMapPin
-                                className={`flex-shrink-0 w-3 h-3 ${
-                                  isSelected ? "text-blue-600" : "text-gray-400"
-                                }`}
-                              />
-                              <span
-                                className={`text-xs font-medium truncate ${
-                                  isSelected ? "text-blue-900" : "text-gray-700"
-                                }`}
-                                title={route.routeName}
-                              >
-                                {route.routeName}
-                              </span>
-                            </div>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  )}
-                  <p className="mt-1.5 text-xs text-gray-500">
-                    💡 Để trống để áp dụng cho tất cả tuyến đường
-                  </p>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex items-center gap-3 pt-3 border-t border-gray-200">
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className={`inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-sm font-semibold shadow-md transition-all ${
-                      saving
-                        ? "bg-gray-400 cursor-not-allowed text-white"
-                        : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white hover:shadow-lg"
-                    }`}
-                  >
-                    {saving
-                      ? editingId
-                        ? "Đang cập nhật..."
-                        : "Đang lưu..."
-                      : editingId
-                      ? "Cập nhật voucher"
-                      : "Lưu voucher"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      resetForm();
-                      setShowForm(false);
-                    }}
-                    className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-semibold transition-all"
-                  >
-                    Hủy bỏ
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        )}
 
         {/* Table */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -846,7 +467,6 @@ const ManagerPromotion = () => {
                 <span className="text-blue-600 font-bold">{totalElements}</span>{" "}
                 voucher
               </div>
-
               <div className="flex items-center gap-2">
                 <button
                   disabled={page <= 0}
@@ -857,9 +477,9 @@ const ManagerPromotion = () => {
                       : "text-gray-700 bg-white border border-gray-300 hover:border-blue-500 hover:text-blue-600 hover:shadow-sm"
                   }`}
                 >
-                  <FiChevronLeft className="w-3.5 h-3.5" /> Trước
+                  <FiChevronLeft className="w-3.5 h-3.5" />
+                  Trước
                 </button>
-
                 <button
                   disabled={page + 1 >= totalPages}
                   onClick={() =>
@@ -871,7 +491,8 @@ const ManagerPromotion = () => {
                       : "text-gray-700 bg-white border border-gray-300 hover:border-blue-500 hover:text-blue-600 hover:shadow-sm"
                   }`}
                 >
-                  Sau <FiChevronRight className="w-3.5 h-3.5" />
+                  Sau
+                  <FiChevronRight className="w-3.5 h-3.5" />
                 </button>
 
                 <select
@@ -881,7 +502,7 @@ const ManagerPromotion = () => {
                     setPage(0);
                   }}
                   className="ml-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none bg-white"
-                  title="Số voucher trên mỗi trang"
+                  title="Số voucher / trang"
                 >
                   {[10, 20, 50, 100].map((n) => (
                     <option key={n} value={n}>
@@ -894,6 +515,346 @@ const ManagerPromotion = () => {
           )}
         </div>
       </div>
+
+      {/* ========= Modal Form: Tạo / Cập nhật ========= */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-[1px] flex items-center justify-center p-3">
+          <div className="bg-white w-full max-w-2xl rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+            {/* Header */}
+            <div className="px-4 py-3 border-b flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-bold text-gray-800">
+                  {editingId ? "Cập Nhật Voucher" : "Tạo Voucher Mới"}
+                </h2>
+              </div>
+              <button
+                onClick={() => {
+                  resetForm();
+                  setShowForm(false);
+                }}
+                className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500"
+                aria-label="Đóng"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="max-h-[70vh] overflow-y-auto">
+              {loadingDetail ? (
+                <div className="py-10 text-center">
+                  <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-sm text-gray-500 mt-3">
+                    Đang tải thông tin voucher...
+                  </p>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="p-4 space-y-4">
+                  {/* Code + Type */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
+                        Mã Voucher
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.code}
+                        onChange={(e) =>
+                          setFormData({ ...formData, code: e.target.value })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        placeholder="VD: SUMMER2024"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
+                        Loại Giảm Giá
+                      </label>
+                      <select
+                        value={formData.type}
+                        onChange={(e) =>
+                          setFormData({ ...formData, type: e.target.value })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      >
+                        {VOUCHER_TYPES.map((t) => (
+                          <option key={t.value} value={t.value}>
+                            {t.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Value + Min Order */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
+                        {formData.type === "PHAN_TRAM" ? (
+                          <FiPercent className="inline w-3 h-3 mr-1" />
+                        ) : (
+                          <FiDollarSign className="inline w-3 h-3 mr-1" />
+                        )}
+                        Giá Trị
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.value}
+                        onChange={(e) =>
+                          setFormData({ ...formData, value: e.target.value })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        placeholder={
+                          formData.type === "PHAN_TRAM" ? "VD: 10" : "VD: 50000"
+                        }
+                        min="0"
+                        step={formData.type === "PHAN_TRAM" ? "0.01" : "1"}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
+                        Giá Trị Đơn Tối Thiểu
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.minOrderValue}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            minOrderValue: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        placeholder="VD: 100000"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
+                      Mô Tả
+                    </label>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+                      placeholder="Mô tả chi tiết về voucher..."
+                      rows="3"
+                    />
+                  </div>
+
+                  {/* Date Range */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
+                        Ngày Bắt Đầu
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={formData.startDate}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            startDate: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
+                        Ngày Kết Thúc
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={formData.endDate}
+                        onChange={(e) =>
+                          setFormData({ ...formData, endDate: e.target.value })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Assign Type */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
+                        Kiểu Phân Phối
+                      </label>
+                      <select
+                        value={formData.assignType}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            assignType: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      >
+                        {ASSIGN_TYPES.map((t) => (
+                          <option key={t.value} value={t.value}>
+                            {t.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {formData.assignType === "DAT_CHI_TIEU" && (
+                      <div>
+                        <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
+                          Ngưỡng Chỉ Tiêu (₫)
+                        </label>
+                        <input
+                          type="number"
+                          value={formData.thresholdAmount}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              thresholdAmount: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                          placeholder="VD: 1000000"
+                          min="0"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Route Selection */}
+                  <div>
+                    <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
+                      Áp Dụng Cho Tuyến Đường
+                      <span className="ml-1 text-xs font-normal text-gray-500 normal-case">
+                        ({formData.routeIds?.length || 0} đã chọn)
+                      </span>
+                    </label>
+
+                    {loadingRoutes ? (
+                      <div className="p-4 bg-gray-50 rounded-lg text-center">
+                        <div className="inline-block w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-xs text-gray-500 mt-2">
+                          Đang tải danh sách tuyến đường...
+                        </p>
+                      </div>
+                    ) : routes.length === 0 ? (
+                      <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p className="text-xs text-yellow-700">
+                          Không có tuyến đường nào. Vui lòng kiểm tra hoặc thêm
+                          tuyến mới.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1 border border-gray-200 rounded-lg bg-gray-50">
+                        {routes.map((route) => {
+                          const isSelected = formData.routeIds?.includes(
+                            route.routeId
+                          );
+                          return (
+                            <label
+                              key={route.routeId}
+                              className={`flex items-center gap-2 p-2 border-2 rounded-lg cursor-pointer transition-all ${
+                                isSelected
+                                  ? "border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm"
+                                  : "border-gray-200 bg-white hover:border-gray-300"
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() =>
+                                  handleRouteToggle(route.routeId)
+                                }
+                                className="sr-only"
+                              />
+                              <div
+                                className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center ${
+                                  isSelected
+                                    ? "border-blue-500 bg-blue-500"
+                                    : "border-gray-300 bg-white"
+                                }`}
+                              >
+                                <FiCheck
+                                  className={`w-3 h-3 ${
+                                    isSelected
+                                      ? "text-white"
+                                      : "text-transparent"
+                                  }`}
+                                />
+                              </div>
+                              <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                <FiMapPin
+                                  className={`flex-shrink-0 w-3 h-3 ${
+                                    isSelected
+                                      ? "text-blue-600"
+                                      : "text-gray-400"
+                                  }`}
+                                />
+                                <span
+                                  className={`text-xs font-medium truncate ${
+                                    isSelected
+                                      ? "text-blue-900"
+                                      : "text-gray-700"
+                                  }`}
+                                  title={route.routeName}
+                                >
+                                  {route.routeName}
+                                </span>
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </form>
+              )}
+            </div>
+
+            {/* Footer actions */}
+            {!loadingDetail && (
+              <div className="px-4 py-3 border-t flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetForm();
+                    setShowForm(false);
+                  }}
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-semibold transition-all"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={saving}
+                  className={`inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-sm font-semibold shadow-md transition-all ${
+                    saving
+                      ? "bg-gray-400 cursor-not-allowed text-white"
+                      : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white hover:shadow-lg"
+                  }`}
+                >
+                  {saving
+                    ? editingId
+                      ? "Đang cập nhật..."
+                      : "Đang lưu..."
+                    : editingId
+                    ? "Cập nhật"
+                    : "Lưu"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Delete Dialog */}
       <ConfirmDialog

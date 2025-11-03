@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { X, Info, Truck } from "lucide-react";
 import createPaymentShipService from "../../Services/Payment/createPaymentShipService";
 import CustomerVoucherPayment from "./CustomerVoucherPayment";
-import BankShipList from "./BankShipList"; // ⬅️ NEW
+import BankShipList from "./BankShipList";
 
 /** Helper: Bóc tách lỗi backend để hiện toast dễ hiểu */
 const getErrorMessage = (error) => {

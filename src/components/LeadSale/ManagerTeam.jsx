@@ -7,7 +7,6 @@ import {
   Users,
   UserCheck,
   UserX,
-  TrendingUp,
   Eye,
   Edit,
   MoreVertical,
@@ -16,7 +15,6 @@ import {
   Calendar,
   Building,
   MapPin,
-  Hash,
 } from "lucide-react";
 import performanceService from "../../Services/StaffSale/performmanceService";
 
@@ -40,7 +38,7 @@ const ManagerTeam = () => {
         setSalesData(data.content || []);
         setFilteredData(data.content || []);
         setLoading(false);
-      } catch (err) {
+      } catch {
         setError("Không thể tải dữ liệu nhân viên.");
         setLoading(false);
       }
@@ -99,17 +97,6 @@ const ManagerTeam = () => {
     departments: departments.length,
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-lg text-gray-600">Đang tải dữ liệu...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-50">
@@ -134,9 +121,6 @@ const ManagerTeam = () => {
           <h1 className="text-3xl font-bold text-gray-800">
             Quản lý đội ngũ bán hàng
           </h1>
-          <p className="text-gray-600 mt-2">
-            Quản lý và theo dõi hiệu suất của đội ngũ nhân viên bán hàng
-          </p>
         </div>
 
         {/* Statistics Cards */}
@@ -278,8 +262,47 @@ const ManagerTeam = () => {
                   </th>
                 </tr>
               </thead>
+
               <tbody className="bg-white divide-y divide-gray-200">
-                {currentItems.length > 0 ? (
+                {loading ? (
+                  // Loading skeleton rows
+                  [...Array(8)].map((_, idx) => (
+                    <tr key={idx} className="animate-pulse">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
+                          <div>
+                            <div className="h-3 w-24 bg-gray-200 rounded mb-2"></div>
+                            <div className="h-3 w-16 bg-gray-100 rounded"></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-3 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div className="h-3 w-20 bg-gray-100 rounded"></div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-3 w-20 bg-gray-200 rounded"></div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-3 w-20 bg-gray-200 rounded"></div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-3 w-16 bg-gray-200 rounded"></div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-3 w-20 bg-gray-200 rounded"></div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className="flex justify-center gap-2">
+                          <div className="h-4 w-4 bg-gray-200 rounded"></div>
+                          <div className="h-4 w-4 bg-gray-200 rounded"></div>
+                          <div className="h-4 w-4 bg-gray-200 rounded"></div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : currentItems.length > 0 ? (
                   currentItems.map((sale) => (
                     <tr
                       key={sale.accountId}
@@ -349,7 +372,12 @@ const ManagerTeam = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-3 w-3 text-gray-400" />
-                          {new Date(sale.createdAt).toLocaleDateString("vi-VN")}
+                          {new Date(sale.createdAt).toString() !==
+                          "Invalid Date"
+                            ? new Date(sale.createdAt).toLocaleDateString(
+                                "vi-VN"
+                              )
+                            : "-"}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
@@ -387,7 +415,7 @@ const ManagerTeam = () => {
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
+          {totalPages > 1 && !loading && (
             <div className="bg-white px-6 py-4 border-t border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-700">

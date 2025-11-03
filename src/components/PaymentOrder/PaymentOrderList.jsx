@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import { confirmPaymentOrder } from "./ConfirmPaymentOrder";
 
-/* ===== Helpers ===== */
 const formatCurrency = (v) => {
   if (v === null || v === undefined || isNaN(Number(v))) return "—";
   try {
@@ -318,7 +317,7 @@ const PaymentOrderList = () => {
     } catch (error) {
       console.error("Error confirming shipping payment:", error);
 
-      // ✅ Simple error handling
+      //  Simple error handling
       const errorMessage =
         error.response?.data?.error ||
         error.response?.data?.message ||
@@ -557,9 +556,6 @@ const PaymentOrderList = () => {
               <h1 className="text-3xl font-bold text-gray-900">
                 Quản lý thanh toán đơn hàng
               </h1>
-              <p className="text-sm text-gray-600 mt-1">
-                Theo dõi và xác nhận các giao dịch thanh toán
-              </p>
             </div>
           </div>
         </div>

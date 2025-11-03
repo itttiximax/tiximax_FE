@@ -98,7 +98,8 @@ import ImportPacking from "../components/WarehouseForeign/ImportPacking";
 import ResetPassword from "../Page/ResetPassword";
 import InventoryWarehouse from "../Services/Warehouse/InventoryWarehouse";
 import RefundOrder from "../components/Order/RefundOrder";
-import BankAccountList from "../Services/Manager/BankAccountList";
+import ManagerBankAccountList from "../components/Manager/ManagerBankAccountList";
+import DividePaymentOrder from "../components/PaymentOrder/DividePaymentOrder";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -176,7 +177,7 @@ const Router = createBrowserRouter([
       { path: "createstaff", element: <CreateAccountStaff /> },
       { path: "quote", element: <PaymentOrderList /> },
       { path: "refund", element: <RefundOrder /> },
-      { path: "cost/paylater", element: <BankAccountList /> },
+      { path: "cost/paylater", element: <ManagerBankAccountList /> },
       { path: "cost/paybefore", element: <NotFound /> },
       { path: "routes", element: <ManagerRoutes /> },
       { path: "transfer", element: <ManagerDestination /> },
@@ -219,6 +220,7 @@ const Router = createBrowserRouter([
       { path: "order-payment", element: <PaymentOrderList /> },
       { path: "ship-payment", element: <PaymentShipList /> },
       { path: "auction-payment", element: <AuctionPayment /> },
+      { path: "divide-payment", element: <DividePaymentOrder /> },
       { path: "createpaymentsupport", element: <MergedPaymentOrder /> },
       { path: "createpaymentshipping", element: <MergedPaymentShip /> },
       { path: "warehouse-staff", element: <NotFound /> },
@@ -254,6 +256,7 @@ const Router = createBrowserRouter([
       { path: "createaccountuser", element: <CreateAccountUser /> },
       { path: "customers", element: <CustomerStaffList /> },
       { path: "auction-payment", element: <AuctionPayment /> },
+      { path: "divide-payment", element: <DividePaymentOrder /> },
       { path: "prospects", element: <NotFound /> },
       { path: "orders", element: <OrderList /> },
       { path: "orders/pending", element: <NotFound /> }, // Chưa triển khai

@@ -3,7 +3,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Users,
-  Loader2,
   Eye,
   Search,
   Filter,
@@ -36,25 +35,29 @@ const StaffList = () => {
       { key: "ADMIN", label: "Quản trị viên", color: "red" },
       { key: "MANAGER", label: "Quản lý", color: "orange" },
       { key: "STAFF_SALE", label: "Nhân viên bán hàng", color: "blue" },
-      { key: "STAFF_WAREHOUSE", label: "Nhân viên kho", color: "purple" },
+      {
+        key: "STAFF_WAREHOUSE_FOREIGN",
+        label: "Nhân viên kho ngoại",
+        color: "purple",
+      },
       {
         key: "STAFF_WAREHOUSE_DOMESTIC",
         label: "Nhân viên kho nội địa",
         color: "indigo",
       },
       { key: "LEAD_SALE", label: "Trưởng nhóm bán hàng", color: "green" },
+      { key: "STAFF_PURCHASER", label: "Nhân viên mua hộ", color: "gray" },
     ],
     []
   );
 
   const pageSizeOptions = [10, 20, 30, 50];
 
-  // Fetch staff accounts
+  // ===== Fetch staff accounts (giữ nguyên nếu bạn đã có ở chỗ khác) =====
   const fetchStaffAccounts = useCallback(
     async (page = 0, size = pageSize) => {
       setError(null);
       setLoading(true);
-
       try {
         const response = await userService.getStaffAccounts(page, size);
         setStaffList(response.content || []);
@@ -74,12 +77,12 @@ const StaffList = () => {
   useEffect(() => {
     fetchStaffAccounts(0, pageSize);
   }, [fetchStaffAccounts, pageSize]);
+  // =====================================================================
 
-  // Filter logic (client-side on current page data)
+  // Filter logic (client-side trên page hiện tại)
   const filteredStaff = useMemo(() => {
     let filtered = [...staffList];
 
-    // Search filter
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -92,12 +95,10 @@ const StaffList = () => {
       );
     }
 
-    // Role filter
     if (selectedRole !== "ALL") {
       filtered = filtered.filter((staff) => staff.role === selectedRole);
     }
 
-    // Status filter
     if (selectedStatus !== "ALL") {
       filtered = filtered.filter((staff) => staff.status === selectedStatus);
     }
@@ -124,20 +125,17 @@ const StaffList = () => {
     [fetchStaffAccounts]
   );
 
-  // Utility functions
+  // Utils
   const formatDate = useCallback((dateString) => {
     return dateString ? new Date(dateString).toLocaleString("vi-VN") : "-";
   }, []);
 
   const getRoleInfo = useCallback(
-    (role) => {
-      return (
-        availableRoles.find((r) => r.key === role) || {
-          label: role,
-          color: "gray",
-        }
-      );
-    },
+    (role) =>
+      availableRoles.find((r) => r.key === role) || {
+        label: role,
+        color: "gray",
+      },
     [availableRoles]
   );
 
@@ -154,21 +152,17 @@ const StaffList = () => {
     return colorMap[color] || "bg-gray-100 text-gray-800";
   }, []);
 
-  const getStatusBadge = useCallback((status) => {
-    return status === "HOAT_DONG"
-      ? "bg-green-100 text-green-800"
-      : "bg-gray-100 text-gray-800";
-  }, []);
+  const getStatusBadge = useCallback(
+    (status) =>
+      status === "HOAT_DONG"
+        ? "bg-green-100 text-green-800"
+        : "bg-gray-100 text-gray-800",
+    []
+  );
 
-  const getStatusText = useCallback((status) => {
-    return status === "HOAT_DONG" ? "Hoạt động" : "Không hoạt động";
-  }, []);
-
-  const LoadingSpinner = () => (
-    <div className="flex justify-center items-center py-8">
-      <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      <span className="ml-2 text-gray-600">Đang tải...</span>
-    </div>
+  const getStatusText = useCallback(
+    (status) => (status === "HOAT_DONG" ? "Hoạt động" : "Không hoạt động"),
+    []
   );
 
   return (
@@ -237,7 +231,7 @@ const StaffList = () => {
           <div className="text-sm text-gray-600">
             Hiển thị{" "}
             <span className="font-semibold text-blue-600">
-              {filteredStaff.length}
+              {loading ? "..." : filteredStaff.length}
             </span>{" "}
             trong <span className="font-semibold">{totalElements}</span> nhân
             viên
@@ -284,144 +278,177 @@ const StaffList = () => {
         </div>
       )}
 
-      {/* Loading State */}
-      {loading && (
-        <div className="bg-white rounded-lg shadow-sm">
-          <LoadingSpinner />
-        </div>
-      )}
+      {/* Staff Table + Loading Skeleton in tbody */}
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Nhân viên
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Mã NV
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Vai trò
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Phòng ban
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Liên hệ
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Trạng thái
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Ngày tạo
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Thao tác
+                </th>
+              </tr>
+            </thead>
 
-      {/* Staff Table */}
-      {!loading && (
-        <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nhân viên
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Mã NV
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Vai trò
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Phòng ban
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Liên hệ
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Trạng thái
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ngày tạo
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Thao tác
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredStaff.map((staff) => {
-                  const roleInfo = getRoleInfo(staff.role);
-
-                  return (
-                    <tr
-                      key={staff.accountId}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
+            <tbody className="bg-white divide-y divide-gray-200">
+              {loading
+                ? // ===== Skeleton rows (8) =====
+                  [...Array(8)].map((_, idx) => (
+                    <tr key={idx} className="animate-pulse">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                            <span className="text-white font-semibold text-sm">
-                              {staff.name?.charAt(0).toUpperCase() || "?"}
-                            </span>
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {staff.name}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {staff.username}
-                            </div>
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 bg-gray-200 rounded-full" />
+                          <div>
+                            <div className="h-3 w-32 bg-gray-200 rounded mb-2" />
+                            <div className="h-3 w-20 bg-gray-100 rounded" />
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm font-medium text-blue-600">
-                          {staff.staffCode}
-                        </span>
+                        <div className="h-3 w-16 bg-gray-200 rounded" />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(
-                            roleInfo.color
-                          )}`}
-                        >
-                          {roleInfo.label}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {staff.department || "-"}
+                        <div className="h-5 w-28 bg-gray-200 rounded-full" />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {staff.email}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {staff.phone}
-                        </div>
+                        <div className="h-3 w-24 bg-gray-200 rounded" />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(
-                            staff.status
-                          )}`}
-                        >
-                          {staff.enabled ? (
-                            <Unlock className="w-3 h-3" />
-                          ) : (
-                            <Lock className="w-3 h-3" />
-                          )}
-                          {getStatusText(staff.status)}
-                        </span>
+                        <div className="h-3 w-40 bg-gray-200 rounded mb-2" />
+                        <div className="h-3 w-28 bg-gray-100 rounded" />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDate(staff.createdAt)}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-5 w-24 bg-gray-200 rounded-full" />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-3 w-24 bg-gray-200 rounded" />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                          <button
-                            title="Xem chi tiết"
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            title="Chỉnh sửa"
-                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            title="Xóa"
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="h-8 w-8 bg-gray-200 rounded" />
+                          <div className="h-8 w-8 bg-gray-200 rounded" />
+                          <div className="h-8 w-8 bg-gray-200 rounded" />
                         </div>
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  ))
+                : // ===== Data rows =====
+                  filteredStaff.map((staff) => {
+                    const roleInfo = getRoleInfo(staff.role);
+                    return (
+                      <tr
+                        key={staff.accountId}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                              <span className="text-white font-semibold text-sm">
+                                {staff.name?.charAt(0).toUpperCase() || "?"}
+                              </span>
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {staff.name}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {staff.username}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="text-sm font-medium text-blue-600">
+                            {staff.staffCode}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(
+                              roleInfo.color
+                            )}`}
+                          >
+                            {roleInfo.label}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {staff.department || "-"}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {staff.email}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {staff.phone}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(
+                              staff.status
+                            )}`}
+                          >
+                            {staff.enabled ? (
+                              <Unlock className="w-3 h-3" />
+                            ) : (
+                              <Lock className="w-3 h-3" />
+                            )}
+                            {getStatusText(staff.status)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {formatDate(staff.createdAt)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <div className="flex items-center gap-2">
+                            <button
+                              title="Xem chi tiết"
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button
+                              title="Chỉnh sửa"
+                              className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              title="Xóa"
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
 
       {/* Empty State */}
       {!loading && filteredStaff.length === 0 && !error && (

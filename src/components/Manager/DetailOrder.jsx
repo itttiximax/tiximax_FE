@@ -91,7 +91,7 @@ const DetailOrder = ({
           <div className="flex items-center gap-3">
             <Package className="w-6 h-6 text-blue-600" />
             <h2 className="text-2xl font-bold text-gray-900">
-              Chi tiết đơn hàng #{orderData.orderCode}
+              Chi tiết đơn hàng
             </h2>
             {isLoading && (
               <Loader2 className="w-5 h-5 animate-spin text-blue-600" />

@@ -124,7 +124,7 @@ const MergedPaymentOrder = () => {
   const fetchCustomerOrders = async (customerCode) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("jwt"); // ✅token
+      const token = localStorage.getItem("jwt");
 
       if (!token) {
         toast.error("Không tìm thấy token xác thực lỗi ở mergedPaymentOrder");
@@ -181,8 +181,6 @@ const MergedPaymentOrder = () => {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
     });
   };
 
