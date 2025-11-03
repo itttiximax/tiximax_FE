@@ -76,9 +76,9 @@ const ManagerSidebar = () => {
           path: "/manager/quote",
         },
         {
-          text: t("marketing"),
+          text: t("Hoàn tiền"),
           icon: <Speaker />,
-          path: "/manager/ads",
+          path: "/manager/refund",
         },
       ],
     },

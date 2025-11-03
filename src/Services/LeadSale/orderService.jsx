@@ -93,8 +93,53 @@ const orderService = {
       throw error;
     }
   },
-};
 
+  // Get refund orders with pagination
+  getRefundOrders: async (offset = 0, limit = 10) => {
+    try {
+      // Validate parameters
+      if (offset < 0) {
+        throw new Error("Offset must be non-negative");
+      }
+      if (limit <= 0) {
+        throw new Error("Limit must be positive");
+      }
+
+      const response = await api.get(`/orders/refund/${offset}/${limit}`);
+      return response.data;
+    } catch (error) {
+      console.error(
+        `Error fetching refund orders (offset: ${offset}, limit: ${limit}):`,
+        error
+      );
+      throw error;
+    }
+  },
+  // Confirm refund (with refundToCustomer true/false)
+  confirmRefundOrder: async (orderId, refundToCustomer) => {
+    try {
+      if (!orderId) {
+        throw new Error("Order ID is required for refund confirmation");
+      }
+
+      if (refundToCustomer === undefined) {
+        throw new Error("refundToCustomer must be true or false");
+      }
+
+      const response = await api.put(
+        `/orders/refund-confirm/${orderId}?refundToCustomer=${refundToCustomer}`
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        `Error confirming refund for order ${orderId} (refundToCustomer: ${refundToCustomer}):`,
+        error
+      );
+      throw error;
+    }
+  },
+};
 export default orderService;
 
 export const createOrderService = orderService.createOrder;

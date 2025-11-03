@@ -97,6 +97,8 @@ import ManagerPromotion from "../components/Manager/ManagerPromotion";
 import ImportPacking from "../components/WarehouseForeign/ImportPacking";
 import ResetPassword from "../Page/ResetPassword";
 import InventoryWarehouse from "../Services/Warehouse/InventoryWarehouse";
+import RefundOrder from "../components/Order/RefundOrder";
+import BankAccountList from "../Services/Manager/BankAccountList";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -173,8 +175,8 @@ const Router = createBrowserRouter([
       { path: "stafflead", element: <StaffListPermission /> },
       { path: "createstaff", element: <CreateAccountStaff /> },
       { path: "quote", element: <PaymentOrderList /> },
-      { path: "ads", element: <NotFound /> },
-      { path: "cost/paylater", element: <NotFound /> },
+      { path: "refund", element: <RefundOrder /> },
+      { path: "cost/paylater", element: <BankAccountList /> },
       { path: "cost/paybefore", element: <NotFound /> },
       { path: "routes", element: <ManagerRoutes /> },
       { path: "transfer", element: <ManagerDestination /> },
