@@ -103,14 +103,14 @@ const LeadSaleSideBar = () => {
               label: "Thanh toán vận chuyển",
             },
             {
-              to: "/lead-sale/auction-payment",
-              icon: Wallet,
-              label: "Thanh toán sau đấu giá ",
-            },
-            {
               to: "/lead-sale/divide-payment",
               icon: Rows2,
               label: "Thanh toán tách đơn ",
+            },
+            {
+              to: "/lead-sale/auction-payment",
+              icon: Wallet,
+              label: "Thanh toán sau đấu giá ",
             },
           ],
           isOpen: isPaymentSupportDropdownOpen,
@@ -127,11 +127,11 @@ const LeadSaleSideBar = () => {
               icon: Banknote,
               label: "Quy trình đơn hàng",
             },
-            {
-              to: "/lead-sale/ship-payment",
-              icon: Truck,
-              label: "Xác nhận vận chuyển",
-            },
+            // {
+            //   to: "/lead-sale/ship-payment",
+            //   icon: Truck,
+            //   label: "Xác nhận vận chuyển",
+            // },
           ],
           isOpen: isQuotationDropdownOpen,
           onToggle: () => setIsQuotationDropdownOpen(!isQuotationDropdownOpen),
@@ -391,7 +391,7 @@ const LeadSaleSideBar = () => {
           {isExpanded ? (
             <>
               <span className="text-sm font-medium text-slate-700 mx-auto">
-                Trường phòng
+                Trường nhóm
               </span>
               <ChevronLeft className="w-6 h-6 text-slate-600" />
             </>

@@ -7,12 +7,17 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
-import { LineChart, Line } from "recharts";
-import { PieChart, Pie, Cell } from "recharts";
 
 const DashboardWarehouse = () => {
-  // Expanded Inventory Data - Chi tiết và thực tế hơn
+  const COMPACT = true;
+
+  // ===== Data giữ nguyên =====
   const inventoryData = [
     { category: "Electronics", stock: 4850, lowStock: 520 },
     { category: "Smartphones", stock: 3200, lowStock: 380 },
@@ -36,7 +41,6 @@ const DashboardWarehouse = () => {
     { category: "Pantry Items", stock: 3200, lowStock: 420 },
   ];
 
-  // Realistic Monthly Sales Data (2023-2024)
   const salesData = [
     { month: "Jan 2023", sales: 45000, orders: 520 },
     { month: "Feb 2023", sales: 38000, orders: 480 },
@@ -58,7 +62,6 @@ const DashboardWarehouse = () => {
     { month: "Jun 2024", sales: 68000, orders: 780 },
   ];
 
-  // Detailed Product Distribution
   const productDistribution = [
     { name: "Electronics", value: 18 },
     { name: "Clothing", value: 28 },
@@ -68,7 +71,6 @@ const DashboardWarehouse = () => {
     { name: "Home & Garden", value: 6 },
   ];
 
-  // Category Performance Data
   const categoryPerformance = [
     { name: "Electronics", revenue: 28500, growth: 12.5 },
     { name: "Clothing", revenue: 42300, growth: 8.2 },
@@ -78,7 +80,6 @@ const DashboardWarehouse = () => {
     { name: "Home & Garden", revenue: 8200, growth: 22.4 },
   ];
 
-  // Top Products
   const topProducts = [
     { product: "Wireless Earbuds Pro", sales: 1240, revenue: 74400 },
     { product: "Cotton T-Shirt Pack", sales: 3200, revenue: 64000 },
@@ -87,31 +88,36 @@ const DashboardWarehouse = () => {
     { product: "Organic Coffee Beans", sales: 2150, revenue: 32250 },
   ];
 
-  // Custom Tooltip cho Bar Chart
+  // ====== Compact sizes ======
+  const chartHeightBig = COMPACT ? 360 : 500;
+  const chartHeightSmall = COMPACT ? 220 : 300;
+  const xAxisTickSize = COMPACT ? 10 : 12;
+  const yAxisTickSize = COMPACT ? 10 : 12;
+  const xAxisHeightBig = COMPACT ? 70 : 100;
+  const xAxisHeightSmall = COMPACT ? 60 : 80;
+
+  // Tooltips gọn hơn
   const CustomBarTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-black/80 backdrop-blur-sm rounded-lg p-3 text-white text-sm">
-          <p className="font-semibold">{`${payload[0].payload.category}`}</p>
-          <p>{`Current Stock: ${payload[0].value.toLocaleString()}`}</p>
-          {payload[1] && (
-            <p>{`Low Stock: ${payload[1].value.toLocaleString()}`}</p>
-          )}
+        <div className="bg-black/80 rounded-md p-2 text-white text-[11px]">
+          <p className="font-semibold">{payload[0].payload.category}</p>
+          <p>Current: {payload[0].value.toLocaleString()}</p>
+          {payload[1] && <p>Low: {payload[1].value.toLocaleString()}</p>}
         </div>
       );
     }
     return null;
   };
 
-  // Custom Tooltip cho Line Chart
   const CustomLineTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-black/80 backdrop-blur-sm rounded-lg p-3 text-white text-sm">
-          <p className="font-semibold">{`${payload[0].payload.month}`}</p>
-          <p>{`Sales: $${payload[0].value.toLocaleString()}`}</p>
+        <div className="bg-black/80 rounded-md p-2 text-white text-[11px]">
+          <p className="font-semibold">{payload[0].payload.month}</p>
+          <p>Sales: ${payload[0].value.toLocaleString()}</p>
           {payload[0].payload.orders && (
-            <p>{`Orders: ${payload[0].payload.orders}`}</p>
+            <p>Orders: {payload[0].payload.orders}</p>
           )}
         </div>
       );
@@ -127,90 +133,132 @@ const DashboardWarehouse = () => {
   );
 
   return (
-    <div className="min-h-screen  p-6 font-sans">
+    <div
+      className={`min-h-screen p-4 md:p-5 ${
+        COMPACT ? "text-[13px]" : "text-base"
+      } font-sans`}
+    >
       {/* Header */}
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 mb-8 shadow-2xl border border-white/20">
-        <h1 className="text-5xl font-black text-black mb-6">
-          📦 Warehouse Dashboard
+      <div
+        className={`bg-white/95 backdrop-blur-xl ${
+          COMPACT ? "rounded-2xl p-5 mb-5" : "rounded-3xl p-8 mb-8"
+        } shadow-xl border border-white/20`}
+      >
+        <h1
+          className={`${
+            COMPACT ? "text-3xl" : "text-5xl"
+          } font-black text-black mb-4`}
+        >
+          Warehouse Dashboard
         </h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl text-center shadow-lg border border-blue-200">
-            <div className="text-3xl font-bold text-blue-700">
+        <div
+          className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${
+            COMPACT ? "gap-3" : "gap-4"
+          }`}
+        >
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl text-center shadow border border-blue-200">
+            <div
+              className={`${
+                COMPACT ? "text-2xl" : "text-3xl"
+              } font-bold text-blue-700`}
+            >
               ${(totalRevenue / 1000).toFixed(0)}K
             </div>
-            <div className="text-sm text-blue-600 font-medium mt-1">
+            <div className="text-xs text-blue-600 font-medium mt-1">
               Total Revenue
             </div>
-            <div className="text-xs text-blue-500 mt-2">Last 18 months</div>
+            <div className="text-[10px] text-blue-500 mt-1">Last 18 months</div>
           </div>
-          <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl text-center shadow-lg border border-green-200">
-            <div className="text-3xl font-bold text-green-700">
+          <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl text-center shadow border border-green-200">
+            <div
+              className={`${
+                COMPACT ? "text-2xl" : "text-3xl"
+              } font-bold text-green-700`}
+            >
               {(totalItems / 1000).toFixed(1)}K
             </div>
-            <div className="text-sm text-green-600 font-medium mt-1">
+            <div className="text-xs text-green-600 font-medium mt-1">
               Total Items
             </div>
-            <div className="text-xs text-green-500 mt-2">In stock</div>
+            <div className="text-[10px] text-green-500 mt-1">In stock</div>
           </div>
-          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-2xl text-center shadow-lg border border-yellow-200">
-            <div className="text-3xl font-bold text-yellow-700">
+          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-xl text-center shadow border border-yellow-200">
+            <div
+              className={`${
+                COMPACT ? "text-2xl" : "text-3xl"
+              } font-bold text-yellow-700`}
+            >
               {inventoryData.length}
             </div>
-            <div className="text-sm text-yellow-600 font-medium mt-1">
+            <div className="text-xs text-yellow-600 font-medium mt-1">
               Categories
             </div>
-            <div className="text-xs text-yellow-500 mt-2">Product types</div>
+            <div className="text-[10px] text-yellow-500 mt-1">
+              Product types
+            </div>
           </div>
-          <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-2xl text-center shadow-lg border border-red-200">
-            <div className="text-3xl font-bold text-red-700">
+          <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-xl text-center shadow border border-red-200">
+            <div
+              className={`${
+                COMPACT ? "text-2xl" : "text-3xl"
+              } font-bold text-red-700`}
+            >
               {(totalLowStock / 1000).toFixed(1)}K
             </div>
-            <div className="text-sm text-red-600 font-medium mt-1">
+            <div className="text-xs text-red-600 font-medium mt-1">
               Low Stock
             </div>
-            <div className="text-xs text-red-500 mt-2">Needs restock</div>
+            <div className="text-[10px] text-red-500 mt-1">Needs restock</div>
           </div>
         </div>
       </div>
 
-      {/* Charts Layout: BIG TOP + 2 SMALL BOTTOM */}
-      <div className="space-y-6">
-        {/* 1. BIG Inventory Levels (Full Width) */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20">
-          <h2 className="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-3">
-            📊 Inventory Levels by Category
+      {/* Charts */}
+      <div className="space-y-5">
+        {/* 1. Big Inventory */}
+        <div
+          className={`bg-white/95 backdrop-blur-xl ${
+            COMPACT ? "rounded-2xl p-5" : "rounded-3xl p-8"
+          } shadow-xl border border-white/20`}
+        >
+          <h2
+            className={`${
+              COMPACT ? "text-2xl" : "text-3xl"
+            } font-bold text-gray-800 mb-4 flex items-center gap-2`}
+          >
+            Inventory Levels by Category
           </h2>
-          <ResponsiveContainer width="100%" height={500}>
+          <ResponsiveContainer width="100%" height={chartHeightBig}>
             <BarChart
               data={inventoryData}
-              margin={{ top: 20, right: 30, left: 0, bottom: 20 }}
+              margin={{ top: 10, right: 16, left: 0, bottom: 10 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
               <XAxis
                 dataKey="category"
                 stroke="#64748b"
-                fontSize={12}
+                fontSize={xAxisTickSize}
                 angle={-45}
                 textAnchor="end"
-                height={100}
+                height={xAxisHeightBig}
                 tick={{ fill: "#64748b" }}
               />
               <YAxis
                 stroke="#64748b"
-                fontSize={12}
+                fontSize={yAxisTickSize}
                 tick={{ fill: "#64748b" }}
               />
               <Tooltip content={<CustomBarTooltip />} />
               <Bar
                 dataKey="stock"
                 fill="url(#stockGradient)"
-                radius={[10, 10, 0, 0]}
+                radius={[8, 8, 0, 0]}
                 name="Current Stock"
               />
               <Bar
                 dataKey="lowStock"
                 fill="url(#lowStockGradient)"
-                radius={[10, 10, 0, 0]}
+                radius={[8, 8, 0, 0]}
                 name="Low Stock Threshold"
               />
               <defs>
@@ -233,28 +281,36 @@ const DashboardWarehouse = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* 2. 2 SMALL Charts Side by Side */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Sales Trend (Small) */}
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20">
-            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-3">
-              📈 Sales Trend (18 Months)
+        {/* 2. Two small charts */}
+        <div
+          className={`grid grid-cols-1 lg:grid-cols-2 ${
+            COMPACT ? "gap-4" : "gap-6"
+          }`}
+        >
+          {/* Sales Trend */}
+          <div
+            className={`bg-white/95 backdrop-blur-xl ${
+              COMPACT ? "rounded-2xl p-4" : "rounded-3xl p-6"
+            } shadow-xl border border-white/20`}
+          >
+            <h2 className="text-lg font-bold text-gray-800 mb-2">
+              Sales Trend (18 Months)
             </h2>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={chartHeightSmall}>
               <LineChart data={salesData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis
                   dataKey="month"
                   stroke="#64748b"
-                  fontSize={10}
+                  fontSize={xAxisTickSize}
                   angle={-45}
                   textAnchor="end"
-                  height={80}
+                  height={xAxisHeightSmall}
                   tick={{ fill: "#64748b" }}
                 />
                 <YAxis
                   stroke="#64748b"
-                  fontSize={10}
+                  fontSize={yAxisTickSize}
                   tick={{ fill: "#64748b" }}
                 />
                 <Tooltip content={<CustomLineTooltip />} />
@@ -262,9 +318,9 @@ const DashboardWarehouse = () => {
                   type="monotone"
                   dataKey="sales"
                   stroke="url(#salesGradient)"
-                  strokeWidth={3}
+                  strokeWidth={2.5}
                   dot={false}
-                  activeDot={{ r: 6, stroke: "#0891b2", strokeWidth: 2 }}
+                  activeDot={{ r: 5, stroke: "#0891b2", strokeWidth: 2 }}
                 />
                 <defs>
                   <linearGradient
@@ -282,12 +338,16 @@ const DashboardWarehouse = () => {
             </ResponsiveContainer>
           </div>
 
-          {/* Product Distribution (Small) */}
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20">
-            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-3">
-              🥧 Product Distribution
+          {/* Product Distribution */}
+          <div
+            className={`bg-white/95 backdrop-blur-xl ${
+              COMPACT ? "rounded-2xl p-4" : "rounded-3xl p-6"
+            } shadow-xl border border-white/20`}
+          >
+            <h2 className="text-lg font-bold text-gray-800 mb-2">
+              Product Distribution
             </h2>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={chartHeightSmall}>
               <PieChart>
                 <Pie
                   data={productDistribution}
@@ -295,16 +355,11 @@ const DashboardWarehouse = () => {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  outerRadius={90}
-                  innerRadius={50}
+                  outerRadius={COMPACT ? 78 : 90}
+                  innerRadius={COMPACT ? 44 : 50}
                   paddingAngle={2}
                   label={({ name, value }) => `${name} ${value}%`}
                   labelLine={false}
-                  labelStyle={{
-                    fontSize: "11px",
-                    fontWeight: "bold",
-                    fill: "#333",
-                  }}
                 >
                   {productDistribution.map((entry, index) => (
                     <Cell
@@ -328,26 +383,34 @@ const DashboardWarehouse = () => {
           </div>
         </div>
 
-        {/* 3. Additional Metrics Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* 3. Metrics row */}
+        <div
+          className={`grid grid-cols-1 md:grid-cols-2 ${
+            COMPACT ? "gap-4" : "gap-6"
+          }`}
+        >
           {/* Category Performance */}
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">
-              💼 Category Performance
+          <div
+            className={`bg-white/95 backdrop-blur-xl ${
+              COMPACT ? "rounded-2xl p-4" : "rounded-3xl p-6"
+            } shadow-xl border border-white/20`}
+          >
+            <h2 className="text-lg font-bold text-gray-800 mb-2">
+              Category Performance
             </h2>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {categoryPerformance.map((cat, idx) => (
                 <div key={idx} className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-gray-700 text-sm">
+                    <p className="font-semibold text-gray-700 text-[13px]">
                       {cat.name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-[11px] text-gray-500">
                       ${(cat.revenue / 1000).toFixed(1)}K
                     </p>
                   </div>
                   <div
-                    className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                       cat.growth >= 0
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
@@ -362,30 +425,34 @@ const DashboardWarehouse = () => {
           </div>
 
           {/* Top Products */}
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">
-              🏆 Top 5 Products
+          <div
+            className={`bg-white/95 backdrop-blur-xl ${
+              COMPACT ? "rounded-2xl p-4" : "rounded-3xl p-6"
+            } shadow-xl border border-white/20`}
+          >
+            <h2 className="text-lg font-bold text-gray-800 mb-2">
+              Top 5 Products
             </h2>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {topProducts.map((prod, idx) => (
                 <div key={idx} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                      <span className="font-bold text-blue-600 text-sm">
+                  <div className="flex items-center gap-2.5 flex-1">
+                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center">
+                      <span className="font-bold text-blue-600 text-xs">
                         #{idx + 1}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-700 text-sm truncate">
+                      <p className="font-semibold text-gray-700 text-[13px] truncate">
                         {prod.product}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-[11px] text-gray-500">
                         {prod.sales} units sold
                       </p>
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="font-bold text-gray-800">
+                    <p className="font-bold text-gray-800 text-[13px]">
                       ${(prod.revenue / 1000).toFixed(1)}K
                     </p>
                   </div>
@@ -395,6 +462,9 @@ const DashboardWarehouse = () => {
           </div>
         </div>
       </div>
+
+      {/* SVG gradients used above */}
+      {/* (Đặt cuối cũng được, đã có trong chart defs) */}
     </div>
   );
 };

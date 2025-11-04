@@ -80,7 +80,6 @@ import StaffListPermission from "../components/Manager/StaffListPermission";
 import PackingFlyingList from "../components/WarehouseDomestic/PackingFlyingList";
 import ExportList from "../components/WarehouseDomestic/ExportList";
 import CreateDepositForm from "../components/Order/CreateDepositForm";
-import PaymentShipList from "../components/PaymentOrder/PaymentShipList";
 import MergedPaymentShip from "../components/PaymentOrder/MergedPaymentShip";
 import MergedPaymentOrder from "../components/PaymentOrder/MergedPaymentOrder";
 import PaymentOrderList from "../components/PaymentOrder/PaymentOrderList";
@@ -100,6 +99,7 @@ import InventoryWarehouse from "../Services/Warehouse/InventoryWarehouse";
 import RefundOrder from "../components/Order/RefundOrder";
 import ManagerBankAccountList from "../components/Manager/ManagerBankAccountList";
 import DividePaymentOrder from "../components/PaymentOrder/DividePaymentOrder";
+import UpdateShipmentCodeList from "../components/StaffPurchaser/UpdateShipmentCodeList";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -218,7 +218,7 @@ const Router = createBrowserRouter([
       { path: "tracking", element: <NotFound /> },
       { path: "orders/tracking", element: <ManagerOrder /> },
       { path: "order-payment", element: <PaymentOrderList /> },
-      { path: "ship-payment", element: <PaymentShipList /> },
+      // { path: "ship-payment", element: <PaymentShipList /> },
       { path: "auction-payment", element: <AuctionPayment /> },
       { path: "divide-payment", element: <DividePaymentOrder /> },
       { path: "createpaymentsupport", element: <MergedPaymentOrder /> },
@@ -249,7 +249,7 @@ const Router = createBrowserRouter([
       { path: "deposit", element: <CreateDepositForm /> },
       { path: "auction", element: <CreateAuctionForm /> },
       { path: "order-payment", element: <PaymentOrderList /> },
-      { path: "ship-payment", element: <PaymentShipList /> },
+      // { path: "ship-payment", element: <PaymentShipList /> },
       { path: "createpaymentsupport", element: <MergedPaymentOrder /> },
       { path: "createpaymentshipping", element: <MergedPaymentShip /> },
       { path: "orders/pending", element: <ManagerOrder /> },
@@ -287,7 +287,7 @@ const Router = createBrowserRouter([
       { path: "dashboard", element: <DashboardPurchase /> },
       { path: "orders", element: <OrderLinkList /> },
       { path: "auction", element: <OrderAuctionList /> },
-      { path: "inventory", element: <NotFound /> },
+      { path: "inventory", element: <UpdateShipmentCodeList /> },
       { path: "inventory/audit", element: <NotFound /> },
     ],
   },

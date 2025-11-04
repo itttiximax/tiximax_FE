@@ -21,7 +21,7 @@ import orderlinkService from "../../Services/StaffPurchase/orderlinkService";
 import DetailOrderLink from "./DetailOrderLink";
 import CreateAuctionPurchase from "./CreateAuctionPurchase";
 import CancelPurchase from "./CancelPurchase";
-import PinOrder from "./PinOrder"; // NEW
+import PinOrder from "./PinOrder";
 
 const OrderAuctionList = () => {
   const [orders, setOrders] = useState([]);
@@ -519,6 +519,14 @@ const OrderAuctionList = () => {
                                       </span>
                                     </div>
                                     <div>
+                                      Phân loại:{" "}
+                                      <span className="font-medium">
+                                        {link.classify !== "string"
+                                          ? link.classify
+                                          : "N/A"}
+                                      </span>
+                                    </div>
+                                    <div>
                                       Note:{" "}
                                       <span className="font-medium">
                                         {link.note || "N/A"}
@@ -530,7 +538,7 @@ const OrderAuctionList = () => {
                                 {/* Actions & Status */}
                                 <div className="lg:col-span-1 text-right">
                                   <div className="text-sm font-semibold text-gray-900 mb-2">
-                                    {formatCurrency(link.finalPriceVnd)}
+                                    {formatCurrency(link.priceWeb)}
                                   </div>
                                   <div className="flex flex-col gap-1.5 items-end">
                                     <span

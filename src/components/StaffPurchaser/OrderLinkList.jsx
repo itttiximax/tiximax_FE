@@ -23,7 +23,7 @@ import DetailOrderLink from "./DetailOrderLink";
 import CreatePurchase from "./CreatePurchase";
 import CancelPurchase from "./CancelPurchase";
 import PurchaseLater from "./PurchaseLater";
-import PinOrder from "./PinOrder"; // NEW
+import PinOrder from "./PinOrder";
 
 const OrderLinkList = () => {
   const [orders, setOrders] = useState([]);
@@ -544,6 +544,14 @@ const OrderLinkList = () => {
                                       <span className="font-medium">
                                         {link.groupTag !== "string"
                                           ? link.groupTag
+                                          : "N/A"}
+                                      </span>
+                                    </div>
+                                    <div>
+                                      Phân loại:{" "}
+                                      <span className="font-medium">
+                                        {link.classify !== "string"
+                                          ? link.classify
                                           : "N/A"}
                                       </span>
                                     </div>
