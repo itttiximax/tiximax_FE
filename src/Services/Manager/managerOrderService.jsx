@@ -73,21 +73,21 @@ const managerOrderService = {
     }
   },
   // Get all orders without pagination
-  getAllOrders: async () => {
+  getOrdersPaginated: async (page = 0, size = 10) => {
     try {
-      const response = await api.get(`/orders`);
-      return response.data;
+      const response = await api.get(`/orders/${page}/${size}`);
+      return {
+        content: response.data.content || [],
+        totalPages: response.data.totalPages || 1,
+        totalElements: response.data.totalElements || 0,
+        number: response.data.number || 0,
+        size: response.data.size || size,
+      };
     } catch (error) {
-      console.error(`Error fetching all orders:`, error);
-
-      if (error.response?.status === 404) {
-        throw new Error("API endpoint not found");
-      } else if (error.response?.status === 403) {
-        throw new Error("Access denied");
-      } else if (error.response?.status === 500) {
-        throw new Error("Server error");
-      }
-
+      console.error(`Error fetching orders page ${page}, size ${size}:`, error);
+      if (error.response?.status === 404) throw new Error("API endpoint not found");
+      if (error.response?.status === 403) throw new Error("Access denied");
+      if (error.response?.status === 500) throw new Error("Server error");
       throw error;
     }
   },
