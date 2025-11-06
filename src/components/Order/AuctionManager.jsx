@@ -572,7 +572,7 @@ const AuctionManager = ({
                     </div>
                     <div className="col-span-4">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Phụ phí
+                        Phụ phí (VNĐ)
                       </label>
                       {productType?.fee ? (
                         <input
