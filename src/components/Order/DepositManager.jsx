@@ -384,7 +384,7 @@ const DepositManager = ({
                     </div>
                     <div className="col-span-3">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Phụ phí{" "}
+                        Phụ phí (VNĐ){" "}
                         {productType?.fee && (
                           <span className="text-red-500">*</span>
                         )}
@@ -410,7 +410,7 @@ const DepositManager = ({
                     </div>
                     <div className="col-span-3">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Phí khác <span className="text-red-500">*</span>
+                        Phí khác (VNĐ)
                       </label>
                       <input
                         type="text"
