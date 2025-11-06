@@ -236,7 +236,7 @@ const CreateDepositForm = () => {
       return;
     }
 
-    if (!form.exchangeRate || Number(form.exchangeRate) <= 0) {
+    if (!form.exchangeRate || Number(form.exchangeRate) < 0) {
       toast.error("Tỷ giá phải là một số dương");
       setShowConfirmDialog(false);
       return;
@@ -281,7 +281,7 @@ const CreateDepositForm = () => {
         return;
       }
 
-      if (!product.differentFee || Number(product.differentFee) <= 0) {
+      if (!product.differentFee || Number(product.differentFee) < 0) {
         toast.error(`Kiện hàng ${i + 1}: Phí khác phải là một số dương`);
         setShowConfirmDialog(false);
         return;

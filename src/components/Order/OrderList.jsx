@@ -12,7 +12,10 @@ import managerOrderService from "../../Services/Manager/managerOrderService";
 import DetailOrder from "../Manager/DetailOrder";
 
 const OrderList = () => {
-  const [allOrders, setAllOrders] = useState([]);
+  // Dữ liệu phân trang từ backend
+  const [orders, setOrders] = useState([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -26,7 +29,7 @@ const OrderList = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
 
-  // Detail modal states
+  // Detail modal
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -35,34 +38,38 @@ const OrderList = () => {
     () => managerOrderService.getAvailableStatuses(),
     []
   );
-
   const pageSizeOptions = [10, 20, 30, 50, 100];
 
-  // Fetch all orders
-  const fetchAllOrders = useCallback(async () => {
-    setError(null);
+  // Fetch orders với phân trang
+  const fetchOrders = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      const response = await managerOrderService.getAllOrders();
-      setAllOrders(Array.isArray(response) ? response : []);
-      setCurrentPage(0); // Reset to first page
+      const result = await managerOrderService.getOrdersPaginated(
+        currentPage,
+        pageSize
+      );
+      setOrders(result.content || []);
+      setTotalPages(result.totalPages || 1);
+      setTotalElements(result.totalElements || 0);
     } catch (err) {
       setError(err.message || "Không thể tải danh sách đơn hàng");
-      setAllOrders([]);
+      setOrders([]);
+      setTotalPages(1);
+      setTotalElements(0);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentPage, pageSize]);
 
   useEffect(() => {
-    fetchAllOrders();
-  }, [fetchAllOrders]);
+    fetchOrders();
+  }, [fetchOrders]);
 
-  // Filter logic
+  // Lọc dữ liệu (frontend - chỉ áp dụng trên trang hiện tại)
   const filteredOrders = useMemo(() => {
-    let filtered = [...allOrders];
+    let filtered = [...orders];
 
-    // Search
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -74,25 +81,23 @@ const OrderList = () => {
       );
     }
 
-    // Status filter
     if (selectedStatus !== "ALL") {
       filtered = filtered.filter((order) => order.status === selectedStatus);
     }
 
-    // Order type filter
     if (selectedOrderType !== "ALL") {
       filtered = filtered.filter(
         (order) => order.orderType === selectedOrderType
       );
     }
 
-    // Date range filter
     if (dateFilter.from) {
       const fromDate = new Date(dateFilter.from);
       filtered = filtered.filter(
         (order) => new Date(order.createdAt) >= fromDate
       );
     }
+
     if (dateFilter.to) {
       const toDate = new Date(dateFilter.to);
       toDate.setHours(23, 59, 59, 999);
@@ -102,33 +107,28 @@ const OrderList = () => {
     }
 
     return filtered;
-  }, [allOrders, searchTerm, selectedStatus, selectedOrderType, dateFilter]);
+  }, [orders, searchTerm, selectedStatus, selectedOrderType, dateFilter]);
 
-  // Pagination logic
-  const paginatedOrders = useMemo(() => {
-    const startIndex = currentPage * pageSize;
-    const endIndex = startIndex + pageSize;
-    return filteredOrders.slice(startIndex, endIndex);
-  }, [filteredOrders, currentPage, pageSize]);
-
-  const totalPages = Math.ceil(filteredOrders.length / pageSize) || 1;
-
-  // Handlers
+  // Pagination handlers
   const handlePageChange = useCallback(
     (newPage) => {
-      if (newPage >= 0 && newPage < totalPages) {
+      if (newPage >= 0 && newPage < totalPages && !loading) {
         setCurrentPage(newPage);
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     },
-    [totalPages]
+    [totalPages, loading]
   );
 
-  const handlePageSizeChange = useCallback((newSize) => {
-    setPageSize(newSize);
-    setCurrentPage(0);
-  }, []);
+  const handlePageSizeChange = useCallback(
+    (newSize) => {
+      setPageSize(newSize);
+      setCurrentPage(0);
+    },
+    []
+  );
 
+  // Export CSV (chỉ dữ liệu trang hiện tại + đã lọc)
   const handleExport = useCallback(() => {
     if (filteredOrders.length === 0) {
       alert("Không có dữ liệu để xuất");
@@ -163,11 +163,13 @@ const OrderList = () => {
     });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `orders_${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `orders_page${currentPage + 1}_${new Date()
+      .toISOString()
+      .split("T")[0]}.csv`;
     link.click();
-  }, [filteredOrders]);
+  }, [filteredOrders, currentPage]);
 
-  // Detail order handlers
+  // Detail order
   const fetchOrderDetail = useCallback(async (orderId) => {
     setLoadingDetail(true);
     try {
@@ -196,7 +198,7 @@ const OrderList = () => {
     setLoadingDetail(false);
   }, []);
 
-  // Utility functions
+  // Utility
   const formatDate = useCallback((dateString) => {
     return dateString ? new Date(dateString).toLocaleString("vi-VN") : "-";
   }, []);
@@ -252,7 +254,6 @@ const OrderList = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -264,7 +265,6 @@ const OrderList = () => {
             />
           </div>
 
-          {/* Status Filter */}
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
@@ -278,7 +278,6 @@ const OrderList = () => {
             ))}
           </select>
 
-          {/* Order Type Filter */}
           <select
             value={selectedOrderType}
             onChange={(e) => setSelectedOrderType(e.target.value)}
@@ -289,7 +288,6 @@ const OrderList = () => {
             <option value="VAN_CHUYEN">Vận chuyển</option>
           </select>
 
-          {/* Date From */}
           <input
             type="date"
             value={dateFilter.from}
@@ -297,12 +295,10 @@ const OrderList = () => {
               setDateFilter({ ...dateFilter, from: e.target.value })
             }
             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Từ ngày"
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-          {/* Date To */}
           <input
             type="date"
             value={dateFilter.to}
@@ -310,10 +306,8 @@ const OrderList = () => {
               setDateFilter({ ...dateFilter, to: e.target.value })
             }
             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Đến ngày"
           />
 
-          {/* Export Button */}
           <button
             onClick={handleExport}
             disabled={loading || filteredOrders.length === 0}
@@ -324,7 +318,6 @@ const OrderList = () => {
           </button>
         </div>
 
-        {/* Filter Results Info */}
         <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
           <div className="text-sm text-gray-600">
             Hiển thị{" "}
@@ -332,7 +325,7 @@ const OrderList = () => {
               {loading ? "..." : filteredOrders.length}
             </span>{" "}
             trong tổng số{" "}
-            <span className="font-semibold">{allOrders.length}</span> đơn hàng
+            <span className="font-semibold">{totalElements}</span> đơn hàng
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Hiển thị:</span>
@@ -351,7 +344,7 @@ const OrderList = () => {
         </div>
       </div>
 
-      {/* Error State */}
+      {/* Error */}
       {error && (
         <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-4">
           <div className="flex">
@@ -364,7 +357,7 @@ const OrderList = () => {
               </div>
               <div className="mt-4">
                 <button
-                  onClick={fetchAllOrders}
+                  onClick={fetchOrders}
                   disabled={loading}
                   className="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-2 rounded-md text-sm disabled:opacity-50"
                 >
@@ -376,7 +369,7 @@ const OrderList = () => {
         </div>
       )}
 
-      {/* Orders Table with loading skeleton */}
+      {/* Table */}
       <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -408,11 +401,9 @@ const OrderList = () => {
                 </th>
               </tr>
             </thead>
-
             <tbody className="bg-white divide-y divide-gray-200">
               {loading
-                ? // Skeleton rows
-                  [...Array(8)].map((_, idx) => (
+                ? [...Array(8)].map((_, idx) => (
                     <tr key={idx} className="animate-pulse">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="h-3 w-28 bg-gray-200 rounded mb-2" />
@@ -442,7 +433,7 @@ const OrderList = () => {
                       </td>
                     </tr>
                   ))
-                : paginatedOrders.map((order) => {
+                : filteredOrders.map((order) => {
                     const orderStatus = availableStatuses.find(
                       (s) => s.key === order.status
                     );
@@ -494,7 +485,7 @@ const OrderList = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {formatDate(order.createdAt)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <button
                             onClick={() =>
                               handleViewDetail(order.orderId, order)
@@ -521,7 +512,7 @@ const OrderList = () => {
             Không tìm thấy đơn hàng
           </p>
           <p className="text-sm text-gray-500">
-            {allOrders.length === 0
+            {totalElements === 0
               ? "Chưa có đơn hàng nào trong hệ thống"
               : "Thử thay đổi điều kiện lọc"}
           </p>
@@ -529,7 +520,7 @@ const OrderList = () => {
       )}
 
       {/* Pagination */}
-      {!loading && filteredOrders.length > 0 && totalPages > 1 && (
+      {!loading && totalElements > 0 && totalPages > 1 && (
         <div className="flex items-center justify-between mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 px-6 py-4">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
@@ -567,7 +558,7 @@ const OrderList = () => {
         </div>
       )}
 
-      {/* Detail Order Modal */}
+      {/* Detail Modal */}
       {showDetailModal && selectedOrder && (
         <DetailOrder
           orderData={selectedOrder}
