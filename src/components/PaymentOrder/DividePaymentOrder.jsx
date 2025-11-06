@@ -13,6 +13,30 @@ import {
   CheckSquare,
   Square,
 } from "lucide-react";
+import CreateDividePaymentShip from "./CreateDividePaymentShip";
+
+// Helper: bóc tách lỗi backend để hiện toast dễ hiểu
+const getErrorMessage = (error) => {
+  if (error?.response) {
+    const be =
+      error.response.data?.error ||
+      error.response.data?.message ||
+      error.response.data?.detail ||
+      error.response.data?.errors;
+    if (be) {
+      if (typeof be === "object" && !Array.isArray(be)) {
+        return Object.entries(be)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join(", ");
+      } else if (Array.isArray(be)) return be.join(", ");
+      return be;
+    }
+    return `Lỗi ${error.response.status}: ${
+      error.response.statusText || "Không xác định"
+    }`;
+  } else if (error?.request) return "Không thể kết nối tới server.";
+  return error?.message || "Đã xảy ra lỗi không xác định";
+};
 
 const DividePaymentOrder = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -31,6 +55,15 @@ const DividePaymentOrder = () => {
     return items
       .filter((it) => selectedItems.includes(it.linkId))
       .reduce((sum, it) => sum + (it.finalPriceVnd || 0), 0);
+  }, [items, selectedItems]);
+
+  // trackingCodes hợp lệ (unique, bỏ falsy)
+  const selectedShipmentCodes = useMemo(() => {
+    const codes = items
+      .filter((it) => selectedItems.includes(it.linkId))
+      .map((it) => it.shipmentCode)
+      .filter(Boolean);
+    return Array.from(new Set(codes));
   }, [items, selectedItems]);
 
   const fetchPartialOrders = async (customer) => {
@@ -55,7 +88,7 @@ const DividePaymentOrder = () => {
       }
     } catch (e) {
       console.error(e);
-      toast.error("Lỗi khi tải danh sách sản phẩm");
+      toast.error(`Lỗi khi tải danh sách sản phẩm: ${getErrorMessage(e)}`);
     } finally {
       setLoading(false);
     }
@@ -85,11 +118,8 @@ const DividePaymentOrder = () => {
   };
 
   const handleSelectAll = () => {
-    if (selectedItems.length === items.length) {
-      setSelectedItems([]);
-    } else {
-      setSelectedItems(items.map((it) => it.linkId));
-    }
+    if (selectedItems.length === items.length) setSelectedItems([]);
+    else setSelectedItems(items.map((it) => it.linkId));
   };
 
   return (
@@ -200,16 +230,25 @@ const DividePaymentOrder = () => {
                           x{item.quantity}
                         </span>
                       </p>
+
                       <div className="flex items-center gap-3 text-sm text-gray-600 mt-1">
-                        <a
-                          href={item.productLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-blue-600 hover:underline"
-                        >
-                          <LinkIcon className="w-4 h-4" />
-                          Link sản phẩm
-                        </a>
+                        {item.productLink ? (
+                          <a
+                            href={item.productLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                          >
+                            <LinkIcon className="w-4 h-4" />
+                            Link sản phẩm
+                          </a>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-gray-400">
+                            <LinkIcon className="w-4 h-4" />
+                            Không có link
+                          </span>
+                        )}
+
                         {item.trackingCode && (
                           <span className="inline-flex items-center gap-1 text-gray-600">
                             <CreditCard className="w-4 h-4" />
@@ -269,20 +308,54 @@ const DividePaymentOrder = () => {
       {selectedItems.length > 0 && (
         <div className="fixed bottom-4 right-4 bg-white shadow-lg border rounded-xl px-4 py-3 flex items-center gap-4">
           <div className="text-gray-800 font-medium">
-            Đã chọn: {selectedItems.length} sản phẩm
+            Đã chọn: {selectedItems.length} sản phẩm{" "}
+            <span className="ml-2 text-xs text-gray-500">
+              ({selectedShipmentCodes.length} shipment)
+            </span>
           </div>
           <div className="text-blue-700 font-semibold">
             Tổng: {formatCurrency(selectedTotal)}
           </div>
-          <button
-            onClick={() =>
-              toast.success("Tính năng chia thanh toán đang phát triển")
+
+          <CreateDividePaymentShip
+            selectedShipmentCodes={selectedShipmentCodes}
+            totalAmount={selectedTotal}
+            formatCurrency={formatCurrency}
+            accountId={
+              selectedCustomer?.accountId ?? selectedCustomer?.id ?? undefined
             }
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
-            disabled={selectedTotal <= 0}
-          >
-            Chia thanh toán
-          </button>
+            onSuccess={async (result) => {
+              // Thông báo thành công rõ ràng tại đây (ngoài toast bên trong button)
+              toast.success(
+                `Đã tạo thanh toán tách đơn${
+                  result?.paymentCode ? ` (${result.paymentCode})` : ""
+                }`
+              );
+              // Reload list
+              try {
+                if (selectedCustomer) {
+                  await fetchPartialOrders(selectedCustomer);
+                }
+                setSelectedItems([]);
+              } catch (e) {
+                toast.error(
+                  `Tạo xong nhưng tải lại danh sách lỗi: ${getErrorMessage(e)}`
+                );
+              }
+            }}
+            onError={(e) => {
+              const msg = getErrorMessage(e);
+              // Thông báo lỗi rõ ràng
+              toast.error(`Tạo thanh toán tách đơn thất bại: ${msg}`, {
+                duration: 5000,
+              });
+              // Trường hợp không có tracking hợp lệ
+              if (!selectedShipmentCodes.length) {
+                toast.error("Không có trackingCode hợp lệ để tách đơn");
+              }
+            }}
+            disabled={!selectedShipmentCodes.length}
+          />
         </div>
       )}
 

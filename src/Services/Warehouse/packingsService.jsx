@@ -138,6 +138,29 @@ class PackingsService {
 
     return allOrders;
   }
+
+  async getPackingById(packingId) {
+    const { data } = await api.get(
+      `/packings/${encodeURIComponent(packingId)}`
+    );
+    return data;
+  }
+
+  async removeShipments(packingCode, shipmentCodes) {
+    if (
+      !packingCode ||
+      !Array.isArray(shipmentCodes) ||
+      shipmentCodes.length === 0
+    ) {
+      throw new Error("packingCode và shipmentCodes không được để trống");
+    }
+
+    const endpoint = `/packings/packing/${encodeURIComponent(
+      packingCode
+    )}/remove-shipments`;
+    const response = await api.patch(endpoint, shipmentCodes);
+    return response.data;
+  }
 }
 
 // Create and export a singleton instance

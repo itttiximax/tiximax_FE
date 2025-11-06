@@ -15,7 +15,7 @@ import packingsService from "../../Services/Warehouse/packingsService";
 const PackingAwaitList = () => {
   const [orders, setOrders] = useState([]);
   const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(20); // ✅ Tăng default lên 20
+  const [limit, setLimit] = useState(20);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedPackings, setSelectedPackings] = useState([]);
@@ -53,8 +53,6 @@ const PackingAwaitList = () => {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     });
   };
 
@@ -382,7 +380,7 @@ const PackingAwaitList = () => {
                         ) : (
                           <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
                             <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                            Chờ CB
+                            Chờ chuyến bay
                           </span>
                         )}
                       </td>

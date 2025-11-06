@@ -100,6 +100,8 @@ import RefundOrder from "../components/Order/RefundOrder";
 import ManagerBankAccountList from "../components/Manager/ManagerBankAccountList";
 import DividePaymentOrder from "../components/PaymentOrder/DividePaymentOrder";
 import UpdateShipmentCodeList from "../components/StaffPurchaser/UpdateShipmentCodeList";
+import RemoveShipment from "../components/WarehouseForeign/RemoveShipment";
+import RemoveShipmentList from "../components/WarehouseForeign/RemoveShipmentList";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -310,8 +312,8 @@ const Router = createBrowserRouter([
       { path: "outbound/packingawaiting", element: <PackingAwaitList /> },
       { path: "outbound/orders", element: <NotFound /> },
       { path: "outbound/packinginwarehouse", element: <NotFound /> },
-      { path: "stock/serial", element: <NotFound /> },
-      { path: "stock/location", element: <NotFound /> },
+      { path: "stock/serial", element: <RemoveShipment /> },
+      { path: "stock/location", element: <RemoveShipmentList /> },
       { path: "audit/check", element: <ImportProduct /> },
       { path: "audit/reconcile", element: <NotFound /> },
       { path: "reports/dashboard", element: <NotFound /> },

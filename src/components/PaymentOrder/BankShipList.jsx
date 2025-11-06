@@ -1,6 +1,7 @@
 // /src/Components/Bank/BankShipList.jsx
 import React, { useEffect, useState, useMemo } from "react";
 import managerBankAccountService from "../../Services/Manager/managerBankAccountService";
+
 const BankShipList = ({
   disabled = false,
   value = null,
@@ -39,12 +40,12 @@ const BankShipList = ({
 
   useEffect(() => {
     fetchAccounts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSelect = (e) => {
     const raw = e.target.value;
-    const selected = raw === "" ? null : raw;
-    onChange?.(selected);
+    onChange?.(raw === "" ? null : raw);
   };
 
   const id = useMemo(() => "bank-ship-select", []);
@@ -53,26 +54,24 @@ const BankShipList = ({
     <div className={className}>
       <label
         htmlFor={id}
-        className="block text-sm font-medium text-gray-700 mb-2"
+        className="block text-sm font-medium text-gray-700 mb-1"
       >
         {label}
         {loading && (
-          <span className="ml-2 animate-pulse text-xs text-gray-500">
-            Đang tải…
-          </span>
+          <span className="ml-2 text-xs text-gray-500">Đang tải…</span>
         )}
       </label>
 
       {error && (
         <div
           role="alert"
-          className="mb-2 text-sm text-red-700 bg-red-50 p-2 rounded border border-red-200 flex items-start justify-between"
+          className="mb-2 text-xs text-red-700 bg-red-50 p-2 rounded border border-red-200 flex items-center justify-between"
         >
           <span>⚠️ {error}</span>
           <button
             type="button"
             onClick={fetchAccounts}
-            className="underline text-red-700 ml-3"
+            className="underline text-red-700 ml-2 shrink-0"
           >
             Thử lại
           </button>
@@ -92,40 +91,18 @@ const BankShipList = ({
           aria-invalid={Boolean(error)}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
         >
-          {/* Placeholder luôn nằm trên cùng */}
-          <option value="">-- Chưa chọn tài khoản nhận cước --</option>
-
-          {/* Danh sách tài khoản */}
+          <option value=""> Chưa chọn tài khoản </option>
           {accounts.map((acc) => {
             const optionValue = String(acc.id);
-            const bank = (acc.bankName || "").toUpperCase();
-            const holder = acc.accountHolder || "Chưa rõ người thụ hưởng";
+            const holder = acc.accountHolder || "Chưa rõ tên";
             const number = acc.accountNumber || "—";
-            const flags =
-              (acc.isProxy ? "Proxy" : "Non-Proxy") +
-              " • " +
-              (acc.isRevenue ? "Revenue" : "Non-Revenue");
-
             return (
               <option key={optionValue} value={optionValue}>
-                {bank} • {number} — {holder} • {flags}
+                {holder} — {number}
               </option>
             );
           })}
         </select>
-      )}
-
-      {/* Gợi ý hiển thị lựa chọn */}
-      {value && accounts.length > 0 && (
-        <p className="mt-1 text-xs text-gray-600">
-          Đã chọn:{" "}
-          {accounts.find((a) => String(a.id) === String(value))?.accountNumber}{" "}
-          (
-          {accounts
-            .find((a) => String(a.id) === String(value))
-            ?.bankName?.toUpperCase()}
-          )
-        </p>
       )}
     </div>
   );
