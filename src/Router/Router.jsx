@@ -103,6 +103,7 @@ import UpdateShipmentCodeList from "../components/StaffPurchaser/UpdateShipmentC
 // import RemoveShipment from "../components/WarehouseForeign/RemoveShipment";
 import RemoveShipmentList from "../components/WarehouseForeign/RemoveShipmentList";
 import DenyRoles from "./DenyRoles";
+import PerformanceStaff from "../components/StaffSale/PerformanceStaff";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -229,7 +230,7 @@ const Router = createBrowserRouter([
       { path: "prospects", element: <NotFound /> },
       { path: "dashboard", element: <DashboardLeadSale /> },
       { path: "team", element: <ManagerTeam /> },
-      { path: "salesreport", element: <NotFound /> },
+      { path: "salesreport", element: <PerformanceStaff /> },
       { path: "team-performance", element: <NotFound /> },
       { path: "customers", element: <CustomerStaffList /> },
       { path: "orders", element: <OrderList /> },
@@ -288,7 +289,7 @@ const Router = createBrowserRouter([
       { path: "knowledge", element: <NotFound /> }, // Chưa triển khai
       { path: "schedule", element: <NotFound /> }, // Chưa triển khai
       { path: "dashboard", element: <NotFound /> },
-      { path: "performance", element: <NotFound /> },
+      { path: "performance", element: <PerformanceStaff /> },
     ],
   },
   {

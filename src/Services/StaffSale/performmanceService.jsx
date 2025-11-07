@@ -20,6 +20,17 @@ const performanceService = {
       throw error;
     }
   },
+  getCurrentMonthPerformance: async () => {
+    try {
+      const response = await api.get(`/accounts/my-performance/current-month`, {
+        headers: { Accept: "*/*" },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Lỗi khi lấy hiệu suất tháng hiện tại:", error);
+      throw error;
+    }
+  },
 };
 
 export default performanceService;

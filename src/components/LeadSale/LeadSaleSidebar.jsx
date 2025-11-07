@@ -154,7 +154,7 @@ const LeadSaleSideBar = () => {
         {
           to: "/lead-sale/salesreport",
           icon: BarChart3,
-          label: "Thống kê bán hàng",
+          label: "Hiệu suất cá nhân",
         },
         {
           to: "/lead-sale/team-performance",
