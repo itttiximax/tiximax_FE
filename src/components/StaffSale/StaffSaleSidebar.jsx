@@ -127,11 +127,11 @@ const StaffSaleSidebar = () => {
               icon: Banknote,
               label: "Quy trình đơn hàng",
             },
-            {
-              to: "/staff-sale/ship-payment",
-              icon: Truck,
-              label: "Xác nhận vận chuyển",
-            },
+            // {
+            //   to: "/staff-sale/ship-payment",
+            //   icon: Truck,
+            //   label: "Xác nhận vận chuyển",
+            // },
           ],
           isOpen: isQuotationDropdownOpen,
           onToggle: () => setIsQuotationDropdownOpen(!isQuotationDropdownOpen),

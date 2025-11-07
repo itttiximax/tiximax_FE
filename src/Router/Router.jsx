@@ -312,7 +312,7 @@ const Router = createBrowserRouter([
       { path: "outbound/packingawaiting", element: <PackingAwaitList /> },
       { path: "outbound/orders", element: <NotFound /> },
       { path: "outbound/packinginwarehouse", element: <NotFound /> },
-      { path: "stock/serial", element: <RemoveShipment /> },
+      // { path: "stock/serial", element: <RemoveShipment /> },
       { path: "stock/location", element: <RemoveShipmentList /> },
       { path: "audit/check", element: <ImportProduct /> },
       { path: "audit/reconcile", element: <NotFound /> },

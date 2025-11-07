@@ -148,10 +148,8 @@ const CreatePurchase = ({
         return;
       }
 
-      if (!purchaseData.shipmentCode.trim()) {
-        toast.error("Vui lòng nhập mã ship");
-        return;
-      }
+      // ✅ ĐÃ BỎ VALIDATION MÃ VẬN ĐƠN BẮT BUỘC
+      // Mã vận đơn giờ là optional, có thể để trống
 
       // Validation bắt buộc phải có ảnh
       if (
@@ -174,7 +172,7 @@ const CreatePurchase = ({
         purchaseTotal: Number(rawPurchaseTotal),
         image: purchaseData.image,
         note: purchaseData.note || "",
-        shipmentCode: purchaseData.shipmentCode || "",
+        shipmentCode: purchaseData.shipmentCode || "", // ✅ Có thể là chuỗi rỗng
         trackingCode: selectedTrackingCodes,
       };
 
@@ -256,8 +254,6 @@ const CreatePurchase = ({
           maxWidth: "500px",
         },
       });
-
-      // ============ END XỬ LÝ LỖI ============
     } finally {
       setCreatingPurchase(false);
     }
@@ -295,6 +291,7 @@ const CreatePurchase = ({
     };
     return colors[status] || "bg-gray-100 text-gray-800";
   };
+
   const getStatusText = (status) => {
     const texts = {
       CHO_MUA: "Chờ mua",
@@ -306,6 +303,7 @@ const CreatePurchase = ({
     };
     return texts[status] || status;
   };
+
   if (!isOpen) return null;
 
   const allTrackingCodes = orderLinks.map((link) => link.trackingCode);
@@ -429,13 +427,6 @@ const CreatePurchase = ({
                           Shop:{" "}
                           {link.groupTag !== "string" ? link.groupTag : "N/A"}
                         </div>
-
-                        {/* <div>
-                          Giá web: {link.priceWeb?.toLocaleString() || 0}
-                        </div>
-                        <div>
-                          Giá Ship: {link.shipWeb?.toLocaleString() || 0}
-                        </div> */}
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-semibold text-gray-900 mb-2">
@@ -474,13 +465,15 @@ const CreatePurchase = ({
                   onBlur={handlePurchaseTotalBlur}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="000000"
-                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mã vận đơn <span className="text-red-500">*</span>
+                  Mã vận đơn{" "}
+                  <span className="text-gray-500 text-xs font-normal">
+                    (Tùy chọn)
+                  </span>
                 </label>
                 <input
                   type="text"
@@ -492,8 +485,7 @@ const CreatePurchase = ({
                     }))
                   }
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="SPX-123456789"
-                  required
+                  placeholder="Nhập mã vận đơn (nếu có)"
                 />
               </div>
             </div>
@@ -538,7 +530,6 @@ const CreatePurchase = ({
               disabled={
                 creatingPurchase ||
                 !purchaseData.purchaseTotal ||
-                !purchaseData.shipmentCode.trim() ||
                 selectedTrackingCodes.length === 0 ||
                 !purchaseData.image ||
                 purchaseData.image === "string"

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+// Components/Warehouse/WarehouseList.jsx
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Search,
   Warehouse,
@@ -7,6 +8,7 @@ import {
   ChevronRight,
   Calendar,
   RefreshCw,
+  Eye,
 } from "lucide-react";
 import warehouseService from "../../Services/Warehouse/warehouseService";
 
@@ -20,8 +22,14 @@ const WarehouseList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState("");
 
+  // Detail modal state
+  const [showDetail, setShowDetail] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
+
   useEffect(() => {
     fetchWarehouses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, pageSize]);
 
   const fetchWarehouses = async () => {
@@ -33,9 +41,10 @@ const WarehouseList = () => {
         pageSize
       );
 
-      setWarehouses(data.content || []);
-      setTotalPages(data.totalPages || 0);
-    } catch {
+      setWarehouses(data?.content || []);
+      setTotalPages(data?.totalPages || 0);
+    } catch (e) {
+      console.error(e);
       setError("Có lỗi khi tải dữ liệu!");
     } finally {
       setLoading(false);
@@ -44,24 +53,26 @@ const WarehouseList = () => {
 
   const nextPage = () => {
     if (currentPage < totalPages - 1) {
-      setCurrentPage(currentPage + 1);
+      setCurrentPage((p) => p + 1);
     }
   };
 
   const prevPage = () => {
     if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
+      setCurrentPage((p) => p - 1);
     }
   };
 
   const changePageSize = (e) => {
-    setPageSize(parseInt(e.target.value));
+    setPageSize(parseInt(e.target.value, 10));
     setCurrentPage(0);
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleString("vi-VN", {
+    const d = new Date(dateString);
+    if (Number.isNaN(d.getTime())) return "-";
+    return d.toLocaleString("vi-VN", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -70,17 +81,53 @@ const WarehouseList = () => {
     });
   };
 
-  // Filter warehouses based on search term
-  const filteredWarehouses = warehouses.filter(
-    (warehouse) =>
-      warehouse.trackingCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      warehouse.orderCode.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Lọc theo từ khóa & ngày (YYYY-MM-DD)
+  const filteredWarehouses = useMemo(() => {
+    const term = (searchTerm || "").toLowerCase().trim();
+    const dateFilter = (filterDate || "").trim(); // "2025-11-07"
+
+    return (warehouses || []).filter((w) => {
+      const matchTerm =
+        !term ||
+        (w?.trackingCode || "").toLowerCase().includes(term) ||
+        (w?.orderCode || "").toLowerCase().includes(term);
+
+      if (!matchTerm) return false;
+
+      if (!dateFilter) return true;
+
+      // So sánh theo ngày (không tính giờ)
+      const created = w?.createdAt ? new Date(w.createdAt) : null;
+      if (!created || Number.isNaN(created.getTime())) return false;
+
+      const yyyy = created.getFullYear();
+      const mm = String(created.getMonth() + 1).padStart(2, "0");
+      const dd = String(created.getDate()).padStart(2, "0");
+      const createdDateOnly = `${yyyy}-${mm}-${dd}`;
+
+      return createdDateOnly === dateFilter;
+    });
+  }, [warehouses, searchTerm, filterDate]);
+
+  // Xem chi tiết
+  const handleViewDetail = async (warehouseId) => {
+    try {
+      setDetailLoading(true);
+      setShowDetail(true); // mở modal ngay để hiển thị skeleton/loading
+      const data = await warehouseService.getWarehouseById(warehouseId);
+      setSelectedWarehouse(data);
+    } catch (e) {
+      console.error("Error fetching warehouse detail:", e);
+      setSelectedWarehouse(null);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen p-3">
       <div className="mx-auto">
-        {/* ✅ COMPACT HEADER */}
+        {/* Header */}
         <div className="mb-3">
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-xl font-bold text-blue-600">
@@ -89,7 +136,7 @@ const WarehouseList = () => {
           </div>
         </div>
 
-        {/* Error Messages */}
+        {/* Error */}
         {error && (
           <div className="mb-3 p-2.5 bg-red-50 border-l-4 border-red-400 rounded-r-lg">
             <div className="flex items-center">
@@ -99,7 +146,7 @@ const WarehouseList = () => {
           </div>
         )}
 
-        {/* ✅ COMPACT CONTROLS */}
+        {/* Controls */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-3">
           <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-3 flex-1">
@@ -140,7 +187,7 @@ const WarehouseList = () => {
           </div>
         </div>
 
-        {/* Loading State */}
+        {/* Loading */}
         {loading && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
             <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-blue-600">
@@ -150,7 +197,7 @@ const WarehouseList = () => {
           </div>
         )}
 
-        {/* Empty State */}
+        {/* Empty */}
         {!loading && !error && filteredWarehouses.length === 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
             <Warehouse className="w-12 h-12 text-gray-300 mx-auto mb-3" />
@@ -165,10 +212,10 @@ const WarehouseList = () => {
           </div>
         )}
 
-        {/* ✅ TABLE LAYOUT - COMPACT & SHOW MORE */}
+        {/* Table */}
         {filteredWarehouses.length > 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            {/* Table Header Info */}
+            {/* Header Info */}
             <div className="px-4 py-2.5 border-b border-gray-200 bg-gray-50">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-medium text-gray-700">
@@ -180,7 +227,6 @@ const WarehouseList = () => {
               </div>
             </div>
 
-            {/* ✅ TABLE */}
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -208,12 +254,15 @@ const WarehouseList = () => {
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       <div className="flex items-center gap-1">Ngày Tạo</div>
                     </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                      Xem
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredWarehouses.map((item, index) => (
                     <tr
-                      key={item.warehouseId}
+                      key={item.warehouseId ?? `${item.trackingCode}-${index}`}
                       className="hover:bg-blue-50 transition-colors"
                     >
                       {/* STT */}
@@ -266,6 +315,18 @@ const WarehouseList = () => {
                           {formatDate(item.createdAt)}
                         </span>
                       </td>
+
+                      {/* View */}
+                      <td className="px-3 py-2.5 whitespace-nowrap">
+                        <button
+                          onClick={() => handleViewDetail(item.warehouseId)}
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:underline"
+                          title="Xem chi tiết"
+                        >
+                          <Eye className="w-4 h-4" />
+                          Xem
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -274,7 +335,7 @@ const WarehouseList = () => {
           </div>
         )}
 
-        {/* ✅ COMPACT PAGINATION */}
+        {/* Pagination */}
         {filteredWarehouses.length > 0 && (
           <div className="flex items-center justify-between mt-3 bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-2.5">
             <button
@@ -300,9 +361,11 @@ const WarehouseList = () => {
 
             <button
               onClick={nextPage}
-              disabled={warehouses.length < pageSize}
+              disabled={
+                warehouses.length < pageSize || currentPage >= totalPages - 1
+              }
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                warehouses.length < pageSize
+                warehouses.length < pageSize || currentPage >= totalPages - 1
                   ? "text-gray-400 cursor-not-allowed"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
@@ -313,6 +376,78 @@ const WarehouseList = () => {
           </div>
         )}
       </div>
+
+      {/* Detail Modal */}
+      {showDetail && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg relative">
+            <button
+              onClick={() => {
+                setShowDetail(false);
+                setSelectedWarehouse(null);
+              }}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+              aria-label="Đóng"
+              title="Đóng"
+            >
+              ✕
+            </button>
+
+            <h2 className="text-lg font-semibold text-blue-600 mb-4">
+              {selectedWarehouse
+                ? `Chi tiết kho hàng #${selectedWarehouse?.warehouseId ?? ""}`
+                : "Đang tải chi tiết..."}
+            </h2>
+
+            {detailLoading ? (
+              <div className="text-center py-6 text-blue-600">
+                <RefreshCw className="animate-spin inline mr-2 w-4 h-4" />
+                Đang tải...
+              </div>
+            ) : selectedWarehouse ? (
+              <div className="space-y-3 text-sm text-gray-700">
+                <p>
+                  <strong>Tracking Code:</strong>{" "}
+                  {selectedWarehouse?.trackingCode || "-"}
+                </p>
+                <p>
+                  <strong>Mã đơn:</strong> {selectedWarehouse?.orderCode || "-"}
+                </p>
+                <p>
+                  <strong>Cân nặng:</strong> {selectedWarehouse?.weight ?? "-"}{" "}
+                  kg
+                </p>
+                <p>
+                  <strong>TL thực:</strong>{" "}
+                  {selectedWarehouse?.netWeight ?? "-"} kg
+                </p>
+                <p>
+                  <strong>Kích thước (Dim):</strong>{" "}
+                  {selectedWarehouse?.dim || "-"}
+                </p>
+                <p>
+                  <strong>Ngày tạo:</strong>{" "}
+                  {formatDate(selectedWarehouse?.createdAt)}
+                </p>
+                <p>
+                  <strong>Trạng thái:</strong>{" "}
+                  <span className="font-semibold text-green-600">
+                    {selectedWarehouse?.status || "-"}
+                  </span>
+                </p>
+                <p>
+                  <strong>Ghi chú:</strong>{" "}
+                  {selectedWarehouse?.note || "Không có ghi chú"}
+                </p>
+              </div>
+            ) : (
+              <div className="text-center text-red-600 py-4">
+                Không thể tải chi tiết kho hàng.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

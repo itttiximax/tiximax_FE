@@ -149,10 +149,8 @@ const CreateAuctionPurchase = ({
         return;
       }
 
-      if (!purchaseData.shipmentCode.trim()) {
-        toast.error("Vui lòng nhập mã vận đơn");
-        return;
-      }
+      // ✅ ĐÃ BỎ VALIDATION MÃ VẬN ĐƠN BẮT BUỘC
+      // Mã vận đơn giờ là optional, có thể để trống
 
       // Validation bắt buộc phải có ảnh
       if (
@@ -175,17 +173,13 @@ const CreateAuctionPurchase = ({
         purchaseTotal: Number(rawPurchaseTotal),
         image: purchaseData.image,
         note: purchaseData.note || "",
-        shipmentCode: purchaseData.shipmentCode || "",
+        shipmentCode: purchaseData.shipmentCode || "", // ✅ Có thể là chuỗi rỗng
         trackingCode: selectedTrackingCodes,
       };
 
       console.log("Payload đấu giá gửi lên:", payload);
 
-      await createPurchaseService.createAuctionPurchase(
-        orderCode,
-        payload
-        // token
-      );
+      await createPurchaseService.createAuctionPurchase(orderCode, payload);
 
       toast.success("Tạo purchase đấu giá thành công!");
       handleClose();
@@ -302,6 +296,7 @@ const CreateAuctionPurchase = ({
     };
     return colors[status] || "bg-gray-100 text-gray-800";
   };
+
   const getStatusText = (status) => {
     const texts = {
       CHO_MUA: "Chờ mua",
@@ -313,6 +308,7 @@ const CreateAuctionPurchase = ({
     };
     return texts[status] || status;
   };
+
   if (!isOpen) return null;
 
   const allTrackingCodes = orderLinks.map((link) => link.trackingCode);
@@ -475,13 +471,15 @@ const CreateAuctionPurchase = ({
                   onBlur={handlePurchaseTotalBlur}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                   placeholder="000000"
-                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mã vận đơn <span className="text-red-500">*</span>
+                  Mã vận đơn{" "}
+                  <span className="text-gray-500 text-xs font-normal">
+                    (Tùy chọn)
+                  </span>
                 </label>
                 <input
                   type="text"
@@ -493,8 +491,7 @@ const CreateAuctionPurchase = ({
                     }))
                   }
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                  placeholder="SPX-123456789"
-                  required
+                  placeholder="Nhập mã vận đơn (nếu có)"
                 />
               </div>
             </div>
@@ -504,7 +501,7 @@ const CreateAuctionPurchase = ({
               imageUrl={purchaseData.image}
               onImageUpload={handleImageUpload}
               onImageRemove={handleImageRemove}
-              label="Hình ảnh  Đấu Giá"
+              label="Hình ảnh Đấu Giá"
               required={true}
               maxSizeMB={3}
               placeholder="Chưa có ảnh purchase"
@@ -539,7 +536,6 @@ const CreateAuctionPurchase = ({
               disabled={
                 creatingPurchase ||
                 !purchaseData.purchaseTotal ||
-                !purchaseData.shipmentCode.trim() ||
                 selectedTrackingCodes.length === 0 ||
                 !purchaseData.image ||
                 purchaseData.image === "string"
@@ -549,7 +545,7 @@ const CreateAuctionPurchase = ({
               {creatingPurchase && (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
               )}
-              {creatingPurchase ? "Đang tạo..." : "Mua hàng đấu giá "}
+              {creatingPurchase ? "Đang tạo..." : "Mua hàng đấu giá"}
             </button>
           </div>
         </div>

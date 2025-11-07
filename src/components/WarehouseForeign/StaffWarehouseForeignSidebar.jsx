@@ -101,11 +101,11 @@ const StaffWarehouseForeignSidebar = () => {
     {
       title: "Stock Management",
       items: [
-        {
-          text: "Serial Number",
-          icon: <Package className="w-6 h-6" />,
-          path: "/staff-warehouse-foreign/stock/serial",
-        },
+        // {
+        //   text: "Serial Number",
+        //   icon: <Package className="w-6 h-6" />,
+        //   path: "/staff-warehouse-foreign/stock/serial",
+        // },
         {
           text: "Vị trí hàng",
           icon: <Package className="w-6 h-6" />,

@@ -90,6 +90,22 @@ const warehouseService = {
       throw error;
     }
   },
+  async getWarehouseById(warehouseId) {
+    if (!warehouseId && warehouseId !== 0)
+      throw new Error("warehouseId là bắt buộc.");
+
+    try {
+      const { data } = await api.get(
+        `https://t-6cn5.onrender.com/warehouse/${encodeURIComponent(
+          warehouseId
+        )}`
+      );
+      return data;
+    } catch (error) {
+      console.error(`Lỗi khi lấy warehouse ID ${warehouseId}:`, error);
+      throw error;
+    }
+  },
 };
 
 export default warehouseService;
