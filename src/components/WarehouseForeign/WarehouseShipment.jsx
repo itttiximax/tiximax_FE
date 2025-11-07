@@ -5,8 +5,6 @@ import UploadImg from "../../common/UploadImg";
 import toast, { Toaster } from "react-hot-toast";
 import {
   Package,
-  Ruler,
-  Weight,
   Image as ImageIcon,
   CheckCircle,
   AlertCircle,
@@ -20,7 +18,6 @@ const WarehouseShipment = () => {
     width: "",
     height: "",
     weight: "",
-    netWeight: "",
     image: "",
   });
   const [shipmentId, setShipmentId] = useState("");
@@ -68,8 +65,7 @@ const WarehouseShipment = () => {
       !formData.length ||
       !formData.width ||
       !formData.height ||
-      !formData.weight ||
-      !formData.netWeight
+      !formData.weight
     ) {
       toast.error("Vui lòng điền đầy đủ thông tin kích thước và trọng lượng");
       return;
@@ -80,8 +76,7 @@ const WarehouseShipment = () => {
       Number(formData.length) <= 0 ||
       Number(formData.width) <= 0 ||
       Number(formData.height) <= 0 ||
-      Number(formData.weight) <= 0 ||
-      Number(formData.netWeight) <= 0
+      Number(formData.weight) <= 0
     ) {
       toast.error("Kích thước và trọng lượng phải lớn hơn 0");
       return;
@@ -96,7 +91,6 @@ const WarehouseShipment = () => {
         width: Number(formData.width),
         height: Number(formData.height),
         weight: Number(formData.weight),
-        netWeight: Number(formData.netWeight),
         image: formData.image || "",
       };
 
@@ -111,9 +105,9 @@ const WarehouseShipment = () => {
       toast.success(successMessage, {
         duration: 3000,
         style: {
-          background: "#ffffffff",
-          color: "#23da60ff",
-          border: "1px solid #ffffffff",
+          background: "#ffffff",
+          color: "#23da60",
+          border: "1px solid #23da60",
         },
       });
 
@@ -123,7 +117,6 @@ const WarehouseShipment = () => {
         width: "",
         height: "",
         weight: "",
-        netWeight: "",
         image: "",
       });
       setShipmentId("");
@@ -143,9 +136,9 @@ const WarehouseShipment = () => {
       toast.error(errorMessage, {
         duration: 4000,
         style: {
-          background: "#ffffffff",
-          color: "#df3131ff",
-          border: "1px solid #ffffffff",
+          background: "#ffffff",
+          color: "#df3131",
+          border: "1px solid #df3131",
         },
       });
     } finally {
@@ -162,31 +155,34 @@ const WarehouseShipment = () => {
   };
 
   return (
-    <div className="min-h-screen py-8 px-4">
+    <div className="min-h-screen  py-12 px-4 sm:px-6 lg:px-8">
       <Toaster position="top-right" />
 
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-100 rounded-lg">
-              <Box className="w-6 h-6 text-indigo-600" />
+        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-200">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-indigo-50 rounded-full">
+              <Box className="w-8 h-8 text-indigo-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">
+              <h1 className="text-3xl font-bold text-gray-900">
                 Nhập kho và cân ký đơn hàng
               </h1>
+              <p className="mt-1 text-sm text-gray-500">
+                Điền thông tin shipment để tạo mới nhanh chóng
+              </p>
             </div>
           </div>
         </div>
 
         {/* Main Form */}
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+          <form onSubmit={handleSubmit} className="space-y-8">
             {/* Shipment ID */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                <Package className="w-4 h-4 text-indigo-600" />
+              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <Package className="w-5 h-5 text-indigo-600" />
                 Mã vận đơn <span className="text-red-500">*</span>
               </label>
               <input
@@ -195,25 +191,26 @@ const WarehouseShipment = () => {
                 value={shipmentId}
                 onChange={(e) => setShipmentId(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                placeholder="Nhập mã Shipment ID"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm"
+                placeholder="Nhập mã Shipment ID (ví dụ: SPX123456678)"
                 disabled={loading}
                 autoFocus
               />
               <p className="mt-2 text-xs text-gray-500 flex items-center gap-1">
-                <AlertCircle className="w-3 h-3" />
-                Nhập mã shipment duy nhất, nhấn Enter để nhanh chóng
+                <AlertCircle className="w-3 h-3 text-yellow-500" />
+                Nhấn Enter để submit nhanh. Mã phải duy nhất.
               </p>
             </div>
 
             {/* Dimensions */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <Box className="w-5 h-5 text-indigo-600" />
                 Kích thước (cm)
               </label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
                     Dài <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -223,14 +220,14 @@ const WarehouseShipment = () => {
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
                     step="0.01"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-sm"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm text-sm"
                     placeholder="0.00"
                     disabled={loading}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
                     Rộng <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -240,14 +237,14 @@ const WarehouseShipment = () => {
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
                     step="0.01"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-sm"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm text-sm"
                     placeholder="0.00"
                     disabled={loading}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
                     Cao <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -257,7 +254,7 @@ const WarehouseShipment = () => {
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
                     step="0.01"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-sm"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm text-sm"
                     placeholder="0.00"
                     disabled={loading}
                   />
@@ -265,14 +262,15 @@ const WarehouseShipment = () => {
               </div>
             </div>
 
-            {/* Weight & Net Weight */}
+            {/* Weight */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <Box className="w-5 h-5 text-indigo-600" />
                 Trọng lượng (kg)
               </label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
                     Tổng trọng lượng <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -282,24 +280,7 @@ const WarehouseShipment = () => {
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
                     step="0.01"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                    placeholder="0.00"
-                    disabled={loading}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1">
-                    Trọng lượng tịnh <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="netWeight"
-                    value={formData.netWeight}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyDown}
-                    step="0.01"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm"
                     placeholder="0.00"
                     disabled={loading}
                   />
@@ -309,24 +290,23 @@ const WarehouseShipment = () => {
 
             {/* Image Upload */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-gray-600" />
-                Hình ảnh đơn hàng
-              </label>
               <UploadImg
                 imageUrl={formData.image}
                 onImageUpload={handleImageUpload}
                 onImageRemove={handleImageRemove}
                 maxSizeMB={3}
-                placeholder="Chưa có ảnh shipment"
+                placeholder="Chưa có ảnh shipment. Upload ảnh để lưu trữ."
               />
+              <p className="mt-2 text-xs text-gray-500">
+                Tùy chọn: Upload ảnh minh họa shipment (tối đa 3MB)
+              </p>
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-indigo-600 text-white py-4 px-6 rounded-xl font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-indigo-300 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3 shadow-md"
             >
               {loading ? (
                 <>
@@ -336,7 +316,7 @@ const WarehouseShipment = () => {
               ) : (
                 <>
                   <CheckCircle className="w-5 h-5" />
-                  Tạo Shipment
+                  Tạo Shipment Mới
                 </>
               )}
             </button>

@@ -100,14 +100,32 @@ import RefundOrder from "../components/Order/RefundOrder";
 import ManagerBankAccountList from "../components/Manager/ManagerBankAccountList";
 import DividePaymentOrder from "../components/PaymentOrder/DividePaymentOrder";
 import UpdateShipmentCodeList from "../components/StaffPurchaser/UpdateShipmentCodeList";
-import RemoveShipment from "../components/WarehouseForeign/RemoveShipment";
+// import RemoveShipment from "../components/WarehouseForeign/RemoveShipment";
 import RemoveShipmentList from "../components/WarehouseForeign/RemoveShipmentList";
+import DenyRoles from "./DenyRoles";
 const Router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
     children: [
-      { path: "", element: <Home /> },
+      {
+        path: "",
+        element: (
+          <DenyRoles
+            denied={[
+              ROLES.ADMIN,
+              ROLES.MANAGER,
+              ROLES.LEAD_SALE,
+              ROLES.STAFF_SALE,
+              ROLES.STAFF_PURCHASER,
+              ROLES.STAFF_WAREHOUSE_FOREIGN,
+              ROLES.STAFF_WAREHOUSE_DOMESTIC,
+            ]}
+          >
+            <Home />
+          </DenyRoles>
+        ),
+      },
       { path: "signin", element: <SignIn /> },
       { path: "signup", element: <SignUp /> },
       { path: "forgot-password", element: <ForgotPassword /> },

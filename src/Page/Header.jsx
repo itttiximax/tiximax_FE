@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+// src/components/Header.jsx
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Search,
   Bell,
@@ -12,9 +13,9 @@ import {
   Menu,
   X,
 } from "lucide-react";
-// import { useAuth } from "../contexts/Authcontext";
 import { useAuth } from "../contexts/AuthContext";
 import toast from "react-hot-toast";
+import { ROLES } from "../Services/Auth/authService";
 
 const Header = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -23,10 +24,61 @@ const Header = () => {
   const dropdownRef = useRef(null);
   const mobileMenuRef = useRef(null);
 
-  // Sử dụng AuthContext để lấy thông tin user
+  const navigate = useNavigate();
+  const location = useLocation();
   const { user, isAuthenticated, logout: authLogout } = useAuth();
 
-  // Đóng dropdown khi click outside
+  // === helper: dashboard theo role ===
+  const dashboardPath = useMemo(() => {
+    const role = user?.role;
+    switch (role) {
+      case ROLES.ADMIN:
+        return "/admin/dashboard";
+      case ROLES.MANAGER:
+        return "/manager/dashboard";
+      case ROLES.LEAD_SALE:
+        return "/lead-sale/dashboard";
+      case ROLES.STAFF_SALE:
+        return "/staff-sale";
+      case ROLES.STAFF_PURCHASER:
+        return "/staff-purchaser/dashboard";
+      case ROLES.STAFF_WAREHOUSE_FOREIGN:
+        return "/staff-warehouse-foreign/dashboard";
+      case ROLES.STAFF_WAREHOUSE_DOMESTIC:
+        return "/staff-warehouse-domestic/dashboard";
+      default:
+        return "/";
+    }
+  }, [user?.role]);
+
+  const isInternal =
+    isAuthenticated && user?.role && user.role !== ROLES.CUSTOMER;
+
+  // Tự động chuyển hướng nếu user nội bộ đang ở trang public
+  useEffect(() => {
+    if (!isInternal) return;
+
+    // Các path public (bạn có thể mở rộng thêm)
+    const PUBLIC_PATHS = [
+      "/",
+      "/home",
+      "/about",
+      "/services",
+      "/blog",
+      "/contact",
+      "/signin",
+      "/signup",
+      "/forgot-password",
+      "/reset-password",
+      "/auth/callback",
+    ];
+
+    if (PUBLIC_PATHS.includes(location.pathname)) {
+      navigate(dashboardPath, { replace: true });
+    }
+  }, [isInternal, location.pathname, dashboardPath, navigate]);
+
+  // Đóng dropdown/menu khi click outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -39,33 +91,50 @@ const Header = () => {
         setIsMobileMenuOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Hàm xử lý đăng xuất
+  // Đăng xuất
   const handleLogout = async () => {
     try {
       await authLogout();
       setIsProfileDropdownOpen(false);
       toast.success("Đăng xuất thành công!");
-    } catch (error) {
-      console.error("Lỗi khi đăng xuất:", error);
+      navigate("/", { replace: true });
+    } catch {
       toast.error("Đăng xuất thất bại!");
     }
   };
 
-  // Toggle dropdown
-  const toggleProfileDropdown = () => {
-    setIsProfileDropdownOpen(!isProfileDropdownOpen);
+  // Toggle
+  const toggleProfileDropdown = () => setIsProfileDropdownOpen((s) => !s);
+  const toggleMobileMenu = () => setIsMobileMenuOpen((s) => !s);
+
+  // Chặn vào khu customer/public nếu là nội bộ
+  const guardPublicClick = (to) => (e) => {
+    if (isInternal) {
+      e.preventDefault();
+      toast("Bạn đang đăng nhập tài khoản nội bộ — chuyển về khu làm việc.", {
+        icon: "🚧",
+      });
+      navigate(dashboardPath, { replace: true });
+      setIsMobileMenuOpen(false);
+      setIsProfileDropdownOpen(false);
+    } else {
+      setIsMobileMenuOpen(false);
+      setIsProfileDropdownOpen(false);
+      navigate(to);
+    }
   };
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+  const publicMenus = [
+    { to: "/", label: "Trang chủ" },
+    { to: "/about", label: "Về chúng tôi" },
+    { to: "/services", label: "Dịch vụ" },
+    { to: "/blog", label: "Blog" },
+    { to: "/contact", label: "Liên hệ" },
+  ];
 
   return (
     <header className="bg-white border-b border-gray-200 py-2 px-4 sticky top-0 z-50">
@@ -74,46 +143,32 @@ const Header = () => {
         <div className="flex items-center justify-between h-14">
           {/* Left Section - Logo */}
           <div className="flex-shrink-0">
-            <Link
-              to="/"
+            {/* Logo: nội bộ -> về dashboard; khách -> về "/" */}
+            <a
+              href={isInternal ? dashboardPath : "/"}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(isInternal ? dashboardPath : "/", { replace: true });
+              }}
               className="text-xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent"
             >
               TixiMax
-            </Link>
+            </a>
           </div>
 
-          {/* Center Section - Navigation (Desktop only) */}
+          {/* Center Section - Navigation (Desktop) */}
           <nav className="hidden lg:flex items-center space-x-8">
-            <Link
-              to="/"
-              className="text-sm text-gray-700 hover:text-yellow-600 transition duration-200 py-2"
-            >
-              Trang chủ
-            </Link>
-            <Link
-              to="/"
-              className="text-sm text-gray-700 hover:text-yellow-600 transition duration-200 py-2"
-            >
-              Về chúng tôi
-            </Link>
-            <Link
-              to="/"
-              className="text-sm text-gray-700 hover:text-yellow-600 transition duration-200 py-2"
-            >
-              Dịch vụ
-            </Link>
-            <Link
-              to="/"
-              className="text-sm text-gray-700 hover:text-yellow-600 transition duration-200 py-2"
-            >
-              Blog
-            </Link>
-            <Link
-              to="/"
-              className="text-sm text-gray-700 hover:text-yellow-600 transition duration-200 py-2"
-            >
-              Liên hệ
-            </Link>
+            {!isInternal &&
+              publicMenus.map((m) => (
+                <a
+                  key={m.to}
+                  href={m.to}
+                  onClick={guardPublicClick(m.to)}
+                  className="text-sm text-gray-700 hover:text-yellow-600 transition duration-200 py-2"
+                >
+                  {m.label}
+                </a>
+              ))}
           </nav>
 
           {/* Right Section - Search & Actions */}
@@ -131,6 +186,7 @@ const Header = () => {
                   }`}
                   onFocus={() => setIsSearchFocused(true)}
                   onBlur={() => setIsSearchFocused(false)}
+                  disabled={false}
                 />
                 <Search
                   className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -146,13 +202,15 @@ const Header = () => {
                 <Bell size={18} />
               </button>
 
-              {/* Shopping Cart */}
-              <button className="relative p-2 text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition duration-200">
-                <ShoppingCart size={18} />
-                <span className="absolute -top-1 -right-1 bg-yellow-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
-                  3
-                </span>
-              </button>
+              {/* Shopping Cart: chỉ hiện cho khách/CUSTOMER */}
+              {!isInternal && (
+                <button className="relative p-2 text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition duration-200">
+                  <ShoppingCart size={18} />
+                  <span className="absolute -top-1 -right-1 bg-yellow-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                    3
+                  </span>
+                </button>
+              )}
 
               {/* User Section */}
               {isAuthenticated && user ? (
@@ -175,9 +233,8 @@ const Header = () => {
                     />
                   </button>
 
-                  {/* Dropdown Menu */}
                   {isProfileDropdownOpen && (
-                    <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                    <div className="absolute right-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
                       <div className="px-3 py-2 border-b border-gray-100">
                         <p className="text-sm font-medium text-gray-900 truncate">
                           {user.username || user.name}
@@ -196,22 +253,28 @@ const Header = () => {
                           <UserCircle size={14} className="mr-2" />
                           Profile
                         </Link>
-                        <Link
-                          to="/order-history"
-                          className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 transition duration-150"
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                        >
-                          <History size={14} className="mr-2" />
-                          Lịch sử
-                        </Link>
-                        <Link
-                          to="/order-history"
-                          className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 transition duration-150"
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                        >
-                          <History size={14} className="mr-2" />
-                          Theo dõi đơn hàng
-                        </Link>
+
+                        {/* Link customer-only: ẩn khi nội bộ */}
+                        {!isInternal && (
+                          <>
+                            <Link
+                              to="/order-history"
+                              className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 transition duration-150"
+                              onClick={() => setIsProfileDropdownOpen(false)}
+                            >
+                              <History size={14} className="mr-2" />
+                              Lịch sử
+                            </Link>
+                            <Link
+                              to="/order-history"
+                              className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 transition duration-150"
+                              onClick={() => setIsProfileDropdownOpen(false)}
+                            >
+                              <History size={14} className="mr-2" />
+                              Theo dõi đơn hàng
+                            </Link>
+                          </>
+                        )}
                       </div>
 
                       <div className="border-t border-gray-100 py-1">
@@ -268,6 +331,7 @@ const Header = () => {
                 type="text"
                 placeholder="Tìm kiếm..."
                 className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-200"
+                disabled={false}
               />
               <Search
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -277,24 +341,20 @@ const Header = () => {
           </div>
 
           {/* Mobile Navigation */}
-          <nav className="px-4 py-2">
-            {[
-              { to: "/home", label: "Trang chủ" },
-              { to: "/about", label: "Về chúng tôi" },
-              { to: "/services", label: "Dịch vụ" },
-              { to: "/blog", label: "Blog" },
-              { to: "/contact", label: "Liên hệ" },
-            ].map((item, index) => (
-              <Link
-                key={index}
-                to={item.to}
-                className="block py-2 text-gray-700 hover:text-yellow-600 transition duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          {!isInternal && (
+            <nav className="px-4 py-2">
+              {publicMenus.map((item) => (
+                <a
+                  key={item.to}
+                  href={item.to}
+                  onClick={guardPublicClick(item.to)}
+                  className="block py-2 text-gray-700 hover:text-yellow-600 transition duration-200"
+                >
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+          )}
 
           {/* Mobile Auth Buttons */}
           {!isAuthenticated && (
