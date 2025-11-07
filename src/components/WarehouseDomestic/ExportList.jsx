@@ -144,7 +144,6 @@ const ExportList = () => {
             <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
               Đơn Hàng Nội Địa
             </h1>
-            <Truck className="w-5 h-5 text-blue-600" />
           </div>
         </div>
 

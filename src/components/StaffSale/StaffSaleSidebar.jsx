@@ -73,14 +73,14 @@ const StaffSaleSidebar = () => {
               label: "Mua hộ",
             },
             {
-              to: "/staff-sale/deposit",
-              icon: Luggage,
-              label: "Ký gửi",
-            },
-            {
               to: "/staff-sale/auction",
               icon: Landmark,
               label: "Đấu giá",
+            },
+            {
+              to: "/staff-sale/deposit",
+              icon: Luggage,
+              label: "Ký gửi",
             },
           ],
           isOpen: isStaffDropdownOpen,
@@ -103,14 +103,14 @@ const StaffSaleSidebar = () => {
               label: "Thanh toán vận chuyển",
             },
             {
-              to: "/staff-sale/auction-payment",
-              icon: Wallet,
-              label: "Thanh toán sau đấu giá ",
-            },
-            {
               to: "/staff-sale/divide-payment",
               icon: Rows2,
               label: "Thanh toán tách đơn ",
+            },
+            {
+              to: "/staff-sale/auction-payment",
+              icon: Wallet,
+              label: "Thanh toán sau đấu giá ",
             },
           ],
           isOpen: isPaymentSupportDropdownOpen,

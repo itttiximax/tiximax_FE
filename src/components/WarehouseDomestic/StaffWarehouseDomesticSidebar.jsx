@@ -66,7 +66,7 @@ const StaffWarehouseDomesticSidebar = () => {
       title: "Quản lý đơn hàng đủ điều kiện đóng gói",
     },
     {
-      text: "Kiểm kê kho",
+      text: "Kiểm tra đóng gói",
       icon: <ClipboardCheck className="w-6 h-6" />,
       path: "/staff-warehouse-domestic/inventory-check",
       title:

@@ -5,7 +5,7 @@ const StaffSaleLayout = () => {
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
       {/* Sidebar - Bỏ width cố định để sidebar tự điều chỉnh */}
-      <div className="bg-white shadow-sm">
+      <div className="bg-white shadow-sm border-r border-gray-200">
         <StaffSaleSidebar />
       </div>
 

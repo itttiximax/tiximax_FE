@@ -209,14 +209,12 @@ const CreatePacking = () => {
                   Mã vận đơn <span className="text-red-500">*</span>
                 </label>
                 <p className="text-xs text-gray-500 mb-3">
-                  Hỗ trợ quét barcode - Nhấn Enter sau mỗi mã để tự động tạo ô
-                  mới
+                  Hỗ trợ quét barcode
                 </p>
                 <div className="space-y-3">
                   {formData.shipmentCodes.map((code, index) => (
                     <div key={index} className="flex items-center gap-3">
                       <div className="relative flex-1">
-                        <Barcode className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                           type="text"
                           ref={(el) => (inputRefs.current[index] = el)}

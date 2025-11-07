@@ -90,19 +90,22 @@ const warehouseService = {
       throw error;
     }
   },
-  async getWarehouseById(warehouseId) {
-    if (!warehouseId && warehouseId !== 0)
-      throw new Error("warehouseId là bắt buộc.");
-
+  getWarehouseById: async (warehouseId) => {
     try {
-      const { data } = await api.get(
-        `https://t-6cn5.onrender.com/warehouse/${encodeURIComponent(
-          warehouseId
-        )}`
+      if (warehouseId === undefined || warehouseId === null) {
+        throw new Error("warehouseId is required.");
+      }
+
+      const response = await api.get(
+        `/warehouse/${encodeURIComponent(warehouseId)}`
       );
-      return data;
+
+      return response.data;
     } catch (error) {
-      console.error(`Lỗi khi lấy warehouse ID ${warehouseId}:`, error);
+      console.error(
+        `Error fetching warehouse by ID (${warehouseId}):`,
+        error?.response || error
+      );
       throw error;
     }
   },

@@ -123,17 +123,20 @@ const DividePaymentOrder = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className=" p-6">
       {/* Header */}
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">
-        Chia thanh toán (Danh sách sản phẩm)
-      </h1>
-
-      {/* Search box */}
-      <div className="bg-white border rounded-lg shadow-sm p-4 mb-6">
-        <h2 className="text-lg font-semibold flex items-center gap-2 mb-3">
-          Tìm khách hàng
-        </h2>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Thanh toán tách đơn
+        </h1>
+      </div>
+      {/* Customer Search */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="flex items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">
+            Tìm kiếm khách hàng
+          </h2>
+        </div>
 
         <div className="max-w-md">
           <AccountSearch

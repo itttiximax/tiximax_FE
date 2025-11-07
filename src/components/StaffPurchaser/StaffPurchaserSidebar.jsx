@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Package,
   Users,
+  Truck,
   Warehouse,
   User,
   ChevronDown,
@@ -54,12 +55,17 @@ const StaffPurchaserSidebar = () => {
           label: "Đơn hàng đấu giá",
         },
         {
+          to: "/staff-purchaser/inventory",
+          icon: Truck,
+          label: "Thêm mã vận đơn",
+        },
+        {
           type: "dropdown",
           icon: Warehouse,
           label: "Quản lý kho hàng",
           dropdownItems: [
             {
-              to: "/staff-purchaser/inventory",
+              to: "/staff-purchaser/inventorystock",
               icon: Warehouse,
               label: "Tồn kho",
             },

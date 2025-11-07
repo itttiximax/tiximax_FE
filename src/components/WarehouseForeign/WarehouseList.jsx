@@ -11,6 +11,7 @@ import {
   Eye,
 } from "lucide-react";
 import warehouseService from "../../Services/Warehouse/warehouseService";
+import DetailWarehouse from "../Warehouse/DetailWarehouse";
 
 const WarehouseList = () => {
   const [warehouses, setWarehouses] = useState([]);
@@ -22,10 +23,9 @@ const WarehouseList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState("");
 
-  // Detail modal state
-  const [showDetail, setShowDetail] = useState(false);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
+  // State cho DetailWarehouse
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailId, setDetailId] = useState(null);
 
   useEffect(() => {
     fetchWarehouses();
@@ -81,10 +81,9 @@ const WarehouseList = () => {
     });
   };
 
-  // Lọc theo từ khóa & ngày (YYYY-MM-DD)
   const filteredWarehouses = useMemo(() => {
     const term = (searchTerm || "").toLowerCase().trim();
-    const dateFilter = (filterDate || "").trim(); // "2025-11-07"
+    const dateFilter = (filterDate || "").trim();
 
     return (warehouses || []).filter((w) => {
       const matchTerm =
@@ -96,7 +95,6 @@ const WarehouseList = () => {
 
       if (!dateFilter) return true;
 
-      // So sánh theo ngày (không tính giờ)
       const created = w?.createdAt ? new Date(w.createdAt) : null;
       if (!created || Number.isNaN(created.getTime())) return false;
 
@@ -109,19 +107,14 @@ const WarehouseList = () => {
     });
   }, [warehouses, searchTerm, filterDate]);
 
-  // Xem chi tiết
-  const handleViewDetail = async (warehouseId) => {
-    try {
-      setDetailLoading(true);
-      setShowDetail(true); // mở modal ngay để hiển thị skeleton/loading
-      const data = await warehouseService.getWarehouseById(warehouseId);
-      setSelectedWarehouse(data);
-    } catch (e) {
-      console.error("Error fetching warehouse detail:", e);
-      setSelectedWarehouse(null);
-    } finally {
-      setDetailLoading(false);
-    }
+  const openDetail = (id) => {
+    setDetailId(id);
+    setDetailOpen(true);
+  };
+
+  const closeDetail = () => {
+    setDetailOpen(false);
+    setDetailId(null);
   };
 
   return (
@@ -319,7 +312,7 @@ const WarehouseList = () => {
                       {/* View */}
                       <td className="px-3 py-2.5 whitespace-nowrap">
                         <button
-                          onClick={() => handleViewDetail(item.warehouseId)}
+                          onClick={() => openDetail(item.warehouseId)}
                           className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:underline"
                           title="Xem chi tiết"
                         >
@@ -377,77 +370,12 @@ const WarehouseList = () => {
         )}
       </div>
 
-      {/* Detail Modal */}
-      {showDetail && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg relative">
-            <button
-              onClick={() => {
-                setShowDetail(false);
-                setSelectedWarehouse(null);
-              }}
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-              aria-label="Đóng"
-              title="Đóng"
-            >
-              ✕
-            </button>
-
-            <h2 className="text-lg font-semibold text-blue-600 mb-4">
-              {selectedWarehouse
-                ? `Chi tiết kho hàng #${selectedWarehouse?.warehouseId ?? ""}`
-                : "Đang tải chi tiết..."}
-            </h2>
-
-            {detailLoading ? (
-              <div className="text-center py-6 text-blue-600">
-                <RefreshCw className="animate-spin inline mr-2 w-4 h-4" />
-                Đang tải...
-              </div>
-            ) : selectedWarehouse ? (
-              <div className="space-y-3 text-sm text-gray-700">
-                <p>
-                  <strong>Tracking Code:</strong>{" "}
-                  {selectedWarehouse?.trackingCode || "-"}
-                </p>
-                <p>
-                  <strong>Mã đơn:</strong> {selectedWarehouse?.orderCode || "-"}
-                </p>
-                <p>
-                  <strong>Cân nặng:</strong> {selectedWarehouse?.weight ?? "-"}{" "}
-                  kg
-                </p>
-                <p>
-                  <strong>TL thực:</strong>{" "}
-                  {selectedWarehouse?.netWeight ?? "-"} kg
-                </p>
-                <p>
-                  <strong>Kích thước (Dim):</strong>{" "}
-                  {selectedWarehouse?.dim || "-"}
-                </p>
-                <p>
-                  <strong>Ngày tạo:</strong>{" "}
-                  {formatDate(selectedWarehouse?.createdAt)}
-                </p>
-                <p>
-                  <strong>Trạng thái:</strong>{" "}
-                  <span className="font-semibold text-green-600">
-                    {selectedWarehouse?.status || "-"}
-                  </span>
-                </p>
-                <p>
-                  <strong>Ghi chú:</strong>{" "}
-                  {selectedWarehouse?.note || "Không có ghi chú"}
-                </p>
-              </div>
-            ) : (
-              <div className="text-center text-red-600 py-4">
-                Không thể tải chi tiết kho hàng.
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Detail Drawer/Modal */}
+      <DetailWarehouse
+        open={detailOpen}
+        warehouseId={detailId}
+        onClose={closeDetail}
+      />
     </div>
   );
 };
