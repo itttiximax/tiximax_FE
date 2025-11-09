@@ -1,14 +1,17 @@
 import React, { useState } from "react";
-import {
-  ChevronDown,
-  ChevronUp,
-  Globe2,
-  ExternalLink,
-  Truck,
-  Package,
-} from "lucide-react";
 
 const services = [
+  {
+    id: 7,
+    domain: "tiximax.vn",
+    country:
+      "https://upload.wikimedia.org/wikipedia/commons/2/21/Flag_of_Vietnam.svg",
+    market: "Vietnam",
+    description:
+      "Tuyến nội địa và đầu mối gom hàng toàn quốc, kết nối tất cả tuyến quốc tế.",
+    specialties: ["Kho vận", "Giao hàng nội địa", "Hỗ trợ doanh nghiệp"],
+    estimatedTime: "1–3 ngày",
+  },
   {
     id: 1,
     domain: "tiximaxindo.com",
@@ -50,6 +53,16 @@ const services = [
   },
   {
     id: 5,
+    domain: "tiximax.hk",
+    country:
+      "https://upload.wikimedia.org/wikipedia/commons/5/5b/Flag_of_Hong_Kong.svg",
+    market: "Hong Kong",
+    description: "Chuyên tuyến vận chuyển và mua hàng từ Hong Kong",
+    specialties: ["Electronics", "Jewelry", "Fashion"],
+    estimatedTime: "4-7 ngày",
+  },
+  {
+    id: 6,
     domain: "tiximax.net",
     country:
       "https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg",
@@ -58,138 +71,97 @@ const services = [
     specialties: ["Multi-platform", "Consolidated", "Express"],
     estimatedTime: "Varies",
   },
+  // ✅ Thêm tuyến Việt Nam
 ];
 
 const ServicesPage = () => {
   const [showAll, setShowAll] = useState(false);
-  const [hoveredCard, setHoveredCard] = useState(null);
-
-  const displayedServices = showAll ? services : services.slice(0, 4);
+  const needsToggle = services.length > 8;
+  const displayedServices =
+    needsToggle && !showAll ? services.slice(0, 8) : services;
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 via-white to-yellow-50 py-10 px-4 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-10 right-10 w-32 h-32 bg-yellow-400 rounded-full"></div>
-        <div className="absolute bottom-10 left-10 w-24 h-24 bg-yellow-300 rounded-lg rotate-45"></div>
-      </div>
+    <div className="bg-gray-50 py-20 px-4">
+      <div className="max-w-[1600px] mx-auto">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h3 className="text-gray-600 text-sm md:text-base font-semibold uppercase tracking-wider mb-3">
+            Mạng lưới toàn cầu
+          </h3>
+          <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+            DỊCH VỤ QUỐC TẾ <span className="text-yellow-400">TIXIMAX</span>
+          </h2>
 
-      <div className="max-w-6xl mx-auto relative z-10">
-        {/* Header Section */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-xl mb-3 shadow-lg">
-            <Globe2 className="w-6 h-6 text-white" />
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="w-24 h-0.5 bg-gray-300"></div>
+            <svg
+              className="w-6 h-6 text-yellow-400"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+            </svg>
+            <div className="w-24 h-0.5 bg-gray-300"></div>
           </div>
 
-          <h1 className="text-3xl lg:text-4xl font-bold mb-2">
-            <span className="bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
-              TIXIMAX
-            </span>
-            <span className="text-gray-800"> Global Services</span>
-          </h1>
-
-          <p className="text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          {/* <p className="text-gray-600 max-w-3xl mx-auto leading-relaxed mb-6">
             Khám phá mạng lưới dịch vụ vận chuyển và mua hàng quốc tế với công
-            nghệ tiên tiến, đảm bảo an toàn và nhanh chóng
-          </p>
-
-          {/* Stats */}
-          <div className="flex justify-center items-center space-x-6 mt-4">
-            <div className="text-center">
-              <div className="text-xl font-bold text-yellow-600">50+</div>
-              <div className="text-xs text-gray-500">Quốc gia</div>
-            </div>
-            <div className="w-px h-8 bg-gray-300"></div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-yellow-600">1M+</div>
-              <div className="text-xs text-gray-500">Đơn hàng</div>
-            </div>
-            <div className="w-px h-8 bg-gray-300"></div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-yellow-600">99.8%</div>
-              <div className="text-xs text-gray-500">Thành công</div>
-            </div>
-          </div>
+            nghệ tiên tiến, đảm bảo an toàn và nhanh chóng.
+          </p> */}
         </div>
 
-        {/* Toggle Button */}
-        {services.length > 4 && (
-          <div className="flex justify-center mb-6">
-            <button
-              onClick={() => setShowAll(!showAll)}
-              className="group flex items-center gap-2 px-4 py-2 bg-white hover:bg-yellow-50 border border-yellow-400 text-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
-            >
-              {showAll ? (
-                <>
-                  <span className="text-sm font-medium">Ẩn bớt</span>
-                  <ChevronUp className="w-4 h-4 text-yellow-600" />
-                </>
-              ) : (
-                <>
-                  <span className="text-sm font-medium">Xem tất cả</span>
-                  <ChevronDown className="w-4 h-4 text-yellow-600" />
-                </>
-              )}
-            </button>
-          </div>
-        )}
-
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Grid 4 cột rộng hơn */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           {displayedServices.map((service) => (
             <div
               key={service.id}
-              className="group bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 hover:border-yellow-200 relative overflow-hidden"
-              onMouseEnter={() => setHoveredCard(service.id)}
-              onMouseLeave={() => setHoveredCard(null)}
+              className="bg-white rounded-2xl p-10 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-gray-200 hover:border-yellow-400 group"
             >
-              {/* Hover overlay */}
-              <div
-                className={`absolute inset-0 bg-gradient-to-br from-yellow-400/5 to-yellow-500/5 transition-opacity duration-300 ${
-                  hoveredCard === service.id ? "opacity-100" : "opacity-0"
-                }`}
-              ></div>
-
-              {/* Header */}
-              <div className="relative z-10 mb-3">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="relative">
-                    <img
-                      src={service.country}
-                      alt={`${service.market} flag`}
-                      className="w-10 h-7 rounded-md shadow-sm object-cover"
-                    />
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center">
-                      <Truck className="w-2 h-2 text-white" />
-                    </div>
-                  </div>
-                  <span className="bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <img
+                    src={service.country}
+                    alt={`${service.market} flag`}
+                    className="w-16 h-11 rounded shadow-md object-cover border-2 border-gray-200"
+                  />
+                  <span className="bg-yellow-400 text-gray-900 px-4 py-2 rounded-full text-sm font-bold uppercase min-w-[120px] text-center">
                     {service.market}
                   </span>
                 </div>
 
-                <h2 className="text-lg font-bold text-gray-800 mb-1 group-hover:text-yellow-600 transition-colors">
+                <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-yellow-600 transition-colors">
                   {service.market}
-                </h2>
+                </h3>
 
-                <p className="text-gray-600 leading-relaxed text-xs">
+                <p className="text-gray-600 leading-relaxed text-base">
                   {service.description}
                 </p>
               </div>
 
-              {/* Specialties */}
-              <div className="relative z-10 mb-3">
-                <div className="flex items-center space-x-1 mb-2">
-                  <Package className="w-3 h-3 text-yellow-600" />
-                  <span className="text-xs font-medium text-gray-700">
-                    Chuyên môn:
+              <div className="mb-6">
+                <div className="flex items-center space-x-2 mb-3">
+                  <svg
+                    className="w-5 h-5 text-yellow-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                    />
+                  </svg>
+                  <span className="text-sm font-semibold text-gray-700 uppercase">
+                    Chuyên môn
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-2">
                   {service.specialties.map((specialty, index) => (
                     <span
                       key={index}
-                      className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs"
+                      className="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium"
                     >
                       {specialty}
                     </span>
@@ -197,54 +169,106 @@ const ServicesPage = () => {
                 </div>
               </div>
 
-              {/* Delivery Time */}
-              <div className="relative z-10 mb-3">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500">Thời gian:</span>
-                  <span className="font-semibold text-yellow-600">
+              <div className="mb-6 pb-6 border-b-2 border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <svg
+                      className="w-5 h-5 text-gray-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span className="text-base text-gray-600 font-medium">
+                      Thời gian:
+                    </span>
+                  </div>
+                  <span className="font-bold text-yellow-600 text-base">
                     {service.estimatedTime}
                   </span>
                 </div>
               </div>
 
-              {/* CTA Button */}
-              <div className="relative z-10">
-                <a
-                  href={`https://${service.domain}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group/btn flex items-center justify-between w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+              {/* CTA */}
+              <a
+                href={`https://${service.domain}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center w-full bg-gray-900 hover:bg-gray-800 text-white px-3 py-2 rounded-lg text-sm font-bold transition-all duration-300 shadow hover:shadow-md group/btn"
+              >
+                <span>Truy cập ngay</span>
+                <svg
+                  className="w-4 h-4 ml-2 group-hover/btn:translate-x-0.5 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <span>Truy cập</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-
-                <p className="text-center text-xs text-gray-400 mt-1">
-                  {service.domain}
-                </p>
-              </div>
-
-              {/* Corner decoration */}
-              <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-yellow-200/20 to-transparent rounded-bl-full"></div>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
+                </svg>
+              </a>
+              <p className="text-center text-xs text-gray-400 mt-2 font-medium">
+                {service.domain}
+              </p>
             </div>
           ))}
         </div>
 
-        {/* Bottom CTA */}
-        <div className="text-center mt-8">
-          <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-2xl p-6 text-white">
-            <h3 className="text-lg font-bold mb-2">
-              Cần hỗ trợ tư vấn dịch vụ?
-            </h3>
-            <p className="text-yellow-100 mb-4 text-sm max-w-xl mx-auto">
-              Đội ngũ chuyên gia của chúng tôi sẵn sàng tư vấn giải pháp
-              logistics phù hợp nhất cho nhu cầu của bạn.
-            </p>
-            <button className="bg-white text-yellow-600 px-6 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-50 transition-colors shadow-md">
-              Liên hệ tư vấn
+        {/* Toggle nếu >8 */}
+        {needsToggle && (
+          <div className="flex justify-center mb-12">
+            <button
+              onClick={() => setShowAll(!showAll)}
+              className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-yellow-50 border-2 border-yellow-400 text-gray-900 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 font-bold"
+            >
+              {showAll ? (
+                <>
+                  <span>Ẩn bớt</span>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 15l7-7 7 7"
+                    />
+                  </svg>
+                </>
+              ) : (
+                <>
+                  <span>Xem tất cả dịch vụ</span>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </>
+              )}
             </button>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
