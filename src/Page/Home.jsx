@@ -19,18 +19,14 @@ const Home = () => {
 
       {/* About section */}
       <About />
-
-      {/* Process Page section - Quy trình 5 bước */}
-      <ProcessPage />
+      {/* Service Page section - Dịch vụ quốc tế */}
+      <ServicePage />
 
       {/* Sẻvice Page section - Quy trình 5 bước */}
       <Service />
 
       {/* Reason Page section - Lý do chọn TixiMax */}
       <ReasonPage />
-
-      {/* Service Page section - Dịch vụ quốc tế */}
-      <ServicePage />
 
       {/* Question Page section - FAQ & Báo giá */}
       <QuestionPage />

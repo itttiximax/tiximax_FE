@@ -132,119 +132,121 @@ const ReasonPage = () => {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left Column - Reasons */}
-          <div className="space-y-8">
-            {reasons.map((reason, index) => (
-              <div
-                key={reason.id}
-                className="flex items-start gap-6 group"
-                data-aos="fade-right"
-                data-aos-delay={index * 100}
-              >
-                {/* Icon */}
-                <div className="flex-shrink-0">
-                  <div className="w-16 h-16 rounded-lg bg-white border-2 border-gray-200 flex items-center justify-center text-gray-700 group-hover:border-yellow-400 group-hover:bg-yellow-50 group-hover:text-yellow-600 transition-all duration-300 shadow-sm">
-                    {reason.icon}
+        <main className="container mx-auto px-12 lg:px-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Column - Reasons */}
+            <div className="space-y-8">
+              {reasons.map((reason, index) => (
+                <div
+                  key={reason.id}
+                  className="flex items-start gap-6 group"
+                  data-aos="fade-right"
+                  data-aos-delay={index * 100}
+                >
+                  {/* Icon */}
+                  <div className="flex-shrink-0">
+                    <div className="w-16 h-16 rounded-lg bg-white border-2 border-gray-200 flex items-center justify-center text-gray-700 group-hover:border-yellow-400 group-hover:bg-yellow-50 group-hover:text-yellow-600 transition-all duration-300 shadow-sm">
+                      {reason.icon}
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-lg md:text-xl font-bold text-gray-900 uppercase">
+                        {reason.title}
+                      </h3>
+                      <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                    </div>
+                    <p className="text-gray-600 leading-relaxed">
+                      {reason.description}
+                    </p>
                   </div>
                 </div>
+              ))}
+            </div>
 
-                {/* Content */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg md:text-xl font-bold text-gray-900 uppercase">
-                      {reason.title}
-                    </h3>
-                    <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                  </div>
-                  <p className="text-gray-600 leading-relaxed">
-                    {reason.description}
-                  </p>
+            {/* Right Column - Image Carousel */}
+            <div className="relative max-w-2lg mx-auto lg:mx-0">
+              <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl">
+                {/* Image Slider */}
+                <div className="relative h-[400px]">
+                  {images.map((img, index) => (
+                    <div
+                      key={index}
+                      className={`absolute inset-0 transition-opacity duration-1000 ${
+                        currentImage === index ? "opacity-100" : "opacity-0"
+                      }`}
+                    >
+                      <img
+                        src={img}
+                        alt={`Logistics ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Image Indicators */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                  {images.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImage(index)}
+                      className={`transition-all duration-300 rounded-full ${
+                        currentImage === index
+                          ? "w-8 h-2 bg-yellow-400"
+                          : "w-2 h-2 bg-white/60 hover:bg-white/80"
+                      }`}
+                      aria-label={`Go to image ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Decorative Elements */}
+              <div className="absolute -top-6 -right-6 w-32 h-32 bg-yellow-400/10 rounded-full blur-3xl -z-10"></div>
+              <div className="absolute -bottom-6 -left-6 w-40 h-40 bg-blue-400/10 rounded-full blur-3xl -z-10"></div>
+
+              {/* Decorative Dots */}
+              <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+                {[...Array(11)].map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      index === 5 ? "bg-yellow-400 scale-125" : "bg-gray-300"
+                    }`}
+                    style={{
+                      animationDelay: `${index * 0.1}s`,
+                    }}
+                  ></div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Section */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20">
+            {[
+              { number: "10+", label: "Năm kinh nghiệm" },
+              { number: "5000+", label: "Khách hàng tin dùng" },
+              { number: "63/63", label: "Tỉnh thành phủ sóng" },
+              { number: "24/7", label: "Hỗ trợ khách hàng" },
+            ].map((stat, index) => (
+              <div
+                key={index}
+                className="text-center p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 border-t-4 border-yellow-400"
+              >
+                <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                  {stat.number}
+                </div>
+                <div className="text-gray-600 text-sm font-medium uppercase tracking-wide">
+                  {stat.label}
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Right Column - Image Carousel */}
-          <div className="relative max-w-2lg mx-auto lg:mx-0">
-            <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl">
-              {/* Image Slider */}
-              <div className="relative h-[400px]">
-                {images.map((img, index) => (
-                  <div
-                    key={index}
-                    className={`absolute inset-0 transition-opacity duration-1000 ${
-                      currentImage === index ? "opacity-100" : "opacity-0"
-                    }`}
-                  >
-                    <img
-                      src={img}
-                      alt={`Logistics ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Image Indicators */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-                {images.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentImage(index)}
-                    className={`transition-all duration-300 rounded-full ${
-                      currentImage === index
-                        ? "w-8 h-2 bg-yellow-400"
-                        : "w-2 h-2 bg-white/60 hover:bg-white/80"
-                    }`}
-                    aria-label={`Go to image ${index + 1}`}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Decorative Elements */}
-            <div className="absolute -top-6 -right-6 w-32 h-32 bg-yellow-400/10 rounded-full blur-3xl -z-10"></div>
-            <div className="absolute -bottom-6 -left-6 w-40 h-40 bg-blue-400/10 rounded-full blur-3xl -z-10"></div>
-
-            {/* Decorative Dots */}
-            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
-              {[...Array(11)].map((_, index) => (
-                <div
-                  key={index}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    index === 5 ? "bg-yellow-400 scale-125" : "bg-gray-300"
-                  }`}
-                  style={{
-                    animationDelay: `${index * 0.1}s`,
-                  }}
-                ></div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Stats Section */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20">
-          {[
-            { number: "10+", label: "Năm kinh nghiệm" },
-            { number: "5000+", label: "Khách hàng tin dùng" },
-            { number: "63/63", label: "Tỉnh thành phủ sóng" },
-            { number: "24/7", label: "Hỗ trợ khách hàng" },
-          ].map((stat, index) => (
-            <div
-              key={index}
-              className="text-center p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 border-t-4 border-yellow-400"
-            >
-              <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-                {stat.number}
-              </div>
-              <div className="text-gray-600 text-sm font-medium uppercase tracking-wide">
-                {stat.label}
-              </div>
-            </div>
-          ))}
-        </div>
+        </main>
       </div>
     </section>
   );

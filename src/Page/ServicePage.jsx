@@ -19,7 +19,7 @@ const services = [
       "https://upload.wikimedia.org/wikipedia/commons/9/9f/Flag_of_Indonesia.svg",
     market: "Indonesia",
     description: "Chuyên tuyến vận chuyển và mua hàng từ Indonesia",
-    specialties: ["E-commerce", "Textiles", "Food & Spices"],
+    specialties: ["E-commerce", "Textiles", "Skincare", "Food & Spices"],
     estimatedTime: "5-7 ngày",
   },
   {
@@ -28,7 +28,7 @@ const services = [
     country: "https://upload.wikimedia.org/wikipedia/en/9/9e/Flag_of_Japan.svg",
     market: "Japan",
     description: "Chuyên tuyến vận chuyển và mua hàng từ Nhật Bản",
-    specialties: ["Electronics", "Cosmetics", "Fashion"],
+    specialties: ["Electronics", "Cosmetics", "Fashion", "Skincare"],
     estimatedTime: "7-10 ngày",
   },
   {
@@ -38,7 +38,7 @@ const services = [
       "https://upload.wikimedia.org/wikipedia/commons/0/09/Flag_of_South_Korea.svg",
     market: "South Korea",
     description: "Chuyên tuyến vận chuyển và mua hàng từ Hàn Quốc",
-    specialties: ["K-Beauty", "Fashion", "Electronics"],
+    specialties: ["K-Beauty", "Fashion", "Electronics", "Skincare"],
     estimatedTime: "6-9 ngày",
   },
   {
@@ -48,7 +48,7 @@ const services = [
       "https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg",
     market: "USA",
     description: "Chuyên tuyến vận chuyển và mua hàng từ Mỹ",
-    specialties: ["Tech", "Supplements", "Books"],
+    specialties: ["Tech", "Supplements", "Books", "Skincare"],
     estimatedTime: "10-14 ngày",
   },
   {
@@ -58,7 +58,7 @@ const services = [
       "https://upload.wikimedia.org/wikipedia/commons/5/5b/Flag_of_Hong_Kong.svg",
     market: "Hong Kong",
     description: "Chuyên tuyến vận chuyển và mua hàng từ Hong Kong",
-    specialties: ["Electronics", "Jewelry", "Fashion"],
+    specialties: ["Electronics", "Jewelry", "Fashion", "Skincare"],
     estimatedTime: "4-7 ngày",
   },
   {
@@ -68,10 +68,9 @@ const services = [
       "https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg",
     market: "Global",
     description: "Tổng quan tất cả dịch vụ vận chuyển và mua hàng quốc tế",
-    specialties: ["Multi-platform", "Consolidated", "Express"],
+    specialties: ["Multi-platform", "Consolidated", "Express", "Skincare"],
     estimatedTime: "Varies",
   },
-  // ✅ Thêm tuyến Việt Nam
 ];
 
 const ServicesPage = () => {
@@ -81,67 +80,56 @@ const ServicesPage = () => {
     needsToggle && !showAll ? services.slice(0, 8) : services;
 
   return (
-    <div className="bg-gray-50 py-20 px-4">
-      <div className="max-w-[1600px] mx-auto">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h3 className="text-gray-600 text-sm md:text-base font-semibold uppercase tracking-wider mb-3">
-            Mạng lưới toàn cầu
-          </h3>
-          <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
-            DỊCH VỤ QUỐC TẾ <span className="text-yellow-400">TIXIMAX</span>
-          </h2>
+    <section className="bg-gray-50 py-20">
+      {/* Header */}
+      <div className="text-center mb-16">
+        <h3 className="text-gray-600 text-sm md:text-base font-semibold uppercase tracking-wider mb-3">
+          Mạng lưới toàn cầu
+        </h3>
+        <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+          DỊCH VỤ QUỐC TẾ <span className="text-yellow-400">TIXIMAX</span>
+        </h2>
 
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="w-24 h-0.5 bg-gray-300"></div>
-            <svg
-              className="w-6 h-6 text-yellow-400"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-            </svg>
-            <div className="w-24 h-0.5 bg-gray-300"></div>
-          </div>
-
-          {/* <p className="text-gray-600 max-w-3xl mx-auto leading-relaxed mb-6">
-            Khám phá mạng lưới dịch vụ vận chuyển và mua hàng quốc tế với công
-            nghệ tiên tiến, đảm bảo an toàn và nhanh chóng.
-          </p> */}
+        <div className="flex items-center justify-center gap-3 mb-6">
+          <div className="w-24 h-0.5 bg-gray-300"></div>
+          <div className="w-3 h-3 bg-yellow-400 rotate-45"></div>
+          <div className="w-24 h-0.5 bg-gray-300"></div>
         </div>
+      </div>
 
-        {/* Grid 4 cột rộng hơn */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+      {/* Main — căn lề theo PromotionPage */}
+      <main className="container mx-auto px-12 lg:px-24">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-12">
           {displayedServices.map((service) => (
             <div
               key={service.id}
-              className="bg-white rounded-2xl p-10 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-gray-200 hover:border-yellow-400 group"
+              className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-yellow-400 group"
             >
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <img
-                    src={service.country}
-                    alt={`${service.market} flag`}
-                    className="w-16 h-11 rounded shadow-md object-cover border-2 border-gray-200"
-                  />
-                  <span className="bg-yellow-400 text-gray-900 px-4 py-2 rounded-full text-sm font-bold uppercase min-w-[120px] text-center">
-                    {service.market}
-                  </span>
-                </div>
-
-                <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-yellow-600 transition-colors">
+              {/* Flag & Market */}
+              <div className="flex items-center justify-between mb-4">
+                <img
+                  src={service.country}
+                  alt={`${service.market} flag`}
+                  className="w-12 h-8 rounded shadow-sm object-cover border border-gray-200"
+                />
+                <span className="bg-yellow-400 text-gray-900 px-3 py-1.5 rounded-full text-xs font-bold uppercase min-w-[96px] text-center">
                   {service.market}
-                </h3>
-
-                <p className="text-gray-600 leading-relaxed text-base">
-                  {service.description}
-                </p>
+                </span>
               </div>
 
-              <div className="mb-6">
-                <div className="flex items-center space-x-2 mb-3">
+              {/* Title & Description */}
+              <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-yellow-600 transition-colors">
+                {service.market}
+              </h3>
+              <p className="text-gray-600 leading-relaxed text-sm mb-4">
+                {service.description}
+              </p>
+
+              {/* Specialties */}
+              <div className="mb-5">
+                <div className="flex items-center gap-2 mb-2">
                   <svg
-                    className="w-5 h-5 text-yellow-600"
+                    className="w-4 h-4 text-yellow-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -153,7 +141,7 @@ const ServicesPage = () => {
                       d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
                     />
                   </svg>
-                  <span className="text-sm font-semibold text-gray-700 uppercase">
+                  <span className="text-xs font-semibold text-gray-700 uppercase">
                     Chuyên môn
                   </span>
                 </div>
@@ -161,7 +149,7 @@ const ServicesPage = () => {
                   {service.specialties.map((specialty, index) => (
                     <span
                       key={index}
-                      className="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium"
+                      className="bg-gray-100 text-gray-700 px-2.5 py-1.5 rounded-lg text-xs font-medium"
                     >
                       {specialty}
                     </span>
@@ -169,11 +157,12 @@ const ServicesPage = () => {
                 </div>
               </div>
 
-              <div className="mb-6 pb-6 border-b-2 border-gray-200">
+              {/* Time */}
+              <div className="mb-5 pb-5 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <svg
-                      className="w-5 h-5 text-gray-600"
+                      className="w-4 h-4 text-gray-600"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -185,11 +174,11 @@ const ServicesPage = () => {
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
-                    <span className="text-base text-gray-600 font-medium">
+                    <span className="text-sm text-gray-600 font-medium">
                       Thời gian:
                     </span>
                   </div>
-                  <span className="font-bold text-yellow-600 text-base">
+                  <span className="font-bold text-yellow-600 text-sm">
                     {service.estimatedTime}
                   </span>
                 </div>
@@ -200,7 +189,7 @@ const ServicesPage = () => {
                 href={`https://${service.domain}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center w-full bg-gray-900 hover:bg-gray-800 text-white px-3 py-2 rounded-lg text-sm font-bold transition-all duration-300 shadow hover:shadow-md group/btn"
+                className="inline-flex items-center justify-center w-full bg-gray-900 hover:bg-gray-800 text-white px-4 py-3 rounded-lg text-sm font-bold transition-all duration-300 shadow hover:shadow-md group/btn"
               >
                 <span>Truy cập ngay</span>
                 <svg
@@ -217,7 +206,7 @@ const ServicesPage = () => {
                   />
                 </svg>
               </a>
-              <p className="text-center text-xs text-gray-400 mt-2 font-medium">
+              <p className="text-center text-xs text-gray-400 mt-2 font-medium select-all">
                 {service.domain}
               </p>
             </div>
@@ -226,10 +215,10 @@ const ServicesPage = () => {
 
         {/* Toggle nếu >8 */}
         {needsToggle && (
-          <div className="flex justify-center mb-12">
+          <div className="flex justify-center mb-4">
             <button
               onClick={() => setShowAll(!showAll)}
-              className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-yellow-50 border-2 border-yellow-400 text-gray-900 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 font-bold"
+              className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-yellow-50 border-2 border-yellow-400 text-gray-900 rounded-full shadow-sm hover:shadow-md transition-all duration-300 font-bold"
             >
               {showAll ? (
                 <>
@@ -269,8 +258,8 @@ const ServicesPage = () => {
             </button>
           </div>
         )}
-      </div>
-    </div>
+      </main>
+    </section>
   );
 };
 

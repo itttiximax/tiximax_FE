@@ -70,7 +70,7 @@ const Footer = () => {
             </div>
 
             {/* Nội dung thông tin - nền đen */}
-            <div className="bg-gray-900/50 rounded-xl shadow-md p-5 text-gray-200 border border-yellow-400/30">
+            <div className=" text-gray-200">
               <ul className="space-y-3 text-sm mt-1">
                 <li>
                   <a
@@ -118,7 +118,7 @@ const Footer = () => {
             </div>
 
             {/* Nội dung dịch vụ - nền đen */}
-            <div className="bg-gray-900/50 rounded-xl shadow-md p-5 text-gray-200 border border-yellow-400/30">
+            <div className="text-gray-200 ">
               <ul className="space-y-3 mt-1">
                 {[
                   "Vận chuyển hàng hóa",
@@ -152,7 +152,7 @@ const Footer = () => {
             </div>
 
             {/* Nội dung liên hệ - nền đen */}
-            <div className="bg-gray-900/50 rounded-xl shadow-md p-5 text-gray-200 border border-yellow-400/30">
+            <div className=" text-gray-200 ">
               <div className="space-y-4 text-sm mt-1">
                 <div className="flex items-start space-x-3">
                   <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
