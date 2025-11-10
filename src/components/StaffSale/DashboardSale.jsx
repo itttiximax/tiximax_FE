@@ -1,27 +1,29 @@
-import React, { useMemo, useState } from "react";
+// src/Components/DashboardSale.jsx
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  LineChart,
-  Line,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
   CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer,
+  RadialBarChart,
+  RadialBar,
+  Legend,
 } from "recharts";
+import { DateRange } from "react-date-range";
+import { addYears, isAfter, isBefore, endOfDay, startOfDay } from "date-fns";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
 
-/* ---------------------- Utils thời gian ---------------------- */
-const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-const addDays = (d, n) =>
-  new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
-const startOfWeek = (d) => {
-  // Tuần bắt đầu vào THỨ HAI (phù hợp VN)
-  const day = d.getDay(); // 0=CN ... 6=Th7
-  const diff = day === 0 ? -6 : 1 - day; // về thứ 2
-  return startOfDay(addDays(d, diff));
-};
-const addWeeks = (d, n) => addDays(d, 7 * n);
-const startOfMonth = (d) => new Date(d.getFullYear(), d.getMonth(), 1);
-const addMonths = (d, n) => new Date(d.getFullYear(), d.getMonth() + n, 1);
+import saleService from "../../Services/Dashboard/saleService";
+
+/* ---------------------- Helpers ---------------------- */
+const toYMD = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate()
+  ).padStart(2, "0")}`;
 
 const fmtVN = (d) =>
   d.toLocaleDateString("vi-VN", {
@@ -30,245 +32,258 @@ const fmtVN = (d) =>
     year: "numeric",
   });
 
-/* ---------------------- Fake data 365 ngày ---------------------- */
-const generateFakeSalesData = () => {
-  const regions = ["Japan", "Korea", "Indonesia", "USA", "Vietnam"];
-  const channels = ["Mua hộ", "Ký gửi", "Đấu giá"];
-  const data = [];
-
-  // tạo dữ liệu từ 365 ngày trước tới hôm nay
-  for (let offset = 365; offset >= 0; offset--) {
-    const day = addDays(new Date(), -offset);
-    const transactions = Math.floor(Math.random() * 6) + 1; // 1-6 đơn/ngày
-    for (let t = 0; t < transactions; t++) {
-      const date = new Date(
-        day.getFullYear(),
-        day.getMonth(),
-        day.getDate(),
-        Math.floor(Math.random() * 24), // giờ ngẫu nhiên
-        Math.floor(Math.random() * 60)
-      );
-      const region = regions[Math.floor(Math.random() * regions.length)];
-      const channel = channels[Math.floor(Math.random() * channels.length)];
-      data.push({
-        id: data.length + 1,
-        date,
-        region,
-        channel,
-        customer: `Khách ${Math.floor(Math.random() * 800) + 100}`,
-        total: Math.floor(Math.random() * 8_000_000) + 500_000, // 0.5–8tr
-        parcels: Math.floor(Math.random() * 5) + 1,
-      });
-    }
-  }
-  return data;
-};
-const fakeSalesData = generateFakeSalesData();
-
 const formatCurrency = (num) =>
-  num.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
+  (Number(num) || 0).toLocaleString("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0,
+  });
 
-/* ---------------------- Component chính ---------------------- */
+const formatNum = (n) => (Number.isFinite(n) ? n.toLocaleString("vi-VN") : "—");
+
+/* ---------------------- Component ---------------------- */
 const DashboardSale = () => {
-  // granularity: day | week | month | 4weeks
-  const [mode, setMode] = useState("week");
+  // Giới hạn chọn tối đa: trong vòng 1 năm tính đến hôm nay
+  const maxDate = endOfDay(new Date());
+  const minDate = startOfDay(addYears(new Date(), -1));
 
-  // mốc tham chiếu: luôn là "ngày nằm trong khoảng đang xem"
-  // dùng để tính start/end range tùy theo mode
-  const [anchor, setAnchor] = useState(startOfDay(new Date()));
+  // Date range picker state
+  const [selectionRange, setSelectionRange] = useState({
+    startDate: startOfDay(addYears(new Date(), -0)), // mặc định: hôm nay về đầu ngày
+    endDate: endOfDay(new Date()),
+    key: "selection",
+  });
+  const [openPicker, setOpenPicker] = useState(false);
 
-  // Tính khoảng thời gian đang xem theo mode + anchor
-  const { rangeStart, rangeEnd, rangeLabel } = useMemo(() => {
-    let start,
-      end,
-      label = "";
+  // API state
+  const [perf, setPerf] = useState({ loading: false, error: "", row: null });
 
-    if (mode === "day") {
-      start = startOfDay(anchor);
-      end = addDays(start, 1);
-      label = `Ngày ${fmtVN(start)}`;
-    } else if (mode === "week") {
-      start = startOfWeek(anchor);
-      end = addWeeks(start, 1);
-      label = `Tuần ${fmtVN(start)} - ${fmtVN(addDays(end, -1))}`;
-    } else if (mode === "month") {
-      start = startOfMonth(anchor);
-      end = addMonths(start, 1);
-      const month = start.getMonth() + 1;
-      label = `Tháng ${month}/${start.getFullYear()}`;
-    } else {
-      // 4weeks: cửa sổ 4 tuần bắt đầu từ tuần chứa anchor
-      const wk = startOfWeek(anchor);
-      start = addWeeks(wk, -3); // 4 tuần: -3, -2, -1, 0 (đến wk+1)
-      end = addWeeks(wk, 1);
-      label = `4 tuần: ${fmtVN(start)} - ${fmtVN(addDays(end, -1))}`;
-    }
+  // Chuẩn hóa và clamp range theo min/max 1 năm
+  const { startDateClamped, endDateClamped, rangeLabel, startYMD, endYMD } =
+    useMemo(() => {
+      let s = selectionRange.startDate
+        ? startOfDay(selectionRange.startDate)
+        : minDate;
+      let e = selectionRange.endDate
+        ? endOfDay(selectionRange.endDate)
+        : maxDate;
 
-    // không cho vượt quá "hôm nay + 1 ngày"
-    const todayEnd = addDays(startOfDay(new Date()), 1);
-    if (end > todayEnd) end = todayEnd;
+      // Clamp vào [minDate, maxDate]
+      if (isBefore(s, minDate)) s = minDate;
+      if (isAfter(e, maxDate)) e = maxDate;
+      if (isAfter(s, e)) s = e; // đảm bảo s <= e
 
-    return { rangeStart: start, rangeEnd: end, rangeLabel: label };
-  }, [mode, anchor]);
+      return {
+        startDateClamped: s,
+        endDateClamped: e,
+        startYMD: toYMD(s),
+        endYMD: toYMD(e),
+        rangeLabel: `Khoảng thời gian: ${fmtVN(s)} - ${fmtVN(e)}`,
+      };
+    }, [selectionRange, minDate, maxDate]);
 
-  // Dữ liệu trong khoảng
-  const filteredData = useMemo(() => {
-    return fakeSalesData.filter(
-      (x) => x.date >= rangeStart && x.date < rangeEnd
-    );
-  }, [rangeStart, rangeEnd]);
-
-  // Tổng hợp
-  const summary = useMemo(() => {
-    const totalRevenue = filteredData.reduce((s, i) => s + i.total, 0);
-    const totalOrders = filteredData.length;
-    const totalParcels = filteredData.reduce((s, i) => s + i.parcels, 0);
-    return { totalRevenue, totalOrders, totalParcels };
-  }, [filteredData]);
-
-  // Dữ liệu biểu đồ theo mode:
-  // - day: theo giờ
-  // - week & month: theo ngày
-  // - 4weeks: gộp theo tuần
-  const chartData = useMemo(() => {
-    if (mode === "day") {
-      const buckets = Array.from({ length: 24 }, (_, h) => ({
-        label: `${h}:00`,
-        revenue: 0,
-      }));
-      filteredData.forEach((x) => {
-        const h = x.date.getHours();
-        buckets[h].revenue += x.total;
-      });
-      return buckets;
-    }
-
-    if (mode === "4weeks") {
-      // chia 4 tuần: [start, start+7), [..+7), [..+7), [..+7)
-      const weeks = [];
-      for (let i = 0; i < 4; i++) {
-        const ws = addWeeks(rangeEnd, i - 4); // hoặc addWeeks(rangeStart, i);
-        const we = addWeeks(ws, 1);
-        const label = `W${i + 1}`;
-        const revenue = filteredData
-          .filter((x) => x.date >= ws && x.date < we)
-          .reduce((s, i) => s + i.total, 0);
-        weeks.push({ label, revenue });
+  // Gọi API mỗi khi range thay đổi
+  useEffect(() => {
+    let ignore = false;
+    (async () => {
+      try {
+        setPerf((s) => ({ ...s, loading: true, error: "" }));
+        const data = await saleService.getMyPerformance(startYMD, endYMD);
+        const firstKey = data ? Object.keys(data)[0] : null;
+        const row = firstKey ? data[firstKey] : null;
+        if (!ignore) setPerf({ loading: false, error: "", row });
+      } catch (e) {
+        if (!ignore)
+          setPerf({
+            loading: false,
+            error: e?.message || "Không lấy được hiệu suất.",
+            row: null,
+          });
       }
-      return weeks;
-    }
+    })();
+    return () => {
+      ignore = true;
+    };
+  }, [startYMD, endYMD]);
 
-    // week & month: theo ngày
-    const days = {};
-    // khởi tạo trục ngày liên tục để không bị "đứt"
-    for (let d = new Date(rangeStart); d < rangeEnd; d = addDays(d, 1)) {
-      days[fmtVN(d)] = 0;
-    }
-    filteredData.forEach((x) => {
-      const key = fmtVN(x.date);
-      days[key] += x.total;
+  // Nút preset nhanh
+  const presets = [
+    {
+      label: "Hôm nay",
+      getRange: () => {
+        const t0 = startOfDay(new Date());
+        const t1 = endOfDay(new Date());
+        return { startDate: t0, endDate: t1 };
+      },
+    },
+    {
+      label: "7 ngày qua",
+      getRange: () => {
+        const t1 = endOfDay(new Date());
+        const t0 = startOfDay(addYears(new Date(), 0)); // tạm dùng ngày hiện tại rồi trừ ngày
+        const t0_7 = new Date(t0);
+        t0_7.setDate(t0.getDate() - 6);
+        return { startDate: t0_7, endDate: t1 };
+      },
+    },
+    {
+      label: "30 ngày qua",
+      getRange: () => {
+        const t1 = endOfDay(new Date());
+        const t0 = startOfDay(new Date());
+        const t0_30 = new Date(t0);
+        t0_30.setDate(t0.getDate() - 29);
+        return { startDate: t0_30, endDate: t1 };
+      },
+    },
+    {
+      label: "Toàn bộ 1 năm",
+      getRange: () => ({ startDate: minDate, endDate: maxDate }),
+    },
+  ];
+
+  // Khi user chọn trên date picker
+  const handleSelect = (ranges) => {
+    const { startDate, endDate } = ranges.selection;
+    setSelectionRange({
+      startDate: startDate || selectionRange.startDate,
+      endDate: endDate || selectionRange.endDate,
+      key: "selection",
     });
-    return Object.keys(days).map((k) => ({ label: k, revenue: days[k] }));
-  }, [filteredData, mode, rangeStart, rangeEnd]);
-
-  // Điều hướng thời gian: prev / today / next theo mode
-  const goPrev = () => {
-    if (mode === "day") setAnchor(addDays(anchor, -1));
-    else if (mode === "week") setAnchor(addWeeks(anchor, -1));
-    else if (mode === "month") setAnchor(addMonths(anchor, -1));
-    else setAnchor(addWeeks(anchor, -4)); // 4weeks
   };
-  const goNext = () => {
-    const today = startOfDay(new Date());
-    const nextAnchor =
-      mode === "day"
-        ? addDays(anchor, 1)
-        : mode === "week"
-        ? addWeeks(anchor, 1)
-        : mode === "month"
-        ? addMonths(anchor, 1)
-        : addWeeks(anchor, 4);
 
-    // chặn đi quá hôm nay (để range không vượt tương lai)
-    if (startOfDay(nextAnchor) > today) return;
-    setAnchor(nextAnchor);
+  // Chuẩn hóa số liệu từ API
+  const row = perf.row || {
+    totalGoods: 0,
+    totalShip: 0,
+    totalOrders: 0,
+    totalParcels: 0,
+    completionRate: 0, // (%)
+    totalNetWeight: 0,
+    badFeedbackCount: 0,
+    newCustomersInPeriod: 0,
+    name: "",
+    staffCode: "",
   };
-  const goToday = () => setAnchor(startOfDay(new Date()));
 
-  // đổi mode thì quay về mốc hôm nay cho trực quan
-  const changeMode = (m) => {
-    setMode(m);
-    setAnchor(startOfDay(new Date()));
-  };
+  // Dữ liệu biểu đồ (aggregate comparisons)
+  const chartValueVsShip = [
+    { name: "Giá trị hàng", value: row.totalGoods || 0 },
+    { name: "Phí ship", value: row.totalShip || 0 },
+  ];
+  const chartOrdersVsParcels = [
+    { name: "Đơn hàng", value: row.totalOrders || 0 },
+    { name: "Kiện hàng", value: row.totalParcels || 0 },
+  ];
+  const completion = Math.max(
+    0,
+    Math.min(100, Number(row.completionRate || 0))
+  );
+  const chartCompletion = [
+    { name: "Hoàn tất", value: completion },
+    { name: "Còn lại", value: Math.max(0, 100 - completion) },
+  ];
+  const chartWeight = [
+    { name: "Khối lượng (kg)", value: row.totalNetWeight || 0 },
+  ];
 
   return (
-    <section className=" py-12 px-6 lg:px-12">
-      <div className=" mx-auto">
-        {/* Header + Filters */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900">
-              Dashboard Bán Hàng
-            </h2>
-            <p className="text-gray-600 mt-1">{rangeLabel}</p>
-          </div>
+    <section className="py-12 px-6 lg:px-12">
+      <div className="mx-auto">
+        {/* Header */}
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 relative">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900">
+                Dashboard Bán Hàng
+              </h2>
+              <p className="text-gray-600 mt-1">{rangeLabel}</p>
+              {row.staffCode && (
+                <p className="text-sm text-gray-500">
+                  Nhân sự:{" "}
+                  <span className="font-medium">
+                    {row.name || row.staffCode}
+                  </span>
+                </p>
+              )}
+              {perf.error && (
+                <p className="text-sm text-red-600 mt-1">⚠️ {perf.error}</p>
+              )}
+            </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Mode buttons */}
-            {[
-              { key: "day", label: "Ngày" },
-              { key: "week", label: "Tuần" },
-              { key: "month", label: "Tháng" },
-              { key: "4weeks", label: "4 Tuần" },
-            ].map((btn) => (
-              <button
-                key={btn.key}
-                onClick={() => changeMode(btn.key)}
-                className={`px-4 py-2 rounded-full font-bold text-sm transition ${
-                  mode === btn.key
-                    ? "bg-yellow-400 text-gray-900 shadow"
-                    : "bg-white border border-gray-300 hover:border-yellow-400 text-gray-700"
-                }`}
-              >
-                {btn.label}
-              </button>
-            ))}
+            <div className="flex items-center gap-2">
+              {/* Nút preset nhanh */}
+              <div className="hidden md:flex flex-wrap gap-2">
+                {presets.map((p) => (
+                  <button
+                    key={p.label}
+                    onClick={() =>
+                      setSelectionRange({ ...p.getRange(), key: "selection" })
+                    }
+                    className="px-3 py-2 rounded-full bg-white border border-gray-300 hover:border-yellow-400 text-gray-700 text-sm font-semibold"
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
 
-            {/* Prev / Today / Next */}
-            <div className="flex items-center gap-2 ml-2">
+              {/* Nút bật/tắt DateRange */}
               <button
-                onClick={goPrev}
-                className="px-3 py-2 rounded-full bg-white border border-gray-300 hover:border-yellow-400 text-gray-700 font-bold"
-                title="Trước"
+                onClick={() => setOpenPicker((v) => !v)}
+                className="px-4 py-2 rounded-full bg-yellow-400 text-gray-900 font-bold hover:bg-yellow-300"
+                title="Chọn khoảng ngày"
               >
-                ←
-              </button>
-              <button
-                onClick={goToday}
-                className="px-4 py-2 rounded-full bg-gray-900 text-white font-bold hover:bg-gray-800"
-                title="Về hôm nay"
-              >
-                Hôm nay
-              </button>
-              <button
-                onClick={goNext}
-                className="px-3 py-2 rounded-full bg-white border border-gray-300 hover:border-yellow-400 text-gray-700 font-bold"
-                title="Sau"
-              >
-                →
+                Chọn ngày
               </button>
             </div>
+
+            {/* Loading overlay mượt */}
+            {perf.loading && (
+              <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] flex items-center justify-center rounded-xl z-10">
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="h-6 w-6 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-gray-600 text-sm font-medium">
+                    Đang tải dữ liệu...
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* DateRange Picker */}
+          {openPicker && (
+            <div className="bg-white rounded-xl shadow p-3 border border-gray-100">
+              <DateRange
+                ranges={[selectionRange]}
+                onChange={handleSelect}
+                showSelectionPreview
+                moveRangeOnFirstSelection={false}
+                months={2}
+                direction="horizontal"
+                maxDate={maxDate}
+                minDate={minDate}
+                rangeColors={["#facc15"]}
+              />
+              <div className="flex items-center justify-end gap-2 mt-2">
+                <button
+                  onClick={() => setOpenPicker(false)}
+                  className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Summary cards */}
+        {/* KPI cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
           <div className="bg-white rounded-xl shadow-md p-6 border-t-4 border-yellow-400">
             <h3 className="text-sm text-gray-500 mb-2 font-semibold">
               Tổng doanh thu
             </h3>
             <p className="text-2xl font-bold text-gray-900">
-              {formatCurrency(summary.totalRevenue)}
+              {formatCurrency(row.totalGoods)}
             </p>
           </div>
           <div className="bg-white rounded-xl shadow-md p-6 border-t-4 border-yellow-400">
@@ -276,7 +291,7 @@ const DashboardSale = () => {
               Tổng đơn hàng
             </h3>
             <p className="text-2xl font-bold text-gray-900">
-              {summary.totalOrders}
+              {formatNum(row.totalOrders)}
             </p>
           </div>
           <div className="bg-white rounded-xl shadow-md p-6 border-t-4 border-yellow-400">
@@ -284,88 +299,124 @@ const DashboardSale = () => {
               Tổng kiện hàng
             </h3>
             <p className="text-2xl font-bold text-gray-900">
-              {summary.totalParcels}
+              {formatNum(row.totalParcels)}
             </p>
           </div>
         </div>
 
-        {/* Chart */}
-        <div className="bg-white rounded-xl shadow-md p-8 mb-12">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">
-            {mode === "day"
-              ? "Doanh thu theo giờ"
-              : mode === "4weeks"
-              ? "Doanh thu theo tuần"
-              : "Doanh thu theo ngày"}
-          </h3>
-          <ResponsiveContainer width="100%" height={320}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-              <YAxis tickFormatter={(v) => `${Math.round(v / 1_000_000)}tr`} />
-              <Tooltip
-                formatter={(v) => formatCurrency(v)}
-                labelFormatter={(l) => `📅 ${l}`}
-              />
-              <Line
-                type="monotone"
-                dataKey="revenue"
-                stroke="#facc15"
-                strokeWidth={3}
-                dot={{ r: 4 }}
-                activeDot={{ r: 7 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+        {/* Charts: So sánh aggregate */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Giá trị hàng vs Phí ship */}
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              Giá trị hàng vs Phí ship
+            </h3>
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={chartValueVsShip}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis
+                  tickFormatter={(v) => `${Math.round(v / 1_000_000)}tr`}
+                />
+                <Tooltip formatter={(v) => formatCurrency(v)} />
+                <Bar dataKey="value" fill="#facc15" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+            <div className="mt-3 text-sm text-gray-600">
+              Doanh thu: <b>{formatCurrency(row.totalGoods)}</b> • Phí ship:{" "}
+              <b>{formatCurrency(row.totalShip)}</b>
+            </div>
+          </div>
+
+          {/* Số đơn vs Số kiện */}
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              Số đơn vs Số kiện
+            </h3>
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={chartOrdersVsParcels}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar
+                  dataKey="value"
+                  fill="#fde68a"
+                  stroke="#facc15"
+                  strokeWidth={2}
+                  radius={[8, 8, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+            <div className="mt-3 text-sm text-gray-600">
+              Đơn: <b>{formatNum(row.totalOrders)}</b> • Kiện:{" "}
+              <b>{formatNum(row.totalParcels)}</b>
+            </div>
+          </div>
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-xl shadow-md p-6 overflow-x-auto">
-          <table className="min-w-full text-sm text-left text-gray-700">
-            <thead>
-              <tr className="border-b text-gray-900 font-semibold">
-                <th className="py-3 px-4">#</th>
-                <th className="py-3 px-4">Thời điểm</th>
-                <th className="py-3 px-4">Khách hàng</th>
-                <th className="py-3 px-4">Kênh</th>
-                <th className="py-3 px-4">Tuyến</th>
-                <th className="py-3 px-4 text-right">Doanh thu</th>
-                <th className="py-3 px-4 text-center">Số kiện</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.map((item) => (
-                <tr
-                  key={item.id}
-                  className="border-b hover:bg-gray-50 transition"
+        {/* Completion Rate gauge + Net Weight */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              Tỉ lệ hoàn tất
+            </h3>
+            <div className="h-[280px]">
+              <ResponsiveContainer>
+                <RadialBarChart
+                  data={chartCompletion}
+                  innerRadius="55%"
+                  outerRadius="95%"
+                  startAngle={180}
+                  endAngle={0}
                 >
-                  <td className="py-2 px-4 font-medium">{item.id}</td>
-                  <td className="py-2 px-4">
-                    {item.date.toLocaleString("vi-VN")}
-                  </td>
-                  <td className="py-2 px-4">{item.customer}</td>
-                  <td className="py-2 px-4">{item.channel}</td>
-                  <td className="py-2 px-4">{item.region}</td>
-                  <td className="py-2 px-4 text-right font-semibold text-gray-900">
-                    {formatCurrency(item.total)}
-                  </td>
-                  <td className="py-2 px-4 text-center">{item.parcels}</td>
-                </tr>
-              ))}
-              {filteredData.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="text-center py-6 text-gray-500">
-                    Không có dữ liệu trong khoảng thời gian này.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                  <RadialBar dataKey="value" cornerRadius={10} fill="#facc15" />
+                  <Legend
+                    verticalAlign="bottom"
+                    height={36}
+                    iconType="circle"
+                  />
+                  <Tooltip formatter={(v) => `${v}%`} />
+                </RadialBarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-3 text-sm text-gray-600">
+              Hoàn tất: <b>{completion.toFixed(2)}%</b> • Còn lại:{" "}
+              <b>{(100 - completion).toFixed(2)}%</b>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              Khối lượng tịnh (kg)
+            </h3>
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={chartWeight}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar
+                  dataKey="value"
+                  fill="#fde68a"
+                  stroke="#facc15"
+                  strokeWidth={2}
+                  radius={[8, 8, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+            <div className="mt-3 text-sm text-gray-600">
+              Tổng: <b>{formatNum(row.totalNetWeight)} kg</b>
+            </div>
+          </div>
         </div>
 
-        <p className="text-center text-gray-500 mt-6 text-sm">
-          Dữ liệu giả lập đến ngày {new Date().toLocaleDateString("vi-VN")}
-        </p>
+        {/* Không có data */}
+        {!perf.loading && !perf.error && !perf.row && (
+          <p className="text-center text-gray-500 mt-8">
+            Không có dữ liệu trong khoảng thời gian đã chọn.
+          </p>
+        )}
       </div>
     </section>
   );

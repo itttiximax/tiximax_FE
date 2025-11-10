@@ -105,6 +105,7 @@ import RemoveShipmentList from "../components/WarehouseForeign/RemoveShipmentLis
 import DenyRoles from "./DenyRoles";
 import PerformanceStaff from "../components/StaffSale/PerformanceStaff";
 import DashboardSale from "../components/StaffSale/DashboardSale";
+import PerformnanceMy from "../components/StaffSale/PerformanceMy";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -247,7 +248,7 @@ const Router = createBrowserRouter([
       { path: "createpaymentshipping", element: <MergedPaymentShip /> },
       { path: "warehouse-staff", element: <NotFound /> },
       { path: "sales-staff", element: <NotFound /> },
-      { path: "schedule", element: <NotFound /> },
+      { path: "schedule", element: <DashboardSale /> },
       { path: "destination", element: <NotFound /> },
       { path: "campaigns", element: <SearchWebsite /> },
       { path: "camp", element: <AccountSearch /> },
@@ -287,7 +288,7 @@ const Router = createBrowserRouter([
       { path: "shipping/international", element: <NotFound /> }, // Chưa triển khai
       { path: "tracking", element: <Tracking /> }, // Chưa triển khai
       { path: "warehouses", element: <Tracking /> }, // Chưa triển khai
-      { path: "telesale", element: <NotFound /> }, // Chưa triển khai
+      { path: "telesale", element: <PerformnanceMy /> }, // Chưa triển khai
       { path: "knowledge", element: <NotFound /> }, // Chưa triển khai
       { path: "schedule", element: <NotFound /> }, // Chưa triển khai
       { path: "dashboard", element: <DashboardSale /> },
