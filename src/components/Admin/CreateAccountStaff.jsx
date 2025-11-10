@@ -20,6 +20,7 @@ import registrationService from "../../Services/Auth/Registration";
 import managerRoutesService from "../../Services/Manager/managerRoutesService";
 import ConfirmDialog from "../../common/ConfirmDialog";
 import toast from "react-hot-toast";
+import registrationByStaffService from "../../Services/Auth/RegistrationByStaffService";
 
 const CreateAccountStaff = () => {
   const [formData, setFormData] = useState({
@@ -115,7 +116,7 @@ const CreateAccountStaff = () => {
       setErrors({});
 
       const validation =
-        registrationService.validateStaffRegistrationData(formData);
+        registrationByStaffService.validateStaffRegistrationData(formData);
       if (!validation.isValid) {
         setErrors(validation.errors);
         setShowConfirmDialog(false);

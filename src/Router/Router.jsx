@@ -104,6 +104,7 @@ import UpdateShipmentCodeList from "../components/StaffPurchaser/UpdateShipmentC
 import RemoveShipmentList from "../components/WarehouseForeign/RemoveShipmentList";
 import DenyRoles from "./DenyRoles";
 import PerformanceStaff from "../components/StaffSale/PerformanceStaff";
+import DashboardSale from "../components/StaffSale/DashboardSale";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -288,7 +289,7 @@ const Router = createBrowserRouter([
       { path: "telesale", element: <NotFound /> }, // Chưa triển khai
       { path: "knowledge", element: <NotFound /> }, // Chưa triển khai
       { path: "schedule", element: <NotFound /> }, // Chưa triển khai
-      { path: "dashboard", element: <NotFound /> },
+      { path: "dashboard", element: <DashboardSale /> },
       { path: "performance", element: <PerformanceStaff /> },
     ],
   },

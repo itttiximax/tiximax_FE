@@ -45,10 +45,10 @@ const Home = () => {
 
       {/* Chat hỗ trợ nổi góc phải */}
       <ChatBoxList
-        zaloHref="https://zalo.me/your-zalo-id"
-        hotlineHref="tel:1900545403"
+        zaloHref="https://zalo.me/84367427630" // chuyển đúng chuẩn định dạng Zalo
+        hotlineHref="tel:+84367427630" // click gọi trực tiếp
         onLiveChat={() => alert("Mở hỗ trợ trực tuyến")}
-        onAssistant={() => alert("Mở trợ lý mua sắm")}
+        onAssistant={() => alert("Mở trợ lý mua sắm Tiximax")}
       />
     </div>
   );

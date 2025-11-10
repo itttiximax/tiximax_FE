@@ -31,13 +31,16 @@ const registrationService = {
       throw error;
     }
   },
-
   registerStaff: async (registrationData) => {
     try {
       const response = await api.post(
         "/accounts/register/staff",
         registrationData
       );
+
+      // LOG ĐỂ DEBUG
+      console.log("Staff registration response:", response.data);
+
       return response.data;
     } catch (error) {
       console.error("Error registering staff:", error.response || error);

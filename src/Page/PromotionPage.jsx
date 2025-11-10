@@ -544,7 +544,7 @@ const PromotionPage = () => {
           <Newsletter />
 
           {/* Bottom CTA */}
-          <div className="mt-20 rounded-2xl bg-white p-12 text-center shadow-2xl border-2 border-gray-200">
+          {/* <div className="mt-20 rounded-2xl bg-white p-12 text-center shadow-2xl border-2 border-gray-200">
             <h4 className="text-3xl md:text-5xl font-bold text-gray-900">
               Sẵn sàng bùng nổ đơn hàng?
             </h4>
@@ -566,7 +566,7 @@ const PromotionPage = () => {
                 Bảng giá & gói dịch vụ
               </a>
             </div>
-          </div>
+          </div> */}
         </main>
       </div>
     </section>
