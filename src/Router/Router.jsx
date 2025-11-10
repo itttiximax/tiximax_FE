@@ -263,7 +263,8 @@ const Router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <StaffSalePage />,
+        // element: <StaffSalePage />,
+        element: <StaffProfile />,
       },
       { path: "profile", element: <StaffProfile /> },
       { path: "create-invoice", element: <CreateOrderForm /> },
