@@ -202,8 +202,8 @@ const DashboardSale = () => {
   };
 
   return (
-    <section className="bg-gray-50 py-12 px-6 lg:px-12">
-      <div className="max-w-7xl mx-auto">
+    <section className=" py-12 px-6 lg:px-12">
+      <div className=" mx-auto">
         {/* Header + Filters */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
           <div>
