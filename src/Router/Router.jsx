@@ -106,6 +106,16 @@ import DenyRoles from "./DenyRoles";
 import PerformanceStaff from "../components/StaffSale/PerformanceStaff";
 import DashboardSale from "../components/StaffSale/DashboardSale";
 import PerformnanceMy from "../components/StaffSale/PerformanceMy";
+import AboutUs from "../Page/Navigattion/AboutUs";
+import ServiceAuction from "../Page/Navigattion/ServiceAuction";
+import ServicesStorage from "../Page/Navigattion/ServicesStorage";
+import New from "../Page/Navigattion/New";
+import Contact from "../Page/Navigattion/Contact";
+import ServicesShipping from "../Page/Navigattion/ServicesShipping";
+import ServicesPurchase from "../Page/Navigattion/ServicesPurchase";
+import ServicesCustoms from "../Page/Navigattion/ServicesCustoms";
+import GuideOrder from "../Page/Navigattion/GuideOrder";
+import GuideTracking from "../Page/Navigattion/GuideTracking";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -133,6 +143,16 @@ const Router = createBrowserRouter([
       { path: "signup", element: <SignUp /> },
       { path: "forgot-password", element: <ForgotPassword /> },
       { path: "profile", element: <ProfilePage /> },
+      { path: "/about", element: <AboutUs /> },
+      { path: "/services/auction", element: <ServiceAuction /> },
+      { path: "/services/storage", element: <ServicesStorage /> },
+      { path: "/services/purchase", element: <ServicesPurchase /> },
+      { path: "/services/shipping", element: <ServicesShipping /> },
+      { path: "/services/customs", element: <ServicesCustoms /> },
+      { path: "/guide/order", element: <GuideOrder /> },
+      { path: "/guide/tracking", element: <GuideTracking /> },
+      { path: "/contact", element: <Contact /> },
+      { path: "/news", element: <New /> },
       { path: "/reset-password", element: <ResetPassword /> },
       { path: "/auth/callback", element: <AuthCallback /> },
     ],

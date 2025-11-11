@@ -209,7 +209,7 @@ const Header = () => {
               to={isInternal ? dashboardPath : "/"}
               className="text-3xl font-black bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 bg-clip-text text-transparent hover:from-amber-500 hover:via-yellow-500 hover:to-amber-600 transition-all"
             >
-              TixiMax
+              TIXIMAX
             </Link>
           </div>
 
