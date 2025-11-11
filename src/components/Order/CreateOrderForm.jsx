@@ -543,7 +543,7 @@ const CreateOrderForm = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center p-3 bg-yellow-100 rounded-lg">
                     <input
                       type="checkbox"
                       name="checkRequired"
