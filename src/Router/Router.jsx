@@ -116,6 +116,7 @@ import ServicesPurchase from "../Page/Navigattion/ServicesPurchase";
 import ServicesCustoms from "../Page/Navigattion/ServicesCustoms";
 import GuideOrder from "../Page/Navigattion/GuideOrder";
 import GuideTracking from "../Page/Navigattion/GuideTracking";
+import OrderHistory from "../Page/Navigattion/OrderHistory";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -153,6 +154,7 @@ const Router = createBrowserRouter([
       { path: "/guide/tracking", element: <GuideTracking /> },
       { path: "/contact", element: <Contact /> },
       { path: "/news", element: <New /> },
+      { path: "order-history", element: <OrderHistory /> },
       { path: "/reset-password", element: <ResetPassword /> },
       { path: "/auth/callback", element: <AuthCallback /> },
     ],

@@ -36,7 +36,8 @@ const PurchaseLater = ({
         );
       }
 
-      await createPurchaseService.markBuyLaterForLink(orderId, linkId);
+      // Gọi service (truyền thêm token nếu service có nhận)
+      await createPurchaseService.markBuyLaterForLink(orderId, linkId, token);
 
       setSuccess(true);
       setTimeout(() => {
@@ -44,12 +45,19 @@ const PurchaseLater = ({
         onClose();
       }, 1500);
     } catch (err) {
-      console.error("Error marking link as buy later:", err);
-      setError(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Không thể chuyển sang 'Mua sau'."
-      );
+      let msg = "Không thể chuyển sang 'Mua sau'.";
+
+      if (err.response) {
+        const { data } = err.response;
+        if (data?.message) msg = data.message;
+        else if (data?.error) msg = data.error;
+        // ví dụ: "Chỉ có thể chuyển sang MUA SAU nếu trạng thái hiện tại là CHỜ MUA!"
+        else if (typeof data === "string") msg = data;
+      } else if (err.message) {
+        msg = err.message;
+      }
+
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -57,15 +65,32 @@ const PurchaseLater = ({
 
   if (!isOpen) return null;
 
-  const statusBadge = (status) => {
+  const statusBadgeClass = (status) => {
     const map = {
       CHO_MUA: "bg-yellow-100 text-yellow-800",
       DANG_MUA: "bg-blue-100 text-blue-800",
       DA_MUA: "bg-emerald-100 text-emerald-800",
       MUA_SAU: "bg-purple-100 text-purple-800",
-      HUY: "bg-red-100 text-red-800",
+      DA_HUY: "bg-red-100 text-red-800",
     };
     return map[status] || "bg-gray-100 text-gray-800";
+  };
+
+  const statusBadgeText = (status) => {
+    switch (status) {
+      case "CHO_MUA":
+        return "Chờ mua";
+      case "DANG_MUA":
+        return "Đang mua";
+      case "DA_MUA":
+        return "Đã mua";
+      case "MUA_SAU":
+        return "Mua sau";
+      case "DA_HUY":
+        return "Đã hủy";
+      default:
+        return status;
+    }
   };
 
   return (
@@ -120,12 +145,14 @@ const PurchaseLater = ({
                     </span>
                   </div>
                 )}
+
                 <div className="flex justify-between items-center py-1.5 border-b border-gray-200">
                   <span className="text-xs text-gray-600">Order ID:</span>
                   <span className="text-xs font-semibold text-gray-900">
                     {orderId}
                   </span>
                 </div>
+
                 <div className="flex justify-between items-center py-1.5 border-b border-gray-200">
                   <span className="text-xs text-gray-600">Link ID:</span>
                   <span className="text-xs font-semibold text-gray-900">
@@ -159,11 +186,11 @@ const PurchaseLater = ({
                           Trạng thái:
                         </span>
                         <span
-                          className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusBadge(
+                          className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusBadgeClass(
                             linkInfo.status
                           )}`}
                         >
-                          {linkInfo.status}
+                          {statusBadgeText(linkInfo.status)}
                         </span>
                       </div>
                     )}

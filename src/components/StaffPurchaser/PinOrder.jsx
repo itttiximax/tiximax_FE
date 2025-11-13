@@ -123,7 +123,7 @@ const PinOrder = ({
               </div>
 
               {/* Order Info */}
-              <div className="space-y-2 mb-4">
+              {/* <div className="space-y-2 mb-4">
                 {orderCode && (
                   <div className="flex justify-between items-center py-1.5 border-b border-gray-200">
                     <span className="text-xs text-gray-600">Mã đơn:</span>
@@ -138,7 +138,7 @@ const PinOrder = ({
                     {orderId}
                   </span>
                 </div>
-              </div>
+              </div> */}
 
               {/* Error */}
               {error && (

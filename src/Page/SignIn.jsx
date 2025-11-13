@@ -64,7 +64,7 @@ const SignIn = () => {
       };
 
       setAuthUser(userData);
-      toast.success(`Chào mừng ${userData.name || userData.username}! 🎉`);
+      toast.success(`Chào mừng ${userData.name || userData.username} `);
       const route = roleRoutes[userData.role] || "/";
       await new Promise((r) => setTimeout(r, 100));
       navigate(route, { replace: true });

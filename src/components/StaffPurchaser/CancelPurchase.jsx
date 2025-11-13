@@ -1,5 +1,5 @@
 // src/Components/StaffPurchase/CancelPurchase.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, AlertTriangle, Loader2, CheckCircle2 } from "lucide-react";
 import createPurchaseService from "../../Services/StaffPurchase/createPurchaseService";
 
@@ -17,7 +17,7 @@ const CancelPurchase = ({
   const [success, setSuccess] = useState(false);
 
   // Reset state when modal opens
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       setLoading(false);
       setError(null);
@@ -30,9 +30,7 @@ const CancelPurchase = ({
       setLoading(true);
       setError(null);
 
-      // Get token from localStorage
       const token = localStorage.getItem("jwt");
-
       if (!token) {
         throw new Error(
           "Không tìm thấy token xác thực. Vui lòng đăng nhập lại."
@@ -49,14 +47,54 @@ const CancelPurchase = ({
         onClose();
       }, 1500);
     } catch (err) {
-      console.error("Error cancelling order link:", err);
-      setError(err.message || "Không thể hủy đơn hàng. Vui lòng thử lại sau.");
+      let msg = "Không thể hủy đơn hàng. Vui lòng thử lại sau.";
+
+      if (err.response) {
+        const { data } = err.response;
+        if (data?.message) msg = data.message;
+        else if (data?.error) msg = data.error;
+        else if (typeof data === "string") msg = data;
+      } else if (err.message) {
+        msg = err.message;
+      }
+
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
   if (!isOpen) return null;
+
+  const getStatusBadgeText = (status) => {
+    switch (status) {
+      case "CHO_MUA":
+        return "Chờ mua";
+      case "DANG_MUA":
+        return "Đang mua";
+      case "DA_MUA":
+        return "Đã mua";
+      case "MUA_SAU":
+        return "Mua sau";
+      default:
+        return status;
+    }
+  };
+
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case "CHO_MUA":
+        return "bg-yellow-100 text-yellow-800";
+      case "DANG_MUA":
+        return "bg-blue-100 text-blue-800";
+      case "DA_MUA":
+        return "bg-red-100 text-red-800";
+      case "MUA_SAU":
+        return "bg-purple-100 text-purple-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
@@ -152,19 +190,11 @@ const CancelPurchase = ({
                           Trạng thái:
                         </span>
                         <span
-                          className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                            linkInfo.status === "CHO_MUA"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : linkInfo.status === "DANG_MUA"
-                              ? "bg-blue-100 text-blue-800"
-                              : linkInfo.status === "DA_MUA"
-                              ? "bg-red-100 text-red-800"
-                              : linkInfo.status === "MUA_SAU"
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
+                          className={`text-xs font-medium px-2 py-0.5 rounded-full ${getStatusBadgeClass(
+                            linkInfo.status
+                          )}`}
                         >
-                          {linkInfo.status}
+                          {getStatusBadgeText(linkInfo.status)}
                         </span>
                       </div>
                     )}

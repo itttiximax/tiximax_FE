@@ -17,7 +17,12 @@ import {
   Clock,
   Star,
   StarOff,
+  Store,
+  CheckSquare,
+  Square,
+  AlertCircle,
 } from "lucide-react";
+import toast from "react-hot-toast";
 import orderlinkService from "../../Services/StaffPurchase/orderlinkService";
 import DetailOrderLink from "./DetailOrderLink";
 import CreatePurchase from "./CreatePurchase";
@@ -45,6 +50,9 @@ const OrderLinkList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState("");
 
+  // Selected links for purchase with shop tracking
+  const [selectedLinksForPurchase, setSelectedLinksForPurchase] = useState({});
+
   // Cancel Purchase
   const [showCancelPurchase, setShowCancelPurchase] = useState(false);
   const [selectedLinkForCancel, setSelectedLinkForCancel] = useState(null);
@@ -57,7 +65,84 @@ const OrderLinkList = () => {
   const [showPin, setShowPin] = useState(false);
   const [pinCtx, setPinCtx] = useState(null);
 
-  // LUÔN FILTER MUA_HO
+  // Color palette cho shop badges
+  const shopColorPalette = [
+    { bg: "bg-blue-500", text: "text-white", border: "border-blue-100" },
+    { bg: "bg-green-500", text: "text-white", border: "border-green-100" },
+    { bg: "bg-purple-500", text: "text-white", border: "border-purple-100" },
+    { bg: "bg-amber-500", text: "text-white", border: "border-amber-100" },
+    { bg: "bg-pink-500", text: "text-white", border: "border-pink-100" },
+    { bg: "bg-indigo-500", text: "text-white", border: "border-indigo-100" },
+    { bg: "bg-cyan-500", text: "text-white", border: "border-cyan-100" },
+    { bg: "bg-rose-500", text: "text-white", border: "border-rose-100" },
+    { bg: "bg-teal-500", text: "text-white", border: "border-teal-100" },
+    { bg: "bg-violet-500", text: "text-white", border: "border-violet-100" },
+  ];
+
+  const getShopColor = (shopName, orderLinks) => {
+    if (!shopName || shopName === "string" || shopName === "N/A") {
+      return {
+        bg: "bg-red-600",
+        text: "text-white",
+        border: "border-gray-100",
+      };
+    }
+
+    const uniqueShops = [
+      ...new Set(
+        orderLinks
+          .map((l) => l.groupTag)
+          .filter((g) => g && g !== "string" && g !== "N/A")
+      ),
+    ];
+
+    if (uniqueShops.length <= 1) {
+      return {
+        bg: "bg-amber-500",
+        text: "text-white",
+        border: "border-gray-100",
+      };
+    }
+
+    let hash = 0;
+    for (let i = 0; i < shopName.length; i++) {
+      hash = shopName.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    const colorIndex = Math.abs(hash) % shopColorPalette.length;
+    return shopColorPalette[colorIndex];
+  };
+
+  // Get selected shop for an order
+  const getSelectedShop = (orderId, orderLinks) => {
+    const selections = selectedLinksForPurchase[orderId] || {};
+    const selectedLinkIds = Object.keys(selections);
+
+    if (selectedLinkIds.length === 0) return null;
+
+    const firstSelectedLink = orderLinks.find((link) =>
+      selectedLinkIds.includes(link.linkId.toString())
+    );
+
+    return firstSelectedLink?.groupTag || null;
+  };
+
+  // Calculate total price of selected links
+  const getSelectedTotal = (orderId, orderLinks) => {
+    const selections = selectedLinksForPurchase[orderId] || {};
+    const selectedLinkIds = Object.keys(selections);
+
+    if (selectedLinkIds.length === 0) return 0;
+
+    const selectedLinks = orderLinks.filter((link) =>
+      selectedLinkIds.includes(link.linkId.toString())
+    );
+
+    return selectedLinks.reduce((total, link) => {
+      return total + (link.totalWeb || 0);
+    }, 0);
+  };
+
   const fetchOrders = useCallback(async (page = 0, size = 15) => {
     try {
       setLoading(true);
@@ -133,11 +218,129 @@ const OrderLinkList = () => {
     }));
   }, []);
 
-  const handleCreatePurchase = useCallback((order) => {
-    if (!order.orderLinks?.length) return;
-    setSelectedOrderForPurchase(order);
-    setShowCreatePurchase(true);
-  }, []);
+  // Toggle select link with shop validation
+  const toggleSelectLink = (
+    orderId,
+    linkId,
+    trackingCode,
+    shopName,
+    orderLinks
+  ) => {
+    const currentSelections = selectedLinksForPurchase[orderId] || {};
+    const isCurrentlySelected = currentSelections[linkId];
+
+    // If deselecting, just remove it
+    if (isCurrentlySelected) {
+      const { [linkId]: removed, ...rest } = currentSelections;
+      setSelectedLinksForPurchase((prev) => ({
+        ...prev,
+        [orderId]: rest,
+      }));
+      return;
+    }
+
+    // If selecting, check shop constraint
+    const selectedShop = getSelectedShop(orderId, orderLinks);
+
+    if (selectedShop && selectedShop !== shopName) {
+      toast.error(
+        `Chỉ được chọn sản phẩm cùng shop!\nĐã chọn: ${selectedShop}\nBạn đang chọn: ${shopName}`,
+        { duration: 4000 }
+      );
+      return;
+    }
+
+    // Valid selection
+    setSelectedLinksForPurchase((prev) => ({
+      ...prev,
+      [orderId]: {
+        ...currentSelections,
+        [linkId]: trackingCode,
+      },
+    }));
+  };
+
+  // Select all links in order - only same shop
+  const selectAllLinksInOrder = (order, selectAll) => {
+    if (!selectAll) {
+      // Deselect all
+      setSelectedLinksForPurchase((prev) => {
+        const { [order.orderId]: removed, ...rest } = prev;
+        return rest;
+      });
+      return;
+    }
+
+    // Select all available links
+    const availableLinks = order.orderLinks.filter(
+      (link) => !["DA_MUA", "HUY", "DA_HUY"].includes(link.status)
+    );
+
+    if (availableLinks.length === 0) return;
+
+    // Group by shop
+    const linksByShop = {};
+    availableLinks.forEach((link) => {
+      const shop = link.groupTag || "N/A";
+      if (!linksByShop[shop]) {
+        linksByShop[shop] = [];
+      }
+      linksByShop[shop].push(link);
+    });
+
+    // If multiple shops, ask user to select manually
+    if (Object.keys(linksByShop).length > 1) {
+      toast.error(
+        "Đơn hàng có nhiều shop khác nhau. Vui lòng chọn từng sản phẩm cùng shop!",
+        { duration: 4000 }
+      );
+      return;
+    }
+
+    // Select all from the only shop
+    const selections = {};
+    availableLinks.forEach((link) => {
+      selections[link.linkId] = link.trackingCode;
+    });
+
+    setSelectedLinksForPurchase((prev) => ({
+      ...prev,
+      [order.orderId]: selections,
+    }));
+  };
+
+  const handleCreatePurchase = useCallback(
+    (order) => {
+      if (!order.orderLinks?.length) return;
+
+      const selectedCount = Object.keys(
+        selectedLinksForPurchase[order.orderId] || {}
+      ).length;
+
+      if (selectedCount === 0) {
+        toast.error("Vui lòng chọn ít nhất một sản phẩm để mua hộ");
+        return;
+      }
+
+      // Validate same shop
+      const selections = selectedLinksForPurchase[order.orderId] || {};
+      const selectedLinkIds = Object.keys(selections);
+      const selectedLinks = order.orderLinks.filter((link) =>
+        selectedLinkIds.includes(link.linkId.toString())
+      );
+
+      const shops = [...new Set(selectedLinks.map((link) => link.groupTag))];
+
+      if (shops.length > 1) {
+        toast.error("Các sản phẩm đã chọn phải cùng shop!");
+        return;
+      }
+
+      setSelectedOrderForPurchase(order);
+      setShowCreatePurchase(true);
+    },
+    [selectedLinksForPurchase]
+  );
 
   const handleCloseCreatePurchase = useCallback(() => {
     setShowCreatePurchase(false);
@@ -145,10 +348,21 @@ const OrderLinkList = () => {
   }, []);
 
   const handlePurchaseSuccess = useCallback(() => {
+    // Clear selections for this order
+    if (selectedOrderForPurchase) {
+      setSelectedLinksForPurchase((prev) => {
+        const { [selectedOrderForPurchase.orderId]: removed, ...rest } = prev;
+        return rest;
+      });
+    }
     fetchOrders(pagination.pageNumber, pagination.pageSize);
-  }, [fetchOrders, pagination.pageNumber, pagination.pageSize]);
+  }, [
+    fetchOrders,
+    pagination.pageNumber,
+    pagination.pageSize,
+    selectedOrderForPurchase,
+  ]);
 
-  // Cancel Purchase
   const handleCancelPurchase = useCallback((order, link) => {
     setSelectedLinkForCancel({
       orderId: order.orderId,
@@ -175,7 +389,6 @@ const OrderLinkList = () => {
     [fetchOrders, pagination.pageNumber, pagination.pageSize]
   );
 
-  // Purchase Later
   const handleOpenPurchaseLater = useCallback((order, link) => {
     setSelectedLinkForBuyLater({
       orderId: order.orderId,
@@ -199,12 +412,11 @@ const OrderLinkList = () => {
     fetchOrders(pagination.pageNumber, pagination.pageSize);
   }, [fetchOrders, pagination.pageNumber, pagination.pageSize]);
 
-  // Pin Order
   const openPin = useCallback((order) => {
     setPinCtx({
       orderId: order.orderId,
       orderCode: order.orderCode,
-      pinned: !!order.pinnedAt, // NEW: dựa trên pinnedAt
+      pinned: !!order.pinnedAt,
     });
     setShowPin(true);
   }, []);
@@ -383,6 +595,28 @@ const OrderLinkList = () => {
           <div className="space-y-3">
             {filteredOrders.map((order, index) => {
               const isPinned = !!order.pinnedAt;
+              const availableLinks =
+                order.orderLinks?.filter(
+                  (link) => !["DA_MUA", "HUY", "DA_HUY"].includes(link.status)
+                ) || [];
+              const selectedCount = Object.keys(
+                selectedLinksForPurchase[order.orderId] || {}
+              ).length;
+              const selectedShop = getSelectedShop(
+                order.orderId,
+                order.orderLinks || []
+              );
+              const selectedTotal = getSelectedTotal(
+                order.orderId,
+                order.orderLinks || []
+              );
+              const isAllSelected =
+                availableLinks.length > 0 &&
+                availableLinks.every(
+                  (link) =>
+                    selectedLinksForPurchase[order.orderId]?.[link.linkId]
+                );
+
               return (
                 <div
                   key={order.orderId}
@@ -391,7 +625,7 @@ const OrderLinkList = () => {
                   {/* Order Header */}
                   <div
                     className={`px-4 py-3 border-b border-gray-200 ${
-                      isPinned ? "bg-amber-100" : "bg-blue-100"
+                      isPinned ? "bg-yellow-100" : "bg-gray-200"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -406,7 +640,6 @@ const OrderLinkList = () => {
                         <div>
                           <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
                             {order.orderCode}
-                            {/* Star Button (Pin) */}
                             <button
                               onClick={() => openPin(order)}
                               className={`inline-flex items-center justify-center rounded-full p-1 transition-colors ${
@@ -424,7 +657,9 @@ const OrderLinkList = () => {
                             </button>
                           </h3>
                           <div className="flex items-center gap-3 text-xs text-gray-600 mt-1">
-                            <span>{formatDate(order.createdAt)}</span>
+                            <span className="font-medium">
+                              {formatDate(order.createdAt)}
+                            </span>
                             <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
                               Mua hộ
                             </span>
@@ -437,20 +672,60 @@ const OrderLinkList = () => {
                           <div className="text-base font-bold text-gray-900 flex items-center gap-1">
                             {formatCurrency(order.finalPriceOrder)}
                           </div>
-                          <div className="text-xs text-gray-500">Tổng tiền</div>
+                          <div className="text-xs text-black-500 font-semibold">
+                            Tổng tiền
+                          </div>
                         </div>
-                        {order.orderLinks?.length > 0 && (
+                        {availableLinks.length > 0 && (
                           <button
                             onClick={() => handleCreatePurchase(order)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-xs font-medium hover:from-green-600 hover:to-green-700 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200"
+                            disabled={selectedCount === 0}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-xs font-medium hover:from-green-600 hover:to-green-700 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                           >
                             <Plus className="w-3 h-3" />
-                            Mua hộ
+                            Mua hộ ({selectedCount})
                           </button>
                         )}
                       </div>
                     </div>
                   </div>
+
+                  {/* Shop Warning with Total */}
+                  {selectedShop && selectedCount > 0 && (
+                    <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm">
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-100">
+                            <Store className="w-4 h-4 text-amber-700" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 text-amber-900">
+                              <span className="font-medium">
+                                Đang chọn shop:
+                              </span>
+                              <span className="font-bold text-amber-700 bg-white px-2 py-0.5 rounded border border-amber-300">
+                                {selectedShop}
+                              </span>
+                              <span className="text-xs font-bold text-red-700  px-2 py-0.5 rounded border border-red-300">
+                                Chỉ được chọn sản phẩm cùng shop
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xl text-black-700 font-medium">
+                            Tổng tiền thu:
+                          </div>
+                          <div className="text-lg font-bold text-amber-900">
+                            {formatCurrency(selectedTotal)} ₫
+                          </div>
+                          {/* <div className="text-xs form-medium text-black-600">
+                            ( {selectedCount} sản phẩm )
+                          </div> */}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Order Content */}
                   <div className="p-4">
@@ -461,24 +736,46 @@ const OrderLinkList = () => {
                             <Package className="w-3 h-3" />
                             Sản phẩm ({order.orderLinks.length})
                           </h4>
-                          {order.orderLinks.length > 2 && (
-                            <button
-                              onClick={() => toggleExpandOrder(order.orderId)}
-                              className="text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center gap-1"
-                            >
-                              {expandedOrders[order.orderId] ? (
-                                <>
-                                  <ChevronUp className="w-3 h-3" />
-                                  Thu gọn
-                                </>
-                              ) : (
-                                <>
-                                  <ChevronDown className="w-3 h-3" />
-                                  Xem tất cả
-                                </>
-                              )}
-                            </button>
-                          )}
+                          <div className="flex items-center gap-3">
+                            {availableLinks.length > 0 && (
+                              <button
+                                onClick={() =>
+                                  selectAllLinksInOrder(order, !isAllSelected)
+                                }
+                                className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800"
+                              >
+                                {isAllSelected ? (
+                                  <>
+                                    <CheckSquare className="w-3 h-3" />
+                                    Bỏ chọn tất cả
+                                  </>
+                                ) : (
+                                  <>
+                                    <Square className="w-3 h-3" />
+                                    Chọn tất cả
+                                  </>
+                                )}
+                              </button>
+                            )}
+                            {order.orderLinks.length > 2 && (
+                              <button
+                                onClick={() => toggleExpandOrder(order.orderId)}
+                                className="text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center gap-1"
+                              >
+                                {expandedOrders[order.orderId] ? (
+                                  <>
+                                    <ChevronUp className="w-3 h-3" />
+                                    Thu gọn
+                                  </>
+                                ) : (
+                                  <>
+                                    <ChevronDown className="w-3 h-3" />
+                                    Xem tất cả
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
                         </div>
 
                         <div className="space-y-2">
@@ -486,146 +783,214 @@ const OrderLinkList = () => {
                           expandedOrders[order.orderId]
                             ? order.orderLinks
                             : order.orderLinks.slice(0, 2)
-                          ).map((link) => (
-                            <div
-                              key={link.linkId}
-                              className="border border-gray-200 rounded-lg p-3 bg-gradient-to-r from-gray-50 to-gray-50"
-                            >
-                              <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
-                                {/* Product Info */}
-                                <div className="lg:col-span-1">
-                                  <div className="font-medium text-gray-900 mb-1 text-sm">
-                                    {link.productName !== "string"
-                                      ? link.productName
-                                      : "Tên sản phẩm"}
-                                  </div>
-                                  <div className="space-y-0.5 text-xs text-gray-600">
-                                    <div className="flex items-center gap-1">
-                                      <ExternalLink className="w-2.5 h-2.5" />
-                                      {link.website !== "string"
-                                        ? link.website
-                                        : "N/A"}
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      {link.trackingCode}
-                                    </div>
-                                  </div>
-                                </div>
+                          ).map((link) => {
+                            const shopColor = getShopColor(
+                              link.groupTag,
+                              order.orderLinks
+                            );
+                            const isDisabled = [
+                              "DA_MUA",
+                              "HUY",
+                              "DA_HUY",
+                            ].includes(link.status);
+                            const isSelected =
+                              selectedLinksForPurchase[order.orderId]?.[
+                                link.linkId
+                              ];
+                            const isDifferentShop =
+                              selectedShop && selectedShop !== link.groupTag;
 
-                                {/* Pricing Info */}
-                                <div className="lg:col-span-1">
-                                  <div className="space-y-0.5 text-xs">
-                                    <div className="text-gray-600">
-                                      SL:{" "}
-                                      <span className="font-medium">
-                                        {link.quantity}
-                                      </span>
-                                    </div>
-                                    <div className="text-gray-600">
-                                      Giá web:{" "}
-                                      <span className="font-medium">
-                                        {link.priceWeb?.toLocaleString() || 0}
-                                      </span>
-                                    </div>
-                                    <div className="text-gray-600">
-                                      Giá Ship:{" "}
-                                      <span className="font-medium">
-                                        {link.shipWeb?.toLocaleString() || 0}
-                                      </span>
-                                    </div>
+                            return (
+                              <div
+                                key={link.linkId}
+                                className={`border rounded-lg p-3 transition-all ${
+                                  isSelected
+                                    ? "bg-green-50 border-green-300 ring-2 ring-green-200"
+                                    : isDifferentShop
+                                    ? "bg-gray-100 border-gray-300 opacity-50"
+                                    : "bg-gradient-to-r from-gray-50 to-gray-50 border-gray-200"
+                                } ${isDisabled ? "opacity-60" : ""}`}
+                              >
+                                <div className="grid grid-cols-1 lg:grid-cols-6 gap-3">
+                                  {/* Checkbox Column */}
+                                  <div className="lg:col-span-1 flex items-center justify-center">
+                                    {!isDisabled && !isDifferentShop ? (
+                                      <button
+                                        onClick={() =>
+                                          toggleSelectLink(
+                                            order.orderId,
+                                            link.linkId,
+                                            link.trackingCode,
+                                            link.groupTag,
+                                            order.orderLinks
+                                          )
+                                        }
+                                        className="flex flex-col items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                                      >
+                                        {isSelected ? (
+                                          <CheckSquare className="w-6 h-6 text-green-600" />
+                                        ) : (
+                                          <Square className="w-6 h-6 text-gray-400" />
+                                        )}
+                                        <span className="text-xs text-gray-600 font-medium">
+                                          {isSelected ? "Đã chọn" : "Chọn"}
+                                        </span>
+                                      </button>
+                                    ) : (
+                                      <div className="flex flex-col items-center gap-2 p-2">
+                                        <XCircle className="w-6 h-6 text-gray-300" />
+                                        <span className="text-xs text-gray-400 text-center font-medium">
+                                          {isDifferentShop
+                                            ? "Shop khác"
+                                            : "Không khả dụng"}
+                                        </span>
+                                      </div>
+                                    )}
                                   </div>
-                                </div>
 
-                                {/* Additional Info */}
-                                <div className="lg:col-span-1">
-                                  <div className="space-y-0.5 text-xs text-gray-600">
-                                    <div>
-                                      Shop:{" "}
-                                      <span className="font-medium">
+                                  {/* Shop Column */}
+                                  <div className="lg:col-span-1">
+                                    <div
+                                      className={`${shopColor.bg} ${shopColor.text} ${shopColor.border} border-2 rounded-lg p-3 h-full flex flex-col items-center justify-center text-center shadow-sm`}
+                                    >
+                                      <Store className="w-5 h-5 mb-1.5" />
+                                      <div className="font-bold text-sm break-words">
                                         {link.groupTag !== "string"
                                           ? link.groupTag
                                           : "N/A"}
-                                      </span>
+                                      </div>
                                     </div>
-                                    <div>
-                                      Phân loại:{" "}
-                                      <span className="font-medium">
-                                        {link.classify !== "string"
-                                          ? link.classify
+                                  </div>
+
+                                  {/* Product Info */}
+                                  <div className="lg:col-span-1">
+                                    <div className="font-medium text-gray-900 mb-1 text-sm">
+                                      {link.productName !== "string"
+                                        ? link.productName
+                                        : "Tên sản phẩm"}
+                                    </div>
+                                    <div className="space-y-0.5 text-xs text-gray-600">
+                                      <div className="flex items-center gap-1">
+                                        <ExternalLink className="w-2.5 h-2.5" />
+                                        {link.website !== "string"
+                                          ? link.website
                                           : "N/A"}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      Note:{" "}
-                                      <span className="font-medium">
-                                        {link.note || "N/A"}
-                                      </span>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        {link.trackingCode}
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
 
-                                {/* Actions & Status */}
-                                <div className="lg:col-span-1 text-right">
-                                  <div className="text-sm font-semibold text-gray-900 mb-2">
-                                    {formatCurrency(link.totalWeb)}
+                                  {/* Pricing Info */}
+                                  <div className="lg:col-span-1">
+                                    <div className="space-y-0.5 text-xs">
+                                      <div className="text-gray-600">
+                                        SL:{" "}
+                                        <span className="font-medium">
+                                          {link.quantity}
+                                        </span>
+                                      </div>
+                                      <div className="text-gray-600">
+                                        Giá web:{" "}
+                                        <span className="font-medium">
+                                          {link.priceWeb?.toLocaleString() || 0}
+                                        </span>
+                                      </div>
+                                      <div className="text-gray-600">
+                                        Giá Ship:{" "}
+                                        <span className="font-medium">
+                                          {link.shipWeb?.toLocaleString() || 0}
+                                        </span>
+                                      </div>
+                                    </div>
                                   </div>
-                                  <div className="flex flex-col gap-1.5 items-end">
-                                    <span
-                                      className={`inline-block px-1.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                                        link.status
-                                      )}`}
-                                    >
-                                      {getStatusText(link.status)}
-                                    </span>
-                                    <div className="flex gap-1.5">
-                                      <button
-                                        onClick={() =>
-                                          handleViewDetail(link.linkId)
-                                        }
-                                        className="flex items-center gap-1 bg-blue-600 text-white px-2 py-1 rounded-md text-xs hover:bg-blue-700 transition-colors"
+
+                                  {/* Additional Info */}
+                                  <div className="lg:col-span-1">
+                                    <div className="space-y-0.5 text-xs text-gray-600">
+                                      <div>
+                                        Phân loại:{" "}
+                                        <span className="font-medium">
+                                          {link.classify !== "string"
+                                            ? link.classify
+                                            : "N/A"}
+                                        </span>
+                                      </div>
+                                      <div>
+                                        Note:{" "}
+                                        <span className="font-medium">
+                                          {link.note || "N/A"}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Actions & Status */}
+                                  <div className="lg:col-span-1 text-right">
+                                    <div className="text-sm font-semibold text-gray-900 mb-2">
+                                      {formatCurrency(link.totalWeb)} ₫
+                                    </div>
+                                    <div className="flex flex-col gap-1.5 items-end">
+                                      <span
+                                        className={`inline-block px-1.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                                          link.status
+                                        )}`}
                                       >
-                                        <Eye className="w-2.5 h-2.5" />
-                                        Chi tiết
-                                      </button>
+                                        {getStatusText(link.status)}
+                                      </span>
+                                      <div className="flex gap-1.5">
+                                        <button
+                                          onClick={() =>
+                                            handleViewDetail(link.linkId)
+                                          }
+                                          className="flex items-center gap-1 bg-blue-600 text-white px-2 py-1 rounded-md text-xs hover:bg-blue-700 transition-colors"
+                                        >
+                                          <Eye className="w-2.5 h-2.5" />
+                                          Chi tiết
+                                        </button>
 
-                                      {/* Mua sau */}
-                                      {link.status !== "HUY" &&
-                                        link.status !== "DA_MUA" &&
-                                        link.status !== "MUA_SAU" && (
-                                          <button
-                                            onClick={() =>
-                                              handleOpenPurchaseLater(
-                                                order,
-                                                link
-                                              )
-                                            }
-                                            className="flex items-center gap-1 bg-indigo-500 text-white px-2 py-1 rounded-md text-xs hover:bg-indigo-600 transition-colors"
-                                            title="Đưa link sang Mua sau"
-                                          >
-                                            <Clock className="w-2.5 h-2.5" />
-                                            Mua sau
-                                          </button>
-                                        )}
+                                        {link.status !== "HUY" &&
+                                          link.status !== "DA_MUA" &&
+                                          link.status !== "MUA_SAU" && (
+                                            <button
+                                              onClick={() =>
+                                                handleOpenPurchaseLater(
+                                                  order,
+                                                  link
+                                                )
+                                              }
+                                              className="flex items-center gap-1 bg-indigo-500 text-white px-2 py-1 rounded-md text-xs hover:bg-indigo-600 transition-colors"
+                                              title="Đưa link sang Mua sau"
+                                            >
+                                              <Clock className="w-2.5 h-2.5" />
+                                              Mua sau
+                                            </button>
+                                          )}
 
-                                      {link.status !== "HUY" &&
-                                        link.status !== "DA_MUA" && (
-                                          <button
-                                            onClick={() =>
-                                              handleCancelPurchase(order, link)
-                                            }
-                                            className="flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-md text-xs hover:bg-red-600 transition-colors"
-                                            title="Hủy đơn hàng"
-                                          >
-                                            <XCircle className="w-2.5 h-2.5" />
-                                            Hủy
-                                          </button>
-                                        )}
+                                        {link.status !== "HUY" &&
+                                          link.status !== "DA_MUA" && (
+                                            <button
+                                              onClick={() =>
+                                                handleCancelPurchase(
+                                                  order,
+                                                  link
+                                                )
+                                              }
+                                              className="flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-md text-xs hover:bg-red-600 transition-colors"
+                                              title="Hủy đơn hàng"
+                                            >
+                                              <XCircle className="w-2.5 h-2.5" />
+                                              Hủy
+                                            </button>
+                                          )}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     ) : (
@@ -689,7 +1054,13 @@ const OrderLinkList = () => {
         isOpen={showCreatePurchase}
         onClose={handleCloseCreatePurchase}
         orderCode={selectedOrderForPurchase?.orderCode}
-        orderLinks={selectedOrderForPurchase?.orderLinks || []}
+        selectedTrackingCodes={
+          selectedOrderForPurchase
+            ? Object.values(
+                selectedLinksForPurchase[selectedOrderForPurchase.orderId] || {}
+              )
+            : []
+        }
         onSuccess={handlePurchaseSuccess}
       />
 
@@ -713,7 +1084,6 @@ const OrderLinkList = () => {
         onSuccess={handlePurchaseLaterSuccess}
       />
 
-      {/* NEW: Pin modal */}
       <PinOrder
         isOpen={showPin}
         onClose={closePin}

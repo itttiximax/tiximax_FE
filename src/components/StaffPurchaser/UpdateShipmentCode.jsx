@@ -49,7 +49,7 @@ const UpdateShipmentCode = ({ isOpen, onClose, purchase, onSaveSuccess }) => {
         purchase.purchaseId,
         shipmentCode.trim()
       );
-      toast.success("✅ Cập nhật mã vận đơn thành công!");
+      toast.success("Cập nhật mã vận đơn thành công!");
       setShipmentCode(""); // reset sau khi lưu thành công
       setTimeout(() => {
         onClose();

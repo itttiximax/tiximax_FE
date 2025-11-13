@@ -136,7 +136,6 @@ const DetailOrderLink = ({ linkId, onClose }) => {
               <h2 className="text-xl font-semibold text-gray-900">
                 Chi tiết sản phẩm
               </h2>
-              <p className="text-sm text-gray-600">ID: #{orderLink.linkId}</p>
             </div>
           </div>
           <button
