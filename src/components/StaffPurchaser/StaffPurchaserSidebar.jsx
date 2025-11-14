@@ -62,12 +62,12 @@ const StaffPurchaserSidebar = () => {
         {
           type: "dropdown",
           icon: Warehouse,
-          label: "Quản lý kho hàng",
+          label: "Quản lý mua hàng",
           dropdownItems: [
             {
               to: "/staff-purchaser/inventorystock",
               icon: Warehouse,
-              label: "Tồn kho",
+              label: "Trạng thái đơn",
             },
             {
               to: "/staff-purchaser/inventory/audit",

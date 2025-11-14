@@ -117,6 +117,9 @@ import ServicesCustoms from "../Page/Navigattion/ServicesCustoms";
 import GuideOrder from "../Page/Navigattion/GuideOrder";
 import GuideTracking from "../Page/Navigattion/GuideTracking";
 import OrderHistory from "../Page/Navigattion/OrderHistory";
+import ServiceList from "../Page/Navigattion/ServiceList";
+import GuideList from "../Page/Navigattion/GuideList";
+import PurchaserList from "../components/StaffPurchaser/PurchaserList";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -145,11 +148,13 @@ const Router = createBrowserRouter([
       { path: "forgot-password", element: <ForgotPassword /> },
       { path: "profile", element: <ProfilePage /> },
       { path: "/about", element: <AboutUs /> },
+      { path: "services", element: <ServiceList /> },
       { path: "/services/auction", element: <ServiceAuction /> },
       { path: "/services/storage", element: <ServicesStorage /> },
       { path: "/services/purchase", element: <ServicesPurchase /> },
       { path: "/services/shipping", element: <ServicesShipping /> },
       { path: "/services/customs", element: <ServicesCustoms /> },
+      { path: "/guide", element: <GuideList /> },
       { path: "/guide/order", element: <GuideOrder /> },
       { path: "/guide/tracking", element: <GuideTracking /> },
       { path: "/contact", element: <Contact /> },
@@ -334,7 +339,7 @@ const Router = createBrowserRouter([
       { path: "orders", element: <OrderLinkList /> },
       { path: "auction", element: <OrderAuctionList /> },
       { path: "inventory", element: <UpdateShipmentCodeList /> },
-      { path: "inventorystock", element: <NotFound /> },
+      { path: "inventorystock", element: <PurchaserList /> },
       { path: "inventory/audit", element: <NotFound /> },
     ],
   },

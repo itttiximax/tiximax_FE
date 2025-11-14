@@ -67,7 +67,7 @@ const StaffWarehouseForeignSidebar = () => {
           path: "/staff-warehouse-foreign/importproduct",
         },
         {
-          text: "Đóng gói",
+          text: "Đóng hàng",
           icon: <PackageOpen className="w-6 h-6" />,
           path: "/staff-warehouse-foreign/packings",
         },

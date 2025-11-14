@@ -1,6 +1,6 @@
 import React from "react";
 import About from "./About";
-import DowApp from "./DowApp";
+// import DowApp from "./DowApp";
 import SideMenu from "./SideMenu";
 import ServicePage from "./ServicePage";
 import Feedback from "./Feedback";
@@ -41,7 +41,7 @@ const Home = () => {
       <PromotionPage />
 
       {/* DowApp section - Download App */}
-      <DowApp />
+      {/* <DowApp /> */}
 
       {/* Chat hỗ trợ nổi góc phải */}
       <ChatBoxList

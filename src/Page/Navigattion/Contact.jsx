@@ -5,410 +5,322 @@ import {
   Phone,
   MapPin,
   Clock,
-  Send,
-  MessageSquare,
-  Building2,
-  HelpCircle,
-  ShieldCheck,
-  Globe2,
   Facebook,
   Instagram,
   Linkedin,
 } from "lucide-react";
 
-/**
- * Contact.jsx — Tiximax (Phiên bản UI chuyên nghiệp hơn)
- * Cải tiến UI để chuyên nghiệp hơn:
- * - Tối ưu hóa responsive: Sử dụng grid linh hoạt hơn, breakpoints rõ ràng.
- * - Font & Typography: Thêm font sans-serif chuyên nghiệp (e.g., Inter hoặc Roboto via Tailwind config), tăng line-height cho readability.
- * - Spacing & Padding: Tăng padding nội dung, sử dụng rem/em cho consistency.
- * - Animations: Thêm stagger cho cards, smooth transitions cho form inputs.
- * - Form Enhancements: Floating labels, better error states, loading spinner cho submit.
- * - Map: Tăng height, thêm border-radius mượt mà.
- * - FAQ: Accordion mượt mà hơn với transitions.
- * - Social: Hover effects tinh tế, thêm tooltips.
- * - Accessibility: Thêm aria-labels, focus rings visible nhưng styled.
- * - Overall: Gradient tinh tế hơn, shadows mềm mại, buttons với ripple effect (via CSS).
- *
- * Giả sử Tailwind config đã có thêm plugins như @tailwindcss/forms cho form styling tốt hơn.
- */
-
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" } },
-};
-
-const staggerChildren = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
 };
 
 const Contact = () => {
   const [form, setForm] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
-    topic: "",
+    subject: "",
     message: "",
   });
+
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-  const topics = [
-    { value: "auction", label: "Hỗ trợ đấu giá" },
-    { value: "storage", label: "Ký gửi kho" },
-    { value: "shipping", label: "Vận chuyển quốc tế" },
-    { value: "customs", label: "Khai báo hải quan" },
-    { value: "other", label: "Khác" },
-  ];
-
-  const validate = () => {
-    const e = {};
-    if (!form.name.trim()) e.name = "Vui lòng nhập họ tên";
-    if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-      e.email = "Email không hợp lệ";
-    if (!form.message || form.message.length < 10)
-      e.message = "Nội dung tối thiểu 10 ký tự";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
     setLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    // fake API
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+
     setLoading(false);
     setSent(true);
-    setTimeout(() => setSent(false), 5000);
-    setForm({ name: "", email: "", phone: "", topic: "", message: "" });
+
+    setForm({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      subject: "",
+      message: "",
+    });
+
+    setTimeout(() => setSent(false), 4000);
   };
 
-  const handle = (k) => (e) => setForm((s) => ({ ...s, [k]: e.target.value }));
+  const handle = (key) => (e) => {
+    setForm((s) => ({ ...s, [key]: e.target.value }));
+  };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white to-yellow-50/30 text-gray-900 font-sans">
-      {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 opacity-30 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-yellow-100 via-yellow-50 to-transparent" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 lg:pt-28 lg:pb-20">
+    <main className="min-h-screen bg-gradient-to-b from-white to-amber-50/30 text-gray-900">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+        {/* TITLE */}
+        <motion.h1
+          variants={fadeUp}
+          initial="hidden"
+          animate="show"
+          className="text-center text-3xl sm:text-4xl lg:text-5xl font-black tracking-wide uppercase"
+        >
+          Liên hệ với chúng tôi
+        </motion.h1>
+
+        {/* TOP ROW: INFO + BANNER */}
+        <div className="mt-12 grid lg:grid-cols-2 gap-8 lg:gap-12">
+          {/* LEFT – COMPANY INFO */}
           <motion.div
             variants={fadeUp}
             initial="hidden"
             animate="show"
-            className="max-w-3xl"
+            className="bg-white rounded-2xl shadow-sm border border-amber-100 p-8 sm:p-10 min-h-[500px] flex flex-col"
           >
-            <span className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide bg-yellow-50 text-yellow-800 px-3 py-1.5 rounded-full shadow-sm">
-              <Globe2 className="w-4 h-4" /> Contact Tiximax
-            </span>
-            <h1 className="mt-6 text-2xl sm:text-5xl lg:text-6xl font-extrabold leading-tight text-gray-900 tracking-tight">
-              Liên hệ Tiximax — Chúng tôi luôn sẵn sàng hỗ trợ bạn.
-            </h1>
-            <p className="mt-5 text-gray-600 text-lg sm:text-xl leading-relaxed">
-              Gửi yêu cầu về đấu giá, ký gửi kho, vận chuyển hay thông quan. Đội
-              ngũ sẽ phản hồi nhanh trong giờ làm việc.
+            <div className="flex items-center gap-3 mb-4">
+              <span className="p-2 rounded-full bg-amber-100 text-amber-700">
+                <MapPin className="w-5 h-5" />
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wide text-gray-900">
+                Công ty CP Tiximax
+              </h2>
+            </div>
+            <p className="mt-2 text-base text-gray-600 leading-relaxed">
+              Nếu cần tư vấn hoặc hỗ trợ tham khảo thêm thông tin, vui lòng liên
+              hệ với chúng tôi theo các thông tin sau:
             </p>
-          </motion.div>
-          {/* Quick Info Cards */}
-          <motion.div
-            variants={staggerChildren}
-            initial="hidden"
-            animate="show"
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12"
-          >
-            {[
-              {
-                icon: Phone,
-                title: "Hotline",
-                desc: "0707 267 001 (09:00–18:00)",
-              },
-              { icon: Mail, title: "Email", desc: "support@tiximax.vn" },
-              { icon: MapPin, title: "Văn phòng", desc: "Đà Nẵng · Việt Nam" },
-            ].map((c, i) => (
-              <motion.div
-                key={c.title}
-                variants={fadeUp}
-                className="rounded-xl border border-yellow-100 bg-white p-6 shadow-md hover:shadow-lg transition-shadow duration-300"
-              >
-                <c.icon className="w-6 h-6 text-yellow-600 mb-3" />
-                <p className="font-semibold text-gray-900 text-lg">{c.title}</p>
-                <p className="text-gray-600">{c.desc}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-      {/* FORM & MAP */}
-      <section className="py-12 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-5 gap-8">
-            {/* Form */}
-            <div className="lg:col-span-3 rounded-xl border border-yellow-100 bg-white p-8 shadow-md">
-              <div className="mb-8">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-50 text-yellow-800 text-sm font-medium">
-                  <MessageSquare className="w-4 h-4" /> Gửi yêu cầu
-                </div>
-                <p className="mt-3 text-gray-600 text-base leading-relaxed">
-                  Điền thông tin để chúng tôi hỗ trợ nhanh hơn.
-                </p>
+
+            <div className="mt-8 space-y-4 text-base">
+              <div className="flex items-center gap-3">
+                <Phone className="w-5 h-5 text-amber-600" />
+                <span className="font-medium text-gray-800">
+                  0707 123 456 789
+                </span>
               </div>
-              <form onSubmit={onSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="relative">
-                    <input
-                      id="name"
-                      value={form.name}
-                      onChange={handle("name")}
-                      placeholder=" "
-                      className={`peer w-full rounded-lg border ${
-                        errors.name ? "border-red-500" : "border-gray-300"
-                      } px-4 py-3 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 focus:outline-none transition-all`}
-                    />
-                    <label
-                      htmlFor="name"
-                      className="absolute left-4 top-3 text-gray-500 text-sm transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:top-[-0.5rem] peer-focus:text-sm peer-focus:text-yellow-600"
-                    >
-                      Họ tên
-                    </label>
-                    {errors.name && (
-                      <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-                    )}
-                  </div>
-                  <div className="relative">
-                    <input
-                      id="email"
-                      value={form.email}
-                      onChange={handle("email")}
-                      placeholder=" "
-                      className={`peer w-full rounded-lg border ${
-                        errors.email ? "border-red-500" : "border-gray-300"
-                      } px-4 py-3 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 focus:outline-none transition-all`}
-                    />
-                    <label
-                      htmlFor="email"
-                      className="absolute left-4 top-3 text-gray-500 text-sm transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:top-[-0.5rem] peer-focus:text-sm peer-focus:text-yellow-600"
-                    >
-                      Email
-                    </label>
-                    {errors.email && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.email}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="relative">
-                    <input
-                      id="phone"
-                      value={form.phone}
-                      onChange={handle("phone")}
-                      placeholder=" "
-                      className="peer w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 focus:outline-none transition-all"
-                    />
-                    <label
-                      htmlFor="phone"
-                      className="absolute left-4 top-3 text-gray-500 text-sm transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:top-[-0.5rem] peer-focus:text-sm peer-focus:text-yellow-600"
-                    >
-                      Số điện thoại
-                    </label>
-                  </div>
-                  <div className="relative">
-                    <select
-                      id="topic"
-                      value={form.topic}
-                      onChange={handle("topic")}
-                      className="peer w-full rounded-lg border border-gray-300 px-4 py-3 appearance-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 focus:outline-none transition-all"
-                    >
-                      <option value="">Chọn chủ đề</option>
-                      {topics.map((t) => (
-                        <option key={t.value} value={t.value}>
-                          {t.label}
-                        </option>
-                      ))}
-                    </select>
-                    <label
-                      htmlFor="topic"
-                      className="absolute left-4 top-3 text-gray-500 text-sm transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:top-[-0.5rem] peer-focus:text-sm peer-focus:text-yellow-600"
-                    >
-                      Chủ đề
-                    </label>
-                  </div>
-                </div>
-                <div className="relative">
-                  <textarea
-                    id="message"
-                    value={form.message}
-                    onChange={handle("message")}
-                    rows={5}
-                    placeholder=" "
-                    className={`peer w-full rounded-lg border ${
-                      errors.message ? "border-red-500" : "border-gray-300"
-                    } px-4 py-3 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 focus:outline-none transition-all`}
-                  />
-                  <label
-                    htmlFor="message"
-                    className="absolute left-4 top-3 text-gray-500 text-sm transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:top-[-0.5rem] peer-focus:text-sm peer-focus:text-yellow-600"
-                  >
-                    Nội dung
-                  </label>
-                  {errors.message && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.message}
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <ShieldCheck className="w-4 h-4 text-yellow-600" /> Thông
-                    tin của bạn được bảo mật.
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="relative inline-flex items-center gap-2 rounded-lg px-6 py-3 font-medium text-white bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 shadow-md hover:shadow-lg transition-all overflow-hidden"
-                  >
-                    {loading ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4" /> Gửi yêu cầu
-                      </>
-                    )}
-                  </button>
-                </div>
-                {sent && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="rounded-lg bg-green-50 border border-green-200 p-4 text-sm text-green-800"
-                  >
-                    Cảm ơn bạn! Yêu cầu đã được ghi nhận. Chúng tôi sẽ liên hệ
-                    sớm nhất.
-                  </motion.div>
-                )}
-              </form>
+              <div className="flex items-center gap-3">
+                <Clock className="w-5 h-5 text-amber-600" />
+                <span className="text-gray-600">
+                  24/7 Hotline – phản hồi trong 2 giờ
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Mail className="w-5 h-5 text-amber-600" />
+                <span className="text-gray-600">inquiry@tiximax.vn</span>
+              </div>
             </div>
-            {/* Map + Hours */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="rounded-xl overflow-hidden border border-yellow-100 shadow-md">
-                <iframe
-                  title="Tiximax Office Map"
-                  src="https://maps.google.com/maps?q=Da%20Nang%2C%20Vietnam&t=&z=12&ie=UTF8&iwloc=&output=embed"
-                  className="w-full h-96"
-                  loading="lazy"
-                />
-              </div>
-              <div className="rounded-xl border border-yellow-100 bg-white p-6 shadow-md grid sm:grid-cols-2 gap-6">
-                <div className="flex items-start gap-4">
-                  <Clock className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-gray-900">Giờ làm việc</p>
-                    <p className="text-gray-600 text-sm">
-                      Thứ 2–Thứ 7: 09:00 – 18:00
-                    </p>
-                  </div>
+
+            {/* Address */}
+            <div className="mt-10">
+              <h3 className="text-base font-semibold uppercase tracking-wide text-gray-800">
+                Địa chỉ văn phòng & kho hàng Tiximax
+              </h3>
+              <div className="mt-4 space-y-3 text-base text-gray-600">
+                <div className="flex gap-3 items-start">
+                  <MapPin className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                  <span>
+                    65 Đ. 9, Hiệp Bình Phước, Thủ Đức, Thành phố Hồ Chí Minh
+                    100000
+                  </span>
                 </div>
-                <div className="flex items-start gap-4">
-                  <Building2 className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-gray-900">
-                      Kho & Văn phòng
-                    </p>
-                    <p className="text-gray-600 text-sm">
-                      Chiba (JP) · Hà Nội/Đà Nẵng/TP.HCM (VN)
-                    </p>
-                  </div>
+                <div className="flex gap-3 items-start">
+                  <MapPin className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                  <span>Kho Chiba – Tiximax Japan</span>
+                </div>
+                <div className="flex gap-3 items-start">
+                  <MapPin className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                  <span>Kho Đà Nẵng – Tiximax Vietnam</span>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-      {/* FAQ + SOCIAL */}
-      <section className="py-12 bg-gradient-to-b from-yellow-50/30 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 rounded-xl border border-yellow-100 bg-white p-8 shadow-md">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-50 text-yellow-800 text-sm font-medium">
-                <HelpCircle className="w-4 h-4" /> Câu hỏi thường gặp
-              </div>
-              <motion.div
-                className="mt-6 space-y-4"
-                initial="hidden"
-                animate="show"
-                variants={staggerChildren}
-              >
-                {[
-                  {
-                    q: "Bao lâu tôi nhận được phản hồi?",
-                    a: "Trong giờ làm việc, thường 1–3 giờ. Ngoài giờ, chúng tôi sẽ phản hồi sớm nhất vào ngày tiếp theo.",
-                  },
-                  {
-                    q: "Có hỗ trợ tư vấn trực tiếp tại văn phòng?",
-                    a: "Có, vui lòng đặt lịch trước để chúng tôi sắp xếp chuyên viên phù hợp.",
-                  },
-                  {
-                    q: "Thông tin của tôi có được bảo mật?",
-                    a: "Tiximax cam kết bảo mật dữ liệu khách hàng và chỉ sử dụng cho mục đích hỗ trợ dịch vụ.",
-                  },
-                ].map((faq, i) => (
-                  <motion.details
-                    key={i}
-                    variants={fadeUp}
-                    className="rounded-lg border border-gray-200 p-5 cursor-pointer group"
-                  >
-                    <summary className="font-semibold text-gray-900 flex justify-between items-center">
-                      {faq.q}
-                      <span className="text-yellow-600 group-open:rotate-180 transition-transform">
-                        ▼
-                      </span>
-                    </summary>
-                    <p className="mt-3 text-gray-600 leading-relaxed">
-                      {faq.a}
-                    </p>
-                  </motion.details>
-                ))}
-              </motion.div>
-            </div>
-            <div className="lg:col-span-1 rounded-xl border border-yellow-100 bg-white p-8 shadow-md">
-              <p className="font-bold text-gray-900 text-xl">
+
+            {/* Social */}
+            <div className="mt-auto pt-8">
+              <p className="text-base font-semibold uppercase tracking-wide text-gray-800">
                 Kết nối với Tiximax
               </p>
-              <p className="mt-2 text-gray-600 text-base">
-                Theo dõi để nhận lịch bay & ưu đãi mới.
-              </p>
-              <div className="mt-6 flex items-center gap-4">
+              <div className="mt-3 flex items-center gap-4">
                 <a
                   href="#"
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-amber-900 text-white hover:bg-amber-500 hover:text-gray-900 transition-colors"
                   aria-label="Facebook"
-                  className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-yellow-100 text-yellow-600 hover:bg-yellow-200 transition-colors"
                 >
-                  <Facebook className="w-6 h-6" />
+                  <Facebook className="w-5 h-5" />
                 </a>
                 <a
                   href="#"
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-amber-900 text-white hover:bg-amber-500 hover:text-gray-900 transition-colors"
                   aria-label="Instagram"
-                  className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-yellow-100 text-yellow-600 hover:bg-yellow-200 transition-colors"
                 >
-                  <Instagram className="w-6 h-6" />
+                  <Instagram className="w-5 h-5" />
                 </a>
                 <a
                   href="#"
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-amber-900 text-white hover:bg-amber-500 hover:text-gray-900 transition-colors"
                   aria-label="LinkedIn"
-                  className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-yellow-100 text-yellow-600 hover:bg-yellow-200 transition-colors"
                 >
-                  <Linkedin className="w-6 h-6" />
+                  <Linkedin className="w-5 h-5" />
                 </a>
               </div>
             </div>
-          </div>
+          </motion.div>
+
+          {/* RIGHT – BANNER */}
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            animate="show"
+            className="bg-white rounded-2xl shadow-sm border border-amber-100 overflow-hidden min-h-[500px] flex items-center justify-center"
+          >
+            {/* Đổi ảnh này thành banner thật của bạn */}
+            <img
+              src="https://i.pinimg.com/736x/ee/4b/81/ee4b81d3a96a4e002225a7db7fadc147.jpg"
+              alt="Banner Tiximax"
+              className="w-full h-full object-cover"
+            />
+          </motion.div>
+        </div>
+
+        {/* BOTTOM ROW: MAP + FORM */}
+        <div className="mt-12 grid lg:grid-cols-2 gap-8 lg:gap-12">
+          {/* MAP */}
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            animate="show"
+            className="bg-white rounded-2xl shadow-sm border border-amber-100 overflow-hidden min-h-[500px]"
+          >
+            <iframe
+              title="Tiximax Map"
+              src="https://maps.google.com/maps?q=65%20%C4%90.%209,%20Hi%E1%BB%87p%20B%C3%ACnh%20Ph%C6%B0%E1%BB%9Bc,%20Th%E1%BB%A7%20%C4%90%E1%BB%A9c,%20Th%C3%A0nh%20ph%E1%BB%91%20H%E1%BB%93%20Ch%C3%AD%20Minh%20100000&t=&z=15&ie=UTF8&iwloc=&output=embed"
+              className="w-full h-full"
+              loading="lazy"
+            />
+          </motion.div>
+
+          {/* CONTACT FORM */}
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            animate="show"
+            className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(245,158,11,0.25)] border border-amber-200 p-8 sm:p-10 min-h-[500px]"
+          >
+            <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wide text-gray-900">
+              Gửi thông tin cho Tiximax
+            </h2>
+
+            <form onSubmit={onSubmit} className="mt-8 space-y-6 w-full">
+              {/* Row 1 */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold uppercase mb-2 text-gray-700">
+                    First Name
+                  </label>
+                  <input
+                    value={form.firstName}
+                    onChange={handle("firstName")}
+                    className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm
+                    focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500
+                    transition-all bg-white placeholder-gray-400"
+                    placeholder="Nhập tên"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold uppercase mb-2 text-gray-700">
+                    Last Name
+                  </label>
+                  <input
+                    value={form.lastName}
+                    onChange={handle("lastName")}
+                    className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm
+                    focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500
+                    transition-all bg-white placeholder-gray-400"
+                    placeholder="Nhập họ"
+                  />
+                </div>
+              </div>
+
+              {/* Row 2 */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold uppercase mb-2 text-gray-700">
+                    Email
+                  </label>
+                  <input
+                    value={form.email}
+                    onChange={handle("email")}
+                    className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm
+                    focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500
+                    transition-all bg-white placeholder-gray-400"
+                    placeholder="email@example.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold uppercase mb-2 text-gray-700">
+                    Phone
+                  </label>
+                  <input
+                    value={form.phone}
+                    onChange={handle("phone")}
+                    className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm
+                    focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500
+                    transition-all bg-white placeholder-gray-400"
+                    placeholder="Số điện thoại"
+                  />
+                </div>
+              </div>
+
+              {/* Subject */}
+              <div>
+                <label className="block text-sm font-semibold uppercase mb-2 text-gray-700">
+                  Subject
+                </label>
+                <input
+                  value={form.subject}
+                  onChange={handle("subject")}
+                  className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm
+                  focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500
+                  transition-all bg-white placeholder-gray-400"
+                  placeholder="Chủ đề"
+                />
+              </div>
+
+              {/* Message */}
+              <div>
+                <label className="block text-sm font-semibold uppercase mb-2 text-gray-700">
+                  Message
+                </label>
+                <textarea
+                  rows="7"
+                  value={form.message}
+                  onChange={handle("message")}
+                  className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm resize-none
+                  focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500
+                  bg-white transition-all placeholder-gray-400"
+                  placeholder="Nội dung tin nhắn..."
+                />
+              </div>
+
+              {/* Button */}
+              <div className="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-8 py-3 text-sm font-semibold uppercase rounded-lg
+                  bg-amber-500 text-white tracking-wide shadow-md
+                  hover:bg-amber-600 hover:text-white transition-all
+                  disabled:opacity-60"
+                >
+                  {loading ? "Sending..." : "Send message"}
+                </button>
+              </div>
+
+              {sent && (
+                <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+                  Cảm ơn bạn! Chúng tôi đã nhận được thông tin.
+                </p>
+              )}
+            </form>
+          </motion.div>
         </div>
       </section>
     </main>

@@ -47,7 +47,9 @@ const UpdateShipmentCode = ({ isOpen, onClose, purchase, onSaveSuccess }) => {
     try {
       await orderlinkService.updatePurchaseShipmentAddress(
         purchase.purchaseId,
-        shipmentCode.trim()
+        {
+          shipmentCode: shipmentCode.trim(), // 🔹 Gửi object đúng với API
+        }
       );
       toast.success("Cập nhật mã vận đơn thành công!");
       setShipmentCode(""); // reset sau khi lưu thành công

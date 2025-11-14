@@ -117,11 +117,12 @@ const orderlinkService = {
     return res.data;
   },
 
-  updatePurchaseShipmentAddress: async (purchaseId, address) => {
-    const res = await api.put(
-      `/purchases/shipment/${purchaseId}`,
-      JSON.stringify(address)
-    );
+  updatePurchaseShipmentAddress: async (purchaseId, data) => {
+    const res = await api.put(`/purchases/shipment/${purchaseId}`, data);
+    return res.data;
+  },
+  getAllPurchases: async (page = 1, size = 10) => {
+    const res = await api.get(`/purchases/all-purchase/${page}/${size}`);
     return res.data;
   },
 };

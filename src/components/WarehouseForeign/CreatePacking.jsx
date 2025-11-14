@@ -145,7 +145,7 @@ const CreatePacking = () => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-2">
             <Package className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-800">Đóng gói</h1>
+            <h1 className="text-3xl font-bold text-gray-800">Đóng hàng</h1>
           </div>
         </div>
 
@@ -153,9 +153,9 @@ const CreatePacking = () => {
           {/* Form */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <div className="flex items-center gap-2 mb-6">
-              <FileText className="w-5 h-5 text-gray-700" />
-              <h2 className="text-xl font-semibold text-gray-800">
-                Chi tiết đóng gói
+              <FileText className="w-6 h-6 text-gray-700" />
+              <h2 className="text-2xl font-semibold text-gray-800">
+                Chi tiết đóng hàng
               </h2>
             </div>
 
@@ -164,14 +164,14 @@ const CreatePacking = () => {
               <div>
                 <label
                   htmlFor="destinationId"
-                  className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
+                  className="block text-2xl font-medium text-black-700 mb-2 flex items-center gap-2"
                 >
                   <MapPin className="w-4 h-4 text-blue-500" />
                   Chọn điểm đến <span className="text-red-500">*</span>
                 </label>
                 {loadingDestinations ? (
                   <div className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                    <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
                     <span className="text-gray-500">Đang tải...</span>
                   </div>
                 ) : (
@@ -181,7 +181,7 @@ const CreatePacking = () => {
                     value={formData.destinationId}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:border-red-600 focus:outline-none"
                   >
                     <option value="">Chọn điểm đến</option>
                     {destinations.map((destination) => (
@@ -196,7 +196,7 @@ const CreatePacking = () => {
                 )}
                 {destinations.length === 0 && !loadingDestinations && (
                   <p className="text-sm text-red-500 mt-1 flex items-center gap-1">
-                    <AlertCircle className="w-4 h-4" />
+                    <AlertCircle className="w-6 h-6" />
                     Không có điểm đến
                   </p>
                 )}
@@ -204,11 +204,11 @@ const CreatePacking = () => {
 
               {/* Shipment Codes */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <label className="block text-2xl font-medium text-black-700 mb-2 flex items-center gap-2">
                   <Barcode className="w-4 h-4 text-blue-500" />
                   Mã vận đơn <span className="text-red-500">*</span>
                 </label>
-                <p className="text-xs text-gray-500 mb-3">
+                <p className="text-sm font-medium text-black-700 mb-3">
                   Hỗ trợ quét barcode
                 </p>
                 <div className="space-y-3">
@@ -224,7 +224,7 @@ const CreatePacking = () => {
                           }
                           onKeyDown={(e) => handleKeyDown(e, index)}
                           placeholder={`Mã vận đơn ${index + 1}`}
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:border-red-600 focus:outline-none"
                         />
                       </div>
                       {formData.shipmentCodes.length > 1 && (

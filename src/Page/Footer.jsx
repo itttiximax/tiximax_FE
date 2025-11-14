@@ -34,7 +34,7 @@ const Footer = () => {
           {/* --- Cột 1 & 2: Logo & giới thiệu --- */}
           <div className="md:col-span-2">
             <div className="mb-6 relative inline-block">
-              <h2 className="inline-block text-4xl font-bold bg-gray-800 text-yellow-500 px-4 py-2 rounded-lg shadow-lg">
+              <h2 className="text-4xl font-bold text-yellow-500 px-4 py-2 ">
                 TixiLogistics
               </h2>
               <div className="absolute -bottom-2 left-0 w-24 h-0.5 bg-yellow-400"></div>
@@ -63,7 +63,7 @@ const Footer = () => {
           {/* --- Cột 3: Thông tin --- */}
           <div>
             <div className="relative mb-6 inline-block">
-              <h3 className="inline-block text-xl font-bold text-black bg-yellow-400 px-3 py-1 rounded-lg shadow-md">
+              <h3 className=" text-xl font-bold text-yellow-500 px-3 py-1 ">
                 Thông tin
               </h3>
               <div className="absolute -bottom-2 left-0 w-8 h-0.5 bg-yellow-400"></div>
@@ -111,7 +111,7 @@ const Footer = () => {
           {/* --- Cột 4: Dịch vụ --- */}
           <div>
             <div className="relative mb-6 inline-block">
-              <h3 className="inline-block text-xl font-bold text-black bg-yellow-400 px-3 py-1 rounded-lg shadow-md">
+              <h3 className=" text-xl font-bold text-yellow-500  px-3 py-1">
                 Dịch vụ
               </h3>
               <div className="absolute -bottom-2 left-0 w-8 h-0.5 bg-yellow-400"></div>
@@ -145,7 +145,7 @@ const Footer = () => {
           {/* --- Cột 5: Liên hệ --- */}
           <div>
             <div className="relative mb-6 inline-block">
-              <h3 className="inline-block text-xl font-bold text-black bg-yellow-400 px-3 py-1 rounded-lg shadow-md">
+              <h3 className="text-xl font-bold text-yellow-500 px-3 py-1 ">
                 Liên hệ
               </h3>
               <div className="absolute -bottom-2 left-0 w-8 h-0.5 bg-yellow-400"></div>
