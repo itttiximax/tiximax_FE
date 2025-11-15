@@ -121,8 +121,12 @@ const orderlinkService = {
     const res = await api.put(`/purchases/shipment/${purchaseId}`, data);
     return res.data;
   },
-  getAllPurchases: async (page = 1, size = 10) => {
-    const res = await api.get(`/purchases/all-purchase/${page}/${size}`);
+  getAllPurchases: async (page = 0, size = 10, filter = "") => {
+    let url = `/purchases/all-purchase/${page}/${size}`;
+    if (filter) {
+      url += `?filter=${filter}`;
+    }
+    const res = await api.get(url);
     return res.data;
   },
 };

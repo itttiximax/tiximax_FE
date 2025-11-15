@@ -10,6 +10,7 @@ import {
 import toast from "react-hot-toast";
 import orderlinkService from "../../Services/StaffPurchase/orderlinkService";
 import CancelPurchase from "./CancelPurchase";
+
 // Chuẩn hóa shipmentCode (loại bỏ dấu " dư thừa, trim khoảng trắng)
 const normalizeShipmentCode = (code) => {
   if (!code) return "";
@@ -19,13 +20,24 @@ const normalizeShipmentCode = (code) => {
   }
   return String(code).trim();
 };
+
+const filters = [
+  { value: "", label: "Tất cả" },
+  { value: "DA_MUA", label: "Đã mua" },
+  { value: "DAU_GIA_THANH_CONG", label: "Đấu giá thành công" },
+  { value: "DA_NHAP_KHO_NN", label: "Đã nhập kho NN" },
+  { value: "DA_HUY", label: "Đã hủy" },
+];
+
 const PurchaserList = () => {
   const [purchases, setPurchases] = useState([]);
-  const [page, setPage] = useState(1); // Backend: /purchases/all-purchase/1/10 → 1-based
+  const [page, setPage] = useState(1); // Frontend: 1-based, backend: 0-based
   const [size] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [filter, setFilter] = useState(""); // Filter status
+
   // State cho modal hủy đơn
   const [cancelModal, setCancelModal] = useState({
     open: false,
@@ -34,11 +46,16 @@ const PurchaserList = () => {
     orderCode: "",
     linkInfo: null,
   });
+
   const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await orderlinkService.getAllPurchases(page, size);
+      const res = await orderlinkService.getAllPurchases(
+        page - 1,
+        size,
+        filter
+      );
       // res dự kiến dạng: { content, totalPages, totalElements, ... }
       setPurchases(res?.content || []);
       setTotalPages(res?.totalPages || 1);
@@ -50,10 +67,12 @@ const PurchaserList = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [page, filter]);
+
   // Thống kê tổng link đã có / chưa có shipment code
   const stats = useMemo(() => {
     let withCode = 0;
@@ -67,9 +86,11 @@ const PurchaserList = () => {
     });
     return { withCode, withoutCode };
   }, [purchases]);
+
   const handleRefresh = () => {
     fetchData();
   };
+
   // Mở modal hủy đơn
   const openCancelModal = (purchase, link) => {
     setCancelModal({
@@ -80,9 +101,16 @@ const PurchaserList = () => {
       linkInfo: link,
     });
   };
+
   const closeCancelModal = () => {
     setCancelModal((prev) => ({ ...prev, open: false }));
   };
+
+  const handleFilterClick = (newFilter) => {
+    setFilter(newFilter);
+    setPage(1);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-amber-50/30 px-4 py-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -111,6 +139,22 @@ const PurchaserList = () => {
               Làm mới
             </button>
           </div>
+        </div>
+        {/* Filter buttons */}
+        <div className="mb-6 flex flex-wrap gap-2">
+          {filters.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => handleFilterClick(f.value)}
+              className={`rounded-xl border px-4 py-2 text-sm font-medium transition-colors ${
+                filter === f.value
+                  ? "border-amber-500 bg-amber-100 text-amber-800"
+                  : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
         {/* Stats */}
         <div className="mb-6 grid gap-4 sm:grid-cols-3">
@@ -207,14 +251,14 @@ const PurchaserList = () => {
                 </div>
                 {/* Pending links */}
                 <div className="mt-4 space-y-3">
-                  {(purchase.pendingLinks || []).map((link) => {
+                  {(purchase.pendingLinks || []).map((link, index) => {
                     const normalizedCode = normalizeShipmentCode(
                       link.shipmentCode
                     );
                     const hasShipmentCode = !!normalizedCode;
                     return (
                       <div
-                        key={link.linkId}
+                        key={`${purchase.purchaseId}-${link.linkId}-${index}`}
                         className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-gray-50 p-4 text-sm sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div className="space-y-1.5">
@@ -337,4 +381,5 @@ const PurchaserList = () => {
     </div>
   );
 };
+
 export default PurchaserList;
