@@ -36,6 +36,7 @@
     "quagga": "^0.12.1",
     "radix-ui": "^1.4.3",
     "react": "^19.1.1",
+    "react-barcode": "^1.6.1",
     "react-chartjs-2": "^5.3.0",
     "react-date-range": "^2.0.1",
     "react-dom": "^19.1.1",

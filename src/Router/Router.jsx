@@ -120,6 +120,7 @@ import OrderHistory from "../Page/Navigattion/OrderHistory";
 import ServiceList from "../Page/Navigattion/ServiceList";
 import GuideList from "../Page/Navigattion/GuideList";
 import PurchaserList from "../components/StaffPurchaser/PurchaserList";
+import TrackingCodeList from "../components/WarehouseDomestic/TrackingCodeList";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -388,7 +389,7 @@ const Router = createBrowserRouter([
       { path: "eligible-packings", element: <PackingEligibleList /> },
       { path: "inventory-check", element: <InventoryWarehouse /> },
       { path: "product-search", element: <NotFound /> },
-      { path: "reports", element: <NotFound /> },
+      { path: "reports", element: <TrackingCodeList /> },
     ],
   },
   {

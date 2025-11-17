@@ -158,11 +158,11 @@ const CreatePurchase = ({
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-xl font-semibold text-gray-900">
+              <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                <span className="inline-block w-1 h-6 bg-blue-600 rounded"></span>
                 Mua hộ - {orderCode}
               </h3>
-              <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
-                <Package className="w-4 h-4" />
+              <div className="flex items-center gap-2 mt-1 text-2xs text-black-600">
                 <span>Đã chọn {selectedTrackingCodes.length} sản phẩm</span>
               </div>
             </div>
@@ -207,7 +207,7 @@ const CreatePurchase = ({
                   value={formatCurrency(purchaseData.purchaseTotal || "")}
                   onChange={handlePurchaseTotalChange}
                   onBlur={handlePurchaseTotalBlur}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border-2 border-red-500 rounded-md px-3 py-2 focus:border-black focus:ring-0 outline-none"
                   placeholder="000000"
                 />
               </div>
@@ -225,7 +225,7 @@ const CreatePurchase = ({
                       shipmentCode: e.target.value,
                     }))
                   }
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border-2 border-gray-500 rounded-md px-3 py-2 focus:border-black focus:ring-0 outline-none"
                   placeholder="Nhập mã vận đơn"
                 />
               </div>
@@ -248,7 +248,7 @@ const CreatePurchase = ({
                   setPurchaseData((prev) => ({ ...prev, note: e.target.value }))
                 }
                 rows={3}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border-2 border-gray-500 rounded-md px-3 py-2 focus:border-black focus:ring-0 outline-none"
                 placeholder="Ghi chú (tùy chọn)"
               />
             </div>
