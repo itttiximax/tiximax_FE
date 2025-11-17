@@ -121,6 +121,7 @@ import ServiceList from "../Page/Navigattion/ServiceList";
 import GuideList from "../Page/Navigattion/GuideList";
 import PurchaserList from "../components/StaffPurchaser/PurchaserList";
 import TrackingCodeList from "../components/WarehouseDomestic/TrackingCodeList";
+import ListOrderManager from "../components/Order/ListOrderManager";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -268,7 +269,8 @@ const Router = createBrowserRouter([
       { path: "/lead-sale/shipping/international", element: <NotFound /> },
       { path: "tracking", element: <NotFound /> },
       { path: "orders/tracking", element: <ManagerOrder /> },
-      { path: "order-payment", element: <PaymentOrderList /> },
+      { path: "comfirm-payment", element: <PaymentOrderList /> },
+      { path: "order-payment", element: <ListOrderManager /> },
       // { path: "ship-payment", element: <PaymentShipList /> },
       { path: "auction-payment", element: <AuctionPayment /> },
       { path: "divide-payment", element: <DividePaymentOrder /> },
@@ -300,7 +302,8 @@ const Router = createBrowserRouter([
       { path: "quotations", element: <PaymentOrderList /> },
       { path: "deposit", element: <CreateDepositForm /> },
       { path: "auction", element: <CreateAuctionForm /> },
-      { path: "order-payment", element: <PaymentOrderList /> },
+      { path: "comfirm-payment", element: <PaymentOrderList /> },
+      { path: "order-payment", element: <ListOrderManager /> },
       // { path: "ship-payment", element: <PaymentShipList /> },
       { path: "createpaymentsupport", element: <MergedPaymentOrder /> },
       { path: "createpaymentshipping", element: <MergedPaymentShip /> },

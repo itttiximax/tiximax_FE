@@ -127,6 +127,11 @@ const StaffSaleSidebar = () => {
               icon: Banknote,
               label: "Quy trình đơn hàng",
             },
+            {
+              to: "/staff-sale/comfirm-payment",
+              icon: Banknote,
+              label: "Xác nhận đơn hàng",
+            },
             // {
             //   to: "/staff-sale/ship-payment",
             //   icon: Truck,

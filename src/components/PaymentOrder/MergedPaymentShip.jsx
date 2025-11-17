@@ -127,7 +127,7 @@ const MergedPaymentShip = () => {
   const fetchCustomerShippingOrders = async (customerCode) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("jwt"); // ✅ token
+      const token = localStorage.getItem("jwt");
 
       if (!token) {
         toast.error("Không tìm thấy token xác thực lỗi ở mergedPayment");
@@ -142,8 +142,17 @@ const MergedPaymentShip = () => {
       setOrders(data || []);
 
       if (!data || data.length === 0) {
-        toast.info(
-          `Không tìm thấy đơn hàng vận chuyển nào cho khách hàng ${customerCode}`
+        // ✅ SỬA LỖI: Thay toast.info bằng toast
+        toast(
+          `Không tìm thấy đơn hàng vận chuyển nào cho khách hàng ${customerCode}`,
+          {
+            icon: "🚚",
+            duration: 4000,
+            style: {
+              background: "#3b82f6",
+              color: "#fff",
+            },
+          }
         );
       } else {
         toast.success(
@@ -418,7 +427,7 @@ const MergedPaymentShip = () => {
                         formatCurrency={formatCurrency}
                         onSuccess={handlePaymentCreated}
                         onError={handlePaymentError}
-                        accountId={derivedAccountId} // 🔹 truyền accountId xuống (null nếu không xác định hoặc mixed)
+                        accountId={derivedAccountId}
                       />
                     </div>
                   )}
@@ -442,7 +451,7 @@ const MergedPaymentShip = () => {
             <div className="divide-y divide-gray-200">
               {orders.map((order) => (
                 <div
-                  key={order.orderCode /* đổi sang orderCode để nhất quán */}
+                  key={order.orderCode}
                   className={`p-6 hover:bg-gray-50 transition-colors ${
                     selectedOrders.includes(order.orderCode)
                       ? "bg-blue-50 border-l-4 border-blue-500"
@@ -552,4 +561,3 @@ const MergedPaymentShip = () => {
 };
 
 export default MergedPaymentShip;
-// ok code

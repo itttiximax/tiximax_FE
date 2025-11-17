@@ -14,6 +14,7 @@ import {
   CheckSquare,
   Square,
 } from "lucide-react";
+
 // Helper function to extract error message from backend
 const getErrorMessage = (error) => {
   if (error.response) {
@@ -138,9 +139,15 @@ const MergedPaymentOrder = () => {
       setOrders(data || []);
 
       if (!data || data.length === 0) {
-        toast.info(
-          `Không tìm thấy đơn hàng nào cho khách hàng ${customerCode}`
-        );
+        // ✅ SỬA LỖI: Thay toast.info bằng toast với custom style
+        toast(`Không tìm thấy đơn hàng nào cho khách hàng ${customerCode}`, {
+          icon: "ℹ️",
+          duration: 4000,
+          style: {
+            background: "#3b82f6",
+            color: "#fff",
+          },
+        });
       } else {
         toast.success(
           `Tìm thấy ${data.length} đơn hàng cho khách hàng ${customerCode}`
@@ -243,7 +250,7 @@ const MergedPaymentOrder = () => {
   };
 
   return (
-    <div className=" p-6">
+    <div className="p-6">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -336,7 +343,6 @@ const MergedPaymentOrder = () => {
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                {/* <Package className="w-5 h-5 mr-2" /> */}
                 Danh sách đơn hàng
                 {orders.length > 0 && (
                   <span className="ml-2 text-sm font-normal text-gray-600">

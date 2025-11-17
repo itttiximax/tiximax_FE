@@ -132,6 +132,11 @@ const LeadSaleSideBar = () => {
             //   icon: Truck,
             //   label: "Xác nhận vận chuyển",
             // },
+            {
+              to: "/lead-sale/confirm-payment",
+              icon: Banknote,
+              label: "Xác nhận đơn hàng",
+            },
           ],
           isOpen: isQuotationDropdownOpen,
           onToggle: () => setIsQuotationDropdownOpen(!isQuotationDropdownOpen),
