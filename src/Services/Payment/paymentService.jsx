@@ -85,6 +85,23 @@ const paymentService = {
       throw error;
     }
   },
+  getPaymentByCode: async (paymentCode) => {
+    try {
+      if (!paymentCode) {
+        throw new Error("Payment code is required");
+      }
+
+      // Ví dụ: /payments/code/MG-CCBE11
+      const response = await api.get(`/payments/code/${paymentCode}`);
+      return response.data;
+    } catch (error) {
+      console.error(
+        `Error fetching payment for code ${paymentCode}:`,
+        error.response || error
+      );
+      throw error;
+    }
+  },
 };
 
 // Export both object and backward compatibility function

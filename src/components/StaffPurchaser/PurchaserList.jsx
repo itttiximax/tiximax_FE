@@ -229,14 +229,15 @@ const PurchaserList = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="flex items-center gap-3 text-3xl font-bold text-gray-900">
+              {/* ĐÃ SỬA: div bọc ngoài, chỉ 1 thẻ h1 */}
+              <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
                   <Package className="h-5 w-5 text-white" />
                 </div>
-                <h1 className="text-2xl font-semibold text-slate-900">
+                <h1 className="text-3xl font-bold text-gray-900">
                   Quản lý đơn mua hàng
                 </h1>
-              </h1>
+              </div>
               <p className="mt-2 text-sm text-gray-600">
                 Theo dõi và kiểm tra shipment code của các đơn{" "}
                 <span className="font-semibold text-blue-600">Đã mua</span> và{" "}
@@ -594,7 +595,7 @@ const PurchaserList = () => {
                 Sau
               </button>
 
-              {/* Size selector giống component trên */}
+              {/* Size selector */}
               <div className="ml-3 border-l border-gray-200 pl-3">
                 <select
                   value={size}

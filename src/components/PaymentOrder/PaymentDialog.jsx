@@ -72,16 +72,16 @@ const PaymentDialog = ({
         {/* Body */}
         <div className="px-6 py-6 space-y-4">
           {/* QR Code - TO NHẤT */}
-          <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
+          <div className="bg-white rounded-xl p-8 border-gray-200">
             <div className="flex flex-col items-center">
-              <div className="bg-white rounded-xl shadow-lg mb-4 w-full h-auto">
+              <div className="">
                 <img
                   src={payment.qrCode}
                   alt="Payment QR Code"
                   className="w-full h-auto object-contain"
                 />
               </div>
-              <p className="text-xs text-gray-600 mb-3">
+              <p className="text-xl text-black-600 mb-3">
                 Quét mã QR để thanh toán
               </p>
               <button

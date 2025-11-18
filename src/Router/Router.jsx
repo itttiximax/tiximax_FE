@@ -122,6 +122,7 @@ import GuideList from "../Page/Navigattion/GuideList";
 import PurchaserList from "../components/StaffPurchaser/PurchaserList";
 import TrackingCodeList from "../components/WarehouseDomestic/TrackingCodeList";
 import ListOrderManager from "../components/Order/ListOrderManager";
+import ExportOrder from "../components/WarehouseDomestic/ExportOrder";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -355,7 +356,7 @@ const Router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <StaffWarehouseForeignPage /> },
+      { index: true, element: <DashboardWarehouse /> },
       { path: "profile", element: <StaffProfile /> },
       { path: "dashboard", element: <DashboardWarehouse /> },
       { path: "warehouse", element: <WarehouseList /> },
@@ -391,7 +392,7 @@ const Router = createBrowserRouter([
       { path: "exports", element: <ExportList /> },
       { path: "eligible-packings", element: <PackingEligibleList /> },
       { path: "inventory-check", element: <InventoryWarehouse /> },
-      { path: "product-search", element: <NotFound /> },
+      { path: "order-search", element: <ExportOrder /> },
       { path: "reports", element: <TrackingCodeList /> },
     ],
   },

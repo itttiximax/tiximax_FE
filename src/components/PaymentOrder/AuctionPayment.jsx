@@ -1,16 +1,11 @@
-// src/Components/StaffPurchase/AuctionPayment.jsx (REDESIGNED - CLEAN BLUE THEME)
+// src/Components/StaffPurchase/AuctionPayment.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Search,
   Gavel,
-  CreditCard,
   QrCode,
   Calendar,
   RefreshCw,
-  Eye,
-  DollarSign,
-  Filter,
-  X,
   Download,
   CheckCircle,
   Clock,
@@ -18,50 +13,19 @@ import {
   AlertTriangle,
   FileText,
   User,
+  X,
 } from "lucide-react";
 import createOrderPaymentService from "../../Services/Payment/createOrderPaymentService";
 import confirmPaymentService from "../../Services/Payment/confirmPaymentService";
 import toast from "react-hot-toast";
 
-// Helper function to extract error message from backend
-const getErrorMessage = (error) => {
-  if (error.response) {
-    const backendError =
-      error.response.data?.error ||
-      error.response.data?.message ||
-      error.response.data?.detail ||
-      error.response.data?.errors;
-
-    if (backendError) {
-      if (typeof backendError === "object" && !Array.isArray(backendError)) {
-        const errorMessages = Object.entries(backendError)
-          .map(([field, msg]) => `${field}: ${msg}`)
-          .join(", ");
-        return `Lỗi validation: ${errorMessages}`;
-      } else if (Array.isArray(backendError)) {
-        return backendError.join(", ");
-      } else {
-        return backendError;
-      }
-    }
-    return `Lỗi ${error.response.status}: ${
-      error.response.statusText || "Không xác định"
-    }`;
-  } else if (error.request) {
-    return "Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng.";
-  }
-  return error.message || "Đã xảy ra lỗi không xác định";
-};
-
 const AuctionPayment = () => {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [selectedQRCode, setSelectedQRCode] = useState(null);
   const [processingPayments, setProcessingPayments] = useState({});
-  const [paymentResults, setPaymentResults] = useState({});
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false,
     payment: null,
@@ -71,26 +35,15 @@ const AuctionPayment = () => {
   const fetchAuctionPayments = useCallback(async () => {
     try {
       setLoading(true);
-      setError(null);
-
-      console.log("Fetching auction payments...");
       const response = await createOrderPaymentService.getAuctionPayments();
-      console.log("API Response:", response);
-
-      if (Array.isArray(response)) {
-        setPayments(response);
-      } else {
-        setPayments([]);
-      }
+      setPayments(Array.isArray(response) ? response : []);
     } catch (error) {
-      console.error("Error fetching auction payments:", error);
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
-        "Không thể tải danh sách thanh toán đấu giá";
-      setError(errorMessage);
-      setPayments([]);
+        "Không thể tải danh sách thanh toán";
       toast.error(errorMessage);
+      setPayments([]);
     } finally {
       setLoading(false);
     }
@@ -104,11 +57,9 @@ const AuctionPayment = () => {
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
       day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     });
   };
 
@@ -121,21 +72,21 @@ const AuctionPayment = () => {
     }).format(amount);
   };
 
-  // Get status color and icon (Blue theme only)
+  // Get status info
   const getStatusInfo = (status) => {
     const statusMap = {
       CHO_THANH_TOAN: {
-        color: "bg-blue-50 text-blue-700 border-blue-200",
+        color: "bg-amber-50 text-amber-700 border-amber-200",
         label: "Chờ thanh toán",
         icon: Clock,
       },
       DA_THANH_TOAN: {
-        color: "bg-blue-100 text-blue-800 border-blue-300",
+        color: "bg-emerald-50 text-emerald-700 border-emerald-200",
         label: "Đã thanh toán",
         icon: CheckCircle,
       },
       HUY: {
-        color: "bg-slate-100 text-slate-600 border-slate-200",
+        color: "bg-red-50 text-red-700 border-red-200",
         label: "Đã hủy",
         icon: XCircle,
       },
@@ -159,16 +110,6 @@ const AuctionPayment = () => {
     return typeMap[type] || type;
   };
 
-  // Handle view QR code
-  const handleViewQRCode = (payment) => {
-    setSelectedQRCode(payment);
-  };
-
-  // Handle close QR modal
-  const handleCloseQRModal = () => {
-    setSelectedQRCode(null);
-  };
-
   // Handle download QR code
   const handleDownloadQR = async (qrUrl, paymentCode) => {
     try {
@@ -183,47 +124,18 @@ const AuctionPayment = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       toast.success("Tải QR code thành công!");
-    } catch (error) {
-      console.error("Error downloading QR code:", error);
+    } catch {
       toast.error("Không thể tải QR code");
     }
-  };
-
-  // Show confirmation dialog
-  const showConfirmDialog = (payment) => {
-    setConfirmDialog({
-      isOpen: true,
-      payment: payment,
-    });
-  };
-
-  // Close confirmation dialog
-  const closeConfirmDialog = () => {
-    setConfirmDialog({
-      isOpen: false,
-      payment: null,
-    });
   };
 
   // Handle payment confirmation
   const handleConfirmPayment = async (payment) => {
     const paymentCode = payment.paymentCode;
-
-    if (!paymentCode) {
-      toast.error("Không tìm thấy mã thanh toán");
-      return;
-    }
-
     setProcessingPayments((prev) => ({ ...prev, [payment.paymentId]: true }));
 
     try {
       const token = localStorage.getItem("jwt");
-
-      if (!token) {
-        toast.error("Không tìm thấy token xác thực");
-        return;
-      }
-
       const response = await confirmPaymentService.confirmPayment(
         paymentCode,
         token
@@ -231,49 +143,22 @@ const AuctionPayment = () => {
 
       if (response.success) {
         toast.success(response.message || "Xác nhận thanh toán thành công!");
-        setPaymentResults((prev) => ({
-          ...prev,
-          [payment.paymentId]: {
-            success: true,
-            message: response.message || "Thanh toán đã được xác nhận",
-          },
-        }));
         await fetchAuctionPayments();
       } else {
-        const errorMsg = getErrorMessage(response);
-        toast.error(errorMsg);
-        setPaymentResults((prev) => ({
-          ...prev,
-          [payment.paymentId]: {
-            success: false,
-            message: errorMsg,
-          },
-        }));
+        toast.error(response.message || "Xác nhận thanh toán thất bại!");
       }
     } catch (error) {
-      console.error("Error confirming payment:", error);
-      const errorMsg = getErrorMessage(error);
+      const errorMsg =
+        error.response?.data?.message ||
+        error.message ||
+        "Lỗi xác nhận thanh toán";
       toast.error(errorMsg);
-      setPaymentResults((prev) => ({
-        ...prev,
-        [payment.paymentId]: {
-          success: false,
-          message: errorMsg,
-        },
-      }));
     } finally {
       setProcessingPayments((prev) => ({
         ...prev,
         [payment.paymentId]: false,
       }));
-      closeConfirmDialog();
-    }
-  };
-
-  // Handle confirmed payment from dialog
-  const handleConfirmedPayment = () => {
-    if (confirmDialog.payment) {
-      handleConfirmPayment(confirmDialog.payment);
+      setConfirmDialog({ isOpen: false, payment: null });
     }
   };
 
@@ -291,17 +176,17 @@ const AuctionPayment = () => {
   });
 
   return (
-    <div className="min-h-screen p-4">
-      <div className="mx-auto">
-        {/* Header Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-4 mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              {/* <div className="bg-blue-600 p-2 rounded-lg">
+    <div className="min-h-screen  p-4 md:p-6">
+      <div className="mx-auto space-y-4">
+        {/* Header */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-5">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-2.5 rounded-lg">
                 <Gavel className="w-5 h-5 text-white" />
-              </div> */}
+              </div>
               <div>
-                <h1 className="text-lg font-bold text-slate-800">
+                <h1 className="text-base md:text-lg font-bold text-slate-800">
                   Quản lý thanh toán đấu giá
                 </h1>
               </div>
@@ -309,124 +194,104 @@ const AuctionPayment = () => {
             <button
               onClick={fetchAuctionPayments}
               disabled={loading}
-              className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 text-xs md:text-sm font-medium disabled:opacity-70"
             >
               <RefreshCw
-                className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
+                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
               />
-              Làm mới
+              <span>Làm mới</span>
             </button>
           </div>
 
-          {/* Search and Filter */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Search Box */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
-                placeholder="Tìm kiếm theo mã, đơn hàng, người dùng..."
+                placeholder="Tìm kiếm mã thanh toán, nội dung, khách hàng..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                className="w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg focus:border-black focus:ring-0 bg-white"
               />
             </div>
 
-            <div className="relative">
-              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white text-sm"
-              >
-                <option value="">Tất cả trạng thái</option>
-                <option value="CHO_THANH_TOAN">Chờ thanh toán</option>
-                <option value="DA_THANH_TOAN">Đã thanh toán</option>
-                <option value="HUY">Đã hủy</option>
-              </select>
-            </div>
+            {/* Status Filter */}
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg bg-white focus:border-black focus:ring-0"
+            >
+              <option value="">Tất cả trạng thái</option>
+              <option value="CHO_THANH_TOAN">Chờ thanh toán</option>
+              <option value="DA_THANH_TOAN">Đã thanh toán</option>
+              <option value="HUY">Đã hủy</option>
+            </select>
           </div>
         </div>
 
-        {/* Stats Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-          <div className="bg-white rounded-lg shadow-sm border border-blue-100 p-3">
-            <div className="flex items-center justify-between">
+        {/* Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="bg-blue-50 rounded-xl border border-blue-200 p-3 md:p-4">
+            <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-xs text-slate-600">Tổng số giao dịch</p>
-                <p className="text-lg font-bold text-slate-800 mt-0.5">
+                <p className="text-[11px] uppercase tracking-wide text-blue-600 font-semibold">
+                  Tổng giao dịch
+                </p>
+                <p className="text-lg md:text-xl font-bold text-slate-800">
                   {payments.length}
                 </p>
               </div>
-              <div className="bg-blue-50 p-2 rounded-lg">
-                <FileText className="w-5 h-5 text-blue-600" />
-              </div>
+              <FileText className="w-6 h-6 text-blue-500" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-blue-100 p-3">
-            <div className="flex items-center justify-between">
+          <div className="bg-amber-50 rounded-xl border border-amber-200 p-3 md:p-4">
+            <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-xs text-slate-600">Chờ thanh toán</p>
-                <p className="text-lg font-bold text-blue-600 mt-0.5">
+                <p className="text-[11px] uppercase tracking-wide text-amber-600 font-semibold">
+                  Chờ thanh toán
+                </p>
+                <p className="text-lg md:text-xl font-bold text-slate-800">
                   {payments.filter((p) => p.status === "CHO_THANH_TOAN").length}
                 </p>
               </div>
-              <div className="bg-blue-50 p-2 rounded-lg">
-                <Clock className="w-5 h-5 text-blue-600" />
-              </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-blue-100 p-3">
-            <div className="flex items-center justify-between">
+          <div className="bg-emerald-50 rounded-xl border border-emerald-200 p-3 md:p-4">
+            <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-xs text-slate-600">Đã thanh toán</p>
-                <p className="text-lg font-bold text-blue-800 mt-0.5">
+                <p className="text-[11px] uppercase tracking-wide text-emerald-600 font-semibold">
+                  Đã hoàn tất
+                </p>
+                <p className="text-lg md:text-xl font-bold text-slate-800">
                   {payments.filter((p) => p.status === "DA_THANH_TOAN").length}
                 </p>
               </div>
-              <div className="bg-blue-100 p-2 rounded-lg">
-                <CheckCircle className="w-5 h-5 text-blue-800" />
-              </div>
+              <CheckCircle className="w-6 h-6 text-emerald-500" />
             </div>
           </div>
         </div>
 
-        {/* Loading State */}
+        {/* Loading */}
         {loading && (
-          <div className="flex items-center justify-center py-8">
-            <div className="text-center">
-              <RefreshCw className="w-6 h-6 text-blue-600 animate-spin mx-auto mb-2" />
-              <p className="text-sm text-slate-600">Đang tải dữ liệu...</p>
-            </div>
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && !loading && (
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-5 text-center">
-            <AlertTriangle className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-            <p className="text-sm text-slate-600 mb-3">{error}</p>
-            <button
-              onClick={fetchAuctionPayments}
-              className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-            >
-              Thử lại
-            </button>
+          <div className="bg-white rounded-xl border border-slate-200 py-8 text-center">
+            <RefreshCw className="w-6 h-6 text-blue-600 animate-spin mx-auto mb-2" />
+            <p className="text-xs md:text-sm text-slate-600">
+              Đang tải danh sách thanh toán...
+            </p>
           </div>
         )}
 
         {/* Payments List */}
-        {!loading && !error && (
-          <div className="space-y-3">
+        {!loading && (
+          <div className="space-y-2">
             {filteredPayments.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-sm border border-blue-100 p-8 text-center">
-                <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                <p className="text-slate-600 text-base mb-1">
-                  Không tìm thấy giao dịch nào
-                </p>
-                <p className="text-slate-400 text-xs">
-                  Thử điều chỉnh bộ lọc hoặc tìm kiếm khác
+              <div className="bg-white rounded-xl border border-slate-200 p-6 text-center">
+                <FileText className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm text-slate-600">
+                  Không tìm thấy giao dịch phù hợp
                 </p>
               </div>
             ) : (
@@ -434,85 +299,86 @@ const AuctionPayment = () => {
                 const statusInfo = getStatusInfo(payment.status);
                 const StatusIcon = statusInfo.icon;
                 const isProcessing = processingPayments[payment.paymentId];
-                const paymentResult = paymentResults[payment.paymentId];
 
                 return (
                   <div
                     key={payment.paymentId}
-                    className="bg-white rounded-xl shadow-sm border border-blue-100 hover:shadow-md transition-shadow"
+                    className="bg-white rounded-xl border border-slate-200 hover:shadow-md transition-shadow"
                   >
-                    <div className="p-4">
-                      {/* Header */}
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1.5">
-                            <span className="text-sm font-bold text-slate-800">
+                    <div className="p-3 md:p-4">
+                      {/* Header row */}
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                            <span className="text-sm md:text-base font-semibold text-slate-800">
                               {payment.paymentCode}
                             </span>
                             <span
-                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${statusInfo.color}`}
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] md:text-xs font-medium border ${statusInfo.color}`}
                             >
-                              <StatusIcon className="w-3 h-3" />
+                              <StatusIcon className="w-3.5 h-3.5" />
                               {statusInfo.label}
                             </span>
                           </div>
-                          <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                            <User className="w-3 h-3" />
-                            <span>{payment.userName || "N/A"}</span>
+                          <div className="flex items-center gap-1 text-xl font-semibold text-black-500">
+                            <User className="w-5 h-5" />
+                            <span className="truncate">
+                              {payment.customerName || "N/A"}
+                            </span>
+                            <p className="mx-1 text-gray-600">|Mã KH:</p>
+                            <span className="truncate">
+                              {payment.customerCode || "N/A"}
+                            </span>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-base font-bold text-blue-600">
+                        <div className="text-right shrink-0">
+                          <div className="text-sm md:text-base font-bold text-blue-600">
                             {formatCurrency(payment.amount)}
                           </div>
-                          <div className="flex items-center justify-end gap-1 text-xs text-slate-500 mt-0.5">
-                            <Calendar className="w-3 h-3" />
-                            <span>{formatDate(payment.createAt)}</span>
+                          <div className="flex items-center justify-end gap-1 text-xl text-black-500 mt-1">
+                            <span>{formatDate(payment.actionAt)}</span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Details Grid */}
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3 p-3 bg-slate-50 rounded-lg">
-                        <div>
-                          <p className="text-xs text-slate-500 mb-0.5">
-                            Mã đơn hàng
+                      {/* Detail row */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3 p-2.5 bg-gray-100 rounded-lg text-xs md:text-sm">
+                        <div className="min-w-0">
+                          <p className="text-2sx text-black-500 mb-0.5">
+                            Đơn hàng / Nội dung
                           </p>
-                          <p className="text-xs font-medium text-slate-800">
+                          <p className="font-semibold text-slate-800 truncate">
                             {payment.content || "N/A"}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs text-slate-500 mb-0.5">
+                          <p className="text-2sx text-black-500 mb-0.5">
                             Loại thanh toán
                           </p>
-                          <div className="flex items-center gap-1">
-                            <CreditCard className="w-3 h-3 text-blue-600" />
-                            <p className="text-xs font-medium text-slate-800">
-                              {getPaymentTypeLabel(payment.paymentType)}
-                            </p>
-                          </div>
+                          <p className="font-semibold text-slate-800">
+                            {getPaymentTypeLabel(payment.paymentType)}
+                          </p>
                         </div>
                         <div>
-                          <p className="text-xs text-slate-500 mb-0.5">
-                            Phí giao dịch
+                          <p className="text-2sx text-black-500 mb-0.5">
+                            Số tiền thu
                           </p>
-                          <p className="text-xs font-medium text-slate-800">
-                            {formatCurrency(payment.fee)}
+                          <p className="font-semibold text-slate-800">
+                            {formatCurrency(payment.collectedAmount)}
                           </p>
                         </div>
                       </div>
 
                       {/* Actions */}
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex items-center gap-2 text-xs md:text-sm">
                         {payment.qrCode && payment.paymentType === "MA_QR" && (
                           <>
                             <button
-                              onClick={() => handleViewQRCode(payment)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs font-medium"
+                              onClick={() => setSelectedQRCode(payment)}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
                             >
                               <QrCode className="w-3.5 h-3.5" />
-                              Xem QR Code
+                              QR
                             </button>
                             <button
                               onClick={() =>
@@ -521,7 +387,7 @@ const AuctionPayment = () => {
                                   payment.paymentCode
                                 )
                               }
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors text-xs font-medium"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-50 font-medium"
                             >
                               <Download className="w-3.5 h-3.5" />
                               Tải QR
@@ -529,44 +395,24 @@ const AuctionPayment = () => {
                           </>
                         )}
 
-                        {payment.status === "CHO_THANH_TOAN" && (
-                          <button
-                            onClick={() => showConfirmDialog(payment)}
-                            disabled={isProcessing}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-colors ml-auto text-xs ${
-                              isProcessing
-                                ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                                : "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                            }`}
-                          >
-                            <CheckCircle className="w-3.5 h-3.5" />
-                            {isProcessing
-                              ? "Đang xử lý..."
-                              : "Xác nhận thanh toán"}
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Payment Result */}
-                      {paymentResult && (
-                        <div
-                          className={`mt-3 p-2.5 rounded-lg border ${
-                            paymentResult.success
-                              ? "bg-blue-50 border-blue-200"
-                              : "bg-slate-50 border-slate-200"
-                          }`}
-                        >
-                          <p
-                            className={`text-xs font-medium ${
-                              paymentResult.success
-                                ? "text-blue-700"
-                                : "text-slate-600"
-                            }`}
-                          >
-                            {paymentResult.message}
-                          </p>
+                        <div className="ml-auto flex gap-2">
+                          {payment.status === "CHO_THANH_TOAN" && (
+                            <button
+                              onClick={() =>
+                                setConfirmDialog({ isOpen: true, payment })
+                              }
+                              disabled={isProcessing}
+                              className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg font-medium ${
+                                isProcessing
+                                  ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                                  : "bg-emerald-500 text-white hover:bg-emerald-600"
+                              }`}
+                            >
+                              {isProcessing ? "Đang xử lý..." : "Xác nhận"}
+                            </button>
+                          )}
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -580,69 +426,43 @@ const AuctionPayment = () => {
       {selectedQRCode && (
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-          onClick={handleCloseQRModal}
+          onClick={() => setSelectedQRCode(null)}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl max-w-md w-full"
+            className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Compact Header */}
+            {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-slate-200">
-              <h3 className="text-base font-bold text-slate-800">
-                QR Code Thanh Toán
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base md:text-lg font-semibold text-black-800">
+                  QR Code thanh toán
+                </h3>
+              </div>
               <button
-                onClick={handleCloseQRModal}
-                className="text-slate-400 hover:text-slate-600 transition-colors p-1.5 hover:bg-slate-100 rounded-lg"
+                onClick={() => setSelectedQRCode(null)}
+                className="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Large QR Code - Takes most space */}
-            <div className="p-5">
-              <div className="bg-gradient-to-br from-blue-50 to-slate-50 rounded-2xl p-5 flex items-center justify-center">
+            {/* QR Image */}
+            <div className="p-6">
+              <div className="flex items-center justify-center">
                 <img
                   src={selectedQRCode.qrCode}
                   alt="QR Code"
-                  className="w-80 h-80 border-4 border-blue-400 rounded-xl shadow-lg"
+                  className="max-h-[500px] w-auto"
                 />
               </div>
-              <p className="text-center text-xs text-slate-500 mt-2">
-                Quét mã QR để thanh toán
+              <p className="text-center text-xl md:text-2xl text-black-500 mt-4">
+                Quét mã QR để thực hiện thanh toán
               </p>
             </div>
 
-            {/* Compact Info */}
-            <div className="px-5 pb-4">
-              <div className="bg-slate-50 rounded-lg p-3 space-y-2 border border-slate-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-500">Mã đơn hàng</span>
-                  <span className="text-xs font-semibold text-blue-600">
-                    {selectedQRCode.content}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-500">Số tiền</span>
-                  <span className="text-sm font-bold text-slate-800">
-                    {formatCurrency(selectedQRCode.amount)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-500">Trạng thái</span>
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                      getStatusInfo(selectedQRCode.status).color
-                    }`}
-                  >
-                    {getStatusInfo(selectedQRCode.status).label}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Compact Footer */}
-            <div className="flex gap-2 px-5 pb-4">
+            {/* Footer */}
+            <div className="flex gap-3 px-6 pb-6">
               <button
                 onClick={() =>
                   handleDownloadQR(
@@ -650,14 +470,14 @@ const AuctionPayment = () => {
                     selectedQRCode.paymentCode
                   )
                 }
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-xs md:text-sm"
               >
                 <Download className="w-4 h-4" />
                 Tải xuống
               </button>
               <button
-                onClick={handleCloseQRModal}
-                className="px-4 py-2 border-2 border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium text-sm"
+                onClick={() => setSelectedQRCode(null)}
+                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-semibold text-xs md:text-sm"
               >
                 Đóng
               </button>
@@ -665,102 +485,90 @@ const AuctionPayment = () => {
           </div>
         </div>
       )}
-
       {/* Confirmation Dialog */}
       {confirmDialog.isOpen && confirmDialog.payment && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-            {/* Dialog Header */}
-            <div className="flex items-center gap-3 p-5 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-slate-50">
-              <div className="bg-blue-600 p-2.5 rounded-lg shadow-lg">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center gap-3 p-5 border-b border-blue-200 bg-gradient-to-r from-blue-500 to-blue-400">
+              <div className="bg-white/15 p-2.5 rounded-xl">
                 <AlertTriangle className="w-5 h-5 text-white" />
               </div>
-              <div className="flex-1">
-                <h3 className="text-base font-bold text-slate-800">
+              <div>
+                <h3 className="text-base md:text-lg font-bold text-white">
                   Xác nhận thanh toán
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Vui lòng kiểm tra kỹ thông tin trước khi xác nhận
+                <p className="text-xs text-blue-100">
+                  Kiểm tra kỹ trước khi xác nhận hoàn tất giao dịch
                 </p>
               </div>
             </div>
 
-            {/* Dialog Body */}
-            <div className="p-5">
-              <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-3 mb-4">
-                <p className="text-xs text-blue-800 font-medium">
-                  ⚠️ Bạn có chắc chắn muốn xác nhận thanh toán cho giao dịch này
-                  không?
+            {/* Body */}
+            <div className="p-5 space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-xs md:text-sm text-slate-700 font-medium">
+                  Bạn có chắc chắn muốn xác nhận thanh toán cho giao dịch này
+                  không? Sau khi xác nhận, trạng thái sẽ được cập nhật thành{" "}
+                  <span className="font-semibold text-emerald-600">
+                    Đã thanh toán
+                  </span>
+                  .
                 </p>
               </div>
 
-              <div className="bg-slate-50 rounded-lg p-4 space-y-3 border border-slate-200">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2 bg-white rounded-lg p-3 border border-slate-200">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <CreditCard className="w-4 h-4 text-blue-600" />
-                      <span className="text-xs font-medium text-slate-600">
-                        Mã giao dịch
-                      </span>
-                    </div>
-                    <span className="text-sm font-bold text-blue-600">
-                      {confirmDialog.payment.paymentCode}
-                    </span>
-                  </div>
+              <div className="space-y-3">
+                <div className="bg-blue-600 rounded-xl p-4">
+                  <p className="text-xs text-blue-100 mb-1">Mã giao dịch</p>
+                  <p className="text-lg md:text-xl font-bold text-white">
+                    {confirmDialog.payment.paymentCode}
+                  </p>
+                </div>
 
-                  <div className="bg-white rounded-lg p-3 border border-slate-200">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <FileText className="w-4 h-4 text-blue-600" />
-                      <span className="text-xs font-medium text-slate-600">
-                        Mã đơn hàng
-                      </span>
-                    </div>
-                    <span className="text-xs font-semibold text-slate-800">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs md:text-sm">
+                  <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                    <p className="text-[11px] text-slate-500 mb-1">Đơn hàng</p>
+                    <p className="font-semibold text-slate-800">
                       {confirmDialog.payment.content}
-                    </span>
+                    </p>
                   </div>
 
-                  <div className="bg-white rounded-lg p-3 border border-slate-200">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <CreditCard className="w-4 h-4 text-blue-600" />
-                      <span className="text-xs font-medium text-slate-600">
-                        Loại thanh toán
-                      </span>
-                    </div>
-                    <span className="text-xs font-semibold text-slate-800">
+                  <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                    <p className="text-[11px] text-slate-500 mb-1">
+                      Loại thanh toán
+                    </p>
+                    <p className="font-semibold text-slate-800">
                       {getPaymentTypeLabel(confirmDialog.payment.paymentType)}
-                    </span>
+                    </p>
                   </div>
 
-                  <div className="col-span-2 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg p-3 border-2 border-blue-400 shadow-lg">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <DollarSign className="w-4 h-4 text-white" />
-                      <span className="text-xs font-medium text-blue-100">
-                        Số tiền thanh toán
-                      </span>
-                    </div>
-                    <span className="text-lg font-bold text-white">
+                  <div className="sm:col-span-2 bg-emerald-50 rounded-lg p-3 border border-emerald-200">
+                    <p className="text-[11px] text-emerald-700 mb-1">
+                      Số tiền thanh toán
+                    </p>
+                    <p className="text-lg md:text-2xl font-bold text-emerald-600">
                       {formatCurrency(confirmDialog.payment.amount)}
-                    </span>
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Dialog Footer */}
-            <div className="flex gap-2 p-5 border-t border-slate-200 bg-slate-50">
+            {/* Footer */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 p-5 border-t border-slate-200">
               <button
-                onClick={closeConfirmDialog}
-                className="flex-1 px-4 py-2 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-white transition-colors font-medium text-sm"
+                onClick={() =>
+                  setConfirmDialog({ isOpen: false, payment: null })
+                }
+                className="flex-1 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-semibold text-sm"
               >
                 Hủy bỏ
               </button>
               <button
-                onClick={handleConfirmedPayment}
-                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm shadow-lg shadow-blue-200"
+                onClick={() => handleConfirmPayment(confirmDialog.payment)}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 font-semibold text-sm"
               >
-                <CheckCircle className="w-4 h-4" />
-                Xác nhận thanh toán
+                Xác nhận
               </button>
             </div>
           </div>

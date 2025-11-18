@@ -24,6 +24,16 @@ const WarehouseShipment = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    // Chỉ cho phép nhập số (bao gồm cả số thập phân)
+    if (["length", "width", "height", "weight"].includes(name)) {
+      // Chỉ cho phép số và dấu chấm
+      const regex = /^\d*\.?\d*$/;
+      if (!regex.test(value)) {
+        return;
+      }
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -91,15 +101,7 @@ const WarehouseShipment = () => {
       const successMessage =
         result?.message || result?.data?.message || "Tạo shipment thành công!";
 
-      toast.success(successMessage, {
-        duration: 3000,
-        style: {
-          background: "#ffffff",
-          color: "#15803d",
-          border: "1px solid #15803d",
-          fontSize: "13px",
-        },
-      });
+      toast.success(successMessage);
 
       setFormData({
         length: "",
@@ -121,15 +123,7 @@ const WarehouseShipment = () => {
         error.message ||
         "Không thể tạo shipment";
 
-      toast.error(errorMessage, {
-        duration: 4000,
-        style: {
-          background: "#ffffff",
-          color: "#b91c1c",
-          border: "1px solid #b91c1c",
-          fontSize: "13px",
-        },
-      });
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -202,12 +196,11 @@ const WarehouseShipment = () => {
                         Dài <span className="text-red-500">*</span>
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         name="length"
                         value={formData.length}
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
-                        step="1"
                         className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-xs"
                         placeholder="00"
                         disabled={loading}
@@ -219,12 +212,11 @@ const WarehouseShipment = () => {
                         Rộng <span className="text-red-500">*</span>
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         name="width"
                         value={formData.width}
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
-                        step="1"
                         className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-xs"
                         placeholder="00"
                         disabled={loading}
@@ -236,12 +228,11 @@ const WarehouseShipment = () => {
                         Cao <span className="text-red-500">*</span>
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         name="height"
                         value={formData.height}
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
-                        step="1"
                         className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-xs"
                         placeholder="00"
                         disabled={loading}
@@ -261,12 +252,11 @@ const WarehouseShipment = () => {
                         Tổng trọng lượng <span className="text-red-500">*</span>
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         name="weight"
                         value={formData.weight}
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
-                        step="1"
                         className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-xs"
                         placeholder="00"
                         disabled={loading}

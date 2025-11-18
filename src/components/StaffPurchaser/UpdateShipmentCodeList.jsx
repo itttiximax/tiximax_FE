@@ -15,15 +15,15 @@ import {
   X,
   Filter,
   Clock,
-  User,
   Globe,
+  Truck,
 } from "lucide-react";
 import UpdateShipmentCode from "./UpdateShipmentCode";
+import UpdateAuctionShip from "./UpdateAuctionShip";
 import toast from "react-hot-toast";
 
 const PAGE_SIZE_DEFAULT = 10;
 
-/** Professional Status Badge */
 const StatusBadge = ({ status, count }) => {
   if (status === "missing") {
     return (
@@ -48,7 +48,6 @@ const StatusBadge = ({ status, count }) => {
   return null;
 };
 
-/** Clean Skeleton */
 const CardSkeleton = () => (
   <div className="rounded-lg border border-slate-200 bg-white">
     <div className="animate-pulse p-6 space-y-4">
@@ -69,8 +68,10 @@ const UpdateShipmentCodeList = () => {
   const [err, setErr] = useState(null);
   const [data, setData] = useState(null);
   const [q, setQ] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [purchaseStatusFilter, setPurchaseStatusFilter] = useState("all");
+  const [shipmentStatusFilter, setShipmentStatusFilter] = useState("all");
   const [showModal, setShowModal] = useState(false);
+  const [showAuctionModal, setShowAuctionModal] = useState(false);
   const [selectedPurchase, setSelectedPurchase] = useState(null);
   const [debouncedQ, setDebouncedQ] = useState(q);
 
@@ -93,7 +94,13 @@ const UpdateShipmentCodeList = () => {
       setLoading(true);
       setErr(null);
       try {
-        const res = await orderlinkService.getPurchasesShipmentCode(p, s);
+        const statusParam =
+          purchaseStatusFilter === "all" ? null : purchaseStatusFilter;
+        const res = await orderlinkService.getPurchasesShipmentCode(
+          p,
+          s,
+          statusParam
+        );
         setData(res);
       } catch (e) {
         const msg =
@@ -106,12 +113,12 @@ const UpdateShipmentCodeList = () => {
         setLoading(false);
       }
     },
-    [page, size]
+    [page, size, purchaseStatusFilter]
   );
 
   useEffect(() => {
     setPage(0);
-  }, [size, debouncedQ, statusFilter]);
+  }, [size, debouncedQ, purchaseStatusFilter, shipmentStatusFilter]);
 
   useEffect(() => {
     fetchData(page, size);
@@ -127,13 +134,23 @@ const UpdateShipmentCodeList = () => {
     );
   };
 
+  // Helper function để lấy status từ links
+  const getPurchaseStatus = (p) => {
+    const links = Array.isArray(p.pendingLinks) ? p.pendingLinks : [];
+    if (links.length === 0) return null;
+    // Lấy status từ link đầu tiên (giả sử tất cả links có cùng status)
+    return links[0]?.status || null;
+  };
+
   const items = useMemo(() => {
     let list = allOnPage;
-    if (statusFilter === "missing") {
+
+    if (shipmentStatusFilter === "missing") {
       list = list.filter((p) => !hasShipment(p));
-    } else if (statusFilter === "has") {
+    } else if (shipmentStatusFilter === "has") {
       list = list.filter((p) => hasShipment(p));
     }
+
     const s = debouncedQ.trim().toLowerCase();
     if (!s) return list;
     return list.filter((it) => {
@@ -151,7 +168,7 @@ const UpdateShipmentCodeList = () => {
       });
       return inOrder || inLinks;
     });
-  }, [allOnPage, debouncedQ, statusFilter]);
+  }, [allOnPage, debouncedQ, shipmentStatusFilter]);
 
   const hasPrev = data?.first === false || page > 0;
   const hasNext =
@@ -179,23 +196,32 @@ const UpdateShipmentCodeList = () => {
     setSelectedPurchase(null);
   };
 
+  const openAuctionModal = (purchase) => {
+    setSelectedPurchase(purchase);
+    setShowAuctionModal(true);
+  };
+
+  const closeAuctionModal = () => {
+    setShowAuctionModal(false);
+    setSelectedPurchase(null);
+  };
+
   const handleSaveSuccess = () => {
     fetchData();
   };
 
-  const typeLabel = (t) =>
-    ({
-      MUA_HO: "Mua hộ",
-      KY_GUI: "Ký gửi",
-      DAU_GIA: "Đấu giá",
-    }[t] ||
-    t ||
-    "-");
+  const purchaseStatusLabel = (status) => {
+    const labels = {
+      DA_MUA: "Đã mua",
+      DAU_GIA_THANH_CONG: "Đấu giá thành công",
+    };
+    return labels[status] || status;
+  };
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen">
       <div className="mx-auto px-6 py-8">
-        {/* Professional Header */}
+        {/* Header */}
         <div className="mb-8">
           <div className="mb-6 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
@@ -228,13 +254,30 @@ const UpdateShipmentCodeList = () => {
                 )}
               </div>
 
-              {/* Filter */}
+              {/* Filters */}
               <div className="flex items-center gap-3">
+                {/* Purchase Status Filter */}
                 <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5">
                   <Filter className="h-4 w-4 text-slate-500" />
                   <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
+                    value={purchaseStatusFilter}
+                    onChange={(e) => setPurchaseStatusFilter(e.target.value)}
+                    className="border-none bg-transparent text-sm font-medium text-slate-700 focus:outline-none"
+                  >
+                    <option value="all">Tất cả trạng thái</option>
+                    <option value="DA_MUA">Đã mua</option>
+                    <option value="DAU_GIA_THANH_CONG">
+                      Đấu giá thành công
+                    </option>
+                  </select>
+                </div>
+
+                {/* Shipment Status Filter */}
+                <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5">
+                  <Package className="h-4 w-4 text-slate-500" />
+                  <select
+                    value={shipmentStatusFilter}
+                    onChange={(e) => setShipmentStatusFilter(e.target.value)}
                     className="border-none bg-transparent text-sm font-medium text-slate-700 focus:outline-none"
                   >
                     <option value="all">Tất cả</option>
@@ -308,7 +351,8 @@ const UpdateShipmentCodeList = () => {
             <button
               onClick={() => {
                 setQ("");
-                setStatusFilter("all");
+                setPurchaseStatusFilter("all");
+                setShipmentStatusFilter("all");
                 fetchData(0, size);
               }}
               className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
@@ -321,9 +365,12 @@ const UpdateShipmentCodeList = () => {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {items.map((p) => {
                 const isCompleted = hasShipment(p);
+                const status = getPurchaseStatus(p);
+                const isAuction = status === "DAU_GIA_THANH_CONG";
                 const links = Array.isArray(p.pendingLinks)
                   ? p.pendingLinks
                   : [];
+
                 return (
                   <div
                     key={p.purchaseId}
@@ -342,9 +389,9 @@ const UpdateShipmentCodeList = () => {
                           <h3 className="mb-1 font-mono text-lg font-semibold text-slate-900">
                             {p.orderCode}
                           </h3>
-                          <div className="flex flex-wrap items-center gap-2 text-xl">
-                            <span className="inline-flex items-center gap-1 text-black">
-                              <Clock className="h-4 w-4 " />
+                          <div className="flex flex-wrap items-center gap-2 text-sm">
+                            <span className="inline-flex items-center gap-1 text-slate-700">
+                              <Clock className="h-4 w-4" />
                               {formatDate(p.purchaseTime)}
                             </span>
                           </div>
@@ -361,18 +408,37 @@ const UpdateShipmentCodeList = () => {
                       </div>
 
                       <div className="flex items-center justify-between gap-2">
-                        <span className="inline-flex items-center rounded bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
-                          {typeLabel(p.orderType)}
-                        </span>
-                        {!isCompleted && (
-                          <button
-                            onClick={() => openShipmentModal(p)}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
-                          >
-                            <Package className="h-3.5 w-3.5" />
-                            Nhập mã vận đơn
-                          </button>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {status && (
+                            <span
+                              className={`inline-flex items-center rounded px-2 py-1 text-xs font-medium ${
+                                isAuction
+                                  ? "bg-purple-50 text-purple-700"
+                                  : "bg-blue-50 text-blue-700"
+                              }`}
+                            >
+                              {purchaseStatusLabel(status)}
+                            </span>
+                          )}
+                        </div>
+                        {!isCompleted &&
+                          (isAuction ? (
+                            <button
+                              onClick={() => openAuctionModal(p)}
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-700"
+                            >
+                              <Truck className="h-3.5 w-3.5" />
+                              Cập nhật vận chuyển
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => openShipmentModal(p)}
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+                            >
+                              <Package className="h-3.5 w-3.5" />
+                              Nhập mã vận đơn
+                            </button>
+                          ))}
                       </div>
                     </div>
 
@@ -389,10 +455,10 @@ const UpdateShipmentCodeList = () => {
                           {links.map((l) => (
                             <div
                               key={l.linkId}
-                              className="rounded-lg border border-slate-300 bg-slate-100 p-4"
+                              className="rounded-lg border border-slate-300 bg-slate-50 p-4"
                             >
                               <div className="mb-2 flex items-start justify-between gap-3">
-                                <h4 className="text-xl font-medium text-black-900 line-clamp-2">
+                                <h4 className="text-sm font-medium text-slate-900 line-clamp-2">
                                   {l.productName}
                                 </h4>
                                 {l.trackingCode && (
@@ -406,38 +472,38 @@ const UpdateShipmentCodeList = () => {
                                 )}
                               </div>
 
-                              <div className="space-y-1.5 text-xl text-black-600">
+                              <div className="space-y-1.5 text-xs text-slate-600">
                                 <div className="flex items-center gap-1.5">
-                                  <Globe className="h-4 w-4 text-black-400" />
+                                  <Globe className="h-3.5 w-3.5 text-slate-400" />
                                   <span>{l.website}</span>
                                   <span className="text-slate-400">-</span>
                                   <span>SL: {l.quantity}</span>
                                 </div>
 
                                 {l.classify && (
-                                  <div className="text-xl text-black-600">
+                                  <div className="text-xs text-slate-600">
                                     Phân loại: {l.classify}
                                   </div>
                                 )}
 
-                                <div className="flex items-start gap-1.5 text-xl text-black-600">
-                                  <span className="text-black-500">
+                                <div className="flex items-start gap-1.5">
+                                  <span className="text-slate-500">
                                     Tracking:
                                   </span>
-                                  <span className="flex-1 text-xl text-black-600 ">
+                                  <span className="flex-1 font-mono text-xs">
                                     {l.trackingCode || "-"}
                                   </span>
                                 </div>
 
-                                <div className="flex items-start text-xl text-black-600 gap-1.5">
-                                  <span className="text-black-500">
+                                <div className="flex items-start gap-1.5">
+                                  <span className="text-slate-500">
                                     Mã vận đơn:
                                   </span>
                                   <span
-                                    className={`flex-1 font-xl ${
+                                    className={`flex-1 font-mono text-xs ${
                                       l.shipmentCode?.trim()
                                         ? "text-blue-700 font-medium"
-                                        : "text-black-400"
+                                        : "text-slate-400"
                                     }`}
                                   >
                                     {l.shipmentCode?.trim() || "Chưa có"}
@@ -518,10 +584,17 @@ const UpdateShipmentCodeList = () => {
           </>
         )}
 
-        {/* Modal */}
+        {/* Modals */}
         <UpdateShipmentCode
           isOpen={showModal}
           onClose={closeShipmentModal}
+          purchase={selectedPurchase}
+          onSaveSuccess={handleSaveSuccess}
+        />
+
+        <UpdateAuctionShip
+          isOpen={showAuctionModal}
+          onClose={closeAuctionModal}
           purchase={selectedPurchase}
           onSaveSuccess={handleSaveSuccess}
         />

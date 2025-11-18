@@ -13,10 +13,11 @@ import {
   Phone,
   FileText,
   AlertCircle,
+  X,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import createOrderPaymentService from "../../Services/Payment/createOrderPaymentService";
-
+import DetailPaymentOrder from "../PaymentOrder/DetailPaymentOrder";
 const ListOrderManager = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -32,6 +33,10 @@ const ListOrderManager = () => {
     first: true,
     last: true,
   });
+
+  // 👉 state dialog thanh toán
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [selectedPaymentCode, setSelectedPaymentCode] = useState(null);
 
   const tabs = [
     {
@@ -147,8 +152,6 @@ const ListOrderManager = () => {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
     });
   };
 
@@ -198,6 +201,22 @@ const ListOrderManager = () => {
   };
 
   const currentTab = tabs.find((tab) => tab.key === activeTab);
+
+  // 👉 Mở dialog thanh toán
+  const openPaymentDialog = (order) => {
+    if (!order.paymentCode) {
+      toast.error("Đơn hàng này chưa có mã thanh toán");
+      return;
+    }
+    setSelectedPaymentCode(order.paymentCode);
+    setIsPaymentDialogOpen(true);
+  };
+
+  // 👉 Đóng dialog
+  const closePaymentDialog = () => {
+    setIsPaymentDialogOpen(false);
+    setSelectedPaymentCode(null);
+  };
 
   return (
     <div className="min-h-screen p-4 sm:p-6">
@@ -257,7 +276,7 @@ const ListOrderManager = () => {
                   placeholder="Tìm kiếm mã đơn, khách hàng..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:border-black focus:ring-0"
                 />
               </div>
 
@@ -267,7 +286,7 @@ const ListOrderManager = () => {
                   type="date"
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
-                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:border-black focus:ring-0"
                 />
               </div>
 
@@ -352,17 +371,19 @@ const ListOrderManager = () => {
                             {getOrderTypeText(order.orderType)}
                           </span>
                         </h3>
-                        <div className="text-xs text-gray-600 mt-1">
+                        <div className="text-2xs text-black-600 mt-1">
                           {formatDate(order.createdAt)}
                         </div>
                       </div>
                     </div>
 
                     <div className="text-right">
+                      <div className="text-xl font-medium text-black-500">
+                        Tổng tiền
+                      </div>
                       <div className="text-base font-bold text-gray-900">
                         {formatCurrency(order.finalPriceOrder)} ₫
                       </div>
-                      <div className="text-xs text-gray-500">Tổng tiền</div>
                     </div>
                   </div>
                 </div>
@@ -372,11 +393,11 @@ const ListOrderManager = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {/* Customer Info */}
                     <div className="space-y-2">
-                      <h4 className="text-sm font-medium text-gray-700 flex items-center gap-1.5 mb-2">
+                      <h4 className="text-sx font-medium text-black-700 flex items-center gap-1.5 mb-2">
                         <User className="w-4 h-4 text-blue-600" />
                         Thông tin khách hàng
                       </h4>
-                      <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                      <div className="bg-gray-100 rounded-lg p-3 space-y-2">
                         <div className="flex items-center gap-2">
                           <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">
                             {order.customer?.customerCode || "N/A"}
@@ -388,13 +409,10 @@ const ListOrderManager = () => {
                             <div className="font-medium text-gray-900">
                               {order.customer?.name || "Chưa có tên"}
                             </div>
-                            <div className="text-xs text-gray-500">
-                              @{order.customer?.username || "N/A"}
-                            </div>
                           </div>
                         </div>
                         {order.customer?.email && (
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <div className="flex items-center gap-2 text-sm text-black-600">
                             <Mail className="w-4 h-4 text-gray-500" />
                             <span className="text-xs">
                               {order.customer.email}
@@ -402,7 +420,7 @@ const ListOrderManager = () => {
                           </div>
                         )}
                         {order.customer?.phone && (
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <div className="flex items-center gap-2 text-sm text-black-600">
                             <Phone className="w-4 h-4 text-gray-500" />
                             <span className="text-xs font-medium">
                               {order.customer.phone}
@@ -418,15 +436,15 @@ const ListOrderManager = () => {
                         <FileText className="w-4 h-4 text-green-600" />
                         Chi tiết đơn hàng
                       </h4>
-                      <div className="bg-gray-50 rounded-lg p-3 space-y-2 text-sm">
+                      <div className="bg-gray-100 rounded-lg p-3 space-y-2 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Tỷ giá:</span>
+                          <span className="text-black-600 ">Tổng tiền:</span>
                           <span className="font-medium text-gray-900">
-                            {order.exchangeRate?.toLocaleString() || "N/A"} ¥
+                            {order.finalPriceOrder?.toLocaleString() || "N/A"}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">
+                          <span className="text-black-600">
                             Tổng trọng lượng:
                           </span>
                           <span className="font-medium text-gray-900">
@@ -471,6 +489,16 @@ const ListOrderManager = () => {
                       <Eye className="w-4 h-4" />
                       Xem chi tiết
                     </button>
+
+                    {order.paymentCode && (
+                      <button
+                        onClick={() => openPaymentDialog(order)}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+                      >
+                        <FileText className="w-4 h-4" />
+                        Xem thanh toán
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -519,6 +547,32 @@ const ListOrderManager = () => {
           </div>
         )}
       </div>
+
+      {/* 👉 Dialog thanh toán */}
+      {isPaymentDialogOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={closePaymentDialog}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl max-w-5xl w-[95%] max-h-[90vh] overflow-y-auto p-4 sm:p-6 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <button
+                onClick={closePaymentDialog}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+              >
+                <X className="w-6 h-6 text-red-500" />
+              </button>
+            </div>
+
+            {selectedPaymentCode && (
+              <DetailPaymentOrder codeFromProp={selectedPaymentCode} />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

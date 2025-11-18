@@ -71,6 +71,15 @@ const registrationService = {
       throw error;
     }
   },
+
+  changePassword: async (oldPassword, newPassword, confirmNewPassword) => {
+    const response = await api.put("/accounts/change-password", {
+      oldPassword,
+      newPassword,
+      confirmNewPassword,
+    });
+    return response.data;
+  },
 };
 
 export default registrationService;

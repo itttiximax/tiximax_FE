@@ -133,7 +133,7 @@ const LeadSaleSideBar = () => {
             //   label: "Xác nhận vận chuyển",
             // },
             {
-              to: "/lead-sale/confirm-payment",
+              to: "/lead-sale/comfirm-payment",
               icon: Banknote,
               label: "Xác nhận đơn hàng",
             },

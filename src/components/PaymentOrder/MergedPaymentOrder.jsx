@@ -141,10 +141,9 @@ const MergedPaymentOrder = () => {
       if (!data || data.length === 0) {
         // ✅ SỬA LỖI: Thay toast.info bằng toast với custom style
         toast(`Không tìm thấy đơn hàng nào cho khách hàng ${customerCode}`, {
-          icon: "ℹ️",
           duration: 4000,
           style: {
-            background: "#3b82f6",
+            background: "#3bf64bff",
             color: "#fff",
           },
         });

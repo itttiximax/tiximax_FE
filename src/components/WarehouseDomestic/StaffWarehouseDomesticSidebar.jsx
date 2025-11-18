@@ -54,17 +54,18 @@ const StaffWarehouseDomesticSidebar = () => {
       title: "Quản lý đơn hàng đang vận chuyển đến kho",
     },
     {
-      text: "Đơn hàng xuất kho",
-      icon: <ArrowUp className="w-6 h-6" />,
-      path: "/staff-warehouse-domestic/exports",
-      title: "Quản lý đơn hàng nội địa sẵn sàng giao",
-    },
-    {
       text: "Đơn đủ điều kiện",
       icon: <PackageCheck className="w-6 h-6" />,
       path: "/staff-warehouse-domestic/eligible-packings",
       title: "Quản lý đơn hàng đủ điều kiện đóng gói",
     },
+    {
+      text: "Xuất kho đồng loạt",
+      icon: <ArrowUp className="w-6 h-6" />,
+      path: "/staff-warehouse-domestic/exports",
+      title: "Quản lý đơn hàng nội địa sẵn sàng giao",
+    },
+
     {
       text: "Kiểm tra đóng gói",
       icon: <ClipboardCheck className="w-6 h-6" />,
@@ -73,9 +74,9 @@ const StaffWarehouseDomesticSidebar = () => {
         "Hỗ trợ kiểm kê định kỳ hoặc đột xuất, quét mã và báo cáo chênh lệch",
     },
     {
-      text: "Tra cứu sản phẩm",
+      text: "Tra cứu đơn xuất kho",
       icon: <Search className="w-6 h-6" />,
-      path: "/staff-warehouse-domestic/product-search",
+      path: "/staff-warehouse-domestic/order-search",
       title: "Tra cứu theo mã, barcode, tên hàng và xem lịch sử nhập-xuất-tồn",
     },
     {

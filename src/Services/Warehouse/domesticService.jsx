@@ -63,6 +63,18 @@ class DomesticService {
       throw error;
     }
   }
+  // Chuyển đơn nội địa cho từng khách cụ thể (VD: KH-5F37E1)
+  async transferByCustomer(customerCode) {
+    const { data } = await api.post(
+      `/domestics/transfer-by-customer/${customerCode}`
+    );
+
+    if (data?.error) {
+      throw new Error(`API Error: ${data.error}`);
+    }
+
+    return data;
+  }
 }
 
 // Create and export a singleton instance

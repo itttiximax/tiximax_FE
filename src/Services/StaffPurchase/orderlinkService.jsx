@@ -112,8 +112,15 @@ const orderlinkService = {
     return res.data;
   },
 
-  getPurchasesShipmentCode: async (page = 0, size = 10) => {
-    const res = await api.get(`/purchases/shipment-code/${page}/${size}`);
+  getPurchasesShipmentCode: async (page = 0, size = 10, status = null) => {
+    const params = {};
+    if (status) {
+      params.status = status;
+    }
+
+    const res = await api.get(`/purchases/lack-shipment-code/${page}/${size}`, {
+      params,
+    });
     return res.data;
   },
 
@@ -127,6 +134,14 @@ const orderlinkService = {
       url += `?filter=${filter}`;
     }
     const res = await api.get(url);
+    return res.data;
+  },
+
+  updateShipmentCodeAndFee: async (purchaseId, shipmentCode, shipFee) => {
+    const res = await api.put(`/purchases/shipment-ship-fee/${purchaseId}`, {
+      shipmentCode,
+      shipFee,
+    });
     return res.data;
   },
 };

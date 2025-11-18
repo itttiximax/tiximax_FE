@@ -75,10 +75,7 @@ const InventoryWarehouse = () => {
         setIsWeighed(true);
         const errorMsg = `Warehouse "${code}" đã được cân ký. Không thể cập nhật!`;
         setError(errorMsg);
-        toast.error(errorMsg, {
-          icon: "⚠️",
-          duration: 4000,
-        });
+        toast.error(errorMsg);
         setWarehouseCode("");
         scanInputRef.current?.focus();
         return;
@@ -88,9 +85,7 @@ const InventoryWarehouse = () => {
       setStep(2);
       const successMsg = `Mã warehouse "${code}" hợp lệ. Nhập thông số bên dưới.`;
       setSuccess(successMsg);
-      toast.success(successMsg, {
-        duration: 3000,
-      });
+      toast.success(successMsg);
     } catch (err) {
       // ✅ Error handling đầy đủ từ Backend
       const errorMsg =
@@ -101,14 +96,7 @@ const InventoryWarehouse = () => {
         "Không thể kiểm tra warehouse. Vui lòng thử lại.";
 
       setError(errorMsg);
-      toast.error(errorMsg, {
-        duration: 4000,
-        style: {
-          background: "#ffffffff",
-          color: "#d62929ff",
-          border: "1px solid #ffffffff",
-        },
-      });
+      toast.error(errorMsg);
       setWarehouseCode("");
       scanInputRef.current?.focus();
     } finally {
@@ -160,15 +148,7 @@ const InventoryWarehouse = () => {
       toast.dismiss(loadingToast);
       const successMsg = "Cập nhật thông tin warehouse package thành công!";
       setSuccess(successMsg);
-      toast.success(successMsg, {
-        duration: 3000,
-        style: {
-          background: "#ffffffff",
-          color: "#0da33fff",
-          border: "1px solid #ffffffff",
-          fontWeight: "500",
-        },
-      });
+      toast.success(successMsg);
 
       // Reset form sau 2s
       setTimeout(() => {
@@ -186,15 +166,7 @@ const InventoryWarehouse = () => {
         "Không thể cập nhật thông tin warehouse";
 
       setError(errorMsg);
-      toast.error(errorMsg, {
-        duration: 4000,
-        style: {
-          background: "#FEE2E2",
-          color: "#e23333ff",
-          border: "1px solid #ffffffff",
-          fontWeight: "500",
-        },
-      });
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -240,7 +212,7 @@ const InventoryWarehouse = () => {
   };
 
   return (
-    <div className="min-h-screen  py-8 px-4">
+    <div className="min-h-screen py-8 px-4">
       <Toaster position="top-right" />
 
       <div className="max-w-2xl mx-auto">
