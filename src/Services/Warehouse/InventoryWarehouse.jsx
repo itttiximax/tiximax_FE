@@ -6,8 +6,6 @@ import toast, { Toaster } from "react-hot-toast";
 import {
   Package,
   ScanBarcode,
-  Ruler,
-  Weight,
   ArrowRight,
   CheckCircle,
   AlertCircle,
@@ -87,7 +85,6 @@ const InventoryWarehouse = () => {
       setSuccess(successMsg);
       toast.success(successMsg);
     } catch (err) {
-      // ✅ Error handling đầy đủ từ Backend
       const errorMsg =
         err?.response?.data?.error ||
         err?.response?.data?.message ||
@@ -118,7 +115,6 @@ const InventoryWarehouse = () => {
     setError("");
     setSuccess("");
 
-    // Validation
     const { length, width, height, weight } = formData;
 
     if (
@@ -150,14 +146,12 @@ const InventoryWarehouse = () => {
       setSuccess(successMsg);
       toast.success(successMsg);
 
-      // Reset form sau 2s
       setTimeout(() => {
         handleReset();
       }, 2000);
     } catch (err) {
       toast.dismiss(loadingToast);
 
-      // ✅ Error handling đầy đủ từ Backend
       const errorMsg =
         err?.response?.data?.error ||
         err?.response?.data?.message ||
@@ -212,19 +206,19 @@ const InventoryWarehouse = () => {
   };
 
   return (
-    <div className="min-h-screen py-8 px-4">
+    <div className="min-h-screen bg-white p-6">
       <Toaster position="top-right" />
 
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+      <div className="max-w-3xl mx-auto space-y-6">
+        {/* HEADER kiểu ExportList / PackingEligibleList */}
+        <div className="bg-blue-600 rounded-xl shadow-sm p-5">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Package className="w-6 h-6 text-blue-600" />
+            <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+              <Package className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">
-                Cập nhật kiểm tra đóng gói
+              <h1 className="text-xl font-semibold text-white">
+                Cập Nhật Kiểm Tra Đóng Gói
               </h1>
             </div>
           </div>
@@ -233,10 +227,10 @@ const InventoryWarehouse = () => {
         {/* Error & Success Messages */}
         {error && (
           <div
-            className={`mb-4 p-4 rounded-lg flex items-start gap-3 ${
+            className={`p-4 rounded-lg flex items-start gap-3 border ${
               isWeighed
-                ? "bg-yellow-50 border border-yellow-200"
-                : "bg-red-50 border border-red-200"
+                ? "bg-yellow-50 border-yellow-200"
+                : "bg-red-50 border-red-200"
             }`}
           >
             {isWeighed ? (
@@ -255,14 +249,14 @@ const InventoryWarehouse = () => {
         )}
 
         {success && (
-          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
             <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
             <span className="text-sm text-green-700">{success}</span>
           </div>
         )}
 
-        {/* Main Content */}
-        <div className="bg-white rounded-xl shadow-md p-6">
+        {/* MAIN CARD */}
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
           {/* STEP 1: Nhập/Scan Warehouse Code */}
           {step === 1 && (
             <form onSubmit={handleVerifyCode} className="space-y-6">
@@ -284,7 +278,7 @@ const InventoryWarehouse = () => {
                     onKeyDown={handleScanKeyDown}
                     placeholder="Quét mã hoặc nhập thủ công..."
                     disabled={loading}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 transition-all"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 outline-none text-sm"
                     autoFocus
                   />
                   <ScanBarcode className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -298,7 +292,7 @@ const InventoryWarehouse = () => {
               <button
                 type="submit"
                 disabled={loading || !warehouseCode.trim()}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center gap-2"
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center gap-2 text-sm"
               >
                 {loading ? (
                   <>
@@ -307,13 +301,12 @@ const InventoryWarehouse = () => {
                   </>
                 ) : (
                   <>
-                    Kiểm tra & Tiếp tục
+                    Kiểm tra &amp; Tiếp tục
                     <ArrowRight className="w-5 h-5" />
                   </>
                 )}
               </button>
 
-              {/* Warning nếu đã được cân ký */}
               {isWeighed && (
                 <div className="mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
                   <div className="flex items-start gap-3">
@@ -343,7 +336,7 @@ const InventoryWarehouse = () => {
                   <Package className="w-5 h-5 text-blue-600" />
                   <div>
                     <span className="text-xs text-gray-600">Mã warehouse:</span>
-                    <p className="font-semibold text-blue-700">
+                    <p className="font-semibold text-blue-700 text-sm">
                       {warehouseCode}
                     </p>
                   </div>
@@ -360,10 +353,10 @@ const InventoryWarehouse = () => {
 
               {/* Dimensions */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
                   Kích thước (cm)
                 </label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <label className="block text-xs text-gray-600 mb-1">
                       Dài <span className="text-red-500">*</span>
@@ -377,7 +370,7 @@ const InventoryWarehouse = () => {
                       }
                       placeholder="0.00"
                       disabled={loading}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-sm"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-sm"
                     />
                   </div>
 
@@ -394,7 +387,7 @@ const InventoryWarehouse = () => {
                       }
                       placeholder="0.00"
                       disabled={loading}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-sm"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-sm"
                     />
                   </div>
 
@@ -411,7 +404,7 @@ const InventoryWarehouse = () => {
                       }
                       placeholder="0.00"
                       disabled={loading}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-sm"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-sm"
                     />
                   </div>
                 </div>
@@ -419,7 +412,7 @@ const InventoryWarehouse = () => {
 
               {/* Weight */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Trọng lượng (kg) <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -429,16 +422,12 @@ const InventoryWarehouse = () => {
                   onChange={(e) => handleInputChange("weight", e.target.value)}
                   placeholder="0.00"
                   disabled={loading}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-sm"
                 />
               </div>
 
               {/* Image Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                  <ImageIcon className="w-4 h-4 text-gray-600" />
-                  Hình ảnh Package
-                </label>
                 <UploadImg
                   imageUrl={formData.image}
                   onImageUpload={handleImageUpload}
@@ -455,7 +444,7 @@ const InventoryWarehouse = () => {
                   type="button"
                   onClick={handleReset}
                   disabled={loading}
-                  className="flex-1 bg-gray-200 text-gray-700 py-2.5 px-4 rounded-lg hover:bg-gray-300 disabled:opacity-50 transition-colors font-medium flex items-center justify-center gap-2"
+                  className="flex-1 bg-gray-100 text-gray-700 py-2.5 px-4 rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-colors font-medium flex items-center justify-center gap-2 text-sm"
                 >
                   <X className="w-4 h-4" />
                   Hủy
@@ -463,7 +452,7 @@ const InventoryWarehouse = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-green-600 text-white py-2.5 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center gap-2"
+                  className="flex-1 bg-blue-600 text-white py-2.5 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center gap-2 text-sm"
                 >
                   {loading ? (
                     <>

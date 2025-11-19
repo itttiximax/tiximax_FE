@@ -60,7 +60,7 @@ const StaffWarehouseDomesticSidebar = () => {
       title: "Quản lý đơn hàng đủ điều kiện đóng gói",
     },
     {
-      text: "Xuất kho đồng loạt",
+      text: "Xuất kho đơn nội địa",
       icon: <ArrowUp className="w-6 h-6" />,
       path: "/staff-warehouse-domestic/exports",
       title: "Quản lý đơn hàng nội địa sẵn sàng giao",

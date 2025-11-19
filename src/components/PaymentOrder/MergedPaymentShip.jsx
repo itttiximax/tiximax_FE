@@ -16,6 +16,7 @@ import {
   Weight,
   AlertTriangle,
 } from "lucide-react";
+import ListOrderManager from "../Order/ListOrderManager";
 
 // Helper function to extract error message from backend
 const getErrorMessage = (error) => {
@@ -556,6 +557,12 @@ const MergedPaymentShip = () => {
           </p>
         </div>
       )}
+      {/* 👇 THÊM PHẦN NÀY - ListOrderManager component */}
+      <div className="mt-8">
+        <div className="border-t border-gray-300 pt-8">
+          <ListOrderManager />
+        </div>
+      </div>
     </div>
   );
 };

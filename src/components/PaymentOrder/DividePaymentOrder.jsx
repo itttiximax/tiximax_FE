@@ -14,7 +14,7 @@ import {
   Square,
 } from "lucide-react";
 import CreateDividePaymentShip from "./CreateDividePaymentShip";
-
+import ListOrderManager from "../Order/ListOrderManager";
 // Helper: bóc tách lỗi backend để hiện toast dễ hiểu
 const getErrorMessage = (error) => {
   if (error?.response) {
@@ -371,6 +371,12 @@ const DividePaymentOrder = () => {
           </p>
         </div>
       )}
+      {/* 👇 THÊM PHẦN NÀY - ListOrderManager component */}
+      <div className="mt-8">
+        <div className="border-t border-gray-300 pt-8">
+          <ListOrderManager />
+        </div>
+      </div>
     </div>
   );
 };
