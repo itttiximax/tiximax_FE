@@ -19,6 +19,8 @@ const roleRoutes = {
 const DEFAULT_ROUTE = "/";
 const REDIRECT_DELAY = 2000;
 const MAX_RETRIES = 2;
+const SESSION_TIMEOUT = 30000;
+const RETRY_DELAY = 1500;
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -26,21 +28,45 @@ export default function AuthCallback() {
 
   const [error, setError] = useState(null);
   const [isProcessing, setIsProcessing] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
 
   const hasProcessedRef = useRef(false);
   const timeoutRef = useRef(null);
 
   const handleError = useCallback(
     (err, statusCode) => {
-      const message = err?.message || "Đăng nhập thất bại";
+      const errorMessages = {
+        404: "Tài khoản không tồn tại trong hệ thống!",
+        401: "Xác thực thất bại!",
+        403: "Bạn không có quyền truy cập!",
+        timeout: "Kết nối quá chậm! Vui lòng thử lại.",
+        network: "Lỗi kết nối mạng! Vui lòng kiểm tra internet.",
+      };
+
+      let message = "Đăng nhập thất bại";
+
+      // Ưu tiên message từ BE
+      if (err?.response?.data?.message) {
+        message = err.response.data.message;
+      } else if (
+        err?.message?.includes("timeout") ||
+        err?.code === "ECONNABORTED"
+      ) {
+        message = errorMessages.timeout;
+      } else if (err?.message?.toLowerCase().includes("network")) {
+        message = errorMessages.network;
+      } else if (statusCode && errorMessages[statusCode]) {
+        message = errorMessages[statusCode];
+      } else if (err?.message) {
+        message = err.message;
+      }
+
       setError(message);
       setIsProcessing(false);
-
-      if (statusCode === 404)
-        toast.error("Tài khoản không tồn tại trong hệ thống!");
-      else if (statusCode === 401) toast.error("Xác thực thất bại!");
-      else if (statusCode === 403) toast.error("Bạn không có quyền truy cập!");
-      else toast.error(message);
+      toast.error(message, {
+        duration: 4000,
+        position: "top-center",
+      });
 
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(
@@ -53,16 +79,30 @@ export default function AuthCallback() {
 
   const verifyWithRetry = useCallback(async (accessToken) => {
     let lastErr;
-    for (let i = 0; i <= MAX_RETRIES; i++) {
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
+        setRetryCount(attempt + 1);
         return await verifySupabaseToken(accessToken);
       } catch (e) {
         lastErr = e;
+
+        const isTimeout =
+          e?.message?.includes("timeout") || e?.code === "ECONNABORTED";
         const isNetwork = e?.message?.toLowerCase?.().includes("network");
-        if (!isNetwork || i === MAX_RETRIES) break;
-        await new Promise((r) => setTimeout(r, 1000));
+
+        // Retry nếu là timeout/network và chưa hết lượt
+        if ((isTimeout || isNetwork) && attempt < MAX_RETRIES) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, RETRY_DELAY * (attempt + 1))
+          );
+          continue;
+        }
+
+        break;
       }
     }
+
     throw lastErr;
   }, []);
 
@@ -71,38 +111,43 @@ export default function AuthCallback() {
     hasProcessedRef.current = true;
 
     try {
-      // (0) bắt lỗi từ provider (nếu có) trên query
       const searchParams = new URLSearchParams(window.location.search);
+
+      // (1) Kiểm tra lỗi từ OAuth provider
       const providerErr =
         searchParams.get("error_description") || searchParams.get("error");
       if (providerErr) {
         throw new Error(decodeURIComponent(providerErr));
       }
 
-      // (1) Code flow (PKCE) – Supabase v2
-      const hasCode = searchParams.get("code");
-      if (hasCode) {
-        const { error: xErr } = await supabase.auth.exchangeCodeForSession({
-          currentUrl: window.location.href, // truyền rõ ràng để chắc chắn
-        });
-        if (xErr) throw xErr;
+      // (2) PKCE Code flow (Supabase v2)
+      const code = searchParams.get("code");
+      if (code) {
+        const { error: exchangeError } =
+          await supabase.auth.exchangeCodeForSession(code);
+        if (exchangeError) throw exchangeError;
       } else {
-        // (2) Fallback: hash token flow (một số trường hợp vẫn trả access_token trên hash)
+        // (3) Fallback: Hash token flow
         const hash = new URLSearchParams(window.location.hash.substring(1));
-        const accessTokenFromHash = hash.get("access_token");
-        const refreshTokenFromHash = hash.get("refresh_token");
-        if (accessTokenFromHash) {
-          await supabase.auth.setSession({
-            access_token: accessTokenFromHash,
-            refresh_token: refreshTokenFromHash || undefined,
+        const accessToken = hash.get("access_token");
+        const refreshToken = hash.get("refresh_token");
+
+        if (accessToken) {
+          const { error: setSessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
           });
+          if (setSessionError) throw setSessionError;
         }
       }
 
-      // (3) Lấy session (timeout 10s)
+      // (4) Lấy session với timeout
       const sessionPromise = supabase.auth.getSession();
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Session timeout")), 10000)
+        setTimeout(
+          () => reject(new Error("Session timeout - Vui lòng thử lại")),
+          SESSION_TIMEOUT
+        )
       );
 
       const {
@@ -111,47 +156,56 @@ export default function AuthCallback() {
       } = await Promise.race([sessionPromise, timeoutPromise]);
 
       if (sessionError) throw sessionError;
-      if (!session?.access_token)
+      if (!session?.access_token) {
         throw new Error("Không tìm thấy phiên đăng nhập hợp lệ");
+      }
       if (session.expires_at && Date.now() / 1000 > session.expires_at) {
         throw new Error("Phiên đăng nhập đã hết hạn");
       }
 
-      // (4) Verify với backend, có retry – fallback dùng dữ liệu supabase user
+      // (5) Verify với backend (có retry) hoặc fallback
       let userData;
       try {
         const data = await verifyWithRetry(session.access_token);
         userData = data?.user;
       } catch {
+        // Fallback: sử dụng dữ liệu từ Supabase
         userData = {
           id: session.user.id,
           email: session.user.email,
           username: session.user.email?.split("@")[0] || "user",
-          name: session.user.user_metadata?.full_name || session.user.email,
+          name:
+            session.user.user_metadata?.full_name ||
+            session.user.user_metadata?.name ||
+            session.user.email,
           role: session.user.user_metadata?.role || ROLES.CUSTOMER,
         };
       }
+
       if (!userData) throw new Error("Dữ liệu người dùng không hợp lệ");
 
-      // (5) Cập nhật AuthContext + localStorage
-      setAuthUser({
+      // (6) Cập nhật AuthContext + localStorage
+      const userInfo = {
         id: userData.id,
         username: userData.username,
         name: userData.name,
         email: userData.email,
         role: userData.role,
-      });
-      localStorage.setItem("user", JSON.stringify(userData));
+      };
 
-      // (6) Điều hướng theo role
-      toast.success(`Chào mừng ${userData.name || userData.email}! 🎉`, {
+      setAuthUser(userInfo);
+      localStorage.setItem("user", JSON.stringify(userInfo));
+
+      // (7) Điều hướng theo role
+      toast.success(`Chào mừng ${userData.name || userData.email}! `, {
         duration: 3000,
+        position: "top-center",
       });
+
       const route = roleRoutes[userData.role] || DEFAULT_ROUTE;
 
-      // Dọn sạch query/hash để URL đẹp
-      const cleanUrl = window.location.pathname;
-      window.history.replaceState(null, "", cleanUrl);
+      // Dọn URL
+      window.history.replaceState(null, "", window.location.pathname);
 
       navigate(route, { replace: true });
     } catch (err) {
@@ -164,6 +218,7 @@ export default function AuthCallback() {
   useEffect(() => {
     hasProcessedRef.current = false;
     handleCallback();
+
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
@@ -210,12 +265,16 @@ export default function AuthCallback() {
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           Đang xử lý đăng nhập...
         </h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 mb-2">
           {isProcessing
             ? "Vui lòng đợi trong giây lát"
             : "Đang chuyển hướng..."}
         </p>
-        {/* ⚠️ THÊM DÒng NÀY */}
+        {retryCount > 0 && (
+          <p className="text-sm text-yellow-600 mb-2">
+            Đang thử lại... (Lần {retryCount}/{MAX_RETRIES + 1})
+          </p>
+        )}
         <p className="text-sm text-gray-500">
           Lần đầu có thể mất 30-60 giây để kết nối server...
         </p>

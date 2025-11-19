@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { FcGoogle } from "react-icons/fc";
 import toast from "react-hot-toast";
 import { googleLogin } from "../Services/Auth/authService";
@@ -10,43 +10,46 @@ const LoginGoogle = ({
   const [loading, setLoading] = useState(false);
   const isMountedRef = useRef(true);
 
-  // Cleanup on unmount
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       isMountedRef.current = false;
     };
   }, []);
 
   const handleGoogleLogin = async () => {
-    if (loading) return; // Prevent double-click
+    if (loading || disabled) return;
 
     setLoading(true);
 
     try {
-      console.log("🚀 Starting Google OAuth flow...");
-
-      // Simply trigger Google OAuth
-      // User will be redirected to /auth/callback after success
       await googleLogin();
-
-      // Note: Code below won't execute because googleLogin() redirects
-      // The /auth/callback page will handle the rest
+      // Redirect sẽ xảy ra, code dưới không chạy
     } catch (err) {
-      console.error("❌ Google login error:", err);
+      if (!isMountedRef.current) return;
 
-      // Only update state if component still mounted
-      if (isMountedRef.current) {
-        setLoading(false);
+      setLoading(false);
 
-        // User-friendly error messages
-        const errorMessage =
-          err.message || "Đăng nhập Google thất bại! Vui lòng thử lại.";
+      // Xử lý error messages từ BE
+      let errorMessage = "Đăng nhập Google thất bại! Vui lòng thử lại.";
 
-        toast.error(errorMessage, {
-          duration: 4000,
-          position: "top-center",
-        });
+      if (err.response?.data?.message) {
+        // Lỗi từ BE
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        // Lỗi network hoặc timeout
+        if (err.code === "ECONNABORTED" || err.message.includes("timeout")) {
+          errorMessage = "Kết nối quá chậm! Vui lòng kiểm tra mạng và thử lại.";
+        } else if (err.message.includes("Network Error")) {
+          errorMessage = "Lỗi kết nối! Vui lòng kiểm tra internet.";
+        } else {
+          errorMessage = err.message;
+        }
       }
+
+      toast.error(errorMessage, {
+        duration: 4000,
+        position: "top-center",
+      });
     }
   };
 
