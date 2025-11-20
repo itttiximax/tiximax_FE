@@ -94,7 +94,7 @@ export const login = async (username, password) => {
   } catch (error) {
     const status = error.response?.status;
     const message = error.response?.data?.message;
-    if (status === 401)
+    if (status === 403)
       throw new Error("Tên đăng nhập hoặc mật khẩu không đúng!");
     if (status === 404) throw new Error("Tài khoản không tồn tại!");
     if (status === 400)
