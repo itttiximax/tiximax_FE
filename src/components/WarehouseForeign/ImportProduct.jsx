@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { createShipment } from "../../Services/Warehouse/warehouseShipmentService";
+import { PackageSearch, Trash2, Upload, X } from "lucide-react";
 
 const normalizeCode = (raw) =>
   String(raw || "")
@@ -178,35 +179,26 @@ const ImportProduct = () => {
   };
 
   return (
-    <>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: "#ffffffff",
-            color: "#222121ff",
-          },
-          success: {
-            style: {
-              background: "#f5f5f5ff",
-            },
-          },
-          error: {
-            style: {
-              background: "#fafafaff",
-            },
-          },
-        }}
-      />
+    <div className="p-6 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="bg-blue-600 rounded-xl shadow-sm p-5 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+              <PackageSearch size={22} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold text-white">
+                Nhập Kho Hàng Loạt
+              </h1>
+            </div>
+          </div>
+        </div>
 
-      <div className="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Nhập kho hàng</h2>
-
-        <div className="grid lg:grid-cols-5 gap-6">
+        <div className="grid lg:grid-cols-5 gap-4">
           {/* Input Section */}
           <div className="lg:col-span-2">
-            <div className="space-y-4">
+            <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Scan hoặc nhập mã
@@ -219,7 +211,7 @@ const ImportProduct = () => {
                   onKeyDown={handleScanKeyDown}
                   onPaste={handleScanPaste}
                   placeholder="Enter để thêm, paste nhiều mã..."
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   autoFocus
                 />
               </div>
@@ -228,12 +220,12 @@ const ImportProduct = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={loading || codes.length === 0 || hasAnyError}
-                  className="flex-1 px-4 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                 >
                   {loading ? (
-                    <span className="flex items-center justify-center">
+                    <>
                       <svg
-                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        className="animate-spin h-4 w-4"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -252,26 +244,32 @@ const ImportProduct = () => {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
-                      Processing...
-                    </span>
+                      Đang xử lý...
+                    </>
                   ) : (
-                    `Gửi (${codes.length})`
+                    <>
+                      <Upload size={16} />
+                      Gửi ({codes.length})
+                    </>
                   )}
                 </button>
                 <button
                   onClick={clearAll}
-                  className="px-4 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                  className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
                 >
+                  <Trash2 size={16} />
                   Xóa
                 </button>
               </div>
 
               {/* Statistics */}
               {codes.length > 0 && (
-                <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                <div className="bg-gray-50 rounded-lg p-3 space-y-2 border border-gray-200">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Tổng mã:</span>
-                    <span className="font-semibold">{codes.length}</span>
+                    <span className="font-semibold text-gray-900">
+                      {codes.length}
+                    </span>
                   </div>
                   {results.length > 0 && (
                     <>
@@ -296,11 +294,13 @@ const ImportProduct = () => {
 
           {/* List Section */}
           <div className="lg:col-span-3">
-            <div className="bg-gray-50 rounded-lg p-4 h-[500px] overflow-hidden flex flex-col">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-gray-700">Danh sách mã</h3>
+            <div className="bg-white border border-gray-200 rounded-xl p-5 h-[500px] flex flex-col">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-semibold text-gray-900">
+                  Danh sách mã
+                </h3>
                 {hasAnyError && (
-                  <span className="text-xs px-2 py-1 bg-red-100 text-red-600 rounded">
+                  <span className="text-xs px-2 py-1 bg-red-50 text-red-600 rounded border border-red-100">
                     Có lỗi
                   </span>
                 )}
@@ -309,7 +309,7 @@ const ImportProduct = () => {
               <div className="flex-1 overflow-auto">
                 {codes.length === 0 ? (
                   <div className="h-full flex items-center justify-center">
-                    <p className="text-gray-400">Chưa có mã nào</p>
+                    <p className="text-gray-400 text-sm">Chưa có mã nào</p>
                   </div>
                 ) : (
                   <ul className="space-y-2">
@@ -321,7 +321,7 @@ const ImportProduct = () => {
                       return (
                         <li
                           key={`${c}-${idx}`}
-                          className={`flex items-center justify-between px-3 py-2.5 rounded-lg border transition-all ${
+                          className={`flex items-center justify-between px-3 py-2 rounded-lg border transition-colors ${
                             isBad
                               ? "border-red-200 bg-red-50"
                               : result?.ok === false
@@ -332,27 +332,27 @@ const ImportProduct = () => {
                           }`}
                         >
                           <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="font-mono text-sm truncate">
+                            <span className="font-mono text-xs text-gray-900 truncate">
                               {c}
                             </span>
                             {err?.duplicate && (
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-600 whitespace-nowrap">
+                              <span className="text-xs px-2 py-0.5 rounded bg-red-100 text-red-600">
                                 Trùng
                               </span>
                             )}
                             {err?.invalid && (
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 whitespace-nowrap">
+                              <span className="text-xs px-2 py-0.5 rounded bg-yellow-100 text-yellow-700">
                                 Sai format
                               </span>
                             )}
                             {result?.ok === true && (
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                              <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">
                                 ✓ OK
                               </span>
                             )}
                             {result?.ok === false && (
                               <span
-                                className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 truncate max-w-[200px]"
+                                className="text-xs px-2 py-0.5 rounded bg-red-100 text-red-700 truncate max-w-[200px]"
                                 title={result.error}
                               >
                                 {result.error}
@@ -364,19 +364,7 @@ const ImportProduct = () => {
                             className="ml-2 text-gray-400 hover:text-red-600 transition-colors p-1"
                             title="Xóa"
                           >
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                              />
-                            </svg>
+                            <X size={16} />
                           </button>
                         </li>
                       );
@@ -389,7 +377,9 @@ const ImportProduct = () => {
           </div>
         </div>
       </div>
-    </>
+
+      <Toaster position="top-right" />
+    </div>
   );
 };
 

@@ -17,7 +17,7 @@ const PackingFlyingList = () => {
   const [packings, setPackings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(20); // ✅ Tăng default lên 20
+  const [pageSize, setPageSize] = useState(20);
   const [totalPackings, setTotalPackings] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState("");
@@ -64,7 +64,6 @@ const PackingFlyingList = () => {
       setTotalPackings(response.totalElements || 0);
       setCurrentPage(page);
     } catch (err) {
-      console.error("Error loading flying-away packings:", err);
       const errorMessage = getErrorMessage(err);
       toast.error(errorMessage, { duration: 5000 });
     } finally {
@@ -109,7 +108,6 @@ const PackingFlyingList = () => {
       setSelectedPackings([]);
       await loadPackings(currentPage, pageSize);
     } catch (err) {
-      console.error("Error confirming receipt:", err);
       const errorMessage = getErrorMessage(err);
       toast.error(`Không thể xác nhận nhận hàng: ${errorMessage}`, {
         duration: 5000,
@@ -121,6 +119,7 @@ const PackingFlyingList = () => {
 
   useEffect(() => {
     loadPackings(0, pageSize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageSize]);
 
   const handlePageChange = (newPage) => {
@@ -143,67 +142,69 @@ const PackingFlyingList = () => {
   const totalPages = Math.ceil(totalPackings / pageSize);
 
   return (
-    <div className="min-h-screen p-3">
-      <div className="mx-auto">
-        {/* ✅ COMPACT HEADER */}
-        <div className="mb-3">
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
+    <div className="p-6  min-h-screen">
+      <div className=" mx-auto">
+        {/* Header */}
+        <div className="bg-blue-600 rounded-xl shadow-sm p-5 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+              <PlaneTakeoff size={22} className="text-white" />
+            </div>
+            <h1 className="text-xl font-semibold text-white">
               Đơn Hàng Đang Vận Chuyển
             </h1>
           </div>
         </div>
 
-        {/* ✅ COMPACT CONTROLS */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-3">
-          <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-3 flex-1">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Tìm mã đóng gói..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-              </div>
-
-              <div className="relative">
-                <Calendar className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="date"
-                  value={filterDate}
-                  onChange={(e) => setFilterDate(e.target.value)}
-                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-              </div>
-
-              <select
-                value={pageSize}
-                onChange={handlePageSizeChange}
-                disabled={loading}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-100"
-              >
-                <option value={10}>10 / trang</option>
-                <option value={20}>20 / trang</option>
-                <option value={30}>30 / trang</option>
-                <option value={50}>50 / trang</option>
-                <option value={100}>100 / trang</option>
-              </select>
+        {/* Controls */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400"
+                size={18}
+              />
+              <input
+                type="text"
+                placeholder="Tìm mã đóng gói..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              />
             </div>
 
-            {/* Confirm Receipt Button */}
+            <div className="relative">
+              <Calendar
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400"
+                size={18}
+              />
+              <input
+                type="date"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className="pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              />
+            </div>
+
+            <select
+              value={pageSize}
+              onChange={handlePageSizeChange}
+              disabled={loading}
+              className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+            >
+              <option value={10}>10 / trang</option>
+              <option value={20}>20 / trang</option>
+              <option value={30}>30 / trang</option>
+              <option value={50}>50 / trang</option>
+              <option value={100}>100 / trang</option>
+            </select>
+
             <button
               onClick={handleConfirmReceipt}
               disabled={loading || selectedPackings.length === 0}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                loading || selectedPackings.length === 0
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md"
-              }`}
+              className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
-              <CheckCircle className="w-4 h-4" />
+              <CheckCircle size={18} />
               Nhận hàng ({selectedPackings.length})
             </button>
           </div>
@@ -211,19 +212,22 @@ const PackingFlyingList = () => {
 
         {/* Loading State */}
         {loading && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-blue-600">
-              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" />
+          <div className="bg-white border border-gray-200 rounded-xl p-10 text-center">
+            <RefreshCw
+              size={32}
+              className="animate-spin text-blue-600 mx-auto mb-3"
+            />
+            <p className="text-gray-700 text-sm font-medium">
               Đang tải dữ liệu...
-            </div>
+            </p>
           </div>
         )}
 
         {/* Empty State */}
         {!loading && filteredPackings.length === 0 && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-            <PlaneTakeoff className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <h3 className="text-base font-medium text-gray-900 mb-2">
+          <div className="bg-white border border-gray-200 rounded-xl p-10 text-center">
+            <PlaneTakeoff size={40} className="text-gray-300 mx-auto mb-3" />
+            <h3 className="text-base font-semibold text-gray-800 mb-1">
               Không có đơn hàng nào
             </h3>
             <p className="text-gray-500 text-sm">
@@ -231,16 +235,27 @@ const PackingFlyingList = () => {
                 ? "Không tìm thấy kết quả phù hợp."
                 : "Hiện tại không có đơn hàng nào đang vận chuyển."}
             </p>
+            {(searchTerm || filterDate) && (
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setFilterDate("");
+                }}
+                className="mt-3 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Xóa bộ lọc
+              </button>
+            )}
           </div>
         )}
 
-        {/* ✅ COMPACT TABLE */}
+        {/* Table */}
         {filteredPackings.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
             {/* Table Header Info */}
-            <div className="px-4 py-2.5 border-b border-gray-200 bg-gray-50">
-              <div className="flex items-center justify-between text-xs">
-                <label className="flex items-center gap-2 cursor-pointer">
+            <div className="px-6 py-3 bg-blue-200 border-b border-blue-100">
+              <div className="flex items-center justify-between text-sm">
+                <label className="flex items-center gap-2 cursor-pointer font-medium text-black-900">
                   <input
                     type="checkbox"
                     checked={
@@ -250,68 +265,54 @@ const PackingFlyingList = () => {
                     onChange={handleSelectAll}
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
-                  <span className="font-medium text-gray-700">
-                    Chọn tất cả ({filteredPackings.length})
-                  </span>
+                  Chọn tất cả ({filteredPackings.length} đơn)
                 </label>
-                <span className="text-gray-500">
+                <span className="text-blue-700">
                   Trang {currentPage + 1} / {totalPages}
                 </span>
               </div>
             </div>
 
-            {/* ✅ TABLE */}
+            {/* Table */}
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="w-full text-sm">
+                <thead className="bg-blue-50">
                   <tr>
-                    <th className="px-3 py-2 text-left w-12">
-                      <span className="sr-only">Checkbox</span>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-12">
+                      Chọn
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <div className="flex items-center gap-1">
-                        <Package className="w-3 h-3" />
-                        Mã Đóng Gói
-                      </div>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Mã Đóng Gói
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <div className="flex items-center gap-1">
-                        <PlaneTakeoff className="w-3 h-3" />
-                        Chuyến Bay
-                      </div>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Chuyến Bay
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Sản Phẩm
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <div className="flex items-center gap-1">
-                        <Package className="w-3 h-3" />
-                        Tổng SP
-                      </div>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Tổng SP
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        Ngày Đóng Gói
-                      </div>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Ngày Đóng Gói
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Trạng Thái
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredPackings.map((packing, index) => (
+                <tbody className="bg-white divide-y divide-gray-100">
+                  {filteredPackings.map((packing) => (
                     <tr
                       key={packing.packingId}
-                      className={`hover:bg-blue-50 transition-colors ${
+                      className={`hover:bg-blue-50/60 transition-colors ${
                         selectedPackings.includes(packing.packingCode)
-                          ? "bg-blue-50"
+                          ? "bg-blue-50/60"
                           : ""
                       }`}
                     >
                       {/* Checkbox */}
-                      <td className="px-3 py-2.5 whitespace-nowrap">
+                      <td className="px-4 py-3">
                         <input
                           type="checkbox"
                           checked={selectedPackings.includes(
@@ -325,32 +326,28 @@ const PackingFlyingList = () => {
                       </td>
 
                       {/* Packing Code */}
-                      <td className="px-3 py-2.5 whitespace-nowrap">
-                        <span className="text-sm font-semibold text-gray-900">
-                          {packing.packingCode}
-                        </span>
+                      <td className="px-6 py-3 text-gray-900 font-medium">
+                        {packing.packingCode}
                       </td>
 
                       {/* Flight Code */}
-                      <td className="px-3 py-2.5 whitespace-nowrap">
-                        <span className="text-sm font-medium text-blue-600">
-                          {packing.flightCode}
-                        </span>
+                      <td className="px-4 py-3 text-gray-700">
+                        {packing.flightCode}
                       </td>
 
                       {/* Packing List */}
-                      <td className="px-3 py-2.5">
+                      <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1 max-w-md">
                           {packing.packingList.slice(0, 2).map((item) => (
                             <span
                               key={item}
-                              className="inline-block px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded font-medium"
+                              className="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded border border-blue-100"
                             >
                               {item}
                             </span>
                           ))}
                           {packing.packingList.length > 2 && (
-                            <span className="inline-block px-1.5 py-0.5 bg-gray-200 text-gray-600 text-xs rounded font-medium">
+                            <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded border border-gray-200">
                               +{packing.packingList.length - 2}
                             </span>
                           )}
@@ -358,24 +355,20 @@ const PackingFlyingList = () => {
                       </td>
 
                       {/* Total Products */}
-                      <td className="px-3 py-2.5 whitespace-nowrap">
-                        <span className="text-sm font-bold text-blue-600">
-                          {getTotalProducts(packing.packingList)}
-                        </span>
+                      <td className="px-4 py-3 text-center text-gray-900">
+                        {getTotalProducts(packing.packingList)}
                       </td>
 
                       {/* Packed Date */}
-                      <td className="px-3 py-2.5 whitespace-nowrap">
-                        <span className="text-xs text-gray-600">
-                          {new Date(packing.packedDate).toLocaleDateString(
-                            "vi-VN"
-                          )}
-                        </span>
+                      <td className="px-4 py-3 text-xs text-gray-500">
+                        {new Date(packing.packedDate).toLocaleDateString(
+                          "vi-VN"
+                        )}
                       </td>
 
                       {/* Status */}
-                      <td className="px-3 py-2.5 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                      <td className="px-4 py-3 text-center">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full border border-blue-100">
                           <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                           Đang bay
                         </span>
@@ -388,42 +381,40 @@ const PackingFlyingList = () => {
           </div>
         )}
 
-        {/* ✅ COMPACT PAGINATION */}
+        {/* Pagination */}
         {filteredPackings.length > 0 && (
-          <div className="flex items-center justify-between mt-3 bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-2.5">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 0}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                currentPage === 0
-                  ? "text-gray-400 cursor-not-allowed"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Trước
-            </button>
+          <div className="bg-white border border-gray-200 rounded-xl px-6 py-3 mt-4">
+            <div className="flex items-center justify-between text-sm">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 0}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-colors ${
+                  currentPage === 0
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-gray-700 hover:bg-blue-50"
+                }`}
+              >
+                <ChevronLeft size={18} />
+                Trước
+              </button>
 
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-gray-500">Trang</span>
-              <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold">
-                {currentPage + 1}
-              </span>
-              <span className="text-xs text-gray-500">/ {totalPages}</span>
+              <div className="font-medium text-gray-700">
+                Trang {currentPage + 1} / {totalPages}
+              </div>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage >= totalPages - 1}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-colors ${
+                  currentPage >= totalPages - 1
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-gray-700 hover:bg-blue-50"
+                }`}
+              >
+                Sau
+                <ChevronRight size={18} />
+              </button>
             </div>
-
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage >= totalPages - 1}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                currentPage >= totalPages - 1
-                  ? "text-gray-400 cursor-not-allowed"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              Sau
-              <ChevronRight className="w-4 h-4" />
-            </button>
           </div>
         )}
       </div>

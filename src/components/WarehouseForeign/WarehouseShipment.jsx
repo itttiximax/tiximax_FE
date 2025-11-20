@@ -1,9 +1,8 @@
-// src/Components/Warehouse/WarehouseShipment.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { createShipment } from "../../Services/Warehouse/warehouseShipmentService";
 import UploadImg from "../../common/UploadImg";
 import toast from "react-hot-toast";
-import { CheckCircle, AlertCircle, Loader2, Box } from "lucide-react";
+import { Loader2, Package } from "lucide-react";
 
 const WarehouseShipment = () => {
   const [formData, setFormData] = useState({
@@ -25,9 +24,7 @@ const WarehouseShipment = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    // Chỉ cho phép nhập số (bao gồm cả số thập phân)
     if (["length", "width", "height", "weight"].includes(name)) {
-      // Chỉ cho phép số và dấu chấm
       const regex = /^\d*\.?\d*$/;
       if (!regex.test(value)) {
         return;
@@ -58,7 +55,7 @@ const WarehouseShipment = () => {
     if (e) e.preventDefault();
 
     if (!shipmentId || !shipmentId.trim()) {
-      toast.error("Vui lòng nhập Shipment ID");
+      toast.error("Vui lòng nhập Mã vận đơn");
       return;
     }
 
@@ -83,7 +80,7 @@ const WarehouseShipment = () => {
     }
 
     setLoading(true);
-    const loadingToast = toast.loading("Đang tạo shipment...");
+    const loadingToast = toast.loading("Đang nhập kho...");
 
     try {
       const shipmentData = {
@@ -99,7 +96,7 @@ const WarehouseShipment = () => {
       toast.dismiss(loadingToast);
 
       const successMessage =
-        result?.message || result?.data?.message || "Tạo shipment thành công!";
+        result?.message || result?.data?.message || "Nhập kho thành công!";
 
       toast.success(successMessage);
 
@@ -114,14 +111,13 @@ const WarehouseShipment = () => {
       shipmentInputRef.current?.focus();
     } catch (error) {
       toast.dismiss(loadingToast);
-      console.error("Error creating shipment:", error);
 
       const errorMessage =
         error.response?.data?.error ||
         error.response?.data?.message ||
         error.response?.data?.detail ||
         error.message ||
-        "Không thể tạo shipment";
+        "Không thể nhập kho";
 
       toast.error(errorMessage);
     } finally {
@@ -137,35 +133,28 @@ const WarehouseShipment = () => {
   };
 
   return (
-    <div className="min-h-[70vh]  py-6 px-3 sm:px-4 lg:px-6">
+    <div className="p-6 min-h-screen">
       <div className="max-w-4xl mx-auto">
-        {/* Card tổng */}
-        <div className="bg-white rounded-2xl shadow-md border border-blue-100">
-          {/* Header */}
-          <div className="flex items-center gap-3 px-5 py-4 border-b border-blue-50">
-            <div className="p-2.5 bg-blue-100 rounded-full">
-              <Box className="w-5 h-5 text-blue-600" />
+        {/* Header */}
+        <div className="bg-blue-600 rounded-xl shadow-sm p-5 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+              <Package size={22} className="text-white" />
             </div>
             <div>
-              <h1 className="text-lg sm:text-xl font-semibold text-slate-900 leading-tight">
-                Nhập kho & cân ký --------- ( Có thể dùng phím Enter nhập nhanh)
+              <h1 className="text-xl font-semibold text-white">
+                Nhập Kho & Cân Ký
               </h1>
-              {/* <p className="mt-0.5 text-xl text-black flex items-center gap-1.5">
-                <AlertCircle className="w-4 h-4 text-amber-500" />
-                Nhấn <span className="font-semibold">Enter</span> để submit
-                nhanh.
-              </p> */}
             </div>
           </div>
+        </div>
 
-          {/* Form */}
-          <form
-            onSubmit={handleSubmit}
-            className="px-5 py-5 sm:px-6 sm:py-6 space-y-6"
-          >
-            {/* Shipment ID */}
-            <div className="space-y-1.5">
-              <label className="block text-xl font-semibold text-slate-700 flex items-center gap-1.5">
+        {/* Form Card */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Mã vận đơn */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Mã vận đơn <span className="text-red-500">*</span>
               </label>
               <input
@@ -175,24 +164,23 @@ const WarehouseShipment = () => {
                 onChange={(e) => setShipmentId(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ví dụ: SPX123456678"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-xl"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 disabled={loading}
                 autoFocus
               />
             </div>
 
-            {/* 2 cột: Kích thước & Trọng lượng + Ảnh */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
               {/* Kích thước & trọng lượng */}
               <div className="lg:col-span-2 space-y-4">
                 {/* Kích thước */}
                 <div>
-                  <label className="block text-xl font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Kích thước (cm)
                   </label>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-2xs font-medium text-black-600 mb-1">
+                      <label className="block text-xs text-gray-600 mb-1">
                         Dài <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -201,14 +189,14 @@ const WarehouseShipment = () => {
                         value={formData.length}
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-xs"
-                        placeholder="00"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        placeholder="0"
                         disabled={loading}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-2xs font-medium text-black-600 mb-1">
+                      <label className="block text-xs text-gray-600 mb-1">
                         Rộng <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -217,14 +205,14 @@ const WarehouseShipment = () => {
                         value={formData.width}
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-xs"
-                        placeholder="00"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        placeholder="0"
                         disabled={loading}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-2xs font-medium text-black-600 mb-1">
+                      <label className="block text-xs text-gray-600 mb-1">
                         Cao <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -233,8 +221,8 @@ const WarehouseShipment = () => {
                         value={formData.height}
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-xs"
-                        placeholder="00"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        placeholder="0"
                         disabled={loading}
                       />
                     </div>
@@ -243,54 +231,55 @@ const WarehouseShipment = () => {
 
                 {/* Trọng lượng */}
                 <div>
-                  <label className="block text-xl font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Trọng lượng (kg)
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-2xs font-medium text--600 mb-1">
-                        Tổng trọng lượng <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="weight"
-                        value={formData.weight}
-                        onChange={handleInputChange}
-                        onKeyDown={handleKeyDown}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-xs"
-                        placeholder="00"
-                        disabled={loading}
-                      />
-                    </div>
+                  <div className="max-w-xs">
+                    <label className="block text-xs text-gray-600 mb-1">
+                      Tổng trọng lượng <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="weight"
+                      value={formData.weight}
+                      onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      placeholder="0"
+                      disabled={loading}
+                    />
                   </div>
                 </div>
               </div>
 
-              {/* Ảnh Shipment */}
-              <div className="space-y-2.5">
+              {/* Ảnh */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ảnh kiện hàng
+                </label>
                 <UploadImg
                   imageUrl={formData.image}
                   onImageUpload={handleImageUpload}
                   onImageRemove={handleImageRemove}
                   maxSizeMB={3}
-                  placeholder="Upload ảnh kiện hàng (tối đa 3MB)."
+                  placeholder="Tải ảnh (tối đa 3MB)"
                 />
               </div>
             </div>
 
             {/* Divider */}
-            <div className="h-px bg-slate-100" />
+            <div className="border-t border-gray-200"></div>
 
-            {/* Nút submit */}
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg text-sm font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:bg-blue-300 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-sm"
+              className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Đang tạo nhập kho...
+                  Đang nhập kho...
                 </>
               ) : (
                 <>Nhập kho</>

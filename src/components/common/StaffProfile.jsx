@@ -48,7 +48,7 @@ const StaffProfile = () => {
       try {
         const data = await profileService.getCurrentAccount();
         setProfile(data);
-      } catch (err) {
+      } catch {
         setError("Không thể tải dữ liệu hồ sơ.");
       } finally {
         setLoading(false);
@@ -196,13 +196,13 @@ const StaffProfile = () => {
 
   const StatusBadge = ({ status }) => {
     const statusColors = {
-      active: "bg-green-100 text-green-700 border-green-200",
+      HOAT_DONG: "bg-green-100 text-green-700 border-green-200",
       inactive: "bg-slate-100 text-slate-700 border-slate-200",
       pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
     };
 
     const statusText = {
-      active: "Hoạt động",
+      HOAT_DONG: "Hoạt động",
       inactive: "Không hoạt động",
       pending: "Chờ xử lý",
     };
@@ -210,10 +210,10 @@ const StaffProfile = () => {
     return (
       <span
         className={`px-3 py-1 rounded-full text-sm font-medium border ${
-          statusColors[status?.toLowerCase()] || statusColors.inactive
+          statusColors[status] || statusColors.inactive
         }`}
       >
-        {statusText[status?.toLowerCase()] || status}
+        {statusText[status] || status}
       </span>
     );
   };
@@ -242,7 +242,7 @@ const StaffProfile = () => {
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Header Card */}
-        <div className="bg-gradient-to-r from-sky-600 to-sky-700 rounded-2xl shadow-xl p-8 mb-6 text-white">
+        <div className="bg-gradient-to-r from-sky-600 to-sky-600 rounded-2xl shadow-xl p-8 mb-6 text-white">
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-4 border-white/30 shadow-lg">
               <span className="text-3xl font-bold text-white">
