@@ -368,8 +368,11 @@ const CustomerStaffList = () => {
                         <div className="flex items-start gap-1 text-sm text-gray-900 max-w-xs">
                           <MapPin className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
                           <span className="line-clamp-2">
-                            {customer.address || "-"}
-                          </span>
+                    {customer.addresses?.length > 0
+                      ? customer.addresses.map(a => a.addressName).join(", ")
+                      : "-"
+                    }
+                  </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

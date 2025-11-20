@@ -67,6 +67,8 @@ const CustomerList = () => {
     fetchCustomerAccounts(0, pageSize);
   }, [fetchCustomerAccounts, pageSize]);
 
+  
+
   // Filter logic (client-side on current page data)
   const filteredCustomers = useMemo(() => {
     let filtered = [...customerList];
@@ -81,7 +83,9 @@ const CustomerList = () => {
           customer.email?.toLowerCase().includes(search) ||
           customer.phone?.includes(search) ||
           customer.customerCode?.toLowerCase().includes(search) ||
-          customer.address?.toLowerCase().includes(search)
+         customer.addresses?.some(a =>
+      a.addressName.toLowerCase().includes(search)
+)
       );
     }
 
@@ -342,6 +346,7 @@ const CustomerList = () => {
                   ))
                 : // Data rows
                   filteredCustomers.map((customer) => (
+                   
                     <tr
                       key={customer.accountId}
                       className="hover:bg-gray-50 transition-colors"
@@ -383,9 +388,9 @@ const CustomerList = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-start gap-1 text-sm text-gray-900 max-w-xs">
                           <MapPin className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
-                          <span className="line-clamp-2">
-                            {customer.address || "-"}
-                          </span>
+                         <span className="line-clamp-2">
+                   Bad Trip
+                  </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
