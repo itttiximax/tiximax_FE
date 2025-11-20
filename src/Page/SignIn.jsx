@@ -70,7 +70,7 @@ const SignIn = () => {
       navigate(route, { replace: true });
     } catch (error) {
       console.error("Login error:", error);
-      if (error.response?.status === 401) {
+      if (error.response?.status === "403") {
         toast.error("Tên đăng nhập hoặc mật khẩu không đúng!");
       } else if (error.response?.status === 404) {
         toast.error("Tài khoản không tồn tại!");

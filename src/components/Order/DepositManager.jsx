@@ -179,6 +179,7 @@ const DepositManager = ({
         differentFee: "",
         extraCharge: "",
         purchaseImage: "",
+        shipmentCode: "",
         productTypeId: "",
         note: "",
       },
@@ -356,7 +357,20 @@ const DepositManager = ({
                       />
                     </div>
                   </div>
-
+                  <div className="col-span-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Mã vận đơn
+                  </label>
+                  <input
+                    type="text"
+                    name="shipmentCode"
+                    value={product.shipmentCode || ""}
+                    onChange={(e) => handleProductChange(index, e)}
+                    className="w-full px-4 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    disabled={!isFormEnabled}
+                    placeholder="Nhập mã vận đơn..."
+                  />
+                </div>
                   {/* Loại sản phẩm, Phụ phí, Phí khác */}
                   <div className="grid grid-cols-12 gap-4">
                     <div className="col-span-6">
