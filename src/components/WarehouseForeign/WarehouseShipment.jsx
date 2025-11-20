@@ -55,7 +55,7 @@ const WarehouseShipment = () => {
     if (e) e.preventDefault();
 
     if (!shipmentId || !shipmentId.trim()) {
-      toast.error("Vui lòng nhập Mã vận đơn");
+      toast.error("Please enter a tracking number.");
       return;
     }
 
@@ -65,7 +65,7 @@ const WarehouseShipment = () => {
       !formData.height ||
       !formData.weight
     ) {
-      toast.error("Vui lòng điền đầy đủ thông tin kích thước và trọng lượng");
+      toast.error("Please fill in all dimension and weight fields.");
       return;
     }
 
@@ -75,12 +75,12 @@ const WarehouseShipment = () => {
       Number(formData.height) <= 0 ||
       Number(formData.weight) <= 0
     ) {
-      toast.error("Kích thước và trọng lượng phải lớn hơn 0");
+      toast.error("Length, width, height and weight must be greater than 0.");
       return;
     }
 
     setLoading(true);
-    const loadingToast = toast.loading("Đang nhập kho...");
+    const loadingToast = toast.loading("Checking in shipment...");
 
     try {
       const shipmentData = {
@@ -96,7 +96,7 @@ const WarehouseShipment = () => {
       toast.dismiss(loadingToast);
 
       const successMessage =
-        result?.message || result?.data?.message || "Nhập kho thành công!";
+        result?.message || result?.data?.message || "Check-in successful!";
 
       toast.success(successMessage);
 
@@ -117,7 +117,7 @@ const WarehouseShipment = () => {
         error.response?.data?.message ||
         error.response?.data?.detail ||
         error.message ||
-        "Không thể nhập kho";
+        "Cannot check in shipment.";
 
       toast.error(errorMessage);
     } finally {
@@ -143,7 +143,7 @@ const WarehouseShipment = () => {
             </div>
             <div>
               <h1 className="text-xl font-semibold text-white">
-                Nhập Kho & Cân Ký
+                Warehouse Import & Weighing
               </h1>
             </div>
           </div>
@@ -151,11 +151,19 @@ const WarehouseShipment = () => {
 
         {/* Form Card */}
         <div className="bg-white border border-gray-200 rounded-xl p-5">
+          {/* Section title giống style CreatePacking */}
+          {/* <div className="flex items-center gap-2 mb-6">
+            <Package className="w-6 h-6 text-gray-700" />
+            <h2 className="text-2xl font-semibold text-gray-800">
+              Shipment Details
+            </h2>
+          </div> */}
+
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Mã vận đơn */}
+            {/* Tracking number */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Mã vận đơn <span className="text-red-500">*</span>
+              <label className="block text-xl font-medium text-gray-700 mb-1">
+                Tracking number <span className="text-red-500">*</span>
               </label>
               <input
                 ref={shipmentInputRef}
@@ -163,7 +171,7 @@ const WarehouseShipment = () => {
                 value={shipmentId}
                 onChange={(e) => setShipmentId(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ví dụ: SPX123456678"
+                placeholder="Example: SPX123456678"
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 disabled={loading}
                 autoFocus
@@ -171,17 +179,17 @@ const WarehouseShipment = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              {/* Kích thước & trọng lượng */}
+              {/* Dimensions & weight */}
               <div className="lg:col-span-2 space-y-4">
-                {/* Kích thước */}
+                {/* Dimensions */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Kích thước (cm)
+                  <label className="block text-xl font-medium text-gray-700 mb-2">
+                    Dimensions (cm)
                   </label>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">
-                        Dài <span className="text-red-500">*</span>
+                      <label className="block text-xl text-black-600 mb-1">
+                        Length <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -196,8 +204,8 @@ const WarehouseShipment = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">
-                        Rộng <span className="text-red-500">*</span>
+                      <label className="block text-xl text-black-600 mb-1">
+                        Width <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -212,8 +220,8 @@ const WarehouseShipment = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">
-                        Cao <span className="text-red-500">*</span>
+                      <label className="block text-xl text-black-600 mb-1">
+                        Height <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -229,14 +237,14 @@ const WarehouseShipment = () => {
                   </div>
                 </div>
 
-                {/* Trọng lượng */}
+                {/* Weight */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Trọng lượng (kg)
+                  <label className="block text-xl font-medium text-gray-700 mb-2">
+                    Weight (kg)
                   </label>
                   <div className="max-w-xs">
-                    <label className="block text-xs text-gray-600 mb-1">
-                      Tổng trọng lượng <span className="text-red-500">*</span>
+                    <label className="block text-xl text-black-600 mb-1">
+                      Total weight <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -252,17 +260,14 @@ const WarehouseShipment = () => {
                 </div>
               </div>
 
-              {/* Ảnh */}
+              {/* Image */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ảnh kiện hàng
-                </label>
                 <UploadImg
                   imageUrl={formData.image}
                   onImageUpload={handleImageUpload}
                   onImageRemove={handleImageRemove}
                   maxSizeMB={3}
-                  placeholder="Tải ảnh (tối đa 3MB)"
+                  placeholder="Upload image (max 3MB)"
                 />
               </div>
             </div>
@@ -279,10 +284,10 @@ const WarehouseShipment = () => {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Đang nhập kho...
+                  Loading in...
                 </>
               ) : (
-                <>Nhập kho</>
+                <>Create</>
               )}
             </button>
           </form>

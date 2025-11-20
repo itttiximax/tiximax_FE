@@ -41,7 +41,7 @@ const WarehouseList = () => {
       setWarehouses(data?.content || []);
       setTotalPages(data?.totalPages || 0);
     } catch (e) {
-      const errorMsg = e.response?.data?.message || "Có lỗi khi tải dữ liệu!";
+      const errorMsg = e.response?.data?.message || "Error loading data!";
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {
@@ -70,7 +70,7 @@ const WarehouseList = () => {
     if (!dateString) return "-";
     const d = new Date(dateString);
     if (Number.isNaN(d.getTime())) return "-";
-    return d.toLocaleString("vi-VN", {
+    return d.toLocaleString("en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -120,8 +120,8 @@ const WarehouseList = () => {
   };
 
   return (
-    <div className="p-6  min-h-screen">
-      <div className=" mx-auto">
+    <div className="p-6 min-h-screen">
+      <div className="mx-auto">
         {/* Header */}
         <div className="bg-blue-600 rounded-xl shadow-sm p-5 mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -129,7 +129,7 @@ const WarehouseList = () => {
               <Warehouse size={22} className="text-white" />
             </div>
             <h1 className="text-xl font-semibold text-white">
-              Quản Lý Kho Hàng
+              Warehouse Management
             </h1>
           </div>
         </div>
@@ -151,7 +151,7 @@ const WarehouseList = () => {
               />
               <input
                 type="text"
-                placeholder="Tìm kiếm theo mã vận đơn hoặc mã đơn hàng..."
+                placeholder="Search by tracking code or order code..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
@@ -177,11 +177,11 @@ const WarehouseList = () => {
               disabled={loading}
               className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
-              <option value={10}>10 / trang</option>
-              <option value={20}>20 / trang</option>
-              <option value={30}>30 / trang</option>
-              <option value={50}>50 / trang</option>
-              <option value={100}>100 / trang</option>
+              <option value={10}>10 / page</option>
+              <option value={20}>20 / page</option>
+              <option value={30}>30 / page</option>
+              <option value={50}>50 / page</option>
+              <option value={100}>100 / page</option>
             </select>
 
             {(searchTerm || filterDate) && (
@@ -189,7 +189,7 @@ const WarehouseList = () => {
                 onClick={clearFilters}
                 className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Xóa bộ lọc
+                Clear filters
               </button>
             )}
           </div>
@@ -202,9 +202,7 @@ const WarehouseList = () => {
               size={32}
               className="animate-spin text-blue-600 mx-auto mb-3"
             />
-            <p className="text-gray-700 text-sm font-medium">
-              Đang tải dữ liệu...
-            </p>
+            <p className="text-gray-700 text-sm font-medium">Loading data...</p>
           </div>
         )}
 
@@ -213,19 +211,19 @@ const WarehouseList = () => {
           <div className="bg-white border border-gray-200 rounded-xl p-10 text-center">
             <Warehouse size={40} className="text-gray-300 mx-auto mb-3" />
             <h3 className="text-base font-semibold text-gray-800 mb-1">
-              Không có dữ liệu
+              No data
             </h3>
             <p className="text-gray-500 text-sm">
               {searchTerm || filterDate
-                ? "Không tìm thấy kết quả phù hợp."
-                : "Chưa có hàng hóa nào trong kho."}
+                ? "No matching results."
+                : "There are no items in the warehouse yet."}
             </p>
             {(searchTerm || filterDate) && (
               <button
                 onClick={clearFilters}
                 className="mt-3 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Xóa bộ lọc
+                Clear filters
               </button>
             )}
           </div>
@@ -237,10 +235,10 @@ const WarehouseList = () => {
             <div className="px-6 py-3 bg-blue-200 border-b border-blue-100">
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium text-black-900">
-                  Tổng: {filteredWarehouses.length} mặt hàng
+                  Total: {filteredWarehouses.length} items
                 </span>
                 <span className="text-blue-700">
-                  Trang {currentPage + 1} / {totalPages}
+                  Page {currentPage + 1} / {totalPages}
                 </span>
               </div>
             </div>
@@ -250,28 +248,28 @@ const WarehouseList = () => {
                 <thead className="bg-blue-50">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      STT
+                      No.
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Mã Vận Đơn
+                      Tracking Code
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Mã Đơn Hàng
+                      Order Code
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Cân Nặng
+                      Weight
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      TL Thực
+                      Net Weight
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Kích Thước
+                      Dimension
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Ngày Tạo
+                      Created At
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Thao Tác
+                      Actions
                     </th>
                   </tr>
                 </thead>
@@ -306,7 +304,7 @@ const WarehouseList = () => {
                           className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
                         >
                           <Eye size={14} />
-                          Xem
+                          View
                         </button>
                       </td>
                     </tr>
@@ -328,11 +326,11 @@ const WarehouseList = () => {
                   }`}
                 >
                   <ChevronLeft size={18} />
-                  Trước
+                  Previous
                 </button>
 
                 <div className="font-medium text-gray-700">
-                  Trang {currentPage + 1} / {totalPages}
+                  Page {currentPage + 1} / {totalPages}
                 </div>
 
                 <button
@@ -344,7 +342,7 @@ const WarehouseList = () => {
                       : "text-gray-700 hover:bg-blue-50"
                   }`}
                 >
-                  Sau
+                  Next
                   <ChevronRight size={18} />
                 </button>
               </div>

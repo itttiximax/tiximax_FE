@@ -30,7 +30,7 @@ const StatusBadge = ({ status, count }) => {
       <div className="inline-flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 border border-red-100">
         <div className="h-2 w-2 rounded-full bg-red-500" />
         <span className="text-sm font-medium text-red-700">
-          {count} đơn chưa có mã
+          {count} orders without shipment code
         </span>
       </div>
     );
@@ -40,7 +40,7 @@ const StatusBadge = ({ status, count }) => {
       <div className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 border border-emerald-100">
         <div className="h-2 w-2 rounded-full bg-emerald-500" />
         <span className="text-sm font-medium text-emerald-700">
-          {count} đơn đã có mã
+          {count} orders with shipment code
         </span>
       </div>
     );
@@ -107,7 +107,7 @@ const UpdateShipmentCodeList = () => {
           e?.response?.data?.message ||
           e?.response?.data?.error ||
           e?.message ||
-          "Lỗi tải dữ liệu";
+          "Failed to load data.";
         setErr(msg);
       } finally {
         setLoading(false);
@@ -134,11 +134,10 @@ const UpdateShipmentCodeList = () => {
     );
   };
 
-  // Helper function để lấy status từ links
+  // Get purchase status from links (assume same status for all links)
   const getPurchaseStatus = (p) => {
     const links = Array.isArray(p.pendingLinks) ? p.pendingLinks : [];
     if (links.length === 0) return null;
-    // Lấy status từ link đầu tiên (giả sử tất cả links có cùng status)
     return links[0]?.status || null;
   };
 
@@ -180,9 +179,9 @@ const UpdateShipmentCodeList = () => {
   const copy = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success("Đã copy tracking", { position: "top-right" });
+      toast.success("Tracking copied.", { position: "top-right" });
     } catch {
-      toast.error("Copy không thành công", { position: "top-right" });
+      toast.error("Copy failed.", { position: "top-right" });
     }
   };
 
@@ -212,113 +211,112 @@ const UpdateShipmentCodeList = () => {
 
   const purchaseStatusLabel = (status) => {
     const labels = {
-      DA_MUA: "Đã mua",
-      DAU_GIA_THANH_CONG: "Đấu giá thành công",
+      DA_MUA: "Purchased",
+      DAU_GIA_THANH_CONG: "Auction won",
     };
     return labels[status] || status;
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto px-6 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
-              <Barcode className="h-5 w-5 text-white" />
+    <div className="min-h-screen p-6">
+      <div className=" mx-auto">
+        {/* Header - unified blue bar */}
+        <div className="bg-blue-600 rounded-xl shadow-sm p-5 mb-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/20">
+                <Barcode className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-white">
+                  Shipment Code Management
+                </h1>
+              </div>
             </div>
-            <h1 className="text-2xl font-semibold text-slate-900">
-              Quản lý mã vận đơn
-            </h1>
+            <button
+              onClick={() => fetchData(page, size)}
+              disabled={loading}
+              className="rounded-lg border border-white/30 bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 disabled:opacity-60 flex items-center gap-2"
+              title="Refresh"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </button>
           </div>
+        </div>
 
-          {/* Search & Filter Section */}
-          <div className="space-y-4">
-            <div className="flex flex-col gap-3 lg:flex-row">
-              {/* Search */}
-              <div className="relative flex-1">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-                <input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="Tìm kiếm theo mã đơn, nhân viên, tracking..."
-                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-                {q && (
-                  <button
-                    onClick={() => setQ("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-
-              {/* Filters */}
-              <div className="flex items-center gap-3">
-                {/* Purchase Status Filter */}
-                <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5">
-                  <Filter className="h-4 w-4 text-slate-500" />
-                  <select
-                    value={purchaseStatusFilter}
-                    onChange={(e) => setPurchaseStatusFilter(e.target.value)}
-                    className="border-none bg-transparent text-sm font-medium text-slate-700 focus:outline-none"
-                  >
-                    <option value="all">Tất cả trạng thái</option>
-                    <option value="DA_MUA">Đã mua</option>
-                    <option value="DAU_GIA_THANH_CONG">
-                      Đấu giá thành công
-                    </option>
-                  </select>
-                </div>
-
-                {/* Shipment Status Filter */}
-                <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5">
-                  <Package className="h-4 w-4 text-slate-500" />
-                  <select
-                    value={shipmentStatusFilter}
-                    onChange={(e) => setShipmentStatusFilter(e.target.value)}
-                    className="border-none bg-transparent text-sm font-medium text-slate-700 focus:outline-none"
-                  >
-                    <option value="all">Tất cả</option>
-                    <option value="missing">Chưa có mã</option>
-                    <option value="has">Đã có mã</option>
-                  </select>
-                </div>
-
+        {/* Search & Filter Section */}
+        <div className="mb-8 space-y-4">
+          <div className="flex flex-col gap-3 lg:flex-row">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search by order code, staff, product, tracking..."
+                className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              {q && (
                 <button
-                  onClick={() => fetchData(page, size)}
-                  disabled={loading}
-                  className="rounded-lg border border-slate-200 bg-white p-2.5 text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-                  title="Làm mới"
+                  onClick={() => setQ("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
                 >
-                  <RefreshCw
-                    className={`h-5 w-5 ${loading ? "animate-spin" : ""}`}
-                  />
+                  <X className="h-4 w-4" />
                 </button>
-              </div>
-            </div>
-
-            {/* Status Info */}
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <div className="flex items-center gap-3">
-                {missingCountOnPage > 0 && (
-                  <StatusBadge status="missing" count={missingCountOnPage} />
-                )}
-                {completedCountOnPage > 0 && (
-                  <StatusBadge
-                    status="completed"
-                    count={completedCountOnPage}
-                  />
-                )}
-              </div>
-              {debouncedQ && (
-                <div className="text-sm text-slate-600">
-                  Tìm thấy <span className="font-medium">{items.length}</span>{" "}
-                  kết quả
-                </div>
               )}
             </div>
+
+            {/* Filters */}
+            <div className="flex items-center gap-3">
+              {/* Purchase Status Filter */}
+              <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5">
+                <Filter className="h-4 w-4 text-slate-500" />
+                <select
+                  value={purchaseStatusFilter}
+                  onChange={(e) => setPurchaseStatusFilter(e.target.value)}
+                  className="border-none bg-transparent text-sm font-medium text-slate-700 focus:outline-none"
+                >
+                  <option value="all">All purchase status</option>
+                  <option value="DA_MUA">Purchased</option>
+                  <option value="DAU_GIA_THANH_CONG">Auction won</option>
+                </select>
+              </div>
+
+              {/* Shipment Status Filter */}
+              <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5">
+                <Package className="h-4 w-4 text-slate-500" />
+                <select
+                  value={shipmentStatusFilter}
+                  onChange={(e) => setShipmentStatusFilter(e.target.value)}
+                  className="border-none bg-transparent text-sm font-medium text-slate-700 focus:outline-none"
+                >
+                  <option value="all">All shipment status</option>
+                  <option value="missing">Missing shipment code</option>
+                  <option value="has">Has shipment code</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Status Info */}
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              {missingCountOnPage > 0 && (
+                <StatusBadge status="missing" count={missingCountOnPage} />
+              )}
+              {completedCountOnPage > 0 && (
+                <StatusBadge status="completed" count={completedCountOnPage} />
+              )}
+            </div>
+            {debouncedQ && (
+              <div className="text-sm text-slate-600">
+                Found <span className="font-medium">{items.length}</span>{" "}
+                result(s)
+              </div>
+            )}
           </div>
         </div>
 
@@ -343,10 +341,10 @@ const UpdateShipmentCodeList = () => {
               <Search className="h-6 w-6 text-slate-400" />
             </div>
             <h3 className="mb-2 text-base font-medium text-slate-900">
-              Không tìm thấy kết quả
+              No results found
             </h3>
             <p className="mb-4 text-sm text-slate-600">
-              Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm
+              Try adjusting your filters or search keyword.
             </p>
             <button
               onClick={() => {
@@ -357,7 +355,7 @@ const UpdateShipmentCodeList = () => {
               }}
               className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
             >
-              <RefreshCw className="h-4 w-4" /> Đặt lại bộ lọc
+              <RefreshCw className="h-4 w-4" /> Reset filters
             </button>
           </div>
         ) : (
@@ -428,7 +426,7 @@ const UpdateShipmentCodeList = () => {
                               className="inline-flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-700"
                             >
                               <Truck className="h-3.5 w-3.5" />
-                              Cập nhật vận chuyển
+                              Update shipping
                             </button>
                           ) : (
                             <button
@@ -436,7 +434,7 @@ const UpdateShipmentCodeList = () => {
                               className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
                             >
                               <Package className="h-3.5 w-3.5" />
-                              Nhập mã vận đơn
+                              Enter shipment codes
                             </button>
                           ))}
                       </div>
@@ -447,7 +445,7 @@ const UpdateShipmentCodeList = () => {
                       {links.length === 0 ? (
                         <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-slate-200 p-6 text-center">
                           <p className="text-sm text-slate-500">
-                            Không có link chờ xử lý
+                            No pending links.
                           </p>
                         </div>
                       ) : (
@@ -477,12 +475,12 @@ const UpdateShipmentCodeList = () => {
                                   <Globe className="h-3.5 w-3.5 text-slate-400" />
                                   <span>{l.website}</span>
                                   <span className="text-slate-400">-</span>
-                                  <span>SL: {l.quantity}</span>
+                                  <span>Qty: {l.quantity}</span>
                                 </div>
 
                                 {l.classify && (
                                   <div className="text-xs text-slate-600">
-                                    Phân loại: {l.classify}
+                                    Category: {l.classify}
                                   </div>
                                 )}
 
@@ -497,7 +495,7 @@ const UpdateShipmentCodeList = () => {
 
                                 <div className="flex items-start gap-1.5">
                                   <span className="text-slate-500">
-                                    Mã vận đơn:
+                                    Shipment code:
                                   </span>
                                   <span
                                     className={`flex-1 font-mono text-xs ${
@@ -506,7 +504,8 @@ const UpdateShipmentCodeList = () => {
                                         : "text-slate-400"
                                     }`}
                                   >
-                                    {l.shipmentCode?.trim() || "Chưa có"}
+                                    {l.shipmentCode?.trim() ||
+                                      "Not assigned yet"}
                                   </span>
                                 </div>
                               </div>
@@ -523,8 +522,8 @@ const UpdateShipmentCodeList = () => {
             {/* Pagination */}
             <div className="mt-6 flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3">
               <div className="text-sm text-slate-600">
-                Hiển thị <span className="font-medium">{items.length}</span> kết
-                quả
+                Showing <span className="font-medium">{items.length}</span>{" "}
+                result(s)
               </div>
 
               <div className="flex items-center gap-2">
@@ -532,7 +531,7 @@ const UpdateShipmentCodeList = () => {
                   onClick={() => setPage(0)}
                   disabled={!hasPrev || loading}
                   className="rounded-md p-1.5 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent"
-                  title="Trang đầu"
+                  title="First page"
                 >
                   <ChevronsLeft className="h-5 w-5" />
                 </button>
@@ -540,20 +539,20 @@ const UpdateShipmentCodeList = () => {
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={!hasPrev || loading}
                   className="rounded-md p-1.5 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent"
-                  title="Trang trước"
+                  title="Previous page"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
 
                 <div className="mx-2 flex h-8 min-w-[80px] items-center justify-center rounded-md bg-slate-50 px-3 text-sm font-medium text-slate-700">
-                  Trang {page + 1}
+                  Page {page + 1}
                 </div>
 
                 <button
                   onClick={() => setPage((p) => p + 1)}
                   disabled={!hasNext || loading}
                   className="rounded-md p-1.5 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent"
-                  title="Trang sau"
+                  title="Next page"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>
@@ -563,7 +562,7 @@ const UpdateShipmentCodeList = () => {
                   }}
                   disabled={!hasNext || !data?.totalPages}
                   className="rounded-md p-1.5 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent"
-                  title="Trang cuối"
+                  title="Last page"
                 >
                   <ChevronsRight className="h-5 w-5" />
                 </button>
@@ -574,9 +573,9 @@ const UpdateShipmentCodeList = () => {
                     onChange={(e) => setSize(Number(e.target.value))}
                     className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
-                    <option value={10}>10 / trang</option>
-                    <option value={20}>20 / trang</option>
-                    <option value={50}>50 / trang</option>
+                    <option value={10}>10 / page</option>
+                    <option value={20}>20 / page</option>
+                    <option value={50}>50 / page</option>
                   </select>
                 </div>
               </div>

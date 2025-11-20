@@ -39,7 +39,7 @@ const PackingAwaitList = () => {
         setOrders(response.content || []);
         setSelectedPackings([]);
       } catch (err) {
-        setError(err.message || "Failed to fetch awaiting-flight orders");
+        setError(err.message || "Failed to load shipments waiting for flight.");
       } finally {
         setLoading(false);
       }
@@ -49,7 +49,10 @@ const PackingAwaitList = () => {
   }, [page, limit]);
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString("vi-VN", {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return "-";
+    return date.toLocaleDateString("en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -88,7 +91,7 @@ const PackingAwaitList = () => {
 
   const handleAssignFlight = async () => {
     if (!flightCode.trim()) {
-      setAssignError("Vui lòng nhập mã chuyến bay");
+      setAssignError("Please enter a flight code.");
       return;
     }
 
@@ -99,7 +102,7 @@ const PackingAwaitList = () => {
     try {
       await packingsService.assignFlight(selectedPackings, flightCode);
       setAssignSuccess(
-        `Đã gán thành công ${selectedPackings.length} kiện hàng vào chuyến bay ${flightCode}`
+        `Successfully assigned ${selectedPackings.length} packages to flight ${flightCode}.`
       );
 
       const response = await packingsService.getAwaitingFlightOrders(
@@ -113,8 +116,8 @@ const PackingAwaitList = () => {
     } catch (err) {
       setAssignError(
         err.response?.status === 405
-          ? "Method Not Allowed: Check if the API supports PUT"
-          : err.message || "Failed to assign flights"
+          ? "Method Not Allowed: Please check if the API supports this method."
+          : err.message || "Failed to assign flight."
       );
     } finally {
       setAssignLoading(false);
@@ -122,9 +125,11 @@ const PackingAwaitList = () => {
   };
 
   const filteredOrders = orders.filter((order) => {
+    const term = searchTerm.toLowerCase();
+
     const matchesSearch =
-      order.packingCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.packingId.toLowerCase().includes(searchTerm.toLowerCase());
+      order.packingCode.toLowerCase().includes(term) ||
+      order.packingId.toLowerCase?.().includes(term); // assume string from API
 
     const matchesDate =
       !filterDate ||
@@ -135,18 +140,23 @@ const PackingAwaitList = () => {
   });
 
   return (
-    <div className="min-h-screen p-3">
+    <div className="min-h-screen p-6">
       <div className="mx-auto">
-        {/* ✅ COMPACT HEADER */}
-        <div className="mb-3">
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-xl font-bold text-blue-600">
-              Đơn Hàng Chờ Chuyến Bay
-            </h1>
+        {/* Header */}
+        <div className="bg-blue-600 rounded-xl shadow-sm p-5 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+              <Plane size={22} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold text-white">
+                Packages Waiting for Flight
+              </h1>
+            </div>
           </div>
         </div>
 
-        {/* Success/Error Messages */}
+        {/* Success/Error Messages (Assign Flight) */}
         {assignSuccess && (
           <div className="mb-3 p-2.5 bg-green-50 border-l-4 border-green-400 rounded-r-lg">
             <div className="flex items-center">
@@ -165,21 +175,23 @@ const PackingAwaitList = () => {
           </div>
         )}
 
-        {/* ✅ COMPACT CONTROLS */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-3">
+        {/* Controls */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
           <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-3 flex-1">
+              {/* Search */}
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Tìm mã kiện hàng..."
+                  placeholder="Search packing code..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
+              {/* Date Filter */}
               <div className="relative">
                 <Calendar className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
@@ -190,21 +202,22 @@ const PackingAwaitList = () => {
                 />
               </div>
 
+              {/* Page Size */}
               <select
                 value={limit}
                 onChange={handlePageSizeChange}
                 disabled={loading}
                 className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-100"
               >
-                <option value={10}>10 / trang</option>
-                <option value={20}>20 / trang</option>
-                <option value={30}>30 / trang</option>
-                <option value={50}>50 / trang</option>
-                <option value={100}>100 / trang</option>
+                <option value={10}>10 / page</option>
+                <option value={20}>20 / page</option>
+                <option value={30}>30 / page</option>
+                <option value={50}>50 / page</option>
+                <option value={100}>100 / page</option>
               </select>
             </div>
 
-            {/* Action Button */}
+            {/* Assign Flight Button */}
             <button
               onClick={() => setShowModal(true)}
               disabled={selectedPackings.length === 0}
@@ -215,7 +228,7 @@ const PackingAwaitList = () => {
               }`}
             >
               <Plane className="w-4 h-4" />
-              Gán Chuyến ({selectedPackings.length})
+              Assign Flight ({selectedPackings.length})
             </button>
           </div>
         </div>
@@ -225,17 +238,17 @@ const PackingAwaitList = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
             <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-blue-600">
               <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" />
-              Đang tải dữ liệu...
+              Loading data...
             </div>
           </div>
         )}
 
-        {/* Error State */}
+        {/* Error State (Fetch) */}
         {error && (
           <div className="bg-white rounded-xl shadow-sm border border-red-200 p-8 text-center">
             <X className="w-12 h-12 text-red-400 mx-auto mb-3" />
             <h3 className="text-base font-medium text-gray-900 mb-2">
-              Có lỗi xảy ra
+              An error occurred
             </h3>
             <p className="text-red-600 text-sm">{error}</p>
           </div>
@@ -246,17 +259,17 @@ const PackingAwaitList = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
             <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <h3 className="text-base font-medium text-gray-900 mb-2">
-              Không có đơn hàng nào
+              No packages found
             </h3>
             <p className="text-gray-500 text-sm">
               {searchTerm || filterDate
-                ? "Không tìm thấy kết quả phù hợp."
-                : "Hiện tại không có kiện hàng nào chờ gán chuyến bay."}
+                ? "No matching results."
+                : "There are currently no packages waiting for flight assignment."}
             </p>
           </div>
         )}
 
-        {/* ✅ TABLE LAYOUT - COMPACT & SHOW MORE */}
+        {/* Table */}
         {filteredOrders.length > 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {/* Table Header */}
@@ -273,16 +286,16 @@ const PackingAwaitList = () => {
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                   <span className="font-medium text-gray-700">
-                    Chọn tất cả ({filteredOrders.length})
+                    Select all ({filteredOrders.length})
                   </span>
                 </label>
                 <span className="text-gray-500">
-                  Đã chọn: {selectedPackings.length} kiện
+                  Selected: {selectedPackings.length} packages
                 </span>
               </div>
             </div>
 
-            {/* ✅ TABLE */}
+            {/* Table Body */}
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -293,20 +306,20 @@ const PackingAwaitList = () => {
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       <div className="flex items-center gap-1">
                         <Package className="w-3 h-3" />
-                        Mã Kiện Hàng
+                        Packing Code
                       </div>
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Danh Sách Hàng Hóa
+                      Package List
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
-                        Ngày Đóng Gói
+                        Packing Date
                       </div>
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Trạng Thái
+                      Status
                     </th>
                   </tr>
                 </thead>
@@ -336,6 +349,7 @@ const PackingAwaitList = () => {
                           {order.packingCode}
                         </span>
                       </td>
+
                       {/* Packing List */}
                       <td className="px-3 py-2.5">
                         <div className="flex flex-wrap gap-1 max-w-md">
@@ -343,9 +357,9 @@ const PackingAwaitList = () => {
                             <>
                               {order.packingList
                                 .slice(0, 2)
-                                .map((item, index) => (
+                                .map((item, idx) => (
                                   <span
-                                    key={index}
+                                    key={idx}
                                     className="inline-block px-1.5 py-0.5 bg-gray-100 text-gray-700 text-xs rounded"
                                   >
                                     {item}
@@ -380,7 +394,7 @@ const PackingAwaitList = () => {
                         ) : (
                           <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
                             <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                            Chờ chuyến bay
+                            Waiting for flight
                           </span>
                         )}
                       </td>
@@ -392,7 +406,7 @@ const PackingAwaitList = () => {
           </div>
         )}
 
-        {/* ✅ COMPACT PAGINATION */}
+        {/* Pagination */}
         {filteredOrders.length > 0 && (
           <div className="flex items-center justify-between mt-3 bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-2.5">
             <button
@@ -405,11 +419,11 @@ const PackingAwaitList = () => {
               }`}
             >
               <ChevronLeft className="w-4 h-4" />
-              Trước
+              Previous
             </button>
 
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-gray-500">Trang</span>
+              <span className="text-xs text-gray-500">Page</span>
               <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold">
                 {page + 1}
               </span>
@@ -424,13 +438,13 @@ const PackingAwaitList = () => {
                   : "text-gray-700 hover:bg-gray-100"
               }`}
             >
-              Sau
+              Next
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         )}
 
-        {/* ✅ COMPACT MODAL */}
+        {/* Assign Flight Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
@@ -440,27 +454,27 @@ const PackingAwaitList = () => {
                     <Plane className="w-5 h-5 text-blue-600" />
                   </div>
                   <h3 className="text-lg font-bold text-gray-900">
-                    Gán Chuyến Bay
+                    Assign Flight
                   </h3>
                 </div>
 
                 <div className="mb-5">
                   <p className="text-gray-600 text-sm mb-3">
-                    Gán chuyến bay cho{" "}
+                    Assign a flight to{" "}
                     <span className="font-semibold text-blue-600">
                       {selectedPackings.length}
                     </span>{" "}
-                    kiện hàng được chọn.
+                    selected packages.
                   </p>
 
                   <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                    Mã chuyến bay <span className="text-red-500">*</span>
+                    Flight code <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={flightCode}
                     onChange={(e) => setFlightCode(e.target.value)}
-                    placeholder="VD: FL123, VN456"
+                    placeholder="E.g.: FL123, VN456"
                     className="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     autoFocus
                   />
@@ -482,7 +496,7 @@ const PackingAwaitList = () => {
                     }}
                     className="flex-1 px-4 py-2.5 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 font-medium transition-colors"
                   >
-                    Hủy
+                    Cancel
                   </button>
                   <button
                     onClick={handleAssignFlight}
@@ -496,10 +510,10 @@ const PackingAwaitList = () => {
                     {assignLoading ? (
                       <span className="flex items-center justify-center gap-1.5">
                         <RefreshCw className="animate-spin h-3.5 w-3.5" />
-                        Đang xử lý...
+                        Processing...
                       </span>
                     ) : (
-                      "Xác nhận"
+                      "Confirm"
                     )}
                   </button>
                 </div>
