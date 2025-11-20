@@ -1,4 +1,3 @@
-// src/Components/Domestic/ExportOrder.jsx
 import React, { useState } from "react";
 import {
   Package,
@@ -27,7 +26,7 @@ const normalizeText = (value) => {
 const STATUS_CONFIG = {
   DA_GIAO: {
     label: "Đã giao",
-    className: "bg-green-100 text-green-800 border-green-200",
+    className: "bg-green-50 text-green-700 border-green-100",
     dot: "bg-green-500",
   },
 };
@@ -67,8 +66,9 @@ const ExportOrder = () => {
         toast.success(`Đã giao ${list.length} đơn cho khách ${code}`);
       }
     } catch (error) {
-      console.error(error);
-      toast.error("Lỗi khi giao hàng cho khách");
+      const errorMsg =
+        error.response?.data?.message || "Lỗi khi giao hàng cho khách";
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -80,23 +80,19 @@ const ExportOrder = () => {
     }
   };
 
-  // Callback khi chọn account từ dropdown
   const handleSelectAccount = (account) => {
     setSelectedCustomer(account);
     setCustomerCode(account.customerCode);
   };
 
-  // Callback khi thay đổi input (typing)
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setCustomerCode(value);
-    // Clear selected customer nếu user đang typing manually
     if (selectedCustomer && value !== selectedCustomer.customerCode) {
       setSelectedCustomer(null);
     }
   };
 
-  // Callback khi clear search
   const handleClearSearch = () => {
     setCustomerCode("");
     setSelectedCustomer(null);
@@ -108,33 +104,29 @@ const ExportOrder = () => {
     setOrders([]);
   };
 
-  // Tính tổng số mã vận đơn
   const totalShippingCodes = orders.reduce(
     (sum, order) => sum + (order.shippingList?.length || 0),
     0
   );
 
   return (
-    <div className="min-h-screen px-4 py-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
+    <div className="p-6  min-h-screen">
+      <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-600 shadow-lg shadow-emerald-500/30">
-              <PackageCheck className="h-6 w-6 text-white" />
+        <div className="bg-blue-600 rounded-xl shadow-sm p-5 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+              <PackageCheck size={22} className="text-white" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Xuất đơn giao hàng
-              </h1>
-            </div>
+            <h1 className="text-xl font-semibold text-white">
+              Xuất Đơn Giao Hàng
+            </h1>
           </div>
         </div>
 
         {/* Search Section */}
-        <div className="mb-6 rounded-xl bg-white border border-gray-200 shadow-sm p-6">
+        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-4">
           <div className="flex flex-col gap-4">
-            {/* Account Search với autocomplete */}
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Tìm kiếm khách hàng
@@ -163,12 +155,11 @@ const ExportOrder = () => {
               )}
             </div>
 
-            {/* Action Buttons */}
             <div className="flex gap-2">
               {orders.length > 0 && (
                 <button
                   onClick={handleReset}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   <XCircle className="h-4 w-4" />
                   Làm mới
@@ -178,7 +169,7 @@ const ExportOrder = () => {
               <button
                 onClick={handleTransfer}
                 disabled={loading || !customerCode.trim()}
-                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? (
                   <>
@@ -196,51 +187,51 @@ const ExportOrder = () => {
           </div>
         </div>
 
-        {/* Stats - Chỉ hiển thị khi có kết quả */}
+        {/* Stats */}
         {orders.length > 0 && (
-          <div className="mb-6 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-lg bg-white border border-gray-200 p-4 shadow-sm">
+          <div className="mb-4 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-lg bg-white border border-gray-200 p-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100">
-                  <Package className="h-5 w-5 text-emerald-600" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+                  <Package className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 font-medium">
                     Số đơn đã giao
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-semibold text-gray-900">
                     {orders.length}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-lg bg-white border border-gray-200 p-4 shadow-sm">
+            <div className="rounded-lg bg-white border border-gray-200 p-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
                   <Truck className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 font-medium">
                     Tổng mã vận đơn
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-semibold text-gray-900">
                     {totalShippingCodes}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-lg bg-white border border-gray-200 p-4 shadow-sm">
+            <div className="rounded-lg bg-white border border-gray-200 p-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
-                  <User className="h-5 w-5 text-purple-600" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+                  <User className="h-5 w-5 text-blue-600" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs text-gray-500 font-medium">
                     Khách hàng
                   </p>
-                  <p className="text-lg font-bold text-gray-900 truncate">
+                  <p className="text-lg font-semibold text-gray-900 truncate">
                     {selectedCustomer?.name || customerCode}
                   </p>
                   {selectedCustomer?.phone && (
@@ -260,20 +251,20 @@ const ExportOrder = () => {
             {orders.map((order, index) => {
               const statusCfg = STATUS_CONFIG[order.status] || {
                 label: order.status,
-                className: "bg-gray-100 text-gray-800 border-gray-200",
+                className: "bg-gray-50 text-gray-700 border-gray-100",
                 dot: "bg-gray-500",
               };
 
               return (
                 <div
                   key={order.domesticId}
-                  className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden"
+                  className="rounded-xl border border-gray-200 bg-white overflow-hidden"
                 >
                   {/* Header */}
-                  <div className="bg-gray-50 px-5 py-4 border-b border-gray-200">
+                  <div className="bg-blue-50 px-5 py-4 border-b border-gray-200">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold text-sm">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white font-semibold text-sm">
                           {index + 1}
                         </div>
                         <div>
@@ -315,10 +306,10 @@ const ExportOrder = () => {
                           Thông tin kho
                         </h4>
                         <div className="space-y-2">
-                          <div className="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-                            <MapPin className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                          <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+                            <MapPin className="h-4 w-4 text-gray-600 flex-shrink-0" />
                             <div>
-                              <p className="text-xs text-emerald-700 font-medium">
+                              <p className="text-xs text-gray-500 font-medium">
                                 Kho xuất
                               </p>
                               <p className="text-sm font-semibold text-gray-900">
@@ -328,10 +319,10 @@ const ExportOrder = () => {
                           </div>
 
                           {order.toLocationName && (
-                            <div className="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
-                              <MapPin className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                            <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+                              <MapPin className="h-4 w-4 text-gray-600 flex-shrink-0" />
                               <div>
-                                <p className="text-xs text-blue-700 font-medium">
+                                <p className="text-xs text-gray-500 font-medium">
                                   Kho nhập
                                 </p>
                                 <p className="text-sm font-semibold text-gray-900">
@@ -349,11 +340,11 @@ const ExportOrder = () => {
                           <User className="h-3.5 w-3.5" />
                           Địa chỉ giao hàng
                         </h4>
-                        <div className="rounded-lg border border-purple-200 bg-purple-50 p-3">
+                        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
                           <div className="flex items-start gap-3">
-                            <User className="h-4 w-4 text-purple-600 flex-shrink-0 mt-0.5" />
+                            <User className="h-4 w-4 text-gray-600 flex-shrink-0 mt-0.5" />
                             <div>
-                              <p className="text-xs text-purple-700 font-medium mb-1">
+                              <p className="text-xs text-gray-500 font-medium mb-1">
                                 Người nhận
                               </p>
                               <p className="text-sm font-semibold text-gray-900">
@@ -388,7 +379,7 @@ const ExportOrder = () => {
                               key={code}
                               className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-gray-300 hover:bg-gray-100 transition-colors"
                             >
-                              <span className="flex h-5 w-5 items-center justify-center rounded bg-gray-200 text-xs font-bold text-gray-700">
+                              <span className="flex h-5 w-5 items-center justify-center rounded bg-gray-200 text-xs font-semibold text-gray-700">
                                 {idx + 1}
                               </span>
                               <span className="flex-1 font-mono text-xs font-medium text-gray-900 truncate">
@@ -398,7 +389,7 @@ const ExportOrder = () => {
                           ))}
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
+                        <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-600">
                           <AlertCircle className="h-4 w-4 flex-shrink-0" />
                           <span>Không có mã vận đơn</span>
                         </div>
@@ -411,17 +402,15 @@ const ExportOrder = () => {
           </div>
         ) : (
           // Empty State
-          <div className="rounded-xl border-2 border-dashed border-gray-300 bg-white p-12 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-gray-100">
-              <Package className="h-8 w-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <div className="bg-white border border-gray-200 rounded-xl p-10 text-center">
+            <Package size={40} className="text-gray-300 mx-auto mb-3" />
+            <h3 className="text-base font-semibold text-gray-800 mb-1">
               Chưa có kết quả
             </h3>
             <p className="text-sm text-gray-500 max-w-md mx-auto">
               Tìm kiếm hoặc nhập mã khách hàng và bấm{" "}
-              <span className="font-semibold text-emerald-600">Giao hàng</span>{" "}
-              để xem danh sách đơn đã giao
+              <span className="font-semibold text-blue-600">Giao hàng</span> để
+              xem danh sách đơn đã giao
             </p>
           </div>
         )}

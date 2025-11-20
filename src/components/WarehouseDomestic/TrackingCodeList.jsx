@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import Barcode from "react-barcode";
-import { Printer, RefreshCw } from "lucide-react";
+import { Printer, RefreshCw, Barcode as BarcodeIcon } from "lucide-react";
 
 const generateMixedCode = () => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const letter1 = chars[Math.floor(Math.random() * chars.length)];
   const letter2 = chars[Math.floor(Math.random() * chars.length)];
-  const num = Math.floor(Math.random() * 90000) + 10000; // 5 số
-  return `${letter1}${num}${letter2}`; // Ví dụ: A12345B
+  const num = Math.floor(Math.random() * 90000) + 10000;
+  return `${letter1}${num}${letter2}`;
 };
 
 const generateCodeList = (count = 10) =>
@@ -15,18 +15,18 @@ const generateCodeList = (count = 10) =>
 
 const CodeList = () => {
   const [codes, setCodes] = useState(generateCodeList());
-  const [printingIndex, setPrintingIndex] = useState(null); // null = in tất cả
+  const [printingIndex, setPrintingIndex] = useState(null);
 
   const handlePrintSingle = (index) => {
-    setPrintingIndex(index); // chế độ in 1 tem
+    setPrintingIndex(index);
     setTimeout(() => {
       window.print();
-      setPrintingIndex(null); // reset về bình thường
+      setPrintingIndex(null);
     }, 0);
   };
 
   const handlePrintAll = () => {
-    setPrintingIndex(null); // chế độ in tất cả
+    setPrintingIndex(null);
     setTimeout(() => window.print(), 0);
   };
 
@@ -35,11 +35,10 @@ const CodeList = () => {
   };
 
   return (
-    <div className="p-4 print:p-0">
+    <div className="p-6 bg-gray-50 min-h-screen print:p-0">
       <style>
         {`
           @media print {
-            /* Ẩn mọi thứ ngoài vùng barcode-print-root */
             body * {
               visibility: hidden;
             }
@@ -73,12 +72,10 @@ const CodeList = () => {
               background: #fff;
             }
 
-            /* In TẤT CẢ: giữ nguyên mọi tem */
             #barcode-print-root.printing-all .label-item {
               display: block !important;
             }
 
-            /* In 1 TEM: ẩn hết, chỉ chừa tem có class print-target */
             #barcode-print-root.printing-single .label-item {
               display: none !important;
             }
@@ -94,74 +91,96 @@ const CodeList = () => {
         `}
       </style>
 
-      {/* container này sẽ là vùng được in */}
-      <div
-        id="barcode-print-root"
-        className={printingIndex !== null ? "printing-single" : "printing-all"}
-      >
-        {/* Thanh điều khiển – chỉ xem trên màn hình */}
-        <div className="no-print flex justify-between items-center mb-4">
-          <div>
-            <h1 className="text-xl font-bold text-blue-700">
-              Danh sách mã vận đơn
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Bấm <b>“In tem này”</b> để in 1 tem nhỏ, hoặc{" "}
-              <b>“In tất cả tem”</b> để in cả lô.
-            </p>
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={handleRegenerate}
-              className="px-3 py-2 border rounded-lg text-sm flex items-center gap-1 hover:bg-gray-100"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Tạo mã mới
-            </button>
-            <button
-              onClick={handlePrintAll}
-              className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm flex items-center gap-1 hover:bg-blue-700"
-            >
-              <Printer className="w-4 h-4" />
-              In tất cả tem
-            </button>
-          </div>
-        </div>
-
-        {/* Lưới tem */}
-        <div className="label-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {codes.map((code, idx) => (
-            <div
-              key={idx}
-              className={
-                "label-item border border-gray-300 rounded-lg px-3 py-2 bg-white flex flex-col items-center " +
-                (printingIndex === idx ? "print-target" : "")
-              }
-            >
-              <div className="text-xs text-gray-600 mb-1">
-                Mã vận đơn #{idx + 1}
+      <div className="max-w-7xl mx-auto">
+        <div
+          id="barcode-print-root"
+          className={
+            printingIndex !== null ? "printing-single" : "printing-all"
+          }
+        >
+          {/* Header */}
+          <div className="no-print bg-blue-600 rounded-xl shadow-sm p-5 mb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                  <BarcodeIcon size={22} className="text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-semibold text-white">
+                    Danh Sách Mã Vận Đơn
+                  </h1>
+                </div>
               </div>
 
-              <Barcode
-                value={code}
-                format="CODE128"
-                displayValue={true}
-                width={1.4}
-                height={50}
-                fontSize={14}
-              />
-
-              <button
-                type="button"
-                onClick={() => handlePrintSingle(idx)}
-                className="no-print mt-2 inline-flex items-center gap-1 px-2 py-1 text-xs rounded bg-emerald-600 text-white hover:bg-emerald-700"
-              >
-                <Printer className="w-3 h-3" />
-                In tem này
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleRegenerate}
+                  className="px-4 py-2 bg-blue-500/20 text-white rounded-lg text-sm flex items-center gap-2 hover:bg-blue-500/30 transition-colors"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Tạo mã mới
+                </button>
+                <button
+                  onClick={handlePrintAll}
+                  className="px-4 py-2 bg-white text-blue-600 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-blue-50 transition-colors"
+                >
+                  <Printer className="w-4 h-4" />
+                  In tất cả tem
+                </button>
+              </div>
             </div>
-          ))}
+          </div>
+
+          {/* Info Bar */}
+          <div className="no-print bg-white border border-gray-200 rounded-xl px-5 py-3 mb-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium text-gray-900">
+                Tổng: {codes.length} mã vận đơn
+              </span>
+              <span className="text-gray-600">Kích thước tem: 55mm × 25mm</span>
+            </div>
+          </div>
+
+          {/* Label Grid */}
+          <div className="label-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {codes.map((code, idx) => (
+              <div
+                key={idx}
+                className={
+                  "label-item border border-gray-200 rounded-lg bg-white overflow-hidden " +
+                  (printingIndex === idx ? "print-target" : "")
+                }
+              >
+                {/* Card Header */}
+                <div className="no-print bg-blue-50 px-3 py-2 border-b border-gray-200">
+                  <div className="text-xs font-medium text-gray-700">
+                    Mã vận đơn #{idx + 1}
+                  </div>
+                </div>
+
+                {/* Barcode Content */}
+                <div className="px-3 py-4 flex flex-col items-center">
+                  <Barcode
+                    value={code}
+                    format="CODE128"
+                    displayValue={true}
+                    width={1.4}
+                    height={50}
+                    fontSize={14}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => handlePrintSingle(idx)}
+                    className="no-print mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    In tem này
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
