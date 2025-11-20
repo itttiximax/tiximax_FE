@@ -44,10 +44,12 @@ const ManagerProductType = () => {
 
   const fetchProductTypes = async () => {
     try {
+      setLoading(true);
       const data = await getAllProductTypes();
-      setProductTypes(data);
+      setProductTypes(Array.isArray(data) ? data : []);
     } catch {
       toast.error("Có lỗi khi tải dữ liệu!");
+      setProductTypes([]);
     } finally {
       setLoading(false);
     }
@@ -63,6 +65,7 @@ const ManagerProductType = () => {
     try {
       if (editingId) {
         const updatedData = { productTypeId: editingId, ...formData };
+        // Optimistic update
         setProductTypes((prev) =>
           prev.map((item) =>
             item.productTypeId === editingId ? { ...item, ...formData } : item
@@ -79,13 +82,13 @@ const ManagerProductType = () => {
     } catch (error) {
       console.error("Error submitting form:", error);
       let errorMessage = "Có lỗi xảy ra!";
-      if (error.response?.data) {
+      if (error?.response?.data) {
         errorMessage =
           error.response.data.error ||
           error.response.data.message ||
           error.response.data.detail ||
           JSON.stringify(error.response.data);
-      } else if (error.message) {
+      } else if (error?.message) {
         errorMessage = error.message;
       }
       toast.error(errorMessage, { id: loadingToast, duration: 5000 });
@@ -114,7 +117,7 @@ const ManagerProductType = () => {
     setShowDialog(true);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = (id) => {
     setDeleteId(id);
     setShowDeleteDialog(true);
   };
@@ -131,7 +134,7 @@ const ManagerProductType = () => {
     } catch (error) {
       console.error("Error deleting:", error);
       let errorMessage = "Có lỗi xảy ra khi xóa!";
-      if (error.response?.data) {
+      if (error?.response?.data) {
         errorMessage =
           error.response.data.error ||
           error.response.data.message ||
@@ -157,7 +160,7 @@ const ManagerProductType = () => {
 
   const filteredProductTypes = productTypes.filter((item) => {
     const matchesSearch = item.productTypeName
-      .toLowerCase()
+      ?.toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesFee =
       filterFee === "all" ||
@@ -177,13 +180,13 @@ const ManagerProductType = () => {
     [...Array(6)].map((_, i) => (
       <tr key={i} className="animate-pulse">
         <td className="px-3 py-2">
-          <div className="h-3 w-56 bg-gray-200 rounded" />
+          <div className="h-3 w-56 bg-slate-100 rounded" />
         </td>
         <td className="px-3 py-2 text-center">
-          <div className="h-5 w-16 bg-gray-200 rounded mx-auto" />
+          <div className="h-5 w-16 bg-slate-100 rounded mx-auto" />
         </td>
         <td className="px-3 py-2">
-          <div className="h-8 w-28 bg-gray-200 rounded mx-auto" />
+          <div className="h-8 w-28 bg-slate-100 rounded mx-auto" />
         </td>
       </tr>
     ));
@@ -192,17 +195,17 @@ const ManagerProductType = () => {
     [...Array(8)].map((_, i) => (
       <div
         key={i}
-        className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 animate-pulse"
+        className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 animate-pulse"
       >
         <div className="flex items-center justify-between mb-3">
-          <div className="h-6 w-28 bg-gray-200 rounded" />
-          <div className="h-5 w-14 bg-gray-200 rounded" />
+          <div className="h-6 w-28 bg-slate-100 rounded" />
+          <div className="h-5 w-14 bg-slate-100 rounded" />
         </div>
-        <div className="h-4 w-3/4 bg-gray-200 rounded mb-2" />
-        <div className="h-4 w-1/2 bg-gray-200 rounded mb-3" />
-        <div className="flex gap-2 pt-2 border-t border-gray-100">
-          <div className="h-8 w-full bg-gray-200 rounded" />
-          <div className="h-8 w-full bg-gray-200 rounded" />
+        <div className="h-4 w-3/4 bg-slate-100 rounded mb-2" />
+        <div className="h-4 w-1/2 bg-slate-100 rounded mb-3" />
+        <div className="flex gap-2 pt-2 border-t border-slate-100">
+          <div className="h-8 w-full bg-slate-100 rounded" />
+          <div className="h-8 w-full bg-slate-100 rounded" />
         </div>
       </div>
     ));
@@ -215,15 +218,15 @@ const ManagerProductType = () => {
         <tr>
           <td colSpan="3" className="px-4 py-8">
             <div className="flex flex-col items-center justify-center">
-              <div className="p-2 bg-gray-100 rounded mb-2">
-                <FiBox className="w-6 h-6 text-gray-400" />
+              <div className="p-2 bg-slate-100 rounded mb-2">
+                <FiBox className="w-6 h-6 text-slate-400" />
               </div>
-              <p className="text-sm font-semibold text-gray-900 mb-1">
+              <p className="text-sm font-semibold text-slate-900 mb-1">
                 {searchTerm || filterFee !== "all"
                   ? "Không tìm thấy"
                   : "Chưa có dữ liệu"}
               </p>
-              <p className="text-xs text-gray-500 mb-3">
+              <p className="text-xs text-slate-500 mb-3">
                 {searchTerm || filterFee !== "all"
                   ? "Thử thay đổi bộ lọc"
                   : "Nhấn nút thêm để bắt đầu"}
@@ -246,12 +249,12 @@ const ManagerProductType = () => {
     return filteredProductTypes.map((item, index) => (
       <tr
         key={item.productTypeId}
-        className={`transition-all hover:bg-blue-50/50 ${
-          index % 2 === 0 ? "bg-white" : "bg-gray-50/50"
+        className={`transition-all hover:bg-blue-50/60 ${
+          index % 2 === 0 ? "bg-white" : "bg-slate-50/60"
         }`}
       >
         <td className="px-3 py-2">
-          <p className="font-semibold text-gray-900 text-sm">
+          <p className="font-semibold text-slate-900 text-sm">
             {item.productTypeName}
           </p>
         </td>
@@ -296,15 +299,15 @@ const ManagerProductType = () => {
     if (filteredProductTypes.length === 0) {
       return (
         <div className="col-span-full flex flex-col items-center justify-center py-8">
-          <div className="p-2 bg-gray-100 rounded mb-2">
-            <FiBox className="w-6 h-6 text-gray-400" />
+          <div className="p-2 bg-slate-100 rounded mb-2">
+            <FiBox className="w-6 h-6 text-slate-400" />
           </div>
-          <p className="text-sm font-semibold text-gray-900 mb-1">
+          <p className="text-sm font-semibold text-slate-900 mb-1">
             {searchTerm || filterFee !== "all"
               ? "Không tìm thấy"
               : "Chưa có dữ liệu"}
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-slate-500">
             {searchTerm || filterFee !== "all"
               ? "Thử thay đổi bộ lọc"
               : "Nhấn nút thêm để bắt đầu"}
@@ -316,7 +319,7 @@ const ManagerProductType = () => {
     return filteredProductTypes.map((item) => (
       <div
         key={item.productTypeId}
-        className="bg-white rounded-lg border border-gray-200 hover:border-blue-400 shadow-sm hover:shadow-md transition-all overflow-hidden"
+        className="bg-white rounded-lg border border-slate-200 hover:border-blue-400 shadow-sm hover:shadow-md transition-all overflow-hidden"
       >
         <div className="p-3">
           <div className="flex items-start justify-between mb-2">
@@ -338,11 +341,11 @@ const ManagerProductType = () => {
             )}
           </div>
 
-          <h3 className="text-sm font-bold text-gray-900 mb-2 line-clamp-2">
+          <h3 className="text-sm font-bold text-slate-900 mb-2 line-clamp-2">
             {item.productTypeName}
           </h3>
 
-          <div className="flex items-center gap-1.5 pt-2 border-t border-gray-100">
+          <div className="flex items-center gap-1.5 pt-2 border-t border-slate-100">
             <button
               onClick={() => handleEdit(item)}
               className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-md shadow-sm transition-all"
@@ -365,66 +368,80 @@ const ManagerProductType = () => {
 
   return (
     <>
-      <Toaster position="top-right" />
-      <div className="min-h-screen">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          {/* Header */}
-          <div className="mb-4">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-3">
-              <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                Quản lý Loại Sản Phẩm
-              </h1>
+      <Toaster
+        position="top-right"
+        toastOptions={{ style: { fontSize: 12 } }}
+      />
 
-              <button
-                onClick={openCreateDialog}
-                className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-semibold shadow-sm transition-all"
-              >
-                <FiPlus className="w-4 h-4" />
-                Thêm mới
-              </button>
+      <div className="min-h-screen ">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-4">
+          {/* Header card xanh – đồng bộ */}
+          <div className="border border-blue-400 bg-blue-600 text-white rounded-xl px-5 py-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-white/10 flex items-center justify-center">
+                <FiBox className="w-5 h-5" />
+              </div>
+              <div>
+                <h1 className="text-lg md:text-xl font-semibold">
+                  Quản lý Loại Sản Phẩm
+                </h1>
+              </div>
             </div>
 
+            <button
+              onClick={openCreateDialog}
+              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-blue-200/60 text-white px-3 py-2 rounded-lg text-sm font-semibold shadow-sm transition-all"
+            >
+              <FiPlus className="w-4 h-4" />
+              Thêm loại sản phẩm
+            </button>
+          </div>
+
+          {/* Stats + Filter card */}
+          <div className="space-y-3">
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              <div className="bg-white rounded-md p-3 shadow-sm border border-gray-200">
-                <p className="text-[11px] font-medium text-gray-600">Tổng</p>
-                <p className="text-lg font-bold text-gray-900">{stats.total}</p>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-white rounded-lg p-3 shadow-sm border border-slate-200">
+                <p className="text-[11px] font-medium text-slate-600">Tổng</p>
+                <p className="text-lg font-bold text-slate-900">
+                  {stats.total}
+                </p>
               </div>
-              <div className="bg-white rounded-md p-3 shadow-sm border border-gray-200">
-                <p className="text-[11px] font-medium text-gray-600">
+              <div className="bg-white rounded-lg p-3 shadow-sm border border-slate-200">
+                <p className="text-[11px] font-medium text-slate-600">
                   Miễn phí
                 </p>
                 <p className="text-lg font-bold text-emerald-600">
                   {stats.free}
                 </p>
               </div>
-              <div className="bg-white rounded-md p-3 shadow-sm border border-gray-200">
-                <p className="text-[11px] font-medium text-gray-600">Có phí</p>
+              <div className="bg-white rounded-lg p-3 shadow-sm border border-slate-200">
+                <p className="text-[11px] font-medium text-slate-600">Có phí</p>
                 <p className="text-lg font-bold text-amber-600">{stats.paid}</p>
               </div>
             </div>
 
             {/* Search & Filter */}
-            <div className="bg-white rounded-md shadow-sm border border-gray-200 p-3">
+            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-3">
               <div className="flex flex-col lg:flex-row gap-2">
                 <div className="flex-1 relative">
-                  <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
                   <input
                     type="text"
-                    placeholder="Tìm kiếm..."
+                    placeholder="Tìm kiếm theo tên loại sản phẩm..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
 
                 <div className="flex items-center gap-2">
                   <div className="relative">
-                    <FiFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <FiFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
                     <select
                       value={filterFee}
                       onChange={(e) => setFilterFee(e.target.value)}
-                      className="pl-9 pr-6 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white cursor-pointer"
+                      className="pl-9 pr-6 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white cursor-pointer"
                     >
                       <option value="all">Tất cả</option>
                       <option value="free">Miễn phí</option>
@@ -432,13 +449,13 @@ const ManagerProductType = () => {
                     </select>
                   </div>
 
-                  <div className="flex items-center gap-1 bg-gray-100 rounded-md p-0.5">
+                  <div className="flex items-center gap-1 bg-slate-100 rounded-md p-0.5">
                     <button
                       onClick={() => setViewMode("table")}
                       className={`p-1.5 rounded ${
                         viewMode === "table"
                           ? "bg-white text-blue-600 shadow-sm"
-                          : "text-gray-600 hover:text-gray-900"
+                          : "text-slate-600 hover:text-slate-900"
                       }`}
                     >
                       <FiList className="w-4 h-4" />
@@ -448,7 +465,7 @@ const ManagerProductType = () => {
                       className={`p-1.5 rounded ${
                         viewMode === "grid"
                           ? "bg-white text-blue-600 shadow-sm"
-                          : "text-gray-600 hover:text-gray-900"
+                          : "text-slate-600 hover:text-slate-900"
                       }`}
                     >
                       <FiGrid className="w-4 h-4" />
@@ -458,8 +475,8 @@ const ManagerProductType = () => {
               </div>
 
               {(searchTerm || filterFee !== "all") && (
-                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-200">
-                  <span className="text-xs font-medium text-gray-600">
+                <div className="flex items-center flex-wrap gap-2 mt-2 pt-2 border-t border-slate-200">
+                  <span className="text-xs font-medium text-slate-600">
                     Bộ lọc:
                   </span>
                   {searchTerm && (
@@ -485,30 +502,30 @@ const ManagerProductType = () => {
 
           {/* Content */}
           {viewMode === "table" ? (
-            <div className="bg-white shadow-sm rounded-md border border-gray-200 overflow-hidden relative">
+            <div className="bg-white shadow-sm rounded-lg border border-slate-200 overflow-hidden relative">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
+                  <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-3 py-2 text-left text-[11px] font-bold text-gray-700 uppercase">
+                      <th className="px-3 py-2 text-left text-[11px] font-semibold text-slate-700 uppercase">
                         Tên loại
                       </th>
-                      <th className="px-3 py-2 text-center text-[11px] font-bold text-gray-700 uppercase">
+                      <th className="px-3 py-2 text-center text-[11px] font-semibold text-slate-700 uppercase">
                         Phí
                       </th>
-                      <th className="px-3 py-2 text-center text-[11px] font-bold text-gray-700 uppercase">
+                      <th className="px-3 py-2 text-center text-[11px] font-semibold text-slate-700 uppercase">
                         Thao tác
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100 text-sm">
+                  <tbody className="divide-y divide-slate-100 text-sm">
                     {renderTableContent()}
                   </tbody>
                 </table>
               </div>
 
               {deleteLoading && (
-                <div className="absolute inset-0 bg-white/90 flex items-center justify-center backdrop-blur-sm rounded-md">
+                <div className="absolute inset-0 bg-white/90 flex items-center justify-center backdrop-blur-sm rounded-lg">
                   <div className="flex flex-col items-center gap-2">
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-red-200 border-t-red-600"></div>
                     <span className="text-red-600 text-xs font-semibold">
@@ -526,7 +543,7 @@ const ManagerProductType = () => {
 
           {!loading && filteredProductTypes.length > 0 && (
             <div className="mt-3 text-center">
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-slate-600">
                 Hiển thị{" "}
                 <span className="font-bold">{filteredProductTypes.length}</span>{" "}
                 / <span className="font-bold">{stats.total}</span> loại
@@ -537,56 +554,58 @@ const ManagerProductType = () => {
 
         {/* Modal */}
         {showDialog && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-3 z-50">
-            <div className="bg-white rounded-lg shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-              <div className="bg-blue-600 text-white p-3 rounded-t-lg">
+          <div className="fixed inset-0 bg-black/45 backdrop-blur-sm flex items-center justify-center p-3 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-slate-200">
+              <div className="bg-blue-600 text-white px-4 py-3 rounded-t-xl">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-white/20 rounded">
+                    <div className="p-1.5 bg-white/20 rounded-lg">
                       <FiBox className="w-4 h-4" />
                     </div>
-                    <h3 className="text-sm font-bold">
-                      {editingId ? "Cập nhật" : "Thêm mới"}
+                    <h3 className="text-sm font-semibold">
+                      {editingId
+                        ? "Cập nhật loại sản phẩm"
+                        : "Thêm loại sản phẩm mới"}
                     </h3>
                   </div>
                   <button
                     onClick={closeDialog}
-                    className="p-1 hover:bg-white/20 rounded transition-colors"
+                    className="p-1 hover:bg-white/15 rounded-md transition-colors"
                   >
                     <FiX className="w-4 h-4" />
                   </button>
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-4">
-                <div className="mb-3">
-                  <label className="block text-xs font-bold text-gray-700 mb-1">
+              <form onSubmit={handleSubmit} className="p-4 space-y-4 text-sm">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Tên loại sản phẩm <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <FiPackage className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <FiPackage className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
                     <input
                       type="text"
                       name="productTypeName"
                       value={formData.productTypeName}
                       onChange={handleInputChange}
-                      className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="VD: Điện tử, Thời trang..."
                       required
                     />
                   </div>
                 </div>
 
-                <div className="mb-3">
-                  <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     Trạng thái phí <span className="text-red-500">*</span>
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     <label
-                      className={`flex flex-col items-center p-2.5 border-2 rounded-md cursor-pointer transition-all ${
+                      className={`flex flex-col items-center p-2.5 border-2 rounded-lg cursor-pointer transition-all ${
                         !formData.fee
                           ? "border-emerald-500 bg-emerald-50"
-                          : "border-gray-200 hover:border-gray-300"
+                          : "border-slate-200 hover:border-slate-300"
                       }`}
                     >
                       <input
@@ -602,7 +621,7 @@ const ManagerProductType = () => {
                         className={`w-7 h-7 rounded-full border-2 flex items-center justify-center mb-1.5 ${
                           !formData.fee
                             ? "border-emerald-500 bg-emerald-500"
-                            : "border-gray-300 bg-white"
+                            : "border-slate-300 bg-white"
                         }`}
                       >
                         <FiCheck
@@ -613,7 +632,7 @@ const ManagerProductType = () => {
                       </div>
                       <span
                         className={`text-[11px] font-bold ${
-                          !formData.fee ? "text-emerald-700" : "text-gray-600"
+                          !formData.fee ? "text-emerald-700" : "text-slate-600"
                         }`}
                       >
                         Miễn phí
@@ -621,10 +640,10 @@ const ManagerProductType = () => {
                     </label>
 
                     <label
-                      className={`flex flex-col items-center p-2.5 border-2 rounded-md cursor-pointer transition-all ${
+                      className={`flex flex-col items-center p-2.5 border-2 rounded-lg cursor-pointer transition-all ${
                         formData.fee
-                          ? "border-yellow-500 bg-yellow-50"
-                          : "border-gray-200 hover:border-gray-300"
+                          ? "border-amber-500 bg-amber-50"
+                          : "border-slate-200 hover:border-slate-300"
                       }`}
                     >
                       <input
@@ -639,8 +658,8 @@ const ManagerProductType = () => {
                       <div
                         className={`w-7 h-7 rounded-full border-2 flex items-center justify-center mb-1.5 ${
                           formData.fee
-                            ? "border-yellow-500 bg-yellow-500"
-                            : "border-gray-300 bg-white"
+                            ? "border-amber-500 bg-amber-500"
+                            : "border-slate-300 bg-white"
                         }`}
                       >
                         <FiDollarSign
@@ -651,7 +670,7 @@ const ManagerProductType = () => {
                       </div>
                       <span
                         className={`text-[11px] font-bold ${
-                          formData.fee ? "text-yellow-700" : "text-gray-600"
+                          formData.fee ? "text-amber-700" : "text-slate-600"
                         }`}
                       >
                         Có phí
@@ -660,11 +679,11 @@ const ManagerProductType = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-2 pt-3 border-t border-gray-200">
+                <div className="flex gap-2 pt-3 border-t border-slate-200">
                   <button
                     type="button"
                     onClick={closeDialog}
-                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-semibold transition-all"
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-md text-sm font-semibold transition-all"
                   >
                     Hủy
                   </button>

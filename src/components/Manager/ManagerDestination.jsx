@@ -165,45 +165,40 @@ const ManagerDestination = () => {
     [formErrors]
   );
 
-  // ===== Loading Skeleton Rows (6) =====
+  // Skeleton rows (3 cột)
   const SkeletonRows = () =>
     [...Array(6)].map((_, i) => (
       <tr key={i} className="animate-pulse">
-        <td className="px-3 py-2">
-          <div className="h-3 w-12 bg-gray-200 rounded" />
+        <td className="px-4 py-3">
+          <div className="h-4 w-12 bg-slate-100 rounded" />
         </td>
-        <td className="px-3 py-2">
+        <td className="px-4 py-3">
           <div className="flex items-center gap-2">
-            <div className="h-4 w-4 bg-gray-200 rounded" />
-            <div className="h-3 w-48 bg-gray-200 rounded" />
+            <div className="h-4 w-4 bg-slate-100 rounded-full" />
+            <div className="h-4 w-48 bg-slate-100 rounded" />
           </div>
         </td>
-        <td className="px-3 py-2">
-          <div className="h-8 w-20 bg-gray-200 rounded mx-auto" />
+        <td className="px-4 py-3">
+          <div className="h-8 w-24 bg-slate-100 rounded mx-auto" />
         </td>
       </tr>
     ));
 
   const renderTableContent = () => {
-    if (loading) {
-      return <SkeletonRows />;
-    }
+    if (loading) return <SkeletonRows />;
 
     if (destinations.length === 0) {
       return (
         <tr>
-          <td colSpan="3" className="px-4 py-10 text-center text-gray-500">
-            <FiMapPin className="w-12 h-12 text-gray-400 mb-3 mx-auto" />
-            <p className="text-base font-medium mb-1">
-              Chưa có dữ liệu điểm đến
-            </p>
-            <p className="text-xs text-gray-400 mb-3">Nhấn "Thêm" để bắt đầu</p>
+          <td colSpan={3} className="px-4 py-10 text-center text-slate-500">
+            <FiMapPin className="w-12 h-12 text-slate-300 mb-3 mx-auto" />
+            <p className="text-sm font-medium mb-1">Chưa có dữ liệu điểm đến</p>
             <button
               onClick={openCreateDialog}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 inline-flex items-center gap-1 shadow-sm"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all inline-flex items-center gap-1 shadow-sm"
             >
               <FiPlus className="w-4 h-4" />
-              Thêm
+              Thêm điểm đến
             </button>
           </td>
         </tr>
@@ -213,29 +208,29 @@ const ManagerDestination = () => {
     return destinations.map((item) => (
       <tr
         key={item.destinationId}
-        className="hover:bg-gray-50 transition-colors"
+        className="hover:bg-slate-50 transition-colors"
       >
-        <td className="px-3 py-2 text-sm font-medium text-gray-900 whitespace-nowrap">
+        <td className="px-4 py-3 text-sm font-medium text-slate-900 whitespace-nowrap">
           #{item.destinationId}
         </td>
-        <td className="px-3 py-2 font-medium text-gray-900">
+        <td className="px-4 py-3 font-medium text-slate-900">
           <div className="flex items-center gap-2">
-            <FiMapPin className="w-4 h-4 text-gray-500" />
+            <FiMapPin className="w-4 h-4 text-slate-500" />
             <span className="text-sm">{item.destinationName}</span>
           </div>
         </td>
-        <td className="px-3 py-2">
+        <td className="px-4 py-3">
           <div className="flex items-center justify-center gap-1.5">
             <button
               onClick={() => handleEdit(item)}
-              className="bg-amber-500 hover:bg-amber-600 text-white p-1.5 rounded-md transition-all"
+              className="inline-flex items-center justify-center p-1.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100 transition-all"
               title="Chỉnh sửa"
             >
               <FiEdit2 className="w-4 h-4" />
             </button>
             <button
               onClick={() => handleDelete(item.destinationId)}
-              className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-md transition-all"
+              className="inline-flex items-center justify-center p-1.5 rounded-lg bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 transition-all"
               title="Xóa"
             >
               <FiTrash2 className="w-4 h-4" />
@@ -247,84 +242,98 @@ const ManagerDestination = () => {
   };
 
   return (
-    <div className="p-4 bg-white-50 min-h-screen">
+    <div className="min-h-screen p-4 md:p-6 ">
       <Toaster position="top-right" />
 
-      <div className="mb-4">
-        <h1 className="text-xl font-bold text-gray-800">Quản lý Điểm Đến</h1>
-      </div>
-
-      <div className="mb-4">
-        <button
-          onClick={openCreateDialog}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-1 shadow-sm"
-          disabled={loading}
-        >
-          <FiPlus className="w-4 h-4" />
-          Thêm
-        </button>
-      </div>
-
-      <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden relative">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase">
-                  ID
-                </th>
-                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase">
-                  Tên điểm đến
-                </th>
-                <th className="px-3 py-2 text-center text-xs font-semibold text-gray-700 uppercase">
-                  Thao tác
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 text-sm">
-              {renderTableContent()}
-            </tbody>
-          </table>
-        </div>
-
-        {deleteLoading && (
-          <div className="absolute inset-x-0 bottom-0 bg-white/85 flex items-center justify-center py-6 rounded-b-lg">
-            <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-600"></div>
-              <span className="text-red-600 text-sm font-medium">
-                Đang xóa...
-              </span>
+      <div className="mx-auto space-y-6">
+        {/* Header card xanh – đồng bộ */}
+        <div className="border border-blue-400 bg-blue-600 text-white rounded-xl px-5 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-white/10 flex items-center justify-center">
+              <FiMapPin className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg md:text-xl font-semibold">
+                Quản lý điểm đến
+              </h1>
             </div>
           </div>
-        )}
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={openCreateDialog}
+              className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-blue-300 bg-white/10 hover:bg-white/20 shadow-sm"
+              disabled={loading}
+            >
+              <FiPlus className="w-4 h-4" />
+              Thêm điểm đến
+            </button>
+          </div>
+        </div>
+
+        {/* Table card */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">
+                    ID
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">
+                    Tên điểm đến
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase">
+                    Thao tác
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {renderTableContent()}
+              </tbody>
+            </table>
+          </div>
+
+          {deleteLoading && (
+            <div className="absolute inset-x-0 bottom-0 bg-white/85 flex items-center justify-center py-4 rounded-b-xl border-t border-red-100">
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-600" />
+                <span className="text-red-600 text-xs font-medium">
+                  Đang xóa...
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
+      {/* Dialog form */}
       {showDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-3 z-50">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-slate-200">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200">
               <div>
-                <h3 className="text-base font-semibold text-gray-900">
+                <h3 className="text-sm font-semibold text-slate-900">
                   {editingId ? "Cập nhật điểm đến" : "Thêm điểm đến mới"}
                 </h3>
-                <p className="text-xs text-gray-600 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   {editingId
-                    ? "Chỉnh sửa thông tin điểm đến"
-                    : "Nhập thông tin điểm đến mới"}
+                    ? "Chỉnh sửa thông tin điểm đến hiện có."
+                    : "Nhập tên điểm đến mới để sử dụng trong cấu hình tuyến."}
                 </p>
               </div>
               <button
                 onClick={closeDialog}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded hover:bg-slate-100"
                 disabled={submitLoading}
               >
-                <FiX className="w-5 h-5" />
+                <FiX className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-4">
+            <form onSubmit={handleSubmit} className="px-5 py-4 text-sm">
               <div className="mb-4">
-                <label className="block text-xs font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-medium text-slate-700 mb-1">
                   Tên điểm đến <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -332,10 +341,10 @@ const ManagerDestination = () => {
                   name="destinationName"
                   value={formData.destinationName}
                   onChange={handleInputChange}
-                  className={`w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  className={`w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all ${
                     formErrors.destinationName
-                      ? "border-red-500 bg-red-50"
-                      : "border-gray-300"
+                      ? "border border-red-500 bg-red-50"
+                      : "border border-slate-200"
                   }`}
                   placeholder="VD: Hà Nội, TP.HCM, Đà Nẵng..."
                   required
@@ -349,23 +358,23 @@ const ManagerDestination = () => {
                 )}
               </div>
 
-              <div className="flex gap-2 pt-4 border-t">
+              <div className="flex gap-2 pt-4 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={closeDialog}
                   disabled={submitLoading}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50"
+                  className="flex-1 bg-white hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-xs font-medium transition-colors border border-slate-200 disabled:opacity-50"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={submitLoading}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-1"
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors inline-flex items-center justify-center gap-1 disabled:opacity-50"
                 >
                   {submitLoading ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
                       {editingId ? "Đang cập nhật..." : "Đang tạo..."}
                     </>
                   ) : (

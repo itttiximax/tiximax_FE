@@ -29,7 +29,7 @@ const Footer = () => {
         <div className="absolute bottom-20 right-20 w-24 h-24 border border-yellow-400 rounded-full"></div>
       </div>
 
-      <div className="container mx-auto px-6 relative z-10">
+      <div className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-12 mb-12 text-white">
           {/* --- Cột 1 & 2: Logo & giới thiệu --- */}
           <div className="md:col-span-2">
@@ -41,9 +41,11 @@ const Footer = () => {
             </div>
 
             <p className="leading-relaxed mb-6 max-w-md text-gray-200 mt-6">
-              Giải pháp logistics toàn diện với công nghệ tiên tiến, mang đến
-              dịch vụ vận chuyển và kho bãi chuyên nghiệp, nhanh chóng và tin
-              cậy cho sự phát triển bền vững của doanh nghiệp.
+              Tiximax Logistics là công ty chuyên cung cấp giải pháp Mua hộ -
+              Vận chuyển - Thanh toán xuyên biên giới tuyến Mỹ, Nhật, Hàn,
+              Indonesia về Việt Nam. Với nền tảng Tử Tế là cốt lõi, Tiximax cam
+              kết mang lại dịch vụ minh bạch, nhanh chóng và đồng hành cùng
+              khách hàng phát triển bền vững.
             </p>
 
             <div className="grid grid-cols-2 gap-4 text-sm text-gray-300">
@@ -104,6 +106,14 @@ const Footer = () => {
                     Tuyển dụng
                   </a>
                 </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-yellow-400 transition-colors"
+                  >
+                    Câu hỏi thường gặp
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
@@ -121,11 +131,11 @@ const Footer = () => {
             <div className="text-gray-200 ">
               <ul className="space-y-3 mt-1">
                 {[
-                  "Vận chuyển hàng hóa",
-                  "Kho bãi & lưu trữ",
-                  "Thủ tục hải quan",
-                  "Tracking đơn hàng",
-                  "Quản lý chuỗi cung ứng",
+                  "Dịch vụ vận chuyển",
+                  "Dịch vụ mua hộ",
+                  "Dịch vụ đấu giá",
+                  "Dịch vụ thông quan hộ",
+                  "Dịch vụ ký gửi kho",
                 ].map((service, index) => (
                   <li key={index}>
                     <a
@@ -155,7 +165,7 @@ const Footer = () => {
             <div className=" text-gray-200 ">
               <div className="space-y-4 text-sm mt-1">
                 <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center flex-shrink-0">
                     <MapPin className="w-4 h-4 text-black" />
                   </div>
                   <div>
@@ -165,7 +175,7 @@ const Footer = () => {
                 </div>
 
                 <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Phone className="w-4 h-4 text-black" />
                   </div>
                   <div>
@@ -177,12 +187,12 @@ const Footer = () => {
                 </div>
 
                 <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Mail className="w-4 h-4 text-black" />
                   </div>
                   <div>
                     <p className="font-medium text-yellow-400">Email:</p>
-                    <p>support@tixilogistics.com</p>
+                    <p className="break-all">support@tixilogistics.com</p>
                   </div>
                 </div>
               </div>
@@ -192,10 +202,12 @@ const Footer = () => {
                 <p className="text-gray-400 text-xs mb-3">
                   Kết nối với chúng tôi:
                 </p>
-                <div className="flex space-x-3 flex-wrap">
+                <div className="flex space-x-3 flex-wrap gap-2">
                   <a
-                    href="#"
-                    className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm"
+                    href="https://www.linkedin.com/company/tiximax-joint-stock-company"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
                     title="LinkedIn"
                   >
                     <svg
@@ -207,8 +219,10 @@ const Footer = () => {
                     </svg>
                   </a>
                   <a
-                    href="#"
-                    className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm"
+                    href="https://www.facebook.com/tiximax.logistics"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
                     title="Facebook"
                   >
                     <svg
@@ -220,8 +234,10 @@ const Footer = () => {
                     </svg>
                   </a>
                   <a
-                    href="#"
-                    className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm"
+                    href="https://www.instagram.com/tiximax.logistics/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
                     title="Instagram"
                   >
                     <svg
@@ -233,8 +249,10 @@ const Footer = () => {
                     </svg>
                   </a>
                   <a
-                    href="#"
-                    className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm"
+                    href="https://www.tiktok.com/@tiximax.logistics"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
                     title="TikTok"
                   >
                     <svg
@@ -243,25 +261,6 @@ const Footer = () => {
                       viewBox="0 0 24 24"
                     >
                       <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-                    </svg>
-                  </a>
-                  <a
-                    href="#"
-                    className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm"
-                    title="Zalo/Chat"
-                  >
-                    <svg
-                      className="w-4 h-4 text-blue-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                      />
                     </svg>
                   </a>
                 </div>
@@ -281,7 +280,7 @@ const Footer = () => {
               . All rights reserved. |{" "}
               <span className="ml-1">Công ty TNHH Logistics Tixi</span>
             </div>
-            <div className="flex space-x-6 text-xs">
+            <div className="flex flex-wrap justify-center md:justify-end gap-4 text-xs">
               <a href="#" className="hover:text-yellow-400 transition-colors">
                 Chính sách bảo mật
               </a>

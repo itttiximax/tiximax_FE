@@ -13,30 +13,36 @@ import {
   Check,
   X,
   Building2,
-  AlertCircle,
-  ChevronUp,
-  ChevronDown,
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 function BadgeYesNo({ value }) {
   return value ? (
-    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-200 text-emerald-700 text-xs font-medium border border-emerald-200">
       <Check className="w-3 h-3" />
       Yes
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-500 text-xs font-semibold">
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-200 text-slate-500 text-xs font-medium border border-slate-200">
       <X className="w-3 h-3" />
       No
     </span>
   );
 }
 
+const getErrorMessage = (err, fallback) => {
+  return (
+    err?.response?.data?.message ||
+    err?.response?.data?.error ||
+    err?.message ||
+    fallback
+  );
+};
+
 export default function ManagerBankAccountList() {
   // data + ui
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState(null);
 
   // search, filters, sort, pagination
   const [q, setQ] = useState("");
@@ -68,13 +74,8 @@ export default function ManagerBankAccountList() {
       setLoading(true);
       const data = await managerBankAccountService.getAll();
       setRows(Array.isArray(data) ? data : []);
-      setMessage(null);
     } catch (err) {
-      console.error(err);
-      setMessage({
-        type: "error",
-        text: "Không tải được danh sách tài khoản ngân hàng.",
-      });
+      toast.error(getErrorMessage(err, "Không tải được danh sách tài khoản."));
     } finally {
       setLoading(false);
     }
@@ -107,7 +108,6 @@ export default function ManagerBankAccountList() {
       data = data.filter((r) => Boolean(r.isProxy) === v);
     }
 
-    // sort
     data.sort((a, b) => {
       const { key, dir } = sortBy;
       const va = a?.[key];
@@ -153,11 +153,10 @@ export default function ManagerBankAccountList() {
       setSubmitting(true);
       await managerBankAccountService.create({ ...form, id: 0 });
       setShowCreate(false);
-      setMessage({ type: "success", text: "✓ Tạo tài khoản thành công." });
+      toast.success("Tạo tài khoản ngân hàng thành công.");
       fetchAll();
     } catch (err) {
-      console.error(err);
-      setMessage({ type: "error", text: "✗ Tạo tài khoản thất bại." });
+      toast.error(getErrorMessage(err, "Tạo tài khoản thất bại."));
     } finally {
       setSubmitting(false);
     }
@@ -177,11 +176,9 @@ export default function ManagerBankAccountList() {
       });
       setShowEdit(true);
     } catch (err) {
-      console.error(err);
-      setMessage({
-        type: "error",
-        text: `✗ Không lấy được dữ liệu chỉnh sửa #${id}.`,
-      });
+      toast.error(
+        getErrorMessage(err, `Không lấy được dữ liệu chỉnh sửa #${id}.`)
+      );
     } finally {
       setSubmitting(false);
     }
@@ -193,11 +190,10 @@ export default function ManagerBankAccountList() {
       const { id, ...rest } = form;
       await managerBankAccountService.update(id, { id, ...rest });
       setShowEdit(false);
-      setMessage({ type: "success", text: "✓ Cập nhật thành công." });
+      toast.success("Cập nhật tài khoản thành công.");
       fetchAll();
     } catch (err) {
-      console.error(err);
-      setMessage({ type: "error", text: "✗ Cập nhật thất bại." });
+      toast.error(getErrorMessage(err, "Cập nhật thất bại."));
     } finally {
       setSubmitting(false);
     }
@@ -217,8 +213,9 @@ export default function ManagerBankAccountList() {
       });
       setShowView(true);
     } catch (err) {
-      console.error(err);
-      setMessage({ type: "error", text: `✗ Không lấy được chi tiết #${id}.` });
+      toast.error(
+        getErrorMessage(err, `Không lấy được chi tiết tài khoản #${id}.`)
+      );
     } finally {
       setSubmitting(false);
     }
@@ -232,258 +229,233 @@ export default function ManagerBankAccountList() {
       setSubmitting(true);
       await managerBankAccountService.delete(deleteId);
       setDeleteId(null);
-      setMessage({ type: "success", text: "✓ Đã xóa tài khoản." });
+      toast.success("Đã xóa tài khoản ngân hàng.");
       fetchAll();
     } catch (err) {
-      console.error(err);
-      setMessage({
-        type: "error",
-        text: `✗ Xóa tài khoản #${deleteId} thất bại.`,
-      });
+      toast.error(
+        getErrorMessage(err, `Xóa tài khoản #${deleteId} không thành công.`)
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Auto-dismiss messages after 5 seconds
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => setMessage(null), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [message]);
-
   const SortIcon = ({ columnKey }) => {
     if (sortBy.key !== columnKey) return null;
     return sortBy.dir === "asc" ? (
-      <ChevronUp className="inline w-3 h-3 ml-1" />
+      <span className="ml-1 text-xs">▲</span>
     ) : (
-      <ChevronDown className="inline w-3 h-3 ml-1" />
+      <span className="ml-1 text-xs">▼</span>
     );
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br p-4 md:p-6">
-      <div className="mx-auto">
+    <div className="min-h-screen p-4 md:p-6">
+      <div className="mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-500 to-blue-600 rounded-2xl shadow-lg p-6 md:p-8 mb-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="flex items-center gap-3 text-white">
-              <Building2 className="w-8 h-8" />
-              <h1 className="text-2xl md:text-3xl font-bold">
+        <div className="border border-blue-400 bg-blue-600 text-white rounded-xl px-5 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-white/10 flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg md:text-xl font-semibold">
                 Bank Accounts Management
               </h1>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={() => fetchAll()}
-                disabled={loading}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-white/90 backdrop-blur text-gray-700 rounded-lg hover:bg-white transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <RefreshCw
-                  className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
-                />
-                {loading ? "Refreshing..." : "Refresh"}
-              </button>
-              <button
-                onClick={openCreate}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
-              >
-                <Plus className="w-4 h-4" />
-                Thêm tài khoản nhận
-              </button>
-            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={fetchAll}
+              disabled={loading}
+              className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border bg-blue-500 hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <RefreshCw
+                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+              />
+              {loading ? "Đang tải..." : "Làm mới"}
+            </button>
+
+            <button
+              onClick={openCreate}
+              className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border bg-blue-500 hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <Plus className="w-4 h-4" />
+              Thêm tài khoản
+            </button>
           </div>
         </div>
 
-        {/* Alert Messages */}
-        {message && (
-          <div
-            className={`mb-6 p-4 rounded-lg flex items-center gap-3 animate-slide-in ${
-              message.type === "error"
-                ? "bg-red-50 border-2 border-red-200 text-red-700"
-                : "bg-green-50 border-2 border-green-200 text-green-700"
-            }`}
-          >
-            {message.type === "error" ? (
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-            ) : (
-              <Check className="w-5 h-5 flex-shrink-0" />
-            )}
-            <span className="font-medium">{message.text}</span>
-          </div>
-        )}
-
         {/* Filters */}
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
             <input
               type="text"
-              placeholder="Tìm kiểm tài khoản ..."
+              placeholder="Tìm theo ngân hàng, số tài khoản, chủ tài khoản..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all duration-200 outline-none"
+              className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 bg-white"
             />
           </div>
-          <select
-            value={fProxy}
-            onChange={(e) => setFProxy(e.target.value)}
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all duration-200 outline-none bg-white cursor-pointer"
-          >
-            <option value="all"> Proxy: All</option>
-            <option value="yes"> Proxy: Yes</option>
-            <option value="no"> Proxy: No</option>
-          </select>
+          <div className="md:col-span-1">
+            <select
+              value={fProxy}
+              onChange={(e) => setFProxy(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 bg-white"
+            >
+              <option value="all">Proxy: Tất cả</option>
+              <option value="yes">Proxy: Yes</option>
+              <option value="no">Proxy: No</option>
+            </select>
+          </div>
         </div>
 
         {/* Table Card */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 border-b-2 border-gray-200">
-                  <th
+                <tr className="bg-slate-50 border-b border-slate-200">
+                  {/* <th
                     onClick={() => changeSort("id")}
-                    className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="text-left px-4 py-3 font-semibold text-slate-600 cursor-pointer"
                   >
                     ID <SortIcon columnKey="id" />
-                  </th>
+                  </th> */}
                   <th
                     onClick={() => changeSort("bankName")}
-                    className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="text-left px-4 py-3 font-semibold text-slate-600 cursor-pointer"
                   >
                     Bank Name <SortIcon columnKey="bankName" />
                   </th>
                   <th
                     onClick={() => changeSort("accountNumber")}
-                    className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="text-left px-4 py-3 font-semibold text-slate-600 cursor-pointer"
                   >
                     Account Number <SortIcon columnKey="accountNumber" />
                   </th>
                   <th
                     onClick={() => changeSort("accountHolder")}
-                    className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="text-left px-4 py-3 font-semibold text-slate-600 cursor-pointer"
                   >
                     Account Holder <SortIcon columnKey="accountHolder" />
                   </th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="text-left px-4 py-3 font-semibold text-slate-600">
                     Proxy
                   </th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="text-left px-4 py-3 font-semibold text-slate-600">
                     Revenue
                   </th>
-                  <th className="text-center px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="text-right px-4 py-3 font-semibold text-slate-600">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-slate-100">
                 {loading ? (
-                  // Loading skeleton
                   [...Array(6)].map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      <td className="px-6 py-4">
-                        <div className="h-4 bg-gray-200 rounded w-8"></div>
+                      <td className="px-4 py-3">
+                        <div className="h-4 bg-slate-100 rounded w-8" />
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="h-4 bg-gray-200 rounded w-24"></div>
+                      <td className="px-4 py-3">
+                        <div className="h-4 bg-slate-100 rounded w-24" />
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="h-4 bg-gray-200 rounded w-32"></div>
+                      <td className="px-4 py-3">
+                        <div className="h-4 bg-slate-100 rounded w-32" />
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="h-4 bg-gray-200 rounded w-28"></div>
+                      <td className="px-4 py-3">
+                        <div className="h-4 bg-slate-100 rounded w-28" />
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="h-6 bg-gray-200 rounded-full w-12"></div>
+                      <td className="px-4 py-3">
+                        <div className="h-5 bg-slate-100 rounded-full w-14" />
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="h-6 bg-gray-200 rounded-full w-12"></div>
+                      <td className="px-4 py-3">
+                        <div className="h-5 bg-slate-100 rounded-full w-14" />
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3">
                         <div className="flex justify-end gap-2">
-                          <div className="h-8 bg-gray-200 rounded w-16"></div>
-                          <div className="h-8 bg-gray-200 rounded w-16"></div>
-                          <div className="h-8 bg-gray-200 rounded w-16"></div>
+                          <div className="h-8 bg-slate-100 rounded w-14" />
+                          <div className="h-8 bg-slate-100 rounded w-14" />
+                          <div className="h-8 bg-slate-100 rounded w-14" />
                         </div>
                       </td>
                     </tr>
                   ))
                 ) : pageData.length === 0 ? (
-                  // Empty state
                   <tr>
-                    <td colSpan={7} className="px-6 py-16 text-center">
-                      <Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                        No Bank Accounts Found
+                    <td colSpan={7} className="px-4 py-12 text-center">
+                      <Building2 className="w-12 h-12 text-slate-200 mx-auto mb-3" />
+                      <h3 className="text-sm font-medium text-slate-800 mb-1">
+                        Không có tài khoản nào
                       </h3>
-                      <p className="text-gray-500 mb-6">
+                      <p className="text-xs text-slate-500 mb-4">
                         {filtered.length === 0 && rows.length > 0
-                          ? "No accounts match your filter criteria."
-                          : "Get started by creating your first bank account."}
+                          ? "Không có tài khoản nào khớp với bộ lọc hiện tại."
+                          : "Thêm tài khoản ngân hàng đầu tiên để bắt đầu sử dụng."}
                       </p>
                       {rows.length === 0 && (
                         <button
                           onClick={openCreate}
-                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+                          className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
                         >
                           <Plus className="w-4 h-4" />
-                          Create First Account
+                          Thêm tài khoản
                         </button>
                       )}
                     </td>
                   </tr>
                 ) : (
-                  // Data rows
                   pageData.map((r) => (
                     <tr
                       key={r.id}
-                      className="hover:bg-gray-50 transition-colors duration-150"
+                      className="hover:bg-slate-50 transition-colors"
                     >
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700 font-semibold text-sm">
+                      {/* <td className="px-4 py-3 align-middle">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-xs font-medium">
                           #{r.id}
                         </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="font-medium text-gray-800">
+                      </td> */}
+                      <td className="px-4 py-3 align-middle">
+                        <span className="font-medium text-slate-900">
                           {r.bankName}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
-                        <span className="font-mono text-sm bg-gray-50 px-2 py-1 rounded text-gray-600">
+                      <td className="px-4 py-3 align-middle">
+                        <span className="font-mono text-xs bg-slate-50 px-2 py-1 rounded border border-slate-100 text-slate-700">
                           {r.accountNumber}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-gray-700">
+                      <td className="px-4 py-3 align-middle text-slate-700">
                         {r.accountHolder}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3 align-middle">
                         <BadgeYesNo value={r.isProxy} />
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3 align-middle">
                         <BadgeYesNo value={r.isRevenue} />
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3 align-middle">
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => openView(r.id)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors font-medium text-sm"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg bg-white hover:bg-slate-50"
                           >
                             <Eye className="w-3.5 h-3.5" />
                             View
                           </button>
                           <button
                             onClick={() => openEdit(r.id)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-colors font-medium text-sm"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs border border-amber-200 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700"
                           >
                             <Edit className="w-3.5 h-3.5" />
                             Edit
                           </button>
                           <button
                             onClick={() => askDelete(r.id)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium text-sm"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs border border-red-200 rounded-lg bg-red-50 hover:bg-red-100 text-red-700"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                             Delete
@@ -498,38 +470,37 @@ export default function ManagerBankAccountList() {
           </div>
 
           {/* Pagination */}
-          <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-sm text-gray-600">
-              Showing <span className="font-semibold">{pageData.length}</span>{" "}
-              of <span className="font-semibold">{filtered.length}</span>{" "}
-              records
+          <div className="bg-slate-50 px-4 py-3 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-slate-600">
+            <div>
+              Hiển thị <span className="font-semibold">{pageData.length}</span>{" "}
+              / <span className="font-semibold">{filtered.length}</span> bản ghi
               {filtered.length < rows.length && (
-                <span className="text-gray-400">
+                <span className="text-slate-400">
                   {" "}
-                  (filtered from {rows.length} total)
+                  (lọc từ {rows.length} tổng số)
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600">
-                Page {page} of {totalPages}
+            <div className="flex items-center gap-2">
+              <span>
+                Trang {page} / {totalPages}
               </span>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page <= 1}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 disabled:opacity-50"
                 >
-                  <ChevronLeft className="w-4 h-4" />
-                  Previous
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  Trước
                 </button>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page >= totalPages}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 disabled:opacity-50"
                 >
-                  Next
-                  <ChevronRight className="w-4 h-4" />
+                  Sau
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -539,66 +510,68 @@ export default function ManagerBankAccountList() {
         {/* VIEW MODAL */}
         {showView && (
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in"
+            className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50"
             onClick={() => setShowView(false)}
           >
             <div
-              className="bg-white rounded-2xl shadow-2xl max-w-lg w-full animate-slide-up"
+              className="bg-white rounded-xl shadow-xl max-w-lg w-full border border-slate-200"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200 rounded-t-2xl">
-                <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+              <div className="px-5 py-3 border-b border-slate-200 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-slate-900">
                   Chi tiết tài khoản
                 </h2>
+                <button
+                  onClick={() => setShowView(false)}
+                  className="p-1 rounded hover:bg-slate-100"
+                >
+                  <X className="w-4 h-4 text-slate-500" />
+                </button>
               </div>
-              <div className="p-6 space-y-4">
+              <div className="p-5 space-y-4 text-sm">
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <div className="text-xs font-medium text-slate-500 mb-1">
                     Tên ngân hàng
-                  </label>
-                  <p className="mt-1 text-lg font-medium text-gray-800">
+                  </div>
+                  <div className="text-base font-medium text-slate-900">
                     {form.bankName || "-"}
-                  </p>
+                  </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <div className="text-xs font-medium text-slate-500 mb-1">
                     Số tài khoản
-                  </label>
-                  <p className="mt-1 font-mono text-lg bg-gray-50 px-3 py-2 rounded-lg text-gray-700">
+                  </div>
+                  <div className="font-mono text-sm bg-slate-50 px-3 py-2 rounded border border-slate-100 text-slate-800">
                     {form.accountNumber || "-"}
-                  </p>
+                  </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <div className="text-xs font-medium text-slate-500 mb-1">
                     Tên chủ thẻ
-                  </label>
-                  <p className="mt-1 text-lg text-gray-800">
+                  </div>
+                  <div className="text-sm text-slate-900">
                     {form.accountHolder || "-"}
-                  </p>
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 pt-2">
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <div className="text-xs font-medium text-slate-500 mb-1">
                       Nhận tiền hàng
-                    </label>
-                    <div className="mt-2">
-                      <BadgeYesNo value={form.isProxy} />
                     </div>
+                    <BadgeYesNo value={form.isProxy} />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <div className="text-xs font-medium text-slate-500 mb-1">
                       Nhận tiền vận chuyển
-                    </label>
-                    <div className="mt-2">
-                      <BadgeYesNo value={form.isRevenue} />
                     </div>
+                    <BadgeYesNo value={form.isRevenue} />
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 rounded-b-2xl flex justify-end">
+              <div className="px-5 py-3 border-t border-slate-200 flex justify-end">
                 <button
                   onClick={() => setShowView(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  className="px-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
                 >
                   Đóng
                 </button>
@@ -610,21 +583,27 @@ export default function ManagerBankAccountList() {
         {/* CREATE MODAL */}
         {showCreate && (
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in"
+            className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50"
             onClick={() => setShowCreate(false)}
           >
             <div
-              className="bg-white rounded-2xl shadow-2xl max-w-lg w-full animate-slide-up"
+              className="bg-white rounded-xl shadow-xl max-w-lg w-full border border-slate-200"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4 border-b border-gray-200 rounded-t-2xl">
-                <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+              <div className="px-5 py-3 border-b border-slate-200 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-slate-900">
                   Thêm tài khoản ngân hàng
                 </h2>
+                <button
+                  onClick={() => setShowCreate(false)}
+                  className="p-1 rounded hover:bg-slate-100"
+                >
+                  <X className="w-4 h-4 text-slate-500" />
+                </button>
               </div>
-              <div className="p-6 space-y-4">
+              <div className="p-5 space-y-4 text-sm">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
                     Tên ngân hàng *
                   </label>
                   <input
@@ -633,12 +612,12 @@ export default function ManagerBankAccountList() {
                     onChange={(e) =>
                       setForm((s) => ({ ...s, bankName: e.target.value }))
                     }
-                    placeholder="e.g. ACB, Vietcombank, Techcombank..."
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all duration-200 outline-none"
+                    placeholder="ACB, Vietcombank, Techcombank..."
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
                     Tên tài khoản *
                   </label>
                   <input
@@ -647,12 +626,12 @@ export default function ManagerBankAccountList() {
                     onChange={(e) =>
                       setForm((s) => ({ ...s, accountHolder: e.target.value }))
                     }
-                    placeholder="e.g. Nguyen Van A"
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all duration-200 outline-none"
+                    placeholder="Nguyen Van A"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
                     Số tài khoản *
                   </label>
                   <input
@@ -661,52 +640,51 @@ export default function ManagerBankAccountList() {
                     onChange={(e) =>
                       setForm((s) => ({ ...s, accountNumber: e.target.value }))
                     }
-                    placeholder="e.g. 23323667"
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all duration-200 outline-none"
+                    placeholder="23323667"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500"
                   />
                 </div>
                 <div className="flex gap-6 pt-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700">
                     <input
                       type="checkbox"
                       checked={form.isProxy}
                       onChange={(e) =>
                         setForm((s) => ({ ...s, isProxy: e.target.checked }))
                       }
-                      className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                      className="w-4 h-4 text-indigo-600 border-slate-300 rounded"
                     />
-                    <span className="text-sm font-medium text-gray-700">
-                      Nhận tiền hàng
-                    </span>
+                    Nhận tiền hàng
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700">
                     <input
                       type="checkbox"
                       checked={form.isRevenue}
                       onChange={(e) =>
-                        setForm((s) => ({ ...s, isRevenue: e.target.checked }))
+                        setForm((s) => ({
+                          ...s,
+                          isRevenue: e.target.checked,
+                        }))
                       }
-                      className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                      className="w-4 h-4 text-indigo-600 border-slate-300 rounded"
                     />
-                    <span className="text-sm font-medium text-gray-700">
-                      Nhận tiền vận chuyển
-                    </span>
+                    Nhận tiền vận chuyển
                   </label>
                 </div>
               </div>
-              <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 rounded-b-2xl flex justify-end gap-3">
+              <div className="px-5 py-3 border-t border-slate-200 flex justify-end gap-2">
                 <button
                   onClick={() => setShowCreate(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  className="px-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
                 >
                   Hủy
                 </button>
                 <button
                   onClick={doCreate}
                   disabled={submitting}
-                  className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-1.5 text-xs rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60"
                 >
-                  {submitting ? "Creating..." : "Tạo"}
+                  {submitting ? "Đang tạo..." : "Tạo"}
                 </button>
               </div>
             </div>
@@ -716,21 +694,27 @@ export default function ManagerBankAccountList() {
         {/* EDIT MODAL */}
         {showEdit && (
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in"
+            className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50"
             onClick={() => setShowEdit(false)}
           >
             <div
-              className="bg-white rounded-2xl shadow-2xl max-w-lg w-full animate-slide-up"
+              className="bg-white rounded-xl shadow-xl max-w-lg w-full border border-slate-200"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-4 border-b border-gray-200 rounded-t-2xl">
-                <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-                  Chỉnh sửa
+              <div className="px-5 py-3 border-b border-slate-200 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-slate-900">
+                  Chỉnh sửa tài khoản
                 </h2>
+                <button
+                  onClick={() => setShowEdit(false)}
+                  className="p-1 rounded hover:bg-slate-100"
+                >
+                  <X className="w-4 h-4 text-slate-500" />
+                </button>
               </div>
-              <div className="p-6 space-y-4">
+              <div className="p-5 space-y-4 text-sm">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
                     Tên ngân hàng
                   </label>
                   <input
@@ -739,11 +723,11 @@ export default function ManagerBankAccountList() {
                     onChange={(e) =>
                       setForm((s) => ({ ...s, bankName: e.target.value }))
                     }
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-amber-500 focus:ring-4 focus:ring-amber-100 transition-all duration-200 outline-none"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
                     Tên chủ thẻ
                   </label>
                   <input
@@ -752,11 +736,11 @@ export default function ManagerBankAccountList() {
                     onChange={(e) =>
                       setForm((s) => ({ ...s, accountHolder: e.target.value }))
                     }
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-amber-500 focus:ring-4 focus:ring-amber-100 transition-all duration-200 outline-none"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
                     Số tài khoản
                   </label>
                   <input
@@ -765,51 +749,50 @@ export default function ManagerBankAccountList() {
                     onChange={(e) =>
                       setForm((s) => ({ ...s, accountNumber: e.target.value }))
                     }
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-amber-500 focus:ring-4 focus:ring-amber-100 transition-all duration-200 outline-none"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500"
                   />
                 </div>
                 <div className="flex gap-6 pt-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700">
                     <input
                       type="checkbox"
                       checked={form.isProxy}
                       onChange={(e) =>
                         setForm((s) => ({ ...s, isProxy: e.target.checked }))
                       }
-                      className="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500"
+                      className="w-4 h-4 text-amber-600 border-slate-300 rounded"
                     />
-                    <span className="text-sm font-medium text-gray-700">
-                      Nhận tiền hàng
-                    </span>
+                    Nhận tiền hàng
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700">
                     <input
                       type="checkbox"
                       checked={form.isRevenue}
                       onChange={(e) =>
-                        setForm((s) => ({ ...s, isRevenue: e.target.checked }))
+                        setForm((s) => ({
+                          ...s,
+                          isRevenue: e.target.checked,
+                        }))
                       }
-                      className="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500"
+                      className="w-4 h-4 text-amber-600 border-slate-300 rounded"
                     />
-                    <span className="text-sm font-medium text-gray-700">
-                      Nhận vận chuyển
-                    </span>
+                    Nhận vận chuyển
                   </label>
                 </div>
               </div>
-              <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 rounded-b-2xl flex justify-end gap-3">
+              <div className="px-5 py-3 border-t border-slate-200 flex justify-end gap-2">
                 <button
                   onClick={() => setShowEdit(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  className="px-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
                 >
                   Thoát
                 </button>
                 <button
                   onClick={doEdit}
                   disabled={submitting}
-                  className="px-5 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-1.5 text-xs rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60"
                 >
-                  {submitting ? "Saving..." : "Lưu thay đổi"}
+                  {submitting ? "Đang lưu..." : "Lưu thay đổi"}
                 </button>
               </div>
             </div>
@@ -819,87 +802,52 @@ export default function ManagerBankAccountList() {
         {/* DELETE CONFIRM MODAL */}
         {deleteId != null && (
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in"
+            className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50"
             onClick={() => setDeleteId(null)}
           >
             <div
-              className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-slide-up"
+              className="bg-white rounded-xl shadow-xl max-w-sm w-full border border-slate-200"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="bg-gradient-to-r from-red-500 to-pink-500 px-6 py-4 border-b border-gray-200 rounded-t-2xl">
-                <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+              <div className="px-5 py-3 border-b border-slate-200 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-slate-900">
                   Xác nhận xóa
                 </h2>
-              </div>
-              <div className="p-6 text-center">
-                <Trash2 className="w-16 h-16 text-red-200 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  Xóa tài khoản
-                </h3>
-                <p className="text-gray-600 mb-1">
-                  Hành động không thể hoàn tác.
-                </p>
-              </div>
-              <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 rounded-b-2xl flex justify-end gap-3">
                 <button
                   onClick={() => setDeleteId(null)}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  className="p-1 rounded hover:bg-slate-100"
                 >
-                  Thoát
+                  <X className="w-4 h-4 text-slate-500" />
+                </button>
+              </div>
+              <div className="p-5 text-center text-sm">
+                <Trash2 className="w-10 h-10 text-red-200 mx-auto mb-3" />
+                <h3 className="text-sm font-semibold text-slate-900 mb-1">
+                  Xóa tài khoản ngân hàng
+                </h3>
+                <p className="text-xs text-slate-600">
+                  Hành động này không thể hoàn tác. Bạn có chắc muốn xóa?
+                </p>
+              </div>
+              <div className="px-5 py-3 border-t border-slate-200 flex justify-end gap-2">
+                <button
+                  onClick={() => setDeleteId(null)}
+                  className="px-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
+                >
+                  Hủy
                 </button>
                 <button
                   onClick={doDelete}
                   disabled={submitting}
-                  className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-1.5 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
                 >
-                  {submitting ? "Xóa..." : "Xóa tài khoản"}
+                  {submitting ? "Đang xóa..." : "Xóa tài khoản"}
                 </button>
               </div>
             </div>
           </div>
         )}
       </div>
-
-      {/* Add CSS animations */}
-      <style jsx>{`
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        @keyframes slide-in {
-          from {
-            opacity: 0;
-            transform: translateX(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        @keyframes slide-up {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.2s ease-out;
-        }
-        .animate-slide-in {
-          animation: slide-in 0.3s ease-out;
-        }
-        .animate-slide-up {
-          animation: slide-up 0.3s ease-out;
-        }
-      `}</style>
     </div>
   );
 }
