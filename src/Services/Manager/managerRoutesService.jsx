@@ -14,24 +14,27 @@ const routesService = {
   createRoute: async (data) => {
     const apiData = {
       name: data.name,
-      shipTime: data.shipTime.toString(), // API expects string
+      shipTime: data.shipTime.toString(),
       unitBuyingPrice: data.unitBuyingPrice || 0,
       unitDepositPrice: data.unitDepositPrice || 0,
       exchangeRate: data.exchangeRate || 0,
+      differenceRate: data.differenceRate || 0,
+      updateAuto: data.updateAuto ?? false,
       note: data.note || "",
     };
 
     const res = await api.post("/routes", apiData);
     return res.data;
   },
-
   updateRoute: async (id, data) => {
     const apiData = {
       name: data.name,
       shipTime: data.shipTime.toString(), // API expects string
-      unitBuyingPrice: data.unitBuyingPrice || 0,
-      unitDepositPrice: data.unitDepositPrice || 0,
-      exchangeRate: data.exchangeRate || 0,
+      unitBuyingPrice: data.unitBuyingPrice ?? 0,
+      unitDepositPrice: data.unitDepositPrice ?? 0,
+      exchangeRate: data.exchangeRate ?? 0,
+      differenceRate: data.differenceRate ?? 0, // mới
+      updateAuto: data.updateAuto ?? false, // mới
       note: data.note || "",
     };
 
