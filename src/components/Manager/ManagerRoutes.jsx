@@ -21,12 +21,16 @@ const ManagerRoutes = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [updateRatesLoading, setUpdateRatesLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
+
+  // ✅ Thêm differenceRate & updateAuto cho đúng API
   const [formData, setFormData] = useState({
     name: "",
     shipTime: "",
     unitBuyingPrice: "",
     unitDepositPrice: "",
     exchangeRate: "",
+    differenceRate: "",
+    updateAuto: false,
     note: "",
   });
 
@@ -79,16 +83,20 @@ const ManagerRoutes = () => {
     );
 
     try {
+      // ✅ Chuẩn payload đúng API mới
       const submitData = {
         name: formData.name,
-        shipTime: formData.shipTime,
+        shipTime: formData.shipTime, // API đang nhận string -> giữ nguyên
         unitBuyingPrice: Number(formData.unitBuyingPrice) || 0,
         unitDepositPrice: Number(formData.unitDepositPrice) || 0,
         exchangeRate: Number(formData.exchangeRate) || 0,
+        differenceRate: Number(formData.differenceRate) || 0,
+        updateAuto: !!formData.updateAuto,
         note: formData.note,
       };
 
       if (editingId) {
+        // Optimistic update
         setRoutes((prev) =>
           prev.map((item) =>
             item.routeId === editingId ? { ...item, ...submitData } : item
@@ -127,6 +135,8 @@ const ManagerRoutes = () => {
       unitBuyingPrice: "",
       unitDepositPrice: "",
       exchangeRate: "",
+      differenceRate: "",
+      updateAuto: false,
       note: "",
     });
     setShowDialog(false);
@@ -141,6 +151,8 @@ const ManagerRoutes = () => {
       unitBuyingPrice: "",
       unitDepositPrice: "",
       exchangeRate: "",
+      differenceRate: "",
+      updateAuto: false,
       note: "",
     });
     setShowDialog(true);
@@ -153,6 +165,8 @@ const ManagerRoutes = () => {
       unitBuyingPrice: item.unitBuyingPrice || "",
       unitDepositPrice: item.unitDepositPrice || "",
       exchangeRate: item.exchangeRate || "",
+      differenceRate: item.differenceRate ?? "",
+      updateAuto: item.updateAuto ?? false,
       note: item.note || "",
     });
     setEditingId(item.routeId);
@@ -193,6 +207,12 @@ const ManagerRoutes = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // ✅ riêng checkbox updateAuto
+  const handleCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: checked }));
   };
 
   const formatCurrency = (amount) =>
@@ -274,9 +294,6 @@ const ManagerRoutes = () => {
             <thead className="bg-gray-50 border-b">
               <tr>
                 <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase">
-                  ID
-                </th>
-                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase">
                   Mã tỷ giá
                 </th>
                 <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase">
@@ -331,9 +348,6 @@ const ManagerRoutes = () => {
                     key={item.routeId}
                     className="hover:bg-gray-50 transition-colors"
                   >
-                    <td className="px-3 py-2 font-medium text-gray-900 whitespace-nowrap">
-                      #{item.routeId}
-                    </td>
                     <td className="px-3 py-2 font-medium text-gray-900 whitespace-nowrap">
                       {item.name}
                     </td>
@@ -429,7 +443,7 @@ const ManagerRoutes = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="VD: JPY - USD"
+                    placeholder="VD: JPY - VNĐ"
                     required
                   />
                 </div>
@@ -497,6 +511,23 @@ const ManagerRoutes = () => {
                   />
                 </div>
 
+                {/* ✅ Tỷ giá chênh */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Tỷ giá chênh (VNĐ)
+                  </label>
+                  <input
+                    type="number"
+                    name="differenceRate"
+                    value={formData.differenceRate}
+                    onChange={handleInputChange}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+
                 <div className="md:col-span-2">
                   <label className="block text-xs font-medium text-gray-700 mb-1">
                     Tên tuyến
@@ -509,6 +540,24 @@ const ManagerRoutes = () => {
                     placeholder="Nhập tên tuyến vận chuyển..."
                     rows={3}
                   />
+                </div>
+
+                {/* ✅ Checkbox updateAuto */}
+                <div className="md:col-span-2">
+                  <label className="flex items-center gap-2 text-xs font-medium text-gray-700">
+                    <input
+                      type="checkbox"
+                      name="updateAuto"
+                      checked={formData.updateAuto}
+                      onChange={handleCheckboxChange}
+                      className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                    />
+                    Tự động cập nhật tỷ giá cho mã này
+                  </label>
+                  <p className="text-[11px] text-gray-500 mt-1">
+                    Nếu bật, hệ thống sẽ tự cập nhật tỷ giá dựa trên nguồn tỷ
+                    giá chung (API backend).
+                  </p>
                 </div>
               </div>
 

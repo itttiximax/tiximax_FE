@@ -139,8 +139,8 @@ const Signup = () => {
         backgroundImage: `url(${LogoTixi})`,
       }}
     >
-      <div className="w-full max-w-[420px] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
-        {/* Header giống SignIn: lớn hơn, có overlay, có mô tả */}
+      <div className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+        {/* Header */}
         <div
           className="px-8 py-8 text-center bg-cover bg-center bg-no-repeat relative"
           style={{
@@ -161,17 +161,17 @@ const Signup = () => {
           </div>
         </div>
 
-        {/* Form Container: Chia thành hai cột cho các trường chính để ngắn hơn, chuyên nghiệp */}
+        {/* Form Container */}
         <div className="px-8 py-6 bg-white">
-          {/* <div className="mb-6">
+          <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-1">
               Tạo Tài Khoản
             </h2>
-          </div> */}
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <fieldset disabled={submitting}>
-              {/* Các trường bắt buộc: Chia grid-cols-2 */}
+              {/* Row 1: Username & Name */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">
@@ -182,9 +182,9 @@ const Signup = () => {
                     name="username"
                     value={formData.username}
                     onChange={handleInputChange}
-                    placeholder="Username"
+                    placeholder="Nhập tên đăng nhập"
                     autoComplete="username"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm"
                     required
                   />
                 </div>
@@ -198,14 +198,15 @@ const Signup = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    placeholder="Họ và tên"
+                    placeholder="Nhập họ và tên"
                     autoComplete="name"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm"
                     required
                   />
                 </div>
               </div>
 
+              {/* Row 2: Email & Phone */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">
@@ -218,7 +219,7 @@ const Signup = () => {
                     onChange={handleInputChange}
                     placeholder="email@example.com"
                     autoComplete="email"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm"
                     required
                   />
                 </div>
@@ -234,12 +235,13 @@ const Signup = () => {
                     onChange={handleInputChange}
                     placeholder="0901234567"
                     autoComplete="tel"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm"
                     required
                   />
                 </div>
               </div>
 
+              {/* Row 3: Password & Confirm Password */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">
@@ -251,9 +253,10 @@ const Signup = () => {
                       name="password"
                       value={formData.password}
                       onChange={handleInputChange}
-                      placeholder="Mật khẩu"
+                      placeholder="Nhập mật khẩu"
                       autoComplete="new-password"
-                      className="w-full px-4 py-2 pr-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm"
+                      minLength={6}
+                      className="w-full px-4 py-2.5 pr-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm"
                       required
                     />
                     <button
@@ -272,7 +275,7 @@ const Signup = () => {
                       )}
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Min 8 ký tự</p>
+                  {/* <p className="text-xstext-black-500 mt-1">Min 6 ký tự</p> */}
                 </div>
 
                 <div>
@@ -285,9 +288,10 @@ const Signup = () => {
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
-                      placeholder="Nhập lại"
+                      placeholder="Nhập lại mật khẩu"
                       autoComplete="new-password"
-                      className="w-full px-4 py-2 pr-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm"
+                      minLength={6}
+                      className="w-full px-4 py-2.5 pr-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm"
                       required
                     />
                     <button
@@ -311,9 +315,13 @@ const Signup = () => {
                 </div>
               </div>
 
-              {/* Optional Fields: Chia grid-cols-2 để ngắn hơn */}
-              <div className="pt-4 border-t border-gray-200">
-                <div className="space-y-3">
+              {/* Optional Fields */}
+              <div className="pt-4 border-gray-400">
+                <p className="text-xl text-black-500 mb-3">
+                  Thông tin thêm (không bắt buộc)
+                </p>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 mb-1">
                       Địa chỉ
@@ -323,9 +331,9 @@ const Signup = () => {
                       name="address"
                       value={formData.address}
                       onChange={handleInputChange}
-                      placeholder="Địa chỉ"
+                      placeholder="Nhập địa chỉ"
                       autoComplete="street-address"
-                      className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 text-xs disabled:bg-gray-50"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 text-sm disabled:bg-gray-50"
                     />
                   </div>
 
@@ -339,14 +347,14 @@ const Signup = () => {
                       value={formData.source}
                       onChange={handleInputChange}
                       placeholder="VD: Facebook, Google"
-                      className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 text-xs disabled:bg-gray-50"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 text-sm disabled:bg-gray-50"
                     />
                   </div>
                 </div>
               </div>
             </fieldset>
 
-            {/* Submit Button giống SignIn */}
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={!isFormFilled || submitting}
@@ -390,7 +398,7 @@ const Signup = () => {
           </p>
         </div>
 
-        {/* Footer giống SignIn */}
+        {/* Footer */}
         <div className="bg-gray-50 px-8 py-3 text-center border-t border-gray-100">
           <p className="text-xs text-gray-400">
             © 2024 TixiMax. All rights reserved.
