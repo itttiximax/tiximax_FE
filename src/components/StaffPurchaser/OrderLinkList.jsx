@@ -689,7 +689,7 @@ const OrderLinkList = () => {
                       <div className="text-right flex items-center gap-3">
                         <div>
                           <div className="text-base font-bold text-gray-900 flex items-center gap-1">
-                            {formatCurrency(order.finalPriceOrder)} ₫
+                            {formatCurrency(order.finalPriceOrder)}
                           </div>
                           <div className="text-xs text-gray-500 font-semibold">
                             Order total
@@ -736,7 +736,7 @@ const OrderLinkList = () => {
                             Selected total:
                           </div>
                           <div className="text-lg font-bold text-amber-900">
-                            {formatCurrency(selectedTotal)} ₫
+                            {formatCurrency(selectedTotal)}
                           </div>
                         </div>
                       </div>
@@ -880,12 +880,12 @@ const OrderLinkList = () => {
 
                                   {/* Product Info */}
                                   <div className="lg:col-span-1">
-                                    <div className="font-medium text-gray-900 mb-1 text-sm">
+                                    <div className="font-medium text-black mb-1 text-xl">
                                       {link.productName !== "string"
                                         ? link.productName
                                         : "Product name"}
                                     </div>
-                                    <div className="space-y-0.5 text-xs text-gray-600">
+                                    <div className="space-y-0.5 text-xls text-black-600">
                                       <div className="flex items-center gap-1">
                                         <ExternalLink className="w-2.5 h-2.5" />
                                         {link.website !== "string"
@@ -900,20 +900,20 @@ const OrderLinkList = () => {
 
                                   {/* Pricing Info */}
                                   <div className="lg:col-span-1">
-                                    <div className="space-y-0.5 text-xs">
-                                      <div className="text-gray-600">
+                                    <div className="space-y-0.5 text-xls text-black">
+                                      <div className="text-black-600">
                                         Qty:{" "}
                                         <span className="font-medium">
                                           {link.quantity}
                                         </span>
                                       </div>
-                                      <div className="text-gray-600">
+                                      <div className="text-black-600">
                                         Item price:{" "}
                                         <span className="font-medium">
                                           {link.priceWeb?.toLocaleString() || 0}
                                         </span>
                                       </div>
-                                      <div className="text-gray-600">
+                                      <div className="text-black-600">
                                         Shipping:{" "}
                                         <span className="font-medium">
                                           {link.shipWeb?.toLocaleString() || 0}
@@ -924,7 +924,7 @@ const OrderLinkList = () => {
 
                                   {/* Additional Info */}
                                   <div className="lg:col-span-1">
-                                    <div className="space-y-0.5 text-xs text-gray-600">
+                                    <div className="space-y-0.5 text-xls text-black-600">
                                       <div>
                                         Variant:{" "}
                                         <span className="font-medium">
@@ -945,7 +945,7 @@ const OrderLinkList = () => {
                                   {/* Actions & Status */}
                                   <div className="lg:col-span-1 text-right">
                                     <div className="text-sm font-semibold text-gray-900 mb-2">
-                                      {formatCurrency(link.totalWeb)} ₫
+                                      {formatCurrency(link.totalWeb)}
                                     </div>
                                     <div className="flex flex-col gap-1.5 items-end">
                                       <span

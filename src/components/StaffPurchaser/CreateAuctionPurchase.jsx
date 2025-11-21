@@ -33,17 +33,19 @@ const CreateAuctionPurchase = ({
   }, [isOpen]);
 
   const formatCurrency = (value) => {
-    if (!value) return "";
-    const stringValue = value.toString();
-    const parts = stringValue.split(".");
-    const integerPart = parts[0].replace(/,/g, "");
-    const decimalPart = parts[1];
-    const formattedInteger = integerPart
-      ? parseInt(integerPart).toLocaleString("en-US")
-      : "";
-    return decimalPart !== undefined
-      ? formattedInteger + "." + decimalPart
-      : formattedInteger;
+    if (!value && value !== 0) return "";
+
+    const number = Number(value);
+    const fixed = number.toFixed(2);
+    const [integerPart, decimalPart] = fixed.split(".");
+    const formattedInteger = parseInt(integerPart).toLocaleString("en-US");
+
+    // Only show decimals if not .00
+    if (decimalPart === "00") {
+      return formattedInteger;
+    }
+
+    return `${formattedInteger}.${decimalPart}`;
   };
 
   const getRawValue = (value) => value.toString().replace(/,/g, "");
@@ -75,6 +77,12 @@ const CreateAuctionPurchase = ({
 
   const handleImageRemove = () =>
     setPurchaseData((prev) => ({ ...prev, image: "" }));
+
+  // Calculate total from selected products
+  const calculatedTotal = selectedProducts.reduce(
+    (sum, product) => sum + (product.priceWeb || 0),
+    0
+  );
 
   const handleSubmitPurchase = async () => {
     try {
@@ -155,21 +163,15 @@ const CreateAuctionPurchase = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          {/* Header - Cyan Theme */}
+          {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                 <span className="inline-block w-1 h-6 bg-cyan-600 rounded"></span>
-                Auction Purchase
+                Auction Purchase - {orderCode}
               </h3>
-              <div className="flex items-center gap-2 mt-1 text-2sx text-black-600">
-                <span>
-                  Order Code:{" "}
-                  <span className="font-medium text-cyan-600">{orderCode}</span>
-                </span>
-              </div>
             </div>
             <button
               onClick={handleClose}
@@ -179,50 +181,73 @@ const CreateAuctionPurchase = ({
             </button>
           </div>
 
-          {/* Selected Products Summary with Product Names */}
-          <div className="mb-6 p-4 bg-gray-100 rounded-lg border border-gray-400">
-            <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
-              <Package className="w-4 h-4" />
-              Selected Auction Products:
-            </h4>
-            <div className="space-y-2">
-              {selectedProducts.map((product, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 p-3 bg-cyan-50 rounded-lg border border-gray-200"
-                >
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-bold text-black-700">
-                      {index + 1}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-black-900 text-sm mb-1">
-                      {product.productName !== "string"
-                        ? product.productName
-                        : "Product Name"}
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-black-800">
-                      <span className="font-medium text-black-600">
-                        {product.trackingCode}
-                      </span>
-                      <span>---</span>
-                      <span>Qty: {product.quantity}</span>
-                      <span>---</span>
-                      <span className="font-medium">
-                        {product.priceWeb?.toLocaleString() || 0} ₫
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+          {/* Product Details Table */}
+          <div className="mb-6">
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-4 py-3 text-left font-medium text-gray-700">
+                        No.
+                      </th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-700">
+                        Product Name
+                      </th>
+                      <th className="px-4 py-3 text-center font-medium text-gray-700">
+                        Quantity
+                      </th>
+                      <th className="px-4 py-3 text-right font-medium text-gray-700">
+                        Auction Price
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {selectedProducts.map((product, index) => (
+                      <tr
+                        key={product.trackingCode || index}
+                        className="hover:bg-gray-50"
+                      >
+                        <td className="px-4 py-3 text-gray-600">{index + 1}</td>
+
+                        <td className="px-4 py-3 text-gray-900">
+                          <div
+                            className="max-w-xs truncate"
+                            title={product.productName}
+                          >
+                            {product.productName || "N/A"}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-center text-gray-900 font-medium">
+                          {product.quantity || 0}
+                        </td>
+                        <td className="px-4 py-3 text-right font-semibold text-gray-900">
+                          {formatCurrency(product.priceWeb || 0)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="bg-cyan-50 border-t-2 border-cyan-200">
+                    <tr>
+                      <td
+                        colSpan="3"
+                        className="px-4 py-3 text-right font-bold text-gray-900"
+                      >
+                        Grand Total:
+                      </td>
+                      <td className="px-4 py-3 text-right font-bold text-cyan-700 text-base">
+                        {formatCurrency(calculatedTotal)}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
             </div>
           </div>
 
           {/* Purchase Form */}
           <div className="space-y-4">
-            <h4 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-              <span className="inline-block w-1 h-5 bg-cyan-600 rounded"></span>
+            <h4 className="text-lg font-medium text-gray-900">
               Auction Information
             </h4>
 
@@ -237,16 +262,13 @@ const CreateAuctionPurchase = ({
                   onChange={handlePurchaseTotalChange}
                   onBlur={handlePurchaseTotalBlur}
                   className="w-full border-2 border-red-500 rounded-md px-3 py-2 focus:border-black focus:ring-0 outline-none"
-                  placeholder="000000"
+                  placeholder={`Suggested: ${formatCurrency(calculatedTotal)}`}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Shipment Code{" "}
-                  <span className="text-gray-500 text-xs font-normal">
-                    (Optional)
-                  </span>
+                  Shipment Code (Optional)
                 </label>
                 <input
                   type="text"
@@ -258,7 +280,7 @@ const CreateAuctionPurchase = ({
                     }))
                   }
                   className="w-full border-2 border-gray-500 rounded-md px-3 py-2 focus:border-black focus:ring-0 outline-none"
-                  placeholder="Enter shipment code (if any)"
+                  placeholder="Shipment code"
                 />
               </div>
             </div>
@@ -267,7 +289,7 @@ const CreateAuctionPurchase = ({
               imageUrl={purchaseData.image}
               onImageUpload={handleImageUpload}
               onImageRemove={handleImageRemove}
-              label="Auction Image"
+              label="Auction Purchase Image"
               required={true}
               maxSizeMB={3}
             />
@@ -281,11 +303,12 @@ const CreateAuctionPurchase = ({
                 }
                 rows={3}
                 className="w-full border-2 border-gray-500 rounded-md px-3 py-2 focus:border-black focus:ring-0 outline-none"
+                placeholder="Add notes (optional)"
               />
             </div>
           </div>
 
-          {/* Actions - Cyan theme */}
+          {/* Actions */}
           <div className="flex justify-end space-x-3 mt-8 pt-6 border-t">
             <button
               onClick={handleClose}
@@ -307,7 +330,7 @@ const CreateAuctionPurchase = ({
               {creatingPurchase && (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
               )}
-              {creatingPurchase ? "Creating..." : "Confirm Auction Purchase"}
+              {creatingPurchase ? "Creating..." : "Create Auction Purchase"}
             </button>
           </div>
         </div>

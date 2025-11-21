@@ -83,18 +83,21 @@ const CreatePurchase = ({
     0
   );
 
-  // Check if entered amount differs and determine warning type
+  // Check if entered amount is higher than calculated
   const getAmountWarning = () => {
     if (!purchaseData.purchaseTotal) return null;
 
     const enteredAmount = Number(getRawValue(purchaseData.purchaseTotal));
 
-    if (enteredAmount === calculatedTotal) return null;
+    // Chỉ show warning nếu cao hơn
+    if (enteredAmount > calculatedTotal) {
+      return {
+        isHigher: true,
+        enteredAmount,
+      };
+    }
 
-    return {
-      isHigher: enteredAmount > calculatedTotal,
-      enteredAmount,
-    };
+    return null;
   };
 
   const amountWarning = getAmountWarning();
@@ -248,13 +251,13 @@ const CreatePurchase = ({
                           {product.quantity || 0}
                         </td>
                         <td className="px-4 py-3 text-right text-gray-900">
-                          {formatCurrency(product.priceWeb || 0)} ₫
+                          {formatCurrency(product.priceWeb || 0)}
                         </td>
                         <td className="px-4 py-3 text-right text-gray-900">
-                          {formatCurrency(product.shipWeb || 0)} ₫
+                          {formatCurrency(product.shipWeb || 0)}
                         </td>
                         <td className="px-4 py-3 text-right font-semibold text-gray-900">
-                          {formatCurrency(product.totalWeb || 0)} ₫
+                          {formatCurrency(product.totalWeb || 0)}
                         </td>
                       </tr>
                     ))}
@@ -268,7 +271,7 @@ const CreatePurchase = ({
                         Grand Total:
                       </td>
                       <td className="px-4 py-3 text-right font-bold text-blue-700 text-base">
-                        {formatCurrency(calculatedTotal)} ₫
+                        {formatCurrency(calculatedTotal)}
                       </td>
                     </tr>
                   </tfoot>
@@ -276,41 +279,21 @@ const CreatePurchase = ({
               </div>
             </div>
 
-            {/* Warning if entered amount differs from calculated */}
+            {/* Warning if entered amount is higher than calculated */}
             {amountWarning && (
-              <div
-                className={`mt-3 p-3 border rounded-lg flex items-start gap-2 ${
-                  amountWarning.isHigher
-                    ? "bg-red-50 border-red-200"
-                    : "bg-amber-50 border-amber-200"
-                }`}
-              >
-                <div
-                  className={`mt-0.5 ${
-                    amountWarning.isHigher ? "text-red-600" : "text-amber-600"
-                  }`}
-                ></div>
-                <div
-                  className={`text-sm ${
-                    amountWarning.isHigher ? "text-red-800" : "text-amber-800"
-                  }`}
-                >
-                  <span className="font-medium">
-                    {amountWarning.isHigher ? "Warning:" : "Notice:"}
-                  </span>{" "}
-                  The total amount you entered (
+              <div className="mt-3 p-3 border rounded-lg flex items-start gap-2 bg-red-50 border-red-200">
+                <div className="text-sm text-red-800">
+                  <span className="font-medium">Warning:</span> The total amount
+                  is (
                   <span className="font-semibold">
-                    {formatCurrency(amountWarning.enteredAmount)} ₫
+                    {formatCurrency(amountWarning.enteredAmount)}
                   </span>
-                  ) is{" "}
+                  ) is <span className="font-semibold">HIGHER</span> than the
+                  calculated product total (
                   <span className="font-semibold">
-                    {amountWarning.isHigher ? "higher" : "lower"}
-                  </span>{" "}
-                  than the calculated product total (
-                  <span className="font-semibold">
-                    {formatCurrency(calculatedTotal)} ₫
+                    {formatCurrency(calculatedTotal)}
                   </span>
-                  )
+                  )<p>Please contact your Sale team.</p>
                 </div>
               </div>
             )}
@@ -401,7 +384,7 @@ const CreatePurchase = ({
               {creatingPurchase && (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
               )}
-              {creatingPurchase ? "Creating..." : "Confirm Purchase"}
+              {creatingPurchase ? "Creating..." : "Create Purchase"}
             </button>
           </div>
         </div>

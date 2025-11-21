@@ -32,17 +32,15 @@ const DetailOrderLink = ({ linkId, onClose }) => {
   // Format currency
   const formatCurrency = (amount) => {
     if (amount === null || amount === undefined) return "N/A";
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
+    return amount.toLocaleString("en-US");
   };
-
   // Get status color
   const getStatusColor = (status) => {
     switch (status) {
       case "HOAT_DONG":
         return "bg-green-100 text-green-800";
+      case "CHO_MUA":
+        return "bg-blue-100 text-blue-800";
       case "TAM_DUNG":
         return "bg-yellow-100 text-yellow-800";
       case "HUY":
@@ -50,6 +48,17 @@ const DetailOrderLink = ({ linkId, onClose }) => {
       default:
         return "bg-gray-100 text-gray-800";
     }
+  };
+
+  // Get status label
+  const getStatusLabel = (status) => {
+    const labels = {
+      HOAT_DONG: "Hoạt động",
+      CHO_MUA: "Chờ mua",
+      TAM_DUNG: "Tạm dừng",
+      HUY: "Huỷ",
+    };
+    return labels[status] || status;
   };
 
   if (loading) {
@@ -113,7 +122,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center space-x-3">
@@ -183,18 +192,19 @@ const DetailOrderLink = ({ linkId, onClose }) => {
 
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xl font-medium text-black-700 mb-1">
                       Product Name
                     </label>
                     <p className="text-gray-900">
-                      {orderLink.productName !== "string"
+                      {orderLink.productName &&
+                      orderLink.productName !== "string"
                         ? orderLink.productName
                         : "No product name"}
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xl font-medium text-black-700 mb-1">
                       Product Link
                     </label>
                     {orderLink.productLink &&
@@ -203,7 +213,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                         href={orderLink.productLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 break-all"
+                        className="text-blue-600 hover:text-blue-800 break-all text-sm"
                       >
                         {orderLink.productLink}
                       </a>
@@ -214,47 +224,60 @@ const DetailOrderLink = ({ linkId, onClose }) => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-xls font-medium text-black-700 mb-1">
                         Website
                       </label>
                       <p className="text-gray-900">
-                        {orderLink.website !== "string"
+                        {orderLink.website && orderLink.website !== "string"
                           ? orderLink.website
                           : "N/A"}
                       </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-xls font-medium text-black-700 mb-1">
                         Quantity
                       </label>
-                      <p className="text-gray-900">{orderLink.quantity}</p>
+                      <p className="text-gray-900 font-semibold">
+                        {orderLink.quantity || 0}
+                      </p>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Tracking Code
-                    </label>
-                    <div className="inline-flex items-center px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
-                      <span className="text-blue-900 font-mono text-sm">
-                        {orderLink.trackingCode}
-                      </span>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xls font-medium text-black-700 mb-1">
+                        Classify
+                      </label>
+                      <p className="text-gray-900">
+                        {orderLink.classify && orderLink.classify !== "string"
+                          ? orderLink.classify
+                          : "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-xls font-medium text-black-700 mb-1">
+                        Shop Name
+                      </label>
+                      <p className="text-gray-900">
+                        {orderLink.groupTag && orderLink.groupTag !== "string"
+                          ? orderLink.groupTag
+                          : "N/A"}
+                      </p>
                     </div>
                   </div>
-
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Group Tag
+                    <label className="block text-xls font-medium text-black-700 mb-1">
+                      Note
                     </label>
                     <p className="text-gray-900">
-                      {orderLink.groupTag !== "string"
-                        ? orderLink.groupTag
-                        : "N/A"}
+                      {orderLink.note && orderLink.note !== "string"
+                        ? orderLink.note
+                        : "No notes"}
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xls font-medium text-black-700 mb-1">
                       Status
                     </label>
                     <span
@@ -262,7 +285,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                         orderLink.status
                       )}`}
                     >
-                      {orderLink.status}
+                      {getStatusLabel(orderLink.status)}
                     </span>
                   </div>
                 </div>
@@ -270,7 +293,8 @@ const DetailOrderLink = ({ linkId, onClose }) => {
 
               {/* Product Image */}
               {orderLink.purchaseImage &&
-                orderLink.purchaseImage !== "string" && (
+                orderLink.purchaseImage !== "string" &&
+                orderLink.purchaseImage !== "" && (
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                       <svg
@@ -321,58 +345,113 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                 </h3>
 
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white rounded-lg p-3 border border-gray-200">
-                      <div className="text-sm text-gray-600 mb-1">
-                        Web Price
+                  {/* Web Pricing */}
+                  <div className="bg-white rounded-lg p-4 border-2 border-blue-200">
+                    <h4 className="text-sm font-semibold text-blue-800 mb-3">
+                      Web Purchase
+                    </h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">
+                          Web Price:
+                        </span>
+                        <span className="font-semibold text-gray-900">
+                          {formatCurrency(orderLink.priceWeb || 0)}
+                        </span>
                       </div>
-                      <div className="text-lg font-semibold text-gray-900">
-                        {orderLink.priceWeb?.toLocaleString() || 0}
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">
+                          Shipping Fee:
+                        </span>
+                        <span className="font-semibold text-gray-900">
+                          {formatCurrency(orderLink.shipWeb || 0)}
+                        </span>
                       </div>
-                    </div>
-                    <div className="bg-white rounded-lg p-3 border border-gray-200">
-                      <div className="text-sm text-gray-600 mb-1">
-                        Shipping Fee
-                      </div>
-                      <div className="text-lg font-semibold text-gray-900">
-                        {orderLink.shipWeb?.toLocaleString() || 0}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-lg p-3 border border-gray-200">
-                    <div className="text-sm text-gray-600 mb-1">Web Total</div>
-                    <div className="text-xl font-bold text-blue-600">
-                      {orderLink.totalWeb?.toLocaleString() || 0}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white rounded-lg p-3 border border-gray-200">
-                      <div className="text-sm text-gray-600 mb-1">
-                        Purchase Fee
-                      </div>
-                      <div className="text-lg font-semibold text-gray-900">
-                        {orderLink.purchaseFee?.toLocaleString() || 0}
-                      </div>
-                    </div>
-                    <div className="bg-white rounded-lg p-3 border border-gray-200">
-                      <div className="text-sm text-gray-600 mb-1">
-                        Extra Charge
-                      </div>
-                      <div className="text-lg font-semibold text-gray-900">
-                        {orderLink.extraCharge?.toLocaleString() || 0}
+                      <div className="pt-2 mt-2 border-t border-blue-200">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium text-blue-700">
+                            Web Total:
+                          </span>
+                          <span className="text-lg font-bold text-blue-700">
+                            {formatCurrency(orderLink.totalWeb || 0)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-green-50 rounded-lg p-4 border-2 border-green-200">
-                    <div className="text-sm text-green-700 mb-1 font-medium">
-                      Final Amount (VND)
+                  {/* Additional Fees */}
+                  <div className="bg-white rounded-lg p-4 border-2 border-amber-200">
+                    <h4 className="text-sm font-semibold text-amber-800 mb-3">
+                      Additional Fees
+                    </h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">
+                          Purchase Fee:
+                        </span>
+                        <span className="font-semibold text-gray-900">
+                          {orderLink.purchaseFee || 0}%
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">
+                          Extra Charge:
+                        </span>
+                        <span className="font-semibold text-gray-900">
+                          {formatCurrency(orderLink.extraCharge || 0)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-2xl font-bold text-green-800">
-                      {formatCurrency(orderLink.finalPriceVnd)}
+                  </div>
+
+                  {/* Final Price */}
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-5 border-2 border-green-300 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm text-green-700 font-medium mb-1">
+                          Final Amount
+                        </div>
+                        <div className="text-3xl font-bold text-green-800">
+                          {formatCurrency(orderLink.finalPriceVnd)}
+                        </div>
+                      </div>
+                      <div className="w-12 h-12 bg-green-200 rounded-full flex items-center justify-center">
+                        <svg
+                          className="w-6 h-6 text-green-700"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
                     </div>
+                  </div>
+
+                  {/* Summary Info */}
+                  <div className="bg-gray-100 rounded-lg p-3 text-xs text-gray-600">
+                    <p className="flex items-center gap-2">
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      Final price includes all fees and charges
+                    </p>
                   </div>
                 </div>
               </div>
@@ -384,7 +463,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
         <div className="flex justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
           >
             Close
           </button>
