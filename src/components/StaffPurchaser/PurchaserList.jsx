@@ -223,7 +223,7 @@ const PurchaserList = () => {
   };
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen px-4 py-6">
       <div className="mx-auto">
         {/* Header - unified blue bar style */}
         <div className="bg-blue-600 rounded-xl shadow-sm p-5 mb-6">

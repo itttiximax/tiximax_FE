@@ -10,7 +10,7 @@ const CreateAuctionPurchase = ({
   onClose,
   orderCode,
   selectedTrackingCodes = [],
-  selectedProducts = [], // Thêm prop mới
+  selectedProducts = [],
   onSuccess,
 }) => {
   const [purchaseData, setPurchaseData] = useState({
@@ -81,24 +81,24 @@ const CreateAuctionPurchase = ({
       setCreatingPurchase(true);
 
       if (selectedTrackingCodes.length === 0) {
-        toast.error("Không có sản phẩm nào được chọn");
+        toast.error("No products selected");
         return;
       }
 
       const rawPurchaseTotal = getRawValue(purchaseData.purchaseTotal);
       if (!rawPurchaseTotal || Number(rawPurchaseTotal) <= 0) {
-        toast.error("Vui lòng nhập tổng tiền hợp lệ (> 0)");
+        toast.error("Please enter a valid total amount (> 0)");
         return;
       }
 
       if (!purchaseData.image || purchaseData.image === "string") {
-        toast.error("Vui lòng upload ảnh purchase đấu giá");
+        toast.error("Please upload auction purchase image");
         return;
       }
 
       const token = localStorage.getItem("jwt");
       if (!token) {
-        toast.error("Không tìm thấy token. Vui lòng đăng nhập lại.");
+        toast.error("Token not found. Please login again.");
         return;
       }
 
@@ -112,11 +112,11 @@ const CreateAuctionPurchase = ({
 
       await createPurchaseService.createAuctionPurchase(orderCode, payload);
 
-      toast.success("Tạo purchase đấu giá thành công!");
+      toast.success("Auction purchase created successfully!");
       handleClose();
       onSuccess?.();
     } catch (error) {
-      let errorMessage = "Có lỗi xảy ra khi tạo purchase đấu giá";
+      let errorMessage = "An error occurred while creating auction purchase";
 
       if (error.response) {
         const { data, status } = error.response;
@@ -131,7 +131,7 @@ const CreateAuctionPurchase = ({
 
         if (status === 401) {
           localStorage.removeItem("jwt");
-          errorMessage = "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.";
+          errorMessage = "Session expired. Please login again.";
         }
       }
 
@@ -162,11 +162,11 @@ const CreateAuctionPurchase = ({
             <div>
               <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                 <span className="inline-block w-1 h-6 bg-cyan-600 rounded"></span>
-                Mua hàng đấu giá
+                Auction Purchase
               </h3>
               <div className="flex items-center gap-2 mt-1 text-2sx text-black-600">
                 <span>
-                  Mã đơn:{" "}
+                  Order Code:{" "}
                   <span className="font-medium text-cyan-600">{orderCode}</span>
                 </span>
               </div>
@@ -183,7 +183,7 @@ const CreateAuctionPurchase = ({
           <div className="mb-6 p-4 bg-gray-100 rounded-lg border border-gray-400">
             <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
               <Package className="w-4 h-4" />
-              Sản phẩm đấu giá đã chọn :
+              Selected Auction Products:
             </h4>
             <div className="space-y-2">
               {selectedProducts.map((product, index) => (
@@ -200,14 +200,14 @@ const CreateAuctionPurchase = ({
                     <div className="font-medium text-black-900 text-sm mb-1">
                       {product.productName !== "string"
                         ? product.productName
-                        : "Tên sản phẩm"}
+                        : "Product Name"}
                     </div>
                     <div className="flex items-center gap-3 text-xs text-black-800">
                       <span className="font-medium text-black-600">
                         {product.trackingCode}
                       </span>
                       <span>---</span>
-                      <span>SL: {product.quantity}</span>
+                      <span>Qty: {product.quantity}</span>
                       <span>---</span>
                       <span className="font-medium">
                         {product.priceWeb?.toLocaleString() || 0} ₫
@@ -223,13 +223,13 @@ const CreateAuctionPurchase = ({
           <div className="space-y-4">
             <h4 className="text-lg font-medium text-gray-900 flex items-center gap-2">
               <span className="inline-block w-1 h-5 bg-cyan-600 rounded"></span>
-              Thông tin Đấu Giá
+              Auction Information
             </h4>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Tổng tiền <span className="text-red-500">*</span>
+                  Total Amount <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -243,9 +243,9 @@ const CreateAuctionPurchase = ({
 
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Mã vận đơn{" "}
+                  Shipment Code{" "}
                   <span className="text-gray-500 text-xs font-normal">
-                    (Tùy chọn)
+                    (Optional)
                   </span>
                 </label>
                 <input
@@ -258,7 +258,7 @@ const CreateAuctionPurchase = ({
                     }))
                   }
                   className="w-full border-2 border-gray-500 rounded-md px-3 py-2 focus:border-black focus:ring-0 outline-none"
-                  placeholder="Nhập mã vận đơn (nếu có)"
+                  placeholder="Enter shipment code (if any)"
                 />
               </div>
             </div>
@@ -267,13 +267,13 @@ const CreateAuctionPurchase = ({
               imageUrl={purchaseData.image}
               onImageUpload={handleImageUpload}
               onImageRemove={handleImageRemove}
-              label="Hình ảnh Đấu Giá"
+              label="Auction Image"
               required={true}
               maxSizeMB={3}
             />
 
             <div>
-              <label className="block text-sm font-medium mb-1">Ghi chú</label>
+              <label className="block text-sm font-medium mb-1">Notes</label>
               <textarea
                 value={purchaseData.note}
                 onChange={(e) =>
@@ -291,7 +291,7 @@ const CreateAuctionPurchase = ({
               onClick={handleClose}
               className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              Hủy
+              Cancel
             </button>
 
             <button
@@ -307,7 +307,7 @@ const CreateAuctionPurchase = ({
               {creatingPurchase && (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
               )}
-              {creatingPurchase ? "Đang tạo..." : "Xác nhận mua đấu giá"}
+              {creatingPurchase ? "Creating..." : "Confirm Auction Purchase"}
             </button>
           </div>
         </div>

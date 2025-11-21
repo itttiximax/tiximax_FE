@@ -23,7 +23,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
     } catch (error) {
       console.error("Error fetching order link detail:", error);
       setError(error.message);
-      toast.error("Không thể tải chi tiết sản phẩm");
+      toast.error("Unable to load product details");
     } finally {
       setLoading(false);
     }
@@ -58,7 +58,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
         <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-2 text-gray-600">Đang tải chi tiết...</span>
+            <span className="ml-2 text-gray-600">Loading details...</span>
           </div>
         </div>
       </div>
@@ -84,7 +84,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
               />
             </svg>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Không thể tải chi tiết
+              Unable to load details
             </h3>
             <p className="text-gray-600 mb-4">{error}</p>
             <div className="flex space-x-2 justify-center">
@@ -92,13 +92,13 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                 onClick={fetchOrderLinkDetail}
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
               >
-                Thử lại
+                Retry
               </button>
               <button
                 onClick={onClose}
                 className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
               >
-                Đóng
+                Close
               </button>
             </div>
           </div>
@@ -134,7 +134,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
-                Chi tiết sản phẩm
+                Product Details
               </h2>
             </div>
           </div>
@@ -178,24 +178,24 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                       d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  Thông tin sản phẩm
+                  Product Information
                 </h3>
 
                 <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Tên sản phẩm
+                      Product Name
                     </label>
                     <p className="text-gray-900">
                       {orderLink.productName !== "string"
                         ? orderLink.productName
-                        : "Chưa có tên sản phẩm"}
+                        : "No product name"}
                     </p>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Link sản phẩm
+                      Product Link
                     </label>
                     {orderLink.productLink &&
                     orderLink.productLink !== "string" ? (
@@ -208,7 +208,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                         {orderLink.productLink}
                       </a>
                     ) : (
-                      <p className="text-gray-500">Chưa có link</p>
+                      <p className="text-gray-500">No link available</p>
                     )}
                   </div>
 
@@ -225,7 +225,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Số lượng
+                        Quantity
                       </label>
                       <p className="text-gray-900">{orderLink.quantity}</p>
                     </div>
@@ -233,7 +233,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Mã tracking
+                      Tracking Code
                     </label>
                     <div className="inline-flex items-center px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
                       <span className="text-blue-900 font-mono text-sm">
@@ -255,7 +255,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Trạng thái
+                      Status
                     </label>
                     <span
                       className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
@@ -286,7 +286,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                           d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                         />
                       </svg>
-                      Hình ảnh sản phẩm
+                      Product Image
                     </h3>
                     <div className="text-center">
                       <img
@@ -317,19 +317,23 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                       d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
                     />
                   </svg>
-                  Thông tin giá cả
+                  Pricing Information
                 </h3>
 
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white rounded-lg p-3 border border-gray-200">
-                      <div className="text-sm text-gray-600 mb-1">Giá web</div>
+                      <div className="text-sm text-gray-600 mb-1">
+                        Web Price
+                      </div>
                       <div className="text-lg font-semibold text-gray-900">
                         {orderLink.priceWeb?.toLocaleString() || 0}
                       </div>
                     </div>
                     <div className="bg-white rounded-lg p-3 border border-gray-200">
-                      <div className="text-sm text-gray-600 mb-1">Phí ship</div>
+                      <div className="text-sm text-gray-600 mb-1">
+                        Shipping Fee
+                      </div>
                       <div className="text-lg font-semibold text-gray-900">
                         {orderLink.shipWeb?.toLocaleString() || 0}
                       </div>
@@ -337,7 +341,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                   </div>
 
                   <div className="bg-white rounded-lg p-3 border border-gray-200">
-                    <div className="text-sm text-gray-600 mb-1">Tổng web</div>
+                    <div className="text-sm text-gray-600 mb-1">Web Total</div>
                     <div className="text-xl font-bold text-blue-600">
                       {orderLink.totalWeb?.toLocaleString() || 0}
                     </div>
@@ -346,14 +350,16 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white rounded-lg p-3 border border-gray-200">
                       <div className="text-sm text-gray-600 mb-1">
-                        Phí mua hộ
+                        Purchase Fee
                       </div>
                       <div className="text-lg font-semibold text-gray-900">
                         {orderLink.purchaseFee?.toLocaleString() || 0}
                       </div>
                     </div>
                     <div className="bg-white rounded-lg p-3 border border-gray-200">
-                      <div className="text-sm text-gray-600 mb-1">Phụ phí</div>
+                      <div className="text-sm text-gray-600 mb-1">
+                        Extra Charge
+                      </div>
                       <div className="text-lg font-semibold text-gray-900">
                         {orderLink.extraCharge?.toLocaleString() || 0}
                       </div>
@@ -362,7 +368,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
 
                   <div className="bg-green-50 rounded-lg p-4 border-2 border-green-200">
                     <div className="text-sm text-green-700 mb-1 font-medium">
-                      Thành tiền (VND)
+                      Final Amount (VND)
                     </div>
                     <div className="text-2xl font-bold text-green-800">
                       {formatCurrency(orderLink.finalPriceVnd)}
@@ -380,7 +386,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
             onClick={onClose}
             className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
           >
-            Đóng
+            Close
           </button>
         </div>
       </div>

@@ -7,7 +7,7 @@ const PinOrder = ({
   isOpen,
   onClose,
   orderId,
-  orderCode,
+  // orderCode,
   pinned = false,
   onSuccess,
 }) => {
@@ -26,7 +26,7 @@ const PinOrder = ({
   if (!isOpen) return null;
 
   const desiredPin = !pinned;
-  const actionText = desiredPin ? "Ghim đơn" : "Bỏ ghim";
+  const actionText = desiredPin ? "Pin Order" : "Unpin Order";
 
   const handleConfirm = async () => {
     try {
@@ -35,9 +35,7 @@ const PinOrder = ({
 
       const token = localStorage.getItem("jwt");
       if (!token) {
-        throw new Error(
-          "Không tìm thấy token xác thực. Vui lòng đăng nhập lại."
-        );
+        throw new Error("Authentication token not found. Please login again.");
       }
 
       await createPurchaseService.pinOrder(orderId, desiredPin);
@@ -52,7 +50,7 @@ const PinOrder = ({
       setError(
         err?.response?.data?.message ||
           err?.message ||
-          "Không thể cập nhật trạng thái ghim."
+          "Unable to update pin status."
       );
     } finally {
       setLoading(false);
@@ -97,9 +95,11 @@ const PinOrder = ({
                 <CheckCircle2 className="w-6 h-6 text-green-600" />
               </div>
               <h3 className="text-sm font-semibold text-gray-900 mb-1">
-                {desiredPin ? "Đã ghim đơn hàng!" : "Đã bỏ ghim đơn hàng!"}
+                {desiredPin
+                  ? "Order pinned successfully!"
+                  : "Order unpinned successfully!"}
               </h3>
-              <p className="text-xs text-gray-600">Đang cập nhật...</p>
+              <p className="text-xs text-gray-600">Updating...</p>
             </div>
           ) : (
             <>
@@ -117,8 +117,8 @@ const PinOrder = ({
                   } text-xs`}
                 >
                   {desiredPin
-                    ? "Đơn hàng sẽ được ưu tiên hiển thị ở đầu danh sách."
-                    : "Đơn hàng sẽ không còn được ưu tiên."}
+                    ? "This order will be prioritized at the top of the list."
+                    : "This order will no longer be prioritized."}
                 </p>
               </div>
 
@@ -126,7 +126,7 @@ const PinOrder = ({
               {/* <div className="space-y-2 mb-4">
                 {orderCode && (
                   <div className="flex justify-between items-center py-1.5 border-b border-gray-200">
-                    <span className="text-xs text-gray-600">Mã đơn:</span>
+                    <span className="text-xs text-gray-600">Order Code:</span>
                     <span className="text-xs font-semibold text-gray-900">
                       {orderCode}
                     </span>
@@ -150,7 +150,8 @@ const PinOrder = ({
               {/* Confirmation */}
               <div className="bg-gray-50 rounded-md p-3">
                 <p className="text-xs text-gray-700 text-center font-medium">
-                  Bạn có chắc muốn {desiredPin ? "ghim" : "bỏ ghim"} đơn này?
+                  Are you sure you want to {desiredPin ? "pin" : "unpin"} this
+                  order?
                 </p>
               </div>
             </>
@@ -165,7 +166,7 @@ const PinOrder = ({
               disabled={loading}
               className="flex-1 px-3 py-2 bg-white border border-gray-300 text-gray-700 rounded-md text-xs font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
-              Hủy
+              Cancel
             </button>
             <button
               onClick={handleConfirm}
@@ -179,7 +180,7 @@ const PinOrder = ({
               {loading ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  Đang xử lý...
+                  Processing...
                 </>
               ) : (
                 <>
@@ -188,7 +189,7 @@ const PinOrder = ({
                   ) : (
                     <PinOff className="w-3.5 h-3.5" />
                   )}
-                  Xác nhận
+                  Confirm
                 </>
               )}
             </button>

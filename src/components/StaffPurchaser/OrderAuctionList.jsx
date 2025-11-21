@@ -46,7 +46,7 @@ const OrderAuctionList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState("");
 
-  // Selected links for purchase
+  // Selected links for auction purchase
   const [selectedLinksForPurchase, setSelectedLinksForPurchase] = useState({});
 
   // Cancel Purchase
@@ -103,7 +103,7 @@ const OrderAuctionList = () => {
       const errorMessage =
         error?.response?.data?.message ||
         error?.message ||
-        "Không thể tải danh sách đơn hàng";
+        "Unable to load auction orders.";
       setError(errorMessage);
       setOrders([]);
     } finally {
@@ -191,7 +191,6 @@ const OrderAuctionList = () => {
 
     if (availableLinks.length === 0) return;
 
-    // Select all
     const selections = {};
     availableLinks.forEach((link) => {
       selections[link.linkId] = link.trackingCode;
@@ -212,7 +211,9 @@ const OrderAuctionList = () => {
       ).length;
 
       if (selectedCount === 0) {
-        toast.error("Vui lòng chọn ít nhất một sản phẩm để mua đấu giá");
+        toast.error(
+          "Please select at least one item to create auction purchase."
+        );
         return;
       }
 
@@ -297,7 +298,7 @@ const OrderAuctionList = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleString("vi-VN", {
+    return new Date(dateString).toLocaleDateString("en-GB", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -313,7 +314,7 @@ const OrderAuctionList = () => {
     const colors = {
       CHO_MUA: "bg-yellow-100 text-yellow-800",
       DANG_MUA: "bg-blue-100 text-blue-800",
-      DA_MUA: "bg-red-600 text-white",
+      DA_MUA: "bg-emerald-600 text-white",
       HUY: "bg-red-100 text-red-800",
       DA_HUY: "bg-red-600 text-white",
       HOAT_DONG: "bg-green-100 text-green-800",
@@ -323,12 +324,12 @@ const OrderAuctionList = () => {
 
   const getStatusText = (status) => {
     const texts = {
-      CHO_MUA: "Chờ mua",
-      DANG_MUA: "Đang mua",
-      DA_MUA: "Đã mua",
-      HUY: "Đã hủy",
-      HOAT_DONG: "Hoạt động",
-      DA_HUY: "Đã hủy",
+      CHO_MUA: "Waiting to buy",
+      DANG_MUA: "Buying",
+      DA_MUA: "Purchased",
+      HUY: "Cancelled",
+      DA_HUY: "Cancelled",
+      HOAT_DONG: "Active",
     };
     return texts[status] || status;
   };
@@ -350,14 +351,33 @@ const OrderAuctionList = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 sm:p-6">
+    <div className="min-h-screen px-4 py-6">
       <div className="mx-auto">
         {/* Header Section */}
         <div className="mb-4">
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-xl font-bold text-cyan-600">
-              Danh Sách Đơn Hàng Đấu Giá
-            </h1>
+          <div className="bg-blue-600 rounded-xl shadow-sm p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
+                <Gavel className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">
+                  Auction Orders (Links)
+                </h1>
+              </div>
+            </div>
+            <button
+              onClick={() =>
+                fetchOrders(pagination.pageNumber, pagination.pageSize)
+              }
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-lg border border-white/40 bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20 disabled:opacity-60"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </button>
           </div>
         </div>
 
@@ -372,7 +392,7 @@ const OrderAuctionList = () => {
                   onClick={() => fetchOrders()}
                   className="text-red-600 hover:text-red-800 text-xs underline mt-1"
                 >
-                  Thử lại
+                  Try again
                 </button>
               </div>
             </div>
@@ -387,10 +407,10 @@ const OrderAuctionList = () => {
                 <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm theo mã đơn hàng..."
+                  placeholder="Search by order code..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
@@ -400,7 +420,7 @@ const OrderAuctionList = () => {
                   type="date"
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
-                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
@@ -408,13 +428,13 @@ const OrderAuctionList = () => {
                 value={pagination.pageSize}
                 onChange={handlePageSizeChange}
                 disabled={loading}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100"
+                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100"
               >
-                <option value={10}>10 / trang</option>
-                <option value={15}>15 / trang</option>
-                <option value={20}>20 / trang</option>
-                <option value={30}>30 / trang</option>
-                <option value={50}>50 / trang</option>
+                <option value={10}>10 / page</option>
+                <option value={15}>15 / page</option>
+                <option value={20}>20 / page</option>
+                <option value={30}>30 / page</option>
+                <option value={50}>50 / page</option>
               </select>
             </div>
           </div>
@@ -423,9 +443,9 @@ const OrderAuctionList = () => {
         {/* Loading State */}
         {loading && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-cyan-600">
-              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-cyan-600" />
-              Đang tải dữ liệu...
+            <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-blue-600">
+              <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" />
+              Loading auction orders...
             </div>
           </div>
         )}
@@ -435,12 +455,12 @@ const OrderAuctionList = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
             <Gavel className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <h3 className="text-base font-medium text-gray-900 mb-2">
-              Không có đơn hàng nào
+              No auction orders found
             </h3>
             <p className="text-gray-500 text-sm">
               {searchTerm
-                ? "Không tìm thấy kết quả phù hợp với từ khóa tìm kiếm."
-                : "Hiện tại chưa có đơn hàng đấu giá nào trong hệ thống."}
+                ? "No orders match your search keyword."
+                : "There are no auction orders in the system right now."}
             </p>
           </div>
         )}
@@ -476,13 +496,13 @@ const OrderAuctionList = () => {
                   {/* Order Header */}
                   <div
                     className={`px-4 py-3 border-b border-gray-200 ${
-                      isPinned ? "bg-yellow-100" : "bg-gray-200"
+                      isPinned ? "bg-yellow-50" : "bg-gray-50"
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-6 h-6 bg-cyan-100 rounded-full flex items-center justify-center">
-                          <span className="text-xs font-semibold text-cyan-600">
+                        <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                          <span className="text-xs font-semibold text-blue-600">
                             {pagination.pageNumber * pagination.pageSize +
                               index +
                               1}
@@ -498,7 +518,7 @@ const OrderAuctionList = () => {
                                   ? "text-amber-600 hover:text-amber-700"
                                   : "text-gray-400 hover:text-gray-600"
                               }`}
-                              title={isPinned ? "Bỏ ghim đơn" : "Ghim đơn"}
+                              title={isPinned ? "Unpin order" : "Pin order"}
                             >
                               {isPinned ? (
                                 <Star className="w-4 h-4" />
@@ -511,8 +531,8 @@ const OrderAuctionList = () => {
                             <span className="font-medium">
                               {formatDate(order.createdAt)}
                             </span>
-                            <span className="px-2 py-0.5 bg-cyan-100 text-cyan-800 rounded-full text-xs font-medium">
-                              Đấu giá
+                            <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                              Auction
                             </span>
                           </div>
                         </div>
@@ -521,19 +541,20 @@ const OrderAuctionList = () => {
                       <div className="text-right flex items-center gap-3">
                         <div>
                           <div className="text-base font-bold text-gray-900 flex items-center gap-1">
-                            {formatCurrency(order.finalPriceOrder)}
+                            {formatCurrency(order.finalPriceOrder)} ₫
                           </div>
-                          <div className="text-2xs text-black-500 font-semibold">
-                            Tổng tiền
+                          <div className="text-xs text-gray-500 font-semibold">
+                            Order total
                           </div>
                         </div>
                         {availableLinks.length > 0 && (
                           <button
                             onClick={() => handleCreatePurchase(order)}
                             disabled={selectedCount === 0}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-lg text-xs font-medium hover:from-cyan-600 hover:to-cyan-700 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-xs font-medium hover:from-blue-600 hover:to-blue-700 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                           >
-                            Mua đấu giá ({selectedCount})
+                            <Plus className="w-3 h-3" />
+                            Auction purchase ({selectedCount})
                           </button>
                         )}
                       </div>
@@ -542,22 +563,19 @@ const OrderAuctionList = () => {
 
                   {/* Selected Summary */}
                   {selectedCount > 0 && (
-                    <div className="px-4 py-3 bg-gradient-to-r from-cyan-50 to-blue-50 border-b border-cyan-200">
+                    <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-blue-50 border-b border-blue-200">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-sm">
-                          <div>
-                            <div className="flex items-center gap-2 text-cyan-900">
-                              <span className="font-medium">
-                                Đã chọn {selectedCount} sản phẩm đấu giá
-                              </span>
-                            </div>
-                          </div>
+                          <span className="font-medium text-blue-900">
+                            Selected {selectedCount} auction item
+                            {selectedCount > 1 ? "s" : ""}
+                          </span>
                         </div>
                         <div className="text-right">
-                          <div className="text-xl text-black-700 font-medium">
-                            Tổng tiền thu:
+                          <div className="text-xs text-gray-700 font-medium">
+                            Selected total:
                           </div>
-                          <div className="text-lg font-bold text-cyan-900">
+                          <div className="text-lg font-bold text-blue-900">
                             {formatCurrency(selectedTotal)} ₫
                           </div>
                         </div>
@@ -572,7 +590,7 @@ const OrderAuctionList = () => {
                         <div className="flex items-center justify-between mb-3">
                           <h4 className="text-xs font-medium text-gray-700 flex items-center gap-1.5">
                             <Package className="w-3 h-3" />
-                            Sản phẩm ({order.orderLinks.length})
+                            Items ({order.orderLinks.length})
                           </h4>
                           <div className="flex items-center gap-3">
                             {availableLinks.length > 0 && (
@@ -580,17 +598,17 @@ const OrderAuctionList = () => {
                                 onClick={() =>
                                   selectAllLinksInOrder(order, !isAllSelected)
                                 }
-                                className="flex items-center gap-1 text-xs font-medium text-cyan-600 hover:text-cyan-800"
+                                className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800"
                               >
                                 {isAllSelected ? (
                                   <>
                                     <CheckSquare className="w-3 h-3" />
-                                    Bỏ chọn tất cả
+                                    Unselect all
                                   </>
                                 ) : (
                                   <>
                                     <Square className="w-3 h-3" />
-                                    Chọn tất cả
+                                    Select all
                                   </>
                                 )}
                               </button>
@@ -598,17 +616,17 @@ const OrderAuctionList = () => {
                             {order.orderLinks.length > 2 && (
                               <button
                                 onClick={() => toggleExpandOrder(order.orderId)}
-                                className="text-cyan-600 hover:text-cyan-800 text-xs font-medium flex items-center gap-1"
+                                className="text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center gap-1"
                               >
                                 {expandedOrders[order.orderId] ? (
                                   <>
                                     <ChevronUp className="w-3 h-3" />
-                                    Thu gọn
+                                    Show less
                                   </>
                                 ) : (
                                   <>
                                     <ChevronDown className="w-3 h-3" />
-                                    Xem tất cả
+                                    Show all
                                   </>
                                 )}
                               </button>
@@ -637,7 +655,7 @@ const OrderAuctionList = () => {
                                 key={link.linkId}
                                 className={`border rounded-lg p-3 transition-all ${
                                   isSelected
-                                    ? "bg-cyan-50 border-cyan-300 ring-2 ring-cyan-200"
+                                    ? "bg-blue-50 border-blue-300 ring-2 ring-blue-200"
                                     : "bg-gradient-to-r from-gray-50 to-gray-50 border-gray-200"
                                 } ${isDisabled ? "opacity-60" : ""}`}
                               >
@@ -656,19 +674,19 @@ const OrderAuctionList = () => {
                                         className="flex flex-col items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
                                       >
                                         {isSelected ? (
-                                          <CheckSquare className="w-6 h-6 text-cyan-600" />
+                                          <CheckSquare className="w-6 h-6 text-blue-600" />
                                         ) : (
                                           <Square className="w-6 h-6 text-gray-400" />
                                         )}
                                         <span className="text-xs text-gray-600 font-medium">
-                                          {isSelected ? "Đã chọn" : "Chọn"}
+                                          {isSelected ? "Selected" : "Select"}
                                         </span>
                                       </button>
                                     ) : (
                                       <div className="flex flex-col items-center gap-2 p-2">
                                         <XCircle className="w-6 h-6 text-gray-300" />
                                         <span className="text-xs text-gray-400 text-center font-medium">
-                                          Không khả dụng
+                                          Not available
                                         </span>
                                       </div>
                                     )}
@@ -679,7 +697,7 @@ const OrderAuctionList = () => {
                                     <div className="font-medium text-gray-900 mb-1 text-sm">
                                       {link.productName !== "string"
                                         ? link.productName
-                                        : "Tên sản phẩm"}
+                                        : "Product name"}
                                     </div>
                                     <div className="space-y-0.5 text-xs text-gray-600">
                                       <div>
@@ -687,7 +705,7 @@ const OrderAuctionList = () => {
                                           ? link.website
                                           : "N/A"}
                                       </div>
-                                      <div className="text-cyan-600 font-medium">
+                                      <div className="text-blue-600 font-medium">
                                         {link.trackingCode}
                                       </div>
                                     </div>
@@ -697,19 +715,19 @@ const OrderAuctionList = () => {
                                   <div className="lg:col-span-1">
                                     <div className="space-y-0.5 text-xs">
                                       <div className="text-gray-600">
-                                        SL:{" "}
+                                        Qty:{" "}
                                         <span className="font-medium">
                                           {link.quantity}
                                         </span>
                                       </div>
                                       <div className="text-gray-600">
-                                        Giá web:{" "}
+                                        Item price:{" "}
                                         <span className="font-medium">
                                           {link.priceWeb?.toLocaleString() || 0}
                                         </span>
                                       </div>
                                       <div className="text-gray-600">
-                                        Giá Ship:{" "}
+                                        Shipping:{" "}
                                         <span className="font-medium">
                                           {link.shipWeb?.toLocaleString() || 0}
                                         </span>
@@ -721,7 +739,7 @@ const OrderAuctionList = () => {
                                   <div className="lg:col-span-1">
                                     <div className="space-y-0.5 text-xs text-gray-600">
                                       <div>
-                                        Phân loại:{" "}
+                                        Variant:{" "}
                                         <span className="font-medium">
                                           {link.classify !== "string"
                                             ? link.classify
@@ -755,10 +773,10 @@ const OrderAuctionList = () => {
                                           onClick={() =>
                                             handleViewDetail(link.linkId)
                                           }
-                                          className="flex items-center gap-1 bg-cyan-600 text-white px-2 py-1 rounded-md text-xs hover:bg-cyan-700 transition-colors"
+                                          className="flex items-center gap-1 bg-blue-600 text-white px-2 py-1 rounded-md text-xs hover:bg-blue-700 transition-colors"
                                         >
                                           <Eye className="w-2.5 h-2.5" />
-                                          Chi tiết
+                                          Details
                                         </button>
 
                                         {link.status !== "HUY" &&
@@ -771,10 +789,10 @@ const OrderAuctionList = () => {
                                                 )
                                               }
                                               className="flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-md text-xs hover:bg-red-600 transition-colors"
-                                              title="Hủy đơn hàng"
+                                              title="Cancel this item"
                                             >
                                               <XCircle className="w-2.5 h-2.5" />
-                                              Hủy
+                                              Cancel
                                             </button>
                                           )}
                                       </div>
@@ -791,7 +809,7 @@ const OrderAuctionList = () => {
                         <div className="flex items-center gap-2">
                           <Package className="w-4 h-4 text-yellow-600" />
                           <span className="text-xs text-yellow-800">
-                            Đơn hàng chưa có sản phẩm nào
+                            This order has no items yet.
                           </span>
                         </div>
                       </div>
@@ -816,12 +834,12 @@ const OrderAuctionList = () => {
               }`}
             >
               <ChevronLeft className="w-4 h-4" />
-              Trang trước
+              Previous
             </button>
 
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-gray-500">Trang</span>
-              <span className="px-2 py-1 bg-cyan-100 text-cyan-700 rounded-lg text-sm font-semibold">
+              <span className="text-xs text-gray-500">Page</span>
+              <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold">
                 {pagination.pageNumber + 1}
               </span>
               <span className="text-xs text-gray-500">
@@ -838,7 +856,7 @@ const OrderAuctionList = () => {
                   : "text-gray-700 hover:bg-gray-100"
               }`}
             >
-              Trang sau
+              Next
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>

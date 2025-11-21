@@ -49,7 +49,7 @@ const StaffProfile = () => {
         const data = await profileService.getCurrentAccount();
         setProfile(data);
       } catch {
-        setError("Không thể tải dữ liệu hồ sơ.");
+        setError("Unable to load profile data.");
       } finally {
         setLoading(false);
       }
@@ -74,22 +74,22 @@ const StaffProfile = () => {
       !passwordData.newPassword ||
       !passwordData.confirmNewPassword
     ) {
-      setPasswordError("Vui lòng điền đầy đủ thông tin");
+      setPasswordError("Please fill in all fields");
       return false;
     }
 
     if (passwordData.newPassword.length < 6) {
-      setPasswordError("Mật khẩu mới phải có ít nhất 6 ký tự");
+      setPasswordError("New password must be at least 6 characters");
       return false;
     }
 
     if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-      setPasswordError("Mật khẩu mới không khớp");
+      setPasswordError("New passwords do not match");
       return false;
     }
 
     if (passwordData.oldPassword === passwordData.newPassword) {
-      setPasswordError("Mật khẩu mới phải khác mật khẩu cũ");
+      setPasswordError("New password must be different from old password");
       return false;
     }
 
@@ -112,7 +112,7 @@ const StaffProfile = () => {
         passwordData.confirmNewPassword
       );
 
-      setPasswordSuccess("Đổi mật khẩu thành công!");
+      setPasswordSuccess("Password changed successfully!");
       setPasswordData({
         oldPassword: "",
         newPassword: "",
@@ -125,7 +125,7 @@ const StaffProfile = () => {
       }, 2000);
     } catch (err) {
       setPasswordError(
-        err.response?.data?.message || err.message || "Đổi mật khẩu thất bại"
+        err.response?.data?.message || err.message || "Password change failed"
       );
     } finally {
       setIsChangingPassword(false);
@@ -147,7 +147,7 @@ const StaffProfile = () => {
     return (
       <div className="flex flex-col justify-center items-center h-screen">
         <Loader2 className="w-12 h-12 text-sky-600 animate-spin mb-4" />
-        <p className="text-slate-600 text-lg">Đang tải hồ sơ của bạn...</p>
+        <p className="text-slate-600 text-lg">Loading your profile...</p>
       </div>
     );
   }
@@ -161,7 +161,7 @@ const StaffProfile = () => {
           onClick={() => window.location.reload()}
           className="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
         >
-          Thử lại
+          Retry
         </button>
       </div>
     );
@@ -171,14 +171,14 @@ const StaffProfile = () => {
     return (
       <div className="flex flex-col justify-center items-center h-screen">
         <AlertCircle className="w-16 h-16 text-slate-400 mb-4" />
-        <p className="text-slate-600 text-xl">Không có dữ liệu hồ sơ</p>
+        <p className="text-slate-600 text-xl">No profile data available</p>
       </div>
     );
   }
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleString("vi-VN", {
+    return date.toLocaleString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -202,9 +202,9 @@ const StaffProfile = () => {
     };
 
     const statusText = {
-      HOAT_DONG: "Hoạt động",
-      inactive: "Không hoạt động",
-      pending: "Chờ xử lý",
+      HOAT_DONG: "Active",
+      inactive: "Inactive",
+      pending: "Pending",
     };
 
     return (
@@ -257,7 +257,7 @@ const StaffProfile = () => {
                 {profile.verify && (
                   <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium flex items-center gap-1 border border-white/30">
                     <Check size={16} />
-                    Đã xác minh
+                    Verified
                   </span>
                 )}
               </div>
@@ -267,7 +267,7 @@ const StaffProfile = () => {
               className="px-6 py-3 bg-white text-sky-600 rounded-xl font-semibold hover:bg-sky-50 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
             >
               <Lock size={20} />
-              Đổi mật khẩu
+              Change Password
             </button>
           </div>
         </div>
@@ -280,18 +280,18 @@ const StaffProfile = () => {
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-slate-100">
               <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
                 <Mail className="text-sky-600" size={24} />
-                Thông tin liên hệ
+                Contact Information
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InfoCard icon={Mail} label="Email" value={profile.email} />
                 <InfoCard
                   icon={Phone}
-                  label="Số điện thoại"
+                  label="Phone Number"
                   value={profile.phone}
                 />
                 <InfoCard
                   icon={Hash}
-                  label="Mã nhân viên"
+                  label="Staff Code"
                   value={profile.staffCode}
                 />
               </div>
@@ -301,22 +301,18 @@ const StaffProfile = () => {
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-slate-100">
               <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
                 <Briefcase className="text-sky-600" size={24} />
-                Thông tin công việc
+                Work Information
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoCard
-                  icon={Briefcase}
-                  label="Vai trò"
-                  value={profile.role}
-                />
+                <InfoCard icon={Briefcase} label="Role" value={profile.role} />
                 <InfoCard
                   icon={Building}
-                  label="Phòng ban"
+                  label="Department"
                   value={profile.department}
                 />
                 <InfoCard
                   icon={MapPin}
-                  label="Địa điểm"
+                  label="Location"
                   value={profile.location}
                   fullWidth
                 />
@@ -330,19 +326,19 @@ const StaffProfile = () => {
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-slate-100">
               <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
                 <CheckCircle className="text-sky-600" size={24} />
-                Trạng thái tài khoản
+                Account Status
               </h2>
               <div className="space-y-3">
                 {[
-                  { label: "Đang kích hoạt", value: profile.enabled },
-                  { label: "Đã xác minh", value: profile.verify },
-                  { label: "Không bị khóa", value: profile.accountNonLocked },
+                  { label: "Enabled", value: profile.enabled },
+                  { label: "Verified", value: profile.verify },
+                  { label: "Not Locked", value: profile.accountNonLocked },
                   {
-                    label: "Tài khoản còn hạn",
+                    label: "Account Valid",
                     value: profile.accountNonExpired,
                   },
                   {
-                    label: "Thông tin hợp lệ",
+                    label: "Credentials Valid",
                     value: profile.credentialsNonExpired,
                   },
                 ].map((item, index) => (
@@ -360,7 +356,7 @@ const StaffProfile = () => {
                           : "bg-red-100 text-red-700"
                       }`}
                     >
-                      {item.value ? "Có" : "Không"}
+                      {item.value ? "Yes" : "No"}
                     </span>
                   </div>
                 ))}
@@ -371,11 +367,11 @@ const StaffProfile = () => {
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-slate-100">
               <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
                 <Calendar className="text-sky-600" size={24} />
-                Thời gian
+                Timeline
               </h2>
               <div className="p-4 bg-slate-50 rounded-lg">
                 <p className="text-xs text-slate-500 font-medium mb-1">
-                  Ngày tạo tài khoản
+                  Account Created
                 </p>
                 <p className="text-sm text-slate-900 font-semibold">
                   {formatDate(profile.createdAt)}
@@ -402,7 +398,7 @@ const StaffProfile = () => {
                 <Lock className="text-sky-600" size={24} />
               </div>
               <h2 className="text-2xl font-bold text-slate-800">
-                Đổi mật khẩu
+                Change Password
               </h2>
             </div>
 
@@ -410,7 +406,7 @@ const StaffProfile = () => {
               {/* Old Password */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Mật khẩu cũ
+                  Old Password
                 </label>
                 <div className="relative">
                   <input
@@ -421,7 +417,7 @@ const StaffProfile = () => {
                     className="w-full px-4 py-3 border border-slate-300 rounded-xl 
                  focus:outline-none focus:ring-2 focus:ring-sky-500 
                  focus:border-sky-500 transition-all"
-                    placeholder="Nhập mật khẩu cũ"
+                    placeholder="Enter old password"
                   />
                   <button
                     type="button"
@@ -440,7 +436,7 @@ const StaffProfile = () => {
               {/* New Password */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Mật khẩu mới
+                  New Password
                 </label>
                 <div className="relative">
                   <input
@@ -451,7 +447,7 @@ const StaffProfile = () => {
                     className="w-full px-4 py-3 border border-slate-300 rounded-xl 
                  focus:outline-none focus:ring-2 focus:ring-sky-500 
                  focus:border-sky-500 transition-all"
-                    placeholder="Nhập mật khẩu mới"
+                    placeholder="Enter new password"
                   />
                   <button
                     type="button"
@@ -470,7 +466,7 @@ const StaffProfile = () => {
               {/* Confirm New Password */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Xác nhận mật khẩu mới
+                  Confirm New Password
                 </label>
                 <div className="relative">
                   <input
@@ -481,7 +477,7 @@ const StaffProfile = () => {
                     className="w-full px-4 py-3 border border-slate-300 rounded-xl 
                  focus:outline-none focus:ring-2 focus:ring-sky-500 
                  focus:border-sky-500 transition-all"
-                    placeholder="Nhập lại mật khẩu mới"
+                    placeholder="Re-enter new password"
                   />
                   <button
                     type="button"
@@ -525,7 +521,7 @@ const StaffProfile = () => {
                   className="flex-1 px-4 py-3 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition-colors"
                   disabled={isChangingPassword}
                 >
-                  Hủy
+                  Cancel
                 </button>
                 <button
                   type="submit"
@@ -535,10 +531,10 @@ const StaffProfile = () => {
                   {isChangingPassword ? (
                     <>
                       <Loader2 className="animate-spin" size={20} />
-                      Đang xử lý...
+                      Processing...
                     </>
                   ) : (
-                    "Xác nhận"
+                    "Confirm"
                   )}
                 </button>
               </div>

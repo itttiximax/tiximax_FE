@@ -65,7 +65,7 @@ const OrderLinkList = () => {
   const [showPin, setShowPin] = useState(false);
   const [pinCtx, setPinCtx] = useState(null);
 
-  // Color palette cho shop badges
+  // Color palette for shop badges
   const shopColorPalette = [
     { bg: "bg-blue-500", text: "text-white", border: "border-blue-100" },
     { bg: "bg-green-500", text: "text-white", border: "border-green-100" },
@@ -173,7 +173,7 @@ const OrderLinkList = () => {
       const errorMessage =
         error?.response?.data?.message ||
         error?.message ||
-        "Không thể tải danh sách đơn hàng";
+        "Unable to load order list.";
       setError(errorMessage);
       setOrders([]);
     } finally {
@@ -244,7 +244,7 @@ const OrderLinkList = () => {
 
     if (selectedShop && selectedShop !== shopName) {
       toast.error(
-        `Chỉ được chọn sản phẩm cùng shop!\nĐã chọn: ${selectedShop}\nBạn đang chọn: ${shopName}`,
+        `You can only select items from the same shop.\nCurrent shop: ${selectedShop}\nYou clicked: ${shopName}`,
         { duration: 4000 }
       );
       return;
@@ -291,7 +291,7 @@ const OrderLinkList = () => {
     // If multiple shops, ask user to select manually
     if (Object.keys(linksByShop).length > 1) {
       toast.error(
-        "Đơn hàng có nhiều shop khác nhau. Vui lòng chọn từng sản phẩm cùng shop!",
+        "This order has items from multiple shops. Please select items by each shop.",
         { duration: 4000 }
       );
       return;
@@ -318,7 +318,7 @@ const OrderLinkList = () => {
       ).length;
 
       if (selectedCount === 0) {
-        toast.error("Vui lòng chọn ít nhất một sản phẩm để mua hộ");
+        toast.error("Please select at least one item to purchase.");
         return;
       }
 
@@ -332,7 +332,7 @@ const OrderLinkList = () => {
       const shops = [...new Set(selectedLinks.map((link) => link.groupTag))];
 
       if (shops.length > 1) {
-        toast.error("Các sản phẩm đã chọn phải cùng shop!");
+        toast.error("Selected items must be from the same shop.");
         return;
       }
 
@@ -440,7 +440,7 @@ const OrderLinkList = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleString("vi-VN", {
+    return new Date(dateString).toLocaleDateString("en-GB", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -456,7 +456,7 @@ const OrderLinkList = () => {
     const colors = {
       CHO_MUA: "bg-yellow-100 text-yellow-800",
       DANG_MUA: "bg-blue-100 text-blue-800",
-      DA_MUA: "bg-red-600 text-white",
+      DA_MUA: "bg-emerald-600 text-white",
       HUY: "bg-red-100 text-red-800",
       DA_HUY: "bg-red-600 text-white",
       HOAT_DONG: "bg-green-100 text-green-800",
@@ -467,13 +467,13 @@ const OrderLinkList = () => {
 
   const getStatusText = (status) => {
     const texts = {
-      CHO_MUA: "Chờ mua",
-      DANG_MUA: "Đang mua",
-      DA_MUA: "Đã mua",
-      HUY: "Đã hủy",
-      HOAT_DONG: "Hoạt động",
-      DA_HUY: "Đã hủy",
-      MUA_SAU: "Mua sau",
+      CHO_MUA: "Waiting to buy",
+      DANG_MUA: "Buying",
+      DA_MUA: "Purchased",
+      HUY: "Cancelled",
+      DA_HUY: "Cancelled",
+      HOAT_DONG: "Active",
+      MUA_SAU: "Buy later",
     };
     return texts[status] || status;
   };
@@ -495,14 +495,33 @@ const OrderLinkList = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 sm:p-6">
+    <div className="min-h-screen px-4 py-6">
       <div className="mx-auto">
         {/* Header Section */}
         <div className="mb-4">
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-xl font-bold text-blue-600">
-              Danh Sách Đơn Hàng Mua Hộ
-            </h1>
+          <div className="bg-blue-600 rounded-xl shadow-sm p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
+                <ShoppingBag className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">
+                  Purchase Orders (Links)
+                </h1>
+              </div>
+            </div>
+            <button
+              onClick={() =>
+                fetchOrders(pagination.pageNumber, pagination.pageSize)
+              }
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-lg border border-white/40 bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20 disabled:opacity-60"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </button>
           </div>
         </div>
 
@@ -510,14 +529,14 @@ const OrderLinkList = () => {
         {error && (
           <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-400 rounded-r-lg">
             <div className="flex items-center">
-              <Eye className="w-4 h-4 text-red-400 mr-2" />
+              <AlertCircle className="w-4 h-4 text-red-400 mr-2" />
               <div>
                 <p className="text-red-700 text-sm">{error}</p>
                 <button
                   onClick={() => fetchOrders()}
                   className="text-red-600 hover:text-red-800 text-xs underline mt-1"
                 >
-                  Thử lại
+                  Try again
                 </button>
               </div>
             </div>
@@ -532,10 +551,10 @@ const OrderLinkList = () => {
                 <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm theo mã đơn hàng..."
+                  placeholder="Search by order code..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
@@ -545,7 +564,7 @@ const OrderLinkList = () => {
                   type="date"
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
-                  className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
@@ -555,11 +574,11 @@ const OrderLinkList = () => {
                 disabled={loading}
                 className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100"
               >
-                <option value={10}>10 / trang</option>
-                <option value={15}>15 / trang</option>
-                <option value={20}>20 / trang</option>
-                <option value={30}>30 / trang</option>
-                <option value={50}>50 / trang</option>
+                <option value={10}>10 / page</option>
+                <option value={15}>15 / page</option>
+                <option value={20}>20 / page</option>
+                <option value={30}>30 / page</option>
+                <option value={50}>50 / page</option>
               </select>
             </div>
           </div>
@@ -570,7 +589,7 @@ const OrderLinkList = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
             <div className="inline-flex items-center px-3 py-2 font-semibold leading-5 text-sm text-blue-600">
               <RefreshCw className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" />
-              Đang tải dữ liệu...
+              Loading orders...
             </div>
           </div>
         )}
@@ -580,12 +599,12 @@ const OrderLinkList = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
             <ShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <h3 className="text-base font-medium text-gray-900 mb-2">
-              Không có đơn hàng nào
+              No orders found
             </h3>
             <p className="text-gray-500 text-sm">
               {searchTerm
-                ? "Không tìm thấy kết quả phù hợp với từ khóa tìm kiếm."
-                : "Hiện tại chưa có đơn hàng mua hộ nào trong hệ thống."}
+                ? "No orders match your search keyword."
+                : "There are no purchase orders in the system right now."}
             </p>
           </div>
         )}
@@ -625,7 +644,7 @@ const OrderLinkList = () => {
                   {/* Order Header */}
                   <div
                     className={`px-4 py-3 border-b border-gray-200 ${
-                      isPinned ? "bg-yellow-100" : "bg-gray-200"
+                      isPinned ? "bg-yellow-50" : "bg-gray-50"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -647,7 +666,7 @@ const OrderLinkList = () => {
                                   ? "text-amber-600 hover:text-amber-700"
                                   : "text-gray-400 hover:text-gray-600"
                               }`}
-                              title={isPinned ? "Bỏ ghim đơn" : "Ghim đơn"}
+                              title={isPinned ? "Unpin order" : "Pin order"}
                             >
                               {isPinned ? (
                                 <Star className="w-4 h-4" />
@@ -661,7 +680,7 @@ const OrderLinkList = () => {
                               {formatDate(order.createdAt)}
                             </span>
                             <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                              Mua hộ
+                              Purchase service
                             </span>
                           </div>
                         </div>
@@ -670,10 +689,10 @@ const OrderLinkList = () => {
                       <div className="text-right flex items-center gap-3">
                         <div>
                           <div className="text-base font-bold text-gray-900 flex items-center gap-1">
-                            {formatCurrency(order.finalPriceOrder)}
+                            {formatCurrency(order.finalPriceOrder)} ₫
                           </div>
-                          <div className="text-xs text-black-500 font-semibold">
-                            Tổng tiền
+                          <div className="text-xs text-gray-500 font-semibold">
+                            Order total
                           </div>
                         </div>
                         {availableLinks.length > 0 && (
@@ -683,7 +702,7 @@ const OrderLinkList = () => {
                             className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-xs font-medium hover:from-green-600 hover:to-green-700 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                           >
                             <Plus className="w-3 h-3" />
-                            Mua hộ ({selectedCount})
+                            Create purchase ({selectedCount})
                           </button>
                         )}
                       </div>
@@ -701,27 +720,24 @@ const OrderLinkList = () => {
                           <div>
                             <div className="flex items-center gap-2 text-amber-900">
                               <span className="font-medium">
-                                Đang chọn shop:
+                                Selected shop:
                               </span>
                               <span className="font-bold text-amber-700 bg-white px-2 py-0.5 rounded border border-amber-300">
                                 {selectedShop}
                               </span>
                               <span className="text-xs font-bold text-red-700  px-2 py-0.5 rounded border border-red-300">
-                                Chỉ được chọn sản phẩm cùng shop
+                                Only items from the same shop can be selected
                               </span>
                             </div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-xl text-black-700 font-medium">
-                            Tổng tiền thu:
+                          <div className="text-xs text-gray-700 font-medium">
+                            Selected total:
                           </div>
                           <div className="text-lg font-bold text-amber-900">
                             {formatCurrency(selectedTotal)} ₫
                           </div>
-                          {/* <div className="text-xs form-medium text-black-600">
-                            ( {selectedCount} sản phẩm )
-                          </div> */}
                         </div>
                       </div>
                     </div>
@@ -734,7 +750,7 @@ const OrderLinkList = () => {
                         <div className="flex items-center justify-between mb-3">
                           <h4 className="text-xs font-medium text-gray-700 flex items-center gap-1.5">
                             <Package className="w-3 h-3" />
-                            Sản phẩm ({order.orderLinks.length})
+                            Items ({order.orderLinks.length})
                           </h4>
                           <div className="flex items-center gap-3">
                             {availableLinks.length > 0 && (
@@ -747,12 +763,12 @@ const OrderLinkList = () => {
                                 {isAllSelected ? (
                                   <>
                                     <CheckSquare className="w-3 h-3" />
-                                    Bỏ chọn tất cả
+                                    Unselect all
                                   </>
                                 ) : (
                                   <>
                                     <Square className="w-3 h-3" />
-                                    Chọn tất cả
+                                    Select all
                                   </>
                                 )}
                               </button>
@@ -765,12 +781,12 @@ const OrderLinkList = () => {
                                 {expandedOrders[order.orderId] ? (
                                   <>
                                     <ChevronUp className="w-3 h-3" />
-                                    Thu gọn
+                                    Show less
                                   </>
                                 ) : (
                                   <>
                                     <ChevronDown className="w-3 h-3" />
-                                    Xem tất cả
+                                    Show all
                                   </>
                                 )}
                               </button>
@@ -833,7 +849,7 @@ const OrderLinkList = () => {
                                           <Square className="w-6 h-6 text-gray-400" />
                                         )}
                                         <span className="text-xs text-gray-600 font-medium">
-                                          {isSelected ? "Đã chọn" : "Chọn"}
+                                          {isSelected ? "Selected" : "Select"}
                                         </span>
                                       </button>
                                     ) : (
@@ -841,8 +857,8 @@ const OrderLinkList = () => {
                                         <XCircle className="w-6 h-6 text-gray-300" />
                                         <span className="text-xs text-gray-400 text-center font-medium">
                                           {isDifferentShop
-                                            ? "Shop khác"
-                                            : "Không khả dụng"}
+                                            ? "Other shop"
+                                            : "Not available"}
                                         </span>
                                       </div>
                                     )}
@@ -867,7 +883,7 @@ const OrderLinkList = () => {
                                     <div className="font-medium text-gray-900 mb-1 text-sm">
                                       {link.productName !== "string"
                                         ? link.productName
-                                        : "Tên sản phẩm"}
+                                        : "Product name"}
                                     </div>
                                     <div className="space-y-0.5 text-xs text-gray-600">
                                       <div className="flex items-center gap-1">
@@ -886,19 +902,19 @@ const OrderLinkList = () => {
                                   <div className="lg:col-span-1">
                                     <div className="space-y-0.5 text-xs">
                                       <div className="text-gray-600">
-                                        SL:{" "}
+                                        Qty:{" "}
                                         <span className="font-medium">
                                           {link.quantity}
                                         </span>
                                       </div>
                                       <div className="text-gray-600">
-                                        Giá web:{" "}
+                                        Item price:{" "}
                                         <span className="font-medium">
                                           {link.priceWeb?.toLocaleString() || 0}
                                         </span>
                                       </div>
                                       <div className="text-gray-600">
-                                        Giá Ship:{" "}
+                                        Shipping:{" "}
                                         <span className="font-medium">
                                           {link.shipWeb?.toLocaleString() || 0}
                                         </span>
@@ -910,7 +926,7 @@ const OrderLinkList = () => {
                                   <div className="lg:col-span-1">
                                     <div className="space-y-0.5 text-xs text-gray-600">
                                       <div>
-                                        Phân loại:{" "}
+                                        Variant:{" "}
                                         <span className="font-medium">
                                           {link.classify !== "string"
                                             ? link.classify
@@ -947,7 +963,7 @@ const OrderLinkList = () => {
                                           className="flex items-center gap-1 bg-blue-600 text-white px-2 py-1 rounded-md text-xs hover:bg-blue-700 transition-colors"
                                         >
                                           <Eye className="w-2.5 h-2.5" />
-                                          Chi tiết
+                                          Details
                                         </button>
 
                                         {link.status !== "HUY" &&
@@ -961,10 +977,10 @@ const OrderLinkList = () => {
                                                 )
                                               }
                                               className="flex items-center gap-1 bg-indigo-500 text-white px-2 py-1 rounded-md text-xs hover:bg-indigo-600 transition-colors"
-                                              title="Đưa link sang Mua sau"
+                                              title="Move to Buy later"
                                             >
                                               <Clock className="w-2.5 h-2.5" />
-                                              Mua sau
+                                              Buy later
                                             </button>
                                           )}
 
@@ -978,10 +994,10 @@ const OrderLinkList = () => {
                                                 )
                                               }
                                               className="flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-md text-xs hover:bg-red-600 transition-colors"
-                                              title="Hủy đơn hàng"
+                                              title="Cancel this item"
                                             >
                                               <XCircle className="w-2.5 h-2.5" />
-                                              Hủy
+                                              Cancel
                                             </button>
                                           )}
                                       </div>
@@ -998,7 +1014,7 @@ const OrderLinkList = () => {
                         <div className="flex items-center gap-2">
                           <Package className="w-4 h-4 text-yellow-600" />
                           <span className="text-xs text-yellow-800">
-                            Đơn hàng chưa có sản phẩm nào
+                            This order has no items yet.
                           </span>
                         </div>
                       </div>
@@ -1023,11 +1039,11 @@ const OrderLinkList = () => {
               }`}
             >
               <ChevronLeft className="w-4 h-4" />
-              Trang trước
+              Previous
             </button>
 
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-gray-500">Trang</span>
+              <span className="text-xs text-gray-500">Page</span>
               <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold">
                 {pagination.pageNumber + 1}
               </span>
@@ -1042,7 +1058,7 @@ const OrderLinkList = () => {
                   : "text-gray-700 hover:bg-gray-100"
               }`}
             >
-              Trang sau
+              Next
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -1058,6 +1074,16 @@ const OrderLinkList = () => {
           selectedOrderForPurchase
             ? Object.values(
                 selectedLinksForPurchase[selectedOrderForPurchase.orderId] || {}
+              )
+            : []
+        }
+        selectedProducts={
+          selectedOrderForPurchase
+            ? selectedOrderForPurchase.orderLinks.filter((link) =>
+                Object.keys(
+                  selectedLinksForPurchase[selectedOrderForPurchase.orderId] ||
+                    {}
+                ).includes(link.linkId.toString())
               )
             : []
         }
