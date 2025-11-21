@@ -322,7 +322,7 @@ const CreatePurchase = ({
 
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Shipment Code (Optional)
+                  Tracking Number (Optional)
                 </label>
                 <input
                   type="text"

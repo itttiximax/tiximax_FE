@@ -246,7 +246,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xls font-medium text-black-700 mb-1">
-                        Classify
+                        Variant
                       </label>
                       <p className="text-gray-900">
                         {orderLink.classify && orderLink.classify !== "string"

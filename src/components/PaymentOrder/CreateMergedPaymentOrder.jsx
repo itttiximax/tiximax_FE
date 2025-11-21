@@ -1,5 +1,5 @@
 // /src/Components/Payment/CreateMergedPaymentOrder.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import mergedPaymentService from "../../Services/Payment/mergedPaymentService";
 import { CreditCard as PaymentIcon, X, Info, Edit2, Check } from "lucide-react";
@@ -44,6 +44,8 @@ const MergedPaymentConfigModal = ({
   totalAmount,
   formatCurrency,
   isCreating,
+  cachedBankAccounts = [], // ✅ THÊM prop
+  bankAccountsLoading = false, // ✅ THÊM prop
 }) => {
   const [depositPercent, setDepositPercent] = useState(100);
   const [isUseBalance, setIsUseBalance] = useState(false);
@@ -53,6 +55,22 @@ const MergedPaymentConfigModal = ({
   // Bank chọn để thanh toán
   const [bankId, setBankId] = useState(null);
   const [bankLoading, setBankLoading] = useState(false);
+
+  // ✅ THÊM: Auto-set bank đầu tiên khi có cached data
+  useEffect(() => {
+    if (
+      cachedBankAccounts &&
+      cachedBankAccounts.length > 0 &&
+      !bankId &&
+      isOpen
+    ) {
+      setBankId(String(cachedBankAccounts[0].id));
+      // Clear error nếu có
+      if (errors.bankId) {
+        setErrors((p) => ({ ...p, bankId: undefined }));
+      }
+    }
+  }, [cachedBankAccounts, isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const validateForm = () => {
     const newErrors = {};
@@ -222,6 +240,9 @@ const MergedPaymentConfigModal = ({
               label="Chọn tài khoản nhận cước (bắt buộc)"
               className="mb-2"
               onLoadingChange={setBankLoading}
+              autoSelectFirst={true}
+              cachedAccounts={cachedBankAccounts} // ✅ THÊM: Truyền cached data
+              initialLoading={bankAccountsLoading} // ✅ THÊM: Loading từ parent
             />
             {(errors.bankId || bankLoading) && (
               <div className="text-xs mt-1">
@@ -335,6 +356,8 @@ const CreateMergedPaymentOrder = ({
   onSuccess,
   onError,
   disabled = false,
+  cachedBankAccounts = [], // ✅ THÊM prop
+  bankAccountsLoading = false, // ✅ THÊM prop
 }) => {
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -415,6 +438,8 @@ const CreateMergedPaymentOrder = ({
         totalAmount={totalAmount || 0}
         formatCurrency={formatCurrency || ((v) => v)}
         isCreating={isCreating}
+        cachedBankAccounts={cachedBankAccounts} // ✅ THÊM
+        bankAccountsLoading={bankAccountsLoading} // ✅ THÊM
       />
     </>
   );

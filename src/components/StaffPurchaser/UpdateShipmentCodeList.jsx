@@ -378,7 +378,11 @@ const UpdateShipmentCodeList = () => {
                     <div
                       className={`border-b px-5 py-4 ${
                         isCompleted
-                          ? "bg-emerald-300 border-emerald-300"
+                          ? isAuction
+                            ? "bg-yellow-300 border-yellow-300"
+                            : "bg-emerald-300 border-emerald-300"
+                          : isAuction
+                          ? "bg-yellow-200 border-yellow-200"
                           : "bg-rose-300 border-rose-300"
                       }`}
                     >
@@ -394,15 +398,6 @@ const UpdateShipmentCodeList = () => {
                             </span>
                           </div>
                         </div>
-                        {isCompleted ? (
-                          <div className="flex h-8 items-center rounded-md bg-emerald-50 px-2.5">
-                            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                          </div>
-                        ) : (
-                          <div className="flex h-8 items-center rounded-md bg-red-50 px-2.5">
-                            <AlertTriangle className="h-4 w-4 text-red-600" />
-                          </div>
-                        )}
                       </div>
 
                       <div className="flex items-center justify-between gap-2">
@@ -411,8 +406,8 @@ const UpdateShipmentCodeList = () => {
                             <span
                               className={`inline-flex items-center rounded px-2 py-1 text-xs font-medium ${
                                 isAuction
-                                  ? "bg-purple-50 text-purple-700"
-                                  : "bg-blue-50 text-blue-700"
+                                  ? "bg-gray-100 text-black-800 border border-yellow-300"
+                                  : "bg-gray-100 text-black-700 border border-blue-300"
                               }`}
                             >
                               {purchaseStatusLabel(status)}
@@ -423,10 +418,10 @@ const UpdateShipmentCodeList = () => {
                           (isAuction ? (
                             <button
                               onClick={() => openAuctionModal(p)}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-700"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-yellow-600"
                             >
                               <Truck className="h-3.5 w-3.5" />
-                              Update shipping
+                              Update shipping codes
                             </button>
                           ) : (
                             <button
@@ -434,7 +429,7 @@ const UpdateShipmentCodeList = () => {
                               className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
                             >
                               <Package className="h-3.5 w-3.5" />
-                              Enter shipment codes
+                              Update shipment codes
                             </button>
                           ))}
                       </div>
@@ -470,11 +465,11 @@ const UpdateShipmentCodeList = () => {
                                 )}
                               </div>
 
-                              <div className="space-y-1.5 text-xs text-slate-600">
+                              <div className="space-y-1.5 text-xls text-black-600">
                                 <div className="flex items-center gap-1.5">
-                                  <Globe className="h-3.5 w-3.5 text-slate-400" />
+                                  <Globe className="h-5 w-5 text-black-400" />
                                   <span>{l.website}</span>
-                                  <span className="text-slate-400">-</span>
+                                  <span className="text-black-400">----</span>
                                   <span>Qty: {l.quantity}</span>
                                 </div>
 
@@ -485,20 +480,20 @@ const UpdateShipmentCodeList = () => {
                                 )}
 
                                 <div className="flex items-start gap-1.5">
-                                  <span className="text-slate-500">
+                                  <span className="text-black-500">
                                     Tracking:
                                   </span>
-                                  <span className="flex-1 font-mono text-xs">
+                                  <span className="flex-1 font-semibold text-xls">
                                     {l.trackingCode || "-"}
                                   </span>
                                 </div>
 
                                 <div className="flex items-start gap-1.5">
-                                  <span className="text-slate-500">
+                                  <span className="text-black-500">
                                     Shipment code:
                                   </span>
                                   <span
-                                    className={`flex-1 font-mono text-xs ${
+                                    className={`flex-1 font-mono text-xls ${
                                       l.shipmentCode?.trim()
                                         ? "text-blue-700 font-medium"
                                         : "text-slate-400"

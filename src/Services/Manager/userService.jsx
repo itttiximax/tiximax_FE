@@ -1,118 +1,93 @@
 // src/Services/userService.js
 import api from "../../config/api.js";
 
+const validatePagination = (page, size) => {
+  if (page < 0 || size < 1 || size > 100) {
+    throw new Error("Invalid parameters");
+  }
+};
+
+const handleApiError = (error, defaultMessage) => {
+  const status = error?.response?.status;
+
+  if (status === 404) {
+    throw new Error("API endpoint not found");
+  }
+  if (status === 400) {
+    throw new Error("Invalid request parameters");
+  }
+  if (status === 403) {
+    throw new Error("Access denied - insufficient permissions");
+  }
+  if (status === 500) {
+    throw new Error("Server error");
+  }
+
+  if (error instanceof Error) throw error;
+  throw new Error(defaultMessage || "Request failed");
+};
+
 const userService = {
+  // ----------------------------
+  // GET account by ID (NEW)
+  // ----------------------------
+  getAccountById: async (id) => {
+    if (!id) throw new Error("Account ID is required");
+    try {
+      const response = await api.get(`/accounts/${id}`);
+      return response.data;
+    } catch (error) {
+      handleApiError(error, "Failed to fetch account by ID");
+    }
+  },
+
   // Get staff accounts with pagination
   getStaffAccounts: async (page = 0, size = 10) => {
+    validatePagination(page, size);
     try {
-      // Validation
-      if (page < 0 || size < 1 || size > 100) {
-        throw new Error("Invalid parameters");
-      }
-
       const response = await api.get(`/accounts/staff/${page}/${size}`);
       return response.data;
     } catch (error) {
-      console.error(`Error fetching staff accounts:`, error);
-
-      if (error.response?.status === 404) {
-        throw new Error("API endpoint not found");
-      } else if (error.response?.status === 400) {
-        throw new Error("Invalid request parameters");
-      } else if (error.response?.status === 403) {
-        throw new Error("Access denied - insufficient permissions");
-      } else if (error.response?.status === 500) {
-        throw new Error("Server error");
-      }
-
-      throw error;
+      handleApiError(error, "Failed to fetch staff accounts");
     }
   },
 
   // Get customer accounts with pagination
   getCustomerAccounts: async (page = 0, size = 10) => {
+    validatePagination(page, size);
     try {
-      // Validation
-      if (page < 0 || size < 1 || size > 100) {
-        throw new Error("Invalid parameters");
-      }
-
       const response = await api.get(`/accounts/customers/${page}/${size}`);
       return response.data;
     } catch (error) {
-      console.error(`Error fetching customer accounts:`, error);
-
-      if (error.response?.status === 404) {
-        throw new Error("API endpoint not found");
-      } else if (error.response?.status === 400) {
-        throw new Error("Invalid request parameters");
-      } else if (error.response?.status === 403) {
-        throw new Error("Access denied - insufficient permissions");
-      } else if (error.response?.status === 500) {
-        throw new Error("Server error");
-      }
-
-      throw error;
+      handleApiError(error, "Failed to fetch customer accounts");
     }
   },
 
-  // Get my customers (assigned to current staff) with pagination
+  // Get my customers (assigned to current staff)
   getMyCustomers: async (page = 0, size = 10) => {
+    validatePagination(page, size);
     try {
-      // Validation
-      if (page < 0 || size < 1 || size > 100) {
-        throw new Error("Invalid parameters");
-      }
-
       const response = await api.get(`/accounts/my-customers/${page}/${size}`);
       return response.data;
     } catch (error) {
-      console.error(`Error fetching my customers:`, error);
-
-      if (error.response?.status === 404) {
-        throw new Error("API endpoint not found");
-      } else if (error.response?.status === 400) {
-        throw new Error("Invalid request parameters");
-      } else if (error.response?.status === 403) {
-        throw new Error("Access denied - insufficient permissions");
-      } else if (error.response?.status === 500) {
-        throw new Error("Server error");
-      }
-
-      throw error;
+      handleApiError(error, "Failed to fetch my customers");
     }
   },
 
-  // Get sale lead staff accounts with pagination
+  // Get sale lead staff with pagination
   getSaleLeadStaff: async (page = 0, size = 10) => {
+    validatePagination(page, size);
     try {
-      // Validation
-      if (page < 0 || size < 1 || size > 100) {
-        throw new Error("Invalid parameters");
-      }
-
       const response = await api.get(
         `/accounts/sale-lead-staff/${page}/${size}`
       );
       return response.data;
     } catch (error) {
-      console.error(`Error fetching sale lead staff:`, error);
-
-      if (error.response?.status === 404) {
-        throw new Error("API endpoint not found");
-      } else if (error.response?.status === 400) {
-        throw new Error("Invalid request parameters");
-      } else if (error.response?.status === 403) {
-        throw new Error("Access denied - insufficient permissions");
-      } else if (error.response?.status === 500) {
-        throw new Error("Server error");
-      }
-
-      throw error;
+      handleApiError(error, "Failed to fetch sale lead staff");
     }
   },
 
-  // Get staff roles configuration
+  // Roles
   getAvailableRoles: () => [
     { key: "ADMIN", label: "Quản trị viên", color: "red" },
     { key: "MANAGER", label: "Quản lý", color: "orange" },
@@ -126,7 +101,7 @@ const userService = {
     { key: "LEAD_SALE", label: "Trưởng nhóm bán hàng", color: "green" },
   ],
 
-  // Get account status configuration
+  // Status
   getAvailableStatuses: () => [
     { key: "HOAT_DONG", label: "Hoạt động", color: "green" },
     { key: "KHONG_HOAT_DONG", label: "Không hoạt động", color: "gray" },

@@ -1,8 +1,9 @@
 // MergedPaymentOrder.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import AccountSearch from "../Order/AccountSearch";
 import orderCustomerService from "../../Services/Order/orderCustomerService";
+import managerBankAccountService from "../../Services/Manager/managerBankAccountService"; // ✅ THÊM
 import PaymentDialog from "./PaymentDialog";
 import CreateMergedPaymentOrder from "./CreateMergedPaymentOrder";
 import {
@@ -15,6 +16,7 @@ import {
   Square,
 } from "lucide-react";
 import ListOrderManager from "../Order/ListOrderManager";
+
 // Helper function to extract error message from backend
 const getErrorMessage = (error) => {
   if (error.response) {
@@ -55,6 +57,28 @@ const MergedPaymentOrder = () => {
     open: false,
     payment: null,
   });
+
+  // ✅ THÊM: State để cache bank accounts
+  const [cachedBankAccounts, setCachedBankAccounts] = useState([]);
+  const [bankAccountsLoading, setBankAccountsLoading] = useState(false);
+
+  // ✅ THÊM: Prefetch bank accounts khi component mount
+  useEffect(() => {
+    const prefetchBankAccounts = async () => {
+      try {
+        setBankAccountsLoading(true);
+        const data = await managerBankAccountService.getProxyAccounts();
+        setCachedBankAccounts(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Failed to prefetch bank accounts:", error);
+        // Không show toast error ở đây vì không ảnh hưởng trực tiếp đến user flow
+      } finally {
+        setBankAccountsLoading(false);
+      }
+    };
+
+    prefetchBankAccounts();
+  }, []); // Chỉ chạy 1 lần khi mount
 
   // Handle customer selection from AccountSearch
   const handleSelectCustomer = async (customer) => {
@@ -139,7 +163,6 @@ const MergedPaymentOrder = () => {
       setOrders(data || []);
 
       if (!data || data.length === 0) {
-        // ✅ SỬA LỖI: Thay toast.info bằng toast với custom style
         toast(`Không tìm thấy đơn hàng nào cho khách hàng ${customerCode}`, {
           duration: 4000,
           style: {
@@ -382,6 +405,8 @@ const MergedPaymentOrder = () => {
                         formatCurrency={formatCurrency}
                         onSuccess={handleMergedPaymentSuccess}
                         onError={handleMergedPaymentError}
+                        cachedBankAccounts={cachedBankAccounts} // ✅ THÊM: Truyền cached data
+                        bankAccountsLoading={bankAccountsLoading} // ✅ THÊM: Truyền loading state
                       />
                     </div>
                   )}
@@ -504,7 +529,8 @@ const MergedPaymentOrder = () => {
           </p>
         </div>
       )}
-      {/* 👇 THÊM PHẦN NÀY - ListOrderManager component */}
+
+      {/* ListOrderManager component */}
       <div className="mt-8">
         <div className="border-t border-gray-300 pt-8">
           <ListOrderManager />

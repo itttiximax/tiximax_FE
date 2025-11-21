@@ -545,7 +545,7 @@ const ProductManager = ({
                     </div>
                     <div className="col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Shop
+                        Shop <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
