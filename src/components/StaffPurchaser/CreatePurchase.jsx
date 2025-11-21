@@ -83,6 +83,22 @@ const CreatePurchase = ({
     0
   );
 
+  // Check if entered amount differs and determine warning type
+  const getAmountWarning = () => {
+    if (!purchaseData.purchaseTotal) return null;
+
+    const enteredAmount = Number(getRawValue(purchaseData.purchaseTotal));
+
+    if (enteredAmount === calculatedTotal) return null;
+
+    return {
+      isHigher: enteredAmount > calculatedTotal,
+      enteredAmount,
+    };
+  };
+
+  const amountWarning = getAmountWarning();
+
   const handleSubmitPurchase = async () => {
     try {
       setCreatingPurchase(true);
@@ -246,7 +262,7 @@ const CreatePurchase = ({
                   <tfoot className="bg-blue-50 border-t-2 border-blue-200">
                     <tr>
                       <td
-                        colSpan="6"
+                        colSpan="5"
                         className="px-4 py-3 text-right font-bold text-gray-900"
                       >
                         Grand Total:
@@ -261,26 +277,43 @@ const CreatePurchase = ({
             </div>
 
             {/* Warning if entered amount differs from calculated */}
-            {purchaseData.purchaseTotal &&
-              Number(getRawValue(purchaseData.purchaseTotal)) !==
-                calculatedTotal && (
-                <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
-                  <div className="text-amber-600 mt-0.5">⚠️</div>
-                  <div className="text-sm text-amber-800">
-                    <span className="font-medium">Notice:</span> The total
-                    amount you entered (
-                    <span className="font-semibold">
-                      {formatCurrency(getRawValue(purchaseData.purchaseTotal))}{" "}
-                      ₫
-                    </span>
-                    ) differs from the calculated product total (
-                    <span className="font-semibold">
-                      {formatCurrency(calculatedTotal)} ₫
-                    </span>
-                    )
-                  </div>
+            {amountWarning && (
+              <div
+                className={`mt-3 p-3 border rounded-lg flex items-start gap-2 ${
+                  amountWarning.isHigher
+                    ? "bg-red-50 border-red-200"
+                    : "bg-amber-50 border-amber-200"
+                }`}
+              >
+                <div
+                  className={`mt-0.5 ${
+                    amountWarning.isHigher ? "text-red-600" : "text-amber-600"
+                  }`}
+                ></div>
+                <div
+                  className={`text-sm ${
+                    amountWarning.isHigher ? "text-red-800" : "text-amber-800"
+                  }`}
+                >
+                  <span className="font-medium">
+                    {amountWarning.isHigher ? "Warning:" : "Notice:"}
+                  </span>{" "}
+                  The total amount you entered (
+                  <span className="font-semibold">
+                    {formatCurrency(amountWarning.enteredAmount)} ₫
+                  </span>
+                  ) is{" "}
+                  <span className="font-semibold">
+                    {amountWarning.isHigher ? "higher" : "lower"}
+                  </span>{" "}
+                  than the calculated product total (
+                  <span className="font-semibold">
+                    {formatCurrency(calculatedTotal)} ₫
+                  </span>
+                  )
                 </div>
-              )}
+              </div>
+            )}
           </div>
 
           {/* Purchase Form */}

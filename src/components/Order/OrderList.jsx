@@ -120,13 +120,10 @@ const OrderList = () => {
     [totalPages, loading]
   );
 
-  const handlePageSizeChange = useCallback(
-    (newSize) => {
-      setPageSize(newSize);
-      setCurrentPage(0);
-    },
-    []
-  );
+  const handlePageSizeChange = useCallback((newSize) => {
+    setPageSize(newSize);
+    setCurrentPage(0);
+  }, []);
 
   // Export CSV (chỉ dữ liệu trang hiện tại + đã lọc)
   const handleExport = useCallback(() => {
@@ -163,9 +160,9 @@ const OrderList = () => {
     });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `orders_page${currentPage + 1}_${new Date()
-      .toISOString()
-      .split("T")[0]}.csv`;
+    link.download = `orders_page${currentPage + 1}_${
+      new Date().toISOString().split("T")[0]
+    }.csv`;
     link.click();
   }, [filteredOrders, currentPage]);
 
@@ -200,7 +197,7 @@ const OrderList = () => {
 
   // Utility
   const formatDate = useCallback((dateString) => {
-    return dateString ? new Date(dateString).toLocaleString("vi-VN") : "-";
+    return dateString ? new Date(dateString).toLocaleDateString("vi-VN") : "-";
   }, []);
 
   const formatPrice = useCallback((price) => {
@@ -324,8 +321,8 @@ const OrderList = () => {
             <span className="font-semibold text-blue-600">
               {loading ? "..." : filteredOrders.length}
             </span>{" "}
-            trong tổng số{" "}
-            <span className="font-semibold">{totalElements}</span> đơn hàng
+            trong tổng số <span className="font-semibold">{totalElements}</span>{" "}
+            đơn hàng
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Hiển thị:</span>
@@ -384,9 +381,9 @@ const OrderList = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Trạng thái
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Khách hàng
-                </th>
+                </th> */}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Tỷ giá
                 </th>
@@ -446,9 +443,6 @@ const OrderList = () => {
                           <div className="text-sm font-medium text-gray-900">
                             {order.orderCode}
                           </div>
-                          <div className="text-xs text-gray-500">
-                            ID: {order.orderId}
-                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {getOrderTypeText(order.orderType)}
@@ -464,14 +458,14 @@ const OrderList = () => {
                             {orderStatus ? orderStatus.label : order.status}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        {/* <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
                             {order.customer?.name || "-"}
                           </div>
                           <div className="text-xs text-gray-500">
                             {order.customer?.phone || "-"}
                           </div>
-                        </td>
+                        </td> */}
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {order.exchangeRate
                             ? `${order.exchangeRate.toLocaleString(

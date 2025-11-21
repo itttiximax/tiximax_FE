@@ -12,9 +12,34 @@ import {
   Settings,
   Search,
 } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
-import toast from "react-hot-toast";
-import { ROLES } from "../Services/Auth/authService";
+
+// Mock hooks for demo - Toggle để test UI
+const MockAuthProvider = () => {
+  const [isAuth, setIsAuth] = React.useState(true);
+  return {
+    user: isAuth
+      ? { username: "TIXIMAX", email: "user@tiximax.com", role: "CUSTOMER" }
+      : null,
+    isAuthenticated: isAuth,
+    logout: async () => {
+      await new Promise((r) => setTimeout(r, 500));
+      setIsAuth(false);
+    },
+  };
+};
+
+const useAuth = MockAuthProvider;
+
+const ROLES = {
+  ADMIN: "ADMIN",
+  MANAGER: "MANAGER",
+  LEAD_SALE: "LEAD_SALE",
+  STAFF_SALE: "STAFF_SALE",
+  STAFF_PURCHASER: "STAFF_PURCHASER",
+  STAFF_WAREHOUSE_FOREIGN: "STAFF_WAREHOUSE_FOREIGN",
+  STAFF_WAREHOUSE_DOMESTIC: "STAFF_WAREHOUSE_DOMESTIC",
+  CUSTOMER: "CUSTOMER",
+};
 
 const Header = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -112,10 +137,10 @@ const Header = () => {
     try {
       await authLogout();
       setIsProfileDropdownOpen(false);
-      toast.success("Đăng xuất thành công!");
+      alert("Đăng xuất thành công!");
       navigate("/", { replace: true });
     } catch {
-      toast.error("Đăng xuất thất bại!");
+      alert("Đăng xuất thất bại!");
     } finally {
       setIsLoggingOut(false);
     }
@@ -131,9 +156,7 @@ const Header = () => {
   const guardPublicClick = (to) => (e) => {
     if (isInternal) {
       e.preventDefault();
-      toast("Bạn đang đăng nhập tài khoản nội bộ — chuyển về khu làm việc.", {
-        icon: "🚧",
-      });
+      alert("Bạn đang đăng nhập tài khoản nội bộ — chuyển về khu làm việc.");
       navigate(dashboardPath, { replace: true });
       closeAllMenus();
     } else {
@@ -154,9 +177,9 @@ const Header = () => {
 
   return (
     <header className="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center h-20 gap-4 lg:gap-8">
-          {/* LEFT: LOGO */}
+      <div className="max-w-[1600px] mx-auto px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          {/* LEFT: LOGO - dời sát lề trái */}
           <div className="flex-shrink-0">
             <Link
               to={isInternal ? dashboardPath : "/"}
@@ -168,11 +191,11 @@ const Header = () => {
 
           {/* CENTER: NAV (desktop, chỉ hiện với khách) */}
           {!isInternal && (
-            <nav className="hidden lg:flex items-center gap-6 mx-auto">
+            <nav className="hidden lg:flex items-center gap-8">
               <Link
                 to="/"
                 onClick={guardPublicClick("/")}
-                className={`text-xl font-medium hover:text-orange-600 transition-colors whitespace-nowrap ${isActive(
+                className={`text-lg font-medium hover:text-orange-600 transition-colors whitespace-nowrap ${isActive(
                   "/"
                 )}`}
               >
@@ -181,11 +204,11 @@ const Header = () => {
               <Link
                 to="/about"
                 onClick={guardPublicClick("/about")}
-                className={`text-xl font-medium hover:text-orange-600 transition-colors whitespace-nowrap ${isActive(
+                className={`text-lg font-medium hover:text-orange-600 transition-colors whitespace-nowrap ${isActive(
                   "/about"
                 )}`}
               >
-                Về Tiximax
+                Về chúng tôi
               </Link>
 
               {/* Services - Split Link and Dropdown */}
@@ -198,7 +221,7 @@ const Header = () => {
                 <Link
                   to="/services"
                   onClick={guardPublicClick("/services")}
-                  className={`text-xl font-medium hover:text-orange-600 transition-colors whitespace-nowrap ${isActive(
+                  className={`text-lg font-medium hover:text-orange-600 transition-colors whitespace-nowrap ${isActive(
                     "/services"
                   )}`}
                 >
@@ -274,7 +297,7 @@ const Header = () => {
                 <Link
                   to="/guide"
                   onClick={guardPublicClick("/guide")}
-                  className={`text-xl font-medium hover:text-orange-600 transition-colors whitespace-nowrap ${isActive(
+                  className={`text-lg font-medium hover:text-orange-600 transition-colors whitespace-nowrap ${isActive(
                     "/guide"
                   )}`}
                 >
@@ -322,7 +345,7 @@ const Header = () => {
               <Link
                 to="/news"
                 onClick={guardPublicClick("/news")}
-                className={`text-xl font-medium hover:text-orange-600 transition-colors whitespace-nowrap ${isActive(
+                className={`text-lg font-medium hover:text-orange-600 transition-colors whitespace-nowrap ${isActive(
                   "/news"
                 )}`}
               >
@@ -331,7 +354,7 @@ const Header = () => {
               <Link
                 to="/contact"
                 onClick={guardPublicClick("/contact")}
-                className={`text-xl font-medium hover:text-orange-600 transition-colors whitespace-nowrap ${isActive(
+                className={`text-lg font-medium hover:text-orange-600 transition-colors whitespace-nowrap ${isActive(
                   "/contact"
                 )}`}
               >
@@ -340,8 +363,8 @@ const Header = () => {
             </nav>
           )}
 
-          {/* RIGHT: ACTIONS */}
-          <div className="ml-auto flex items-center gap-3 flex-shrink-0">
+          {/* RIGHT: ACTIONS - dời sát lề phải */}
+          <div className="flex items-center gap-3 flex-shrink-0">
             {/* User Profile / Auth desktop */}
             {isAuthenticated && user ? (
               <div className="hidden md:block relative" ref={dropdownRef}>
@@ -423,17 +446,17 @@ const Header = () => {
                 >
                   Đăng ký
                 </Link>
-
-                {/* Tracking Button - Desktop */}
-                <button
-                  onClick={handleTrackingClick}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all whitespace-nowrap"
-                >
-                  <Search size={18} />
-                  <span>Theo dõi đơn</span>
-                </button>
               </div>
             )}
+
+            {/* Tracking Button - CỐ ĐỊNH Ở VỊ TRÍ PHẢI NHẤT */}
+            <button
+              onClick={handleTrackingClick}
+              className="hidden md:flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all whitespace-nowrap"
+            >
+              <Search size={18} />
+              <span>Theo dõi đơn</span>
+            </button>
 
             {/* Mobile Menu Toggle */}
             <button
@@ -486,7 +509,7 @@ const Header = () => {
                 <Link
                   to="/"
                   onClick={guardPublicClick("/")}
-                  className={`block px-4 py-3 text-3xl font-medium rounded-xl hover:bg-orange-50 hover:text-orange-600 transition ${isActive(
+                  className={`block px-4 py-3 text-base font-medium rounded-xl hover:bg-orange-50 hover:text-orange-600 transition ${isActive(
                     "/"
                   )}`}
                 >

@@ -170,7 +170,10 @@ const Footer = () => {
                   </div>
                   <div>
                     <p className="font-medium text-yellow-400">Địa chỉ:</p>
-                    <p>123 Đường Lê Lợi, Quận 1, TP.HCM</p>
+                    <p>
+                      65 Đ. 9, Hiệp Bình Phước, Thủ Đức, Thành phố Hồ Chí Minh
+                      100000.
+                    </p>
                   </div>
                 </div>
 
@@ -180,8 +183,8 @@ const Footer = () => {
                   </div>
                   <div>
                     <p className="font-medium text-yellow-400">Hotline:</p>
-                    <p className="text-yellow-400 font-bold text-lg">
-                      0909 444 909
+                    <p className="text-white font-bold text-lg">
+                      +84 901 834 283
                     </p>
                   </div>
                 </div>
@@ -192,7 +195,7 @@ const Footer = () => {
                   </div>
                   <div>
                     <p className="font-medium text-yellow-400">Email:</p>
-                    <p className="break-all">support@tixilogistics.com</p>
+                    <p className="break-all">global.trans@tiximax.net</p>
                   </div>
                 </div>
               </div>

@@ -235,14 +235,14 @@ const RemoveShipmentList = () => {
     <div className="min-h-screen bg-gradient-to-br p-6">
       <div className="mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-blue-600 rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="bg-blue-100 rounded-lg p-3">
-                <PackageSearch className="w-6 h-6 text-blue-600" />
+              <div className="bg-blue-600 rounded-lg p-3">
+                <PackageSearch className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-white">
                   Packing Management
                 </h1>
               </div>

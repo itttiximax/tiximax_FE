@@ -162,6 +162,7 @@ const Router = createBrowserRouter([
       { path: "/guide/tracking", element: <GuideTracking /> },
       { path: "/contact", element: <Contact /> },
       { path: "/news", element: <New /> },
+      { path: "/tracking", element: <GuideTracking /> },
       { path: "order-history", element: <OrderHistory /> },
       { path: "/reset-password", element: <ResetPassword /> },
       { path: "/auth/callback", element: <AuthCallback /> },
