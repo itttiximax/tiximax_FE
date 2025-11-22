@@ -212,13 +212,13 @@ const OrderList = () => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString("vi-VN");
   }, []);
-
   const formatPrice = useCallback((price) => {
-    if (!price) return "-";
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
+    if (price === null || price === undefined || price === "") return "-";
+
+    const number = Number(price);
+    if (isNaN(number)) return "-";
+
+    return number.toLocaleString("vi-VN");
   }, []);
 
   const getStatusColor = useCallback((color) => {
@@ -524,9 +524,7 @@ const OrderList = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {order.exchangeRate
-                            ? `${order.exchangeRate.toLocaleString(
-                                "vi-VN"
-                              )} VNĐ`
+                            ? `${order.exchangeRate.toLocaleString("vi-VN")} `
                             : "-"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
