@@ -258,7 +258,7 @@ const OrderLinksDialog = ({ orderLinks, onClose }) => (
               <div>
                 <div className="text-gray-600 text-xs">Giá web</div>
                 <div className="font-medium">
-                  ¥{link.priceWeb?.toLocaleString("vi-VN")}
+                  {link.priceWeb?.toLocaleString("vi-VN")}
                 </div>
               </div>
               <div>
