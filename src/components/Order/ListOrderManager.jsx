@@ -58,7 +58,7 @@ const ListOrderManager = () => {
 
     {
       key: "DA_DU_HANG",
-      label: "Đã đủ hàng",
+      label: "Đã đủ đơn",
       color: "blue",
       bgColor: "bg-blue-50",
       textColor: "text-blue-700",
