@@ -19,280 +19,438 @@ import {
 } from "lucide-react";
 
 // Sub-dialog: Purchases
-const PurchasesDialog = ({ purchases, onClose }) => (
-  <div className="fixed inset-0 bg-black bg-opacity-60 z-[60] flex items-center justify-center p-4">
-    <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b bg-purple-50">
-        <div className="flex items-center gap-2">
-          <ShoppingCart className="w-5 h-5 text-purple-600" />
-          <h3 className="text-lg font-semibold">Chi tiết mua hàng</h3>
+const PurchasesDialog = ({ purchases, onClose }) => {
+  // Hàm để lấy thông tin hiển thị cho từng trạng thái
+  const getStatusDisplay = (status) => {
+    const statusMap = {
+      DA_MUA: {
+        label: "Đã mua",
+        className: "bg-blue-100 text-blue-800",
+      },
+      CHO_THANH_TOAN: {
+        label: "Chờ thanh toán",
+        className: "bg-yellow-100 text-yellow-800",
+      },
+      DA_DU_HANG: {
+        label: "Đã đủ hàng",
+        className: "bg-purple-100 text-purple-800",
+      },
+      CHO_MUA: {
+        label: "Chờ mua",
+        className: "bg-orange-100 text-orange-800",
+      },
+      DA_HUY: {
+        label: "Đã hủy",
+        className: "bg-red-100 text-red-800",
+      },
+      DAU_GIA_THANH_CONG: {
+        label: "Đấu giá thành công",
+        className: "bg-red-100 text-red-800",
+      },
+      DA_NHAP_KHO_VN: {
+        label: "Đã nhập kho VN",
+        className: "bg-red-100 text-red-800",
+      },
+    };
+
+    return (
+      statusMap[status] || {
+        label: status,
+        className: "bg-gray-100 text-gray-800",
+      }
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 z-[60] flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        <div className="flex items-center justify-between p-4 border-b bg-purple-50">
+          <div className="flex items-center gap-2">
+            <ShoppingCart className="w-5 h-5 text-purple-600" />
+            <h3 className="text-lg font-semibold">Chi tiết mua hàng</h3>
+            <span className="text-sm text-gray-600">
+              ({purchases.length} đơn mua)
+            </span>
+          </div>
+          <button onClick={onClose} className="p-1 hover:bg-purple-100 rounded">
+            <X className="w-5 h-5" />
+          </button>
         </div>
-        <button onClick={onClose} className="p-1 hover:bg-purple-100 rounded">
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-      <div className="p-4 overflow-y-auto max-h-[calc(90vh-80px)]">
-        {purchases.map((purchase, idx) => (
-          <div
-            key={purchase.purchaseId}
-            className="mb-4 border rounded-lg p-4 bg-gray-50"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <div className="font-semibold text-lg text-purple-600">
-                  {purchase.purchaseCode}
-                </div>
-                <div className="text-sm text-gray-500">
-                  {new Date(purchase.purchaseTime).toLocaleString("vi-VN")}
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm text-gray-600">Tổng tiền:</div>
-                <div className="font-bold text-lg text-purple-600">
-                  ¥{purchase.finalPriceOrder?.toLocaleString("vi-VN")}
-                </div>
-              </div>
-            </div>
 
-            {purchase.purchaseImage && (
-              <div className="mb-3">
-                <img
-                  src={purchase.purchaseImage}
-                  alt="Purchase"
-                  className="w-32 h-32 object-cover rounded border"
-                />
-              </div>
-            )}
-
-            {purchase.note && (
-              <div className="mb-3 text-sm text-gray-600">
-                <span className="font-medium">Ghi chú: </span>
-                {purchase.note}
-              </div>
-            )}
-
-            {/* Order Links */}
-            {purchase.orderLinks?.length > 0 && (
-              <div className="mt-3 border-t pt-3">
-                <div className="font-medium text-sm text-gray-700 mb-2">
-                  Sản phẩm ({purchase.orderLinks.length}):
-                </div>
-                {purchase.orderLinks.map((link) => (
-                  <div
-                    key={link.linkId}
-                    className="bg-white p-3 rounded border mb-2"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="font-medium text-blue-600">
-                        {link.productName}
-                      </div>
-                      <span
-                        className={`px-2 py-1 rounded text-xs ${
-                          link.status === "DA_HUY"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-green-100 text-green-800"
-                        }`}
-                      >
-                        {link.status === "DA_HUY" ? "Đã hủy" : link.status}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div>
-                        <span className="text-gray-600">Số lượng: </span>
-                        <span className="font-medium">{link.quantity}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Giá web: </span>
-                        <span className="font-medium">
-                          ¥{link.priceWeb?.toLocaleString("vi-VN")}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Ship web: </span>
-                        <span className="font-medium">
-                          ¥{link.shipWeb?.toLocaleString("vi-VN")}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Phí mua: </span>
-                        <span className="font-medium">
-                          ¥{link.purchaseFee?.toLocaleString("vi-VN")}
-                        </span>
-                      </div>
-                      <div className="col-span-2">
-                        <span className="text-gray-600">Tổng VNĐ: </span>
-                        <span className="font-bold text-green-600">
-                          {link.finalPriceVnd?.toLocaleString("vi-VN")} VNĐ
-                        </span>
-                      </div>
-                    </div>
-                    {link.trackingCode && (
-                      <div className="mt-2 text-sm">
-                        <span className="text-gray-600">Mã tracking: </span>
-                        <span className="font-mono bg-gray-100 px-2 py-1 rounded">
-                          {link.trackingCode}
-                        </span>
-                      </div>
-                    )}
-                    {link.productLink && (
-                      <a
-                        href={link.productLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 text-sm flex items-center gap-1 mt-2 hover:underline"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                        Xem sản phẩm
-                      </a>
+        <div className="p-4 overflow-y-auto max-h-[calc(90vh-80px)]">
+          {purchases.map((purchase, idx) => (
+            <div
+              key={purchase.purchaseId}
+              className="mb-4 border rounded-lg p-4 bg-gray-50"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <div className="font-semibold text-lg text-purple-600">
+                    {purchase.purchaseCode}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {new Date(purchase.purchaseTime).toLocaleDateString(
+                      "vi-VN",
+                      {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      }
                     )}
                   </div>
-                ))}
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-gray-600">Tổng tiền:</div>
+                  <div className="font-bold text-lg text-purple-600">
+                    {purchase.finalPriceOrder?.toLocaleString("vi-VN")} ₫
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-);
 
-// Sub-dialog: Payments
-const PaymentsDialog = ({ payments, onClose }) => (
-  <div className="fixed inset-0 bg-black bg-opacity-60 z-[60] flex items-center justify-center p-4">
-    <div className="bg-white rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b bg-green-50">
-        <div className="flex items-center gap-2">
-          <CreditCard className="w-5 h-5 text-green-600" />
-          <h3 className="text-lg font-semibold">Chi tiết thanh toán</h3>
-        </div>
-        <button onClick={onClose} className="p-1 hover:bg-green-100 rounded">
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-      <div className="p-4 overflow-y-auto max-h-[calc(90vh-80px)]">
-        {payments.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            Chưa có thanh toán nào
-          </div>
-        ) : (
-          payments.map((payment) => (
-            <div
-              key={payment.paymentId}
-              className="mb-3 border rounded-lg p-4 bg-gray-50"
-            >
-              <div className="flex justify-between items-start mb-2">
-                <div className="font-semibold text-green-600">
-                  {payment.paymentCode}
+              {purchase.purchaseImage && (
+                <div className="mb-3">
+                  <img
+                    src={purchase.purchaseImage}
+                    alt="Purchase"
+                    className="w-32 h-32 object-cover rounded border"
+                  />
                 </div>
-                <div className="font-bold text-lg">
-                  {payment.amount?.toLocaleString("vi-VN")} VNĐ
+              )}
+
+              {purchase.note && (
+                <div className="mb-3 text-sm text-gray-600">
+                  <span className="font-medium">Ghi chú: </span>
+                  {purchase.note}
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-gray-600">Phương thức: </span>
-                  <span>{payment.method}</span>
+              )}
+
+              {/* Order Links */}
+              {purchase.orderLinks?.length > 0 && (
+                <div className="mt-3 border-t pt-3">
+                  <div className="font-medium text-sm text-gray-700 mb-2">
+                    Sản phẩm ({purchase.orderLinks.length}):
+                  </div>
+                  {purchase.orderLinks.map((link) => {
+                    const statusInfo = getStatusDisplay(link.status);
+
+                    return (
+                      <div
+                        key={link.linkId}
+                        className="bg-white p-3 rounded border mb-2 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="font-medium text-blue-600 flex-1 mr-2">
+                            {link.productName}
+                          </div>
+                          <span
+                            className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap ${statusInfo.className}`}
+                          >
+                            {statusInfo.label}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <span className="text-gray-600">Số lượng: </span>
+                            <span className="font-medium">{link.quantity}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Giá web: </span>
+                            <span className="font-medium">
+                              {link.priceWeb?.toLocaleString("vi-VN")}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Ship web: </span>
+                            <span className="font-medium">
+                              {link.shipWeb?.toLocaleString("vi-VN")}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Phí mua: </span>
+                            <span className="font-medium">
+                              {link.purchaseFee?.toLocaleString("vi-VN")}
+                            </span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-gray-600">Tổng VNĐ: </span>
+                            <span className="font-bold text-green-600">
+                              {link.finalPriceVnd?.toLocaleString("vi-VN")} ₫
+                            </span>
+                          </div>
+                        </div>
+
+                        {link.trackingCode && (
+                          <div className="mt-2 text-sm">
+                            <span className="text-gray-600">Mã tracking: </span>
+                            <span className="font-mono bg-gray-100 px-2 py-1 rounded">
+                              {link.trackingCode}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-                <div>
-                  <span className="text-gray-600">Trạng thái: </span>
-                  <span
-                    className={`px-2 py-0.5 rounded ${
-                      payment.status === "COMPLETED"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}
-                  >
-                    {payment.status}
-                  </span>
-                </div>
-              </div>
-              {payment.note && (
-                <div className="mt-2 text-sm text-gray-600">{payment.note}</div>
               )}
             </div>
-          ))
-        )}
+          ))}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
+// Sub-dialog: Payments
+const PaymentsDialog = ({ payments, onClose }) => {
+  // Hàm để lấy thông tin hiển thị cho từng trạng thái thanh toán
+  const getPaymentStatusDisplay = (status) => {
+    const statusMap = {
+      ĐA_XAC_NHAN: {
+        label: "Đã xác nhận",
+        className: "bg-green-100 text-green-800",
+      },
+      CHO_THANH_TOAN: {
+        label: "Chờ thanh toán",
+        className: "bg-yellow-100 text-yellow-800",
+      },
+      CHO_THANH_TOAN_SHIP: {
+        label: "Chờ thanh toán ship",
+        className: "bg-blue-100 text-blue-800",
+      },
+      THAT_BAI: {
+        label: "Thất bại",
+        className: "bg-red-100 text-red-800",
+      },
+      DA_HUY: {
+        label: "Đã hủy",
+        className: "bg-gray-100 text-gray-800",
+      },
+      DA_HOAN_TIEN: {
+        label: "Đã hoàn tiền",
+        className: "bg-purple-100 text-purple-800",
+      },
+      DA_THANH_TOAN: {
+        label: "Đã thanh toán",
+        className: "bg-green-100 text-green-800",
+      },
+    };
 
-// Sub-dialog: Order Links
-const OrderLinksDialog = ({ orderLinks, onClose }) => (
-  <div className="fixed inset-0 bg-black bg-opacity-60 z-[60] flex items-center justify-center p-4">
-    <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b bg-blue-50">
-        <div className="flex items-center gap-2">
-          <LinkIcon className="w-5 h-5 text-blue-600" />
-          <h3 className="text-lg font-semibold">Danh sách sản phẩm</h3>
-        </div>
-        <button onClick={onClose} className="p-1 hover:bg-blue-100 rounded">
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-      <div className="p-4 overflow-y-auto max-h-[calc(90vh-80px)]">
-        {orderLinks.map((link) => (
-          <div
-            key={link.linkId}
-            className="mb-3 border rounded-lg p-4 bg-gray-50"
-          >
-            <div className="flex justify-between items-start mb-2">
-              <div className="font-semibold text-blue-600">
-                {link.productName}
-              </div>
-              <span
-                className={`px-2 py-1 rounded text-xs ${
-                  link.status === "DA_HUY"
-                    ? "bg-red-100 text-red-800"
-                    : "bg-green-100 text-green-800"
-                }`}
-              >
-                {link.status === "DA_HUY" ? "Đã hủy" : link.status}
+    return (
+      statusMap[status] || {
+        label: status,
+        className: "bg-gray-100 text-gray-800",
+      }
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 z-[60] flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
+        <div className="flex items-center justify-between p-4 border-b bg-green-50">
+          <div className="flex items-center gap-2">
+            <CreditCard className="w-5 h-5 text-green-600" />
+            <h3 className="text-lg font-semibold">Chi tiết thanh toán</h3>
+            {payments.length > 0 && (
+              <span className="text-sm text-gray-600">
+                ({payments.length} giao dịch)
               </span>
-            </div>
-            <div className="grid grid-cols-3 gap-3 text-sm mb-2">
-              <div>
-                <div className="text-gray-600 text-xs">Số lượng</div>
-                <div className="font-medium">{link.quantity}</div>
-              </div>
-              <div>
-                <div className="text-gray-600 text-xs">Giá web</div>
-                <div className="font-medium">
-                  {link.priceWeb?.toLocaleString("vi-VN")}
-                </div>
-              </div>
-              <div>
-                <div className="text-gray-600 text-xs">Tổng VNĐ</div>
-                <div className="font-bold text-green-600">
-                  {link.finalPriceVnd?.toLocaleString("vi-VN")}
-                </div>
-              </div>
-            </div>
-            {link.trackingCode && (
-              <div className="text-sm mb-2">
-                <span className="text-gray-600">Mã tracking: </span>
-                <span className="font-mono bg-gray-100 px-2 py-1 rounded">
-                  {link.trackingCode}
-                </span>
-              </div>
-            )}
-            {link.productLink && (
-              <a
-                href={link.productLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 text-sm flex items-center gap-1 hover:underline"
-              >
-                <ExternalLink className="w-3 h-3" />
-                {link.productLink}
-              </a>
             )}
           </div>
-        ))}
+          <button onClick={onClose} className="p-1 hover:bg-green-100 rounded">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-4 overflow-y-auto max-h-[calc(90vh-80px)]">
+          {payments.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              Chưa có thanh toán nào
+            </div>
+          ) : (
+            payments.map((payment) => {
+              const statusInfo = getPaymentStatusDisplay(payment.status);
+
+              return (
+                <div
+                  key={payment.paymentId}
+                  className="mb-3 border rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <div className="font-semibold text-green-600">
+                        {payment.paymentCode}
+                      </div>
+                      {payment.paymentTime && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          {new Date(payment.paymentTime).toLocaleString(
+                            "vi-VN",
+                            {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-lg text-green-600">
+                        {payment.amount?.toLocaleString("vi-VN")} ₫
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-600">Phương thức: </span>
+                      <span className="font-medium">{payment.method}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-gray-600">Trạng thái: </span>
+                      <span
+                        className={`px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${statusInfo.className}`}
+                      >
+                        {statusInfo.label}
+                      </span>
+                    </div>
+                  </div>
+
+                  {payment.note && (
+                    <div className="mt-2 text-sm text-gray-600 bg-white p-2 rounded border-l-2 border-gray-300">
+                      <span className="font-medium">Ghi chú: </span>
+                      {payment.note}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
+
+// Sub-dialog: Order Links
+const OrderLinksDialog = ({ orderLinks, onClose }) => {
+  // Hàm để lấy thông tin hiển thị cho từng trạng thái
+  const getStatusDisplay = (status) => {
+    const statusMap = {
+      DA_MUA: {
+        label: "Đã mua",
+        className: "bg-blue-100 text-blue-800",
+      },
+      CHO_THANH_TOAN: {
+        label: "Chờ thanh toán",
+        className: "bg-yellow-100 text-yellow-800",
+      },
+      DA_DU_HANG: {
+        label: "Đã đủ hàng",
+        className: "bg-purple-100 text-purple-800",
+      },
+      CHO_MUA: {
+        label: "Chờ mua",
+        className: "bg-orange-100 text-orange-800",
+      },
+      DA_HUY: {
+        label: "Đã hủy",
+        className: "bg-red-100 text-red-800",
+      },
+      DA_NHAP_KHO_NN: {
+        label: "Đã nhập kho nước ngoài",
+        className: "bg-red-100 text-red-800",
+      },
+      DAU_GIA_THANH_CONG: {
+        label: "Đấu giá thành công",
+        className: "bg-red-100 text-red-800",
+      },
+      DA_NHAP_KHO_VN: {
+        label: "Đã nhập kho VN",
+        className: "bg-red-100 text-red-800",
+      },
+    };
+
+    return (
+      statusMap[status] || {
+        label: status,
+        className: "bg-gray-100 text-gray-800",
+      }
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 z-[60] flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        <div className="flex items-center justify-between p-4 border-b bg-blue-50">
+          <div className="flex items-center gap-2">
+            <LinkIcon className="w-5 h-5 text-blue-600" />
+            <h3 className="text-lg font-semibold">Danh sách sản phẩm</h3>
+            <span className="text-sm text-gray-600">
+              ({orderLinks.length} sản phẩm)
+            </span>
+          </div>
+          <button onClick={onClose} className="p-1 hover:bg-blue-100 rounded">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-4 overflow-y-auto max-h-[calc(90vh-80px)]">
+          {orderLinks.map((link) => {
+            const statusInfo = getStatusDisplay(link.status);
+
+            return (
+              <div
+                key={link.linkId}
+                className="mb-3 border rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div className="font-semibold text-blue-600 flex-1 mr-2">
+                    {link.productName}
+                  </div>
+                  <span
+                    className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap ${statusInfo.className}`}
+                  >
+                    {statusInfo.label}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 text-sm mb-2">
+                  <div>
+                    <div className="text-gray-600 text-xs">Số lượng</div>
+                    <div className="font-medium">{link.quantity}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-600 text-xs">Giá web</div>
+                    <div className="font-medium">
+                      {link.priceWeb?.toLocaleString("vi-VN")}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-gray-600 text-xs">Tổng VNĐ</div>
+                    <div className="font-bold text-green-600">
+                      {link.finalPriceVnd?.toLocaleString("vi-VN")} ₫
+                    </div>
+                  </div>
+                </div>
+
+                {link.trackingCode && (
+                  <div className="text-sm mb-2">
+                    <span className="text-gray-600">Mã tracking: </span>
+                    <span className="font-mono bg-gray-100 px-2 py-1 rounded">
+                      {link.trackingCode}
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Sub-dialog: Process Logs
 const ProcessLogsDialog = ({ logs, onClose }) => {
@@ -308,6 +466,9 @@ const ProcessLogsDialog = ({ logs, onClose }) => {
       GIAO_HANG: "Giao hàng",
       HUY_DON: "Hủy đơn",
       HOAN_THANH: "Hoàn thành",
+      DA_NHAP_KHO_NN: "Đã nhập kho nước ngoài",
+      DA_NHAP_KHO_VN: "Đã nhập kho VN",
+      DAU_GIA_THANH_CONG: "Đấu giá thành công",
     };
     return actionMap[action] || action;
   };
@@ -321,6 +482,7 @@ const ProcessLogsDialog = ({ logs, onClose }) => {
       STAFF_PURCHASER: "Nhân viên mua hàng",
       MANAGER: "Quản lý",
       ADMIN: "Quản trị viên",
+      STAFF_WAREHOUSE_FOREIGN: "Nhân viên kho nước ngoài",
     };
     return roleMap[role] || role;
   };
@@ -354,7 +516,11 @@ const ProcessLogsDialog = ({ logs, onClose }) => {
                         {getActionText(log.action)}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {new Date(log.timestamp).toLocaleString("vi-VN")}
+                        {new Date(log.timestamp).toLocaleString("vi-VN", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        })}
                       </div>
                     </div>
                     <div className="text-sm text-gray-600">
