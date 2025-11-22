@@ -188,6 +188,14 @@ const PurchasesDialog = ({ purchases, onClose }) => {
                             </span>
                           </div>
                         )}
+                        {link.productLinke && (
+                          <div className="mt-2 text-sm">
+                            <span className="text-gray-600">Mã tracking: </span>
+                            <span className="font-mono bg-gray-100 px-2 py-1 rounded">
+                              {link.productLink}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -440,6 +448,14 @@ const OrderLinksDialog = ({ orderLinks, onClose }) => {
                     <span className="text-gray-600">Mã tracking: </span>
                     <span className="font-mono bg-gray-100 px-2 py-1 rounded">
                       {link.trackingCode}
+                    </span>
+                  </div>
+                )}
+                {link.productLink && (
+                  <div className="text-sm mb-2">
+                    <span className="text-gray-600">Linnk: </span>
+                    <span className="font-mono bg-gray-100 px-2 py-1 rounded">
+                      {link.productLink}
                     </span>
                   </div>
                 )}

@@ -120,12 +120,12 @@ const StaffSaleSidebar = () => {
         {
           type: "dropdown",
           icon: Banknote,
-          label: "Theo dõi đơn hàng",
+          label: "Theo dõi thanh toán",
           dropdownItems: [
             {
               to: "/staff-sale/order-payment",
               icon: Banknote,
-              label: "Quy trình đơn hàng",
+              label: "Quy trình thanh toán",
             },
             // {
             //   to: "/staff-sale/comfirm-payment",
