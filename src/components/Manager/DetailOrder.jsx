@@ -188,9 +188,11 @@ const PurchasesDialog = ({ purchases, onClose }) => {
                             </span>
                           </div>
                         )}
-                        {link.productLinke && (
+                        {link.productLink && (
                           <div className="mt-2 text-sm">
-                            <span className="text-gray-600">Mã tracking: </span>
+                            <span className="text-gray-600">
+                              Link sản phẩm:{" "}
+                            </span>
                             <span className="font-mono bg-gray-100 px-2 py-1 rounded">
                               {link.productLink}
                             </span>
