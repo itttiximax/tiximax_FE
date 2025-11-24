@@ -172,16 +172,12 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
               </div>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-600">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-gray-200 rounded-full shadow-sm">
-                  <span className="uppercase tracking-wide text-gray-500 font-medium">
-                    Purchase
+                  <span className="text-xl text-black-500 font-medium">
+                    Purchase Code --
                   </span>
-                  <strong className="text-gray-900 text-sm ml-1">
+                  <strong className="text-gray-900 text-xl ml-1">
                     {purchase.purchaseCode}
                   </strong>
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-gray-200 rounded-full shadow-sm">
-                  <span className="font-medium">Date:</span>{" "}
-                  {formatDate(purchase.purchaseTime)}
                 </span>
               </div>
             </div>
@@ -449,6 +445,15 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
                     </span>
                     <span className="text-sm font-bold text-slate-900">
                       {getOrderTypeLabel(orders)}
+                    </span>
+                  </div>
+                  {/* Order Code */}
+                  <div className="bg-white rounded-lg p-2 border border-gray-200 col-span-2">
+                    <span className="font-semibold text-slate-800 block mb-0.5">
+                      Order Code:
+                    </span>
+                    <span className="text-sm font-bold text-slate-900">
+                      {orders.orderCode}
                     </span>
                   </div>
 

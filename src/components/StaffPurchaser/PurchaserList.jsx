@@ -281,7 +281,7 @@ const PurchaserList = () => {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Search by purchase code, order code, product, tracking..."
+              placeholder="Search by purchase code, order code, product..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full rounded-xl border border-gray-200 bg-white pl-10 pr-4 py-2.5 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
@@ -433,11 +433,11 @@ const PurchaserList = () => {
                             <ShoppingCart className="h-4 w-4" />
                             {purchase.purchaseCode}
                           </span>
-                          <span className="text-sm text-gray-600">
+                          {/* <span className="text-sm text-gray-600">
                             <span className="font-medium text-gray-900">
                               {purchase.orderCode}
                             </span>
-                          </span>
+                          </span> */}
                         </div>
 
                         <div className="flex flex-wrap items-center gap-4 text-xs text-gray-600">
@@ -526,11 +526,11 @@ const PurchaserList = () => {
                                         {link.quantity}
                                       </span>
                                     </span>
-                                    {link.trackingCode && (
+                                    {purchase.orderCode && (
                                       <span className="flex items-center gap-1">
-                                        Tracking:{" "}
+                                        OrderCode:{" "}
                                         <span className="font-medium text-blue-600">
-                                          {link.trackingCode}
+                                          {purchase.orderCode}
                                         </span>
                                       </span>
                                     )}

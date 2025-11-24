@@ -155,7 +155,8 @@ const UpdateShipmentCodeList = () => {
     return list.filter((it) => {
       const inOrder =
         it.orderCode?.toLowerCase().includes(s) ||
-        it.staffName?.toLowerCase().includes(s);
+        it.staffName?.toLowerCase().includes(s) ||
+        it.purchaseCode?.toLowerCase().includes(s);
       const inLinks = (it.pendingLinks || []).some((l) => {
         const lc = String(l.linkId).toLowerCase();
         return (
@@ -256,7 +257,7 @@ const UpdateShipmentCodeList = () => {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search by order code, staff, product, tracking..."
+                placeholder="Search by Order code, Purchase code, product, ....."
                 className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
               {q && (
@@ -389,7 +390,7 @@ const UpdateShipmentCodeList = () => {
                       <div className="mb-3 flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
                           <h3 className="mb-1 font-mono text-lg font-semibold text-slate-900">
-                            {p.orderCode}
+                            {p.purchaseCode}
                           </h3>
                           <div className="flex flex-wrap items-center gap-2 text-sm">
                             <span className="inline-flex items-center gap-1 text-slate-700">
@@ -481,10 +482,10 @@ const UpdateShipmentCodeList = () => {
 
                                 <div className="flex items-start gap-1.5">
                                   <span className="text-black-500">
-                                    Tracking:
+                                    OrderCode:
                                   </span>
                                   <span className="flex-1 font-semibold text-xls">
-                                    {l.trackingCode || "-"}
+                                    {p.orderCode || "-"}
                                   </span>
                                 </div>
 
