@@ -406,7 +406,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                   </div>
 
                   {/* Final Price */}
-                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-5 border-2 border-green-300 shadow-sm">
+                  {/* <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-5 border-2 border-green-300 shadow-sm">
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="text-sm text-green-700 font-medium mb-1">
@@ -432,7 +432,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                         </svg>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Summary Info */}
                   <div className="bg-gray-100 rounded-lg p-3 text-xs text-gray-600">

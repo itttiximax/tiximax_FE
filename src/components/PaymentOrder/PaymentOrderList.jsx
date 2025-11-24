@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import createOrderPaymentService from "../../Services/Payment/createOrderPaymentService";
-import countStatusService from "../../Services/Order/countStatusService";
 import {
   CheckCircle,
   Clock,
@@ -12,6 +11,7 @@ import {
   ChevronRight,
   FileText,
   Loader2,
+  Search,
 } from "lucide-react";
 import ConfirmPayment from "./ConfirmPayment";
 
@@ -38,6 +38,7 @@ const formatDate = (isoStr) => {
     return isoStr;
   }
 };
+
 const statusBadge = (status) => {
   const map = {
     DA_XAC_NHAN: {
@@ -85,8 +86,11 @@ const PaymentOrderList = () => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [statusCounts, setStatusCounts] = useState({});
-  const [statsLoading, setStatsLoading] = useState(false);
+
+  // Search theo mã đơn + mã giao dịch
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const PAGE_SIZE = 50; // default 50 / trang
 
   const fetchOrders = async (status, page = 0) => {
     setLoading(true);
@@ -94,7 +98,7 @@ const PaymentOrderList = () => {
       const response = await createOrderPaymentService.getOrdersByStatus(
         status,
         page,
-        10
+        PAGE_SIZE
       );
       setOrders(response.content || []);
       setTotalPages(response.totalPages || 0);
@@ -108,38 +112,14 @@ const PaymentOrderList = () => {
     }
   };
 
-  const fetchStatusStatistics = async () => {
-    try {
-      const response = await countStatusService.getForPaymentStatistics();
-      const normalizedCounts = validTabs.reduce((acc, tab) => {
-        acc[tab] = response[tab] ?? 0;
-        return acc;
-      }, {});
-      setStatusCounts(normalizedCounts);
-    } catch (error) {
-      console.error("Error fetching payment statistics:", error);
-      toast.error("Không thể tải thống kê trạng thái");
-      setStatusCounts(
-        validTabs.reduce((acc, tab) => ({ ...acc, [tab]: 0 }), {})
-      );
-    }
-  };
-
   useEffect(() => {
     localStorage.setItem("activeTab", activeTab);
-    setLoading(true);
-    setStatsLoading(true);
-    Promise.all([fetchOrders(activeTab, 0), fetchStatusStatistics()])
-      .catch(() => {})
-      .finally(() => {
-        setLoading(false);
-        setStatsLoading(false);
-      });
+    fetchOrders(activeTab, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   const refreshAll = async () => {
     await fetchOrders(activeTab, currentPage);
-    await fetchStatusStatistics();
   };
 
   const tabConfigs = [
@@ -172,28 +152,24 @@ const PaymentOrderList = () => {
         activeBorder: "border-emerald-600",
         activeText: "text-white",
         icon: "text-emerald-600",
-        badge: "bg-emerald-600",
       },
       orange: {
         activeBg: "bg-orange-600",
         activeBorder: "border-orange-600",
         activeText: "text-white",
         icon: "text-orange-600",
-        badge: "bg-orange-600",
       },
       blue: {
         activeBg: "bg-blue-600",
         activeBorder: "border-blue-600",
         activeText: "text-white",
         icon: "text-blue-600",
-        badge: "bg-blue-600",
       },
       purple: {
         activeBg: "bg-purple-600",
         activeBorder: "border-purple-600",
         activeText: "text-white",
         icon: "text-purple-600",
-        badge: "bg-purple-600",
       },
     };
     return colors[color];
@@ -204,10 +180,9 @@ const PaymentOrderList = () => {
       fetchOrders(activeTab, newPage);
     }
   };
-  // Thay thế toàn bộ hàm này trong PaymentOrderList.jsx
+
   const orderTypeLabel = (t) => {
     switch (t) {
-      // Keys mới (ưu tiên)
       case "MUA_HO":
         return "Mua hộ";
       case "KY_GUI":
@@ -215,7 +190,6 @@ const PaymentOrderList = () => {
       case "DAU_GIA":
         return "Đấu giá";
 
-      // Tương thích ngược (nếu backend vẫn trả key cũ ở vài nơi)
       case "SHOPPING":
         return "Mua hộ";
       case "SHIP":
@@ -270,8 +244,23 @@ const PaymentOrderList = () => {
     ];
   };
 
-  const renderRows = () =>
-    (orders || []).map((order) => {
+  const renderRows = () => {
+    const term = searchTerm.trim().toLowerCase();
+
+    const filteredOrders = (orders || []).filter((order) => {
+      if (!term) return true;
+
+      const code = (order?.code || order?.orderCode || "").toLowerCase();
+      const payCode = (
+        order?.paymentCode ||
+        order?.transactionCode ||
+        ""
+      ).toLowerCase();
+
+      return code.includes(term) || payCode.includes(term);
+    });
+
+    return filteredOrders.map((order) => {
       const customerName = order?.customer?.name || "N/A";
       const code = order?.code || order?.orderCode || "—";
       const payCode = order?.paymentCode || order?.transactionCode || "—";
@@ -310,15 +299,30 @@ const PaymentOrderList = () => {
         </div>
       );
     });
+  };
 
   return (
     <div className="min-h-screen py-6 px-4">
-      {/* <Toaster position="top-right" /> */}
-
       <div className="mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">
-          Quản lý thanh toán đơn hàng
-        </h1>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">
+            Quản lý thanh toán đơn hàng
+          </h1>
+
+          {/* Search mã đơn + mã giao dịch */}
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Tìm mã đơn hoặc mã giao dịch..."
+                className="pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-72"
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Tabs */}
         <div className="bg-white rounded-lg shadow border border-gray-200 mb-6">
@@ -327,7 +331,6 @@ const PaymentOrderList = () => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.key;
               const color = getColorClasses(tab.color);
-              const count = statusCounts[tab.key] ?? 0;
 
               return (
                 <button
@@ -349,19 +352,6 @@ const PaymentOrderList = () => {
                       />
                       <span className="text-sm font-semibold">{tab.label}</span>
                     </div>
-                    {statsLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
-                    ) : (
-                      <span
-                        className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                          isActive
-                            ? "bg-white/20 text-white"
-                            : "bg-gray-100 text-gray-600"
-                        }`}
-                      >
-                        {count}
-                      </span>
-                    )}
                   </div>
                 </button>
               );
@@ -369,7 +359,7 @@ const PaymentOrderList = () => {
           </div>
         </div>
 
-        {/* Loading */}
+        {/* Loading / List */}
         {loading ? (
           <div className="bg-white rounded-lg shadow border border-gray-200 p-12 text-center">
             <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
@@ -408,6 +398,9 @@ const PaymentOrderList = () => {
             <div className="text-sm text-gray-700">
               Trang <span className="font-semibold">{currentPage + 1}</span> /{" "}
               <span className="font-semibold">{totalPages}</span>
+              <span className="ml-2 text-xs text-gray-500">
+                ({PAGE_SIZE} đơn / trang)
+              </span>
             </div>
             <div className="flex gap-2">
               <button
