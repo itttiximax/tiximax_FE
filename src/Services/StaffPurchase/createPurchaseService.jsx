@@ -82,6 +82,17 @@ const createPurchaseService = {
       throw error;
     }
   },
+  getPurchaseById: async (purchaseId) => {
+    if (!purchaseId) throw new Error("Purchase ID is required");
+
+    try {
+      const response = await api.get(`/purchases/${purchaseId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching purchase by ID:", error);
+      throw error;
+    }
+  },
 };
 
 export default createPurchaseService;

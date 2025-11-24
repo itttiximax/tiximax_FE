@@ -11,10 +11,12 @@ import {
   Calendar,
   User,
   ShoppingCart,
+  Eye, // 👈 NEW
 } from "lucide-react";
 import toast from "react-hot-toast";
 import orderlinkService from "../../Services/StaffPurchase/orderlinkService";
 import CancelPurchase from "./CancelPurchase";
+import DetailPurchase from "./DetailPurchase"; // 👈 NEW
 
 const PAGE_SIZE_DEFAULT = 10;
 
@@ -101,6 +103,12 @@ const PurchaserList = () => {
     linkId: null,
     orderCode: "",
     linkInfo: null,
+  });
+
+  // 👇 NEW: state cho popup DetailPurchase
+  const [detailModal, setDetailModal] = useState({
+    open: false,
+    purchaseId: null,
   });
 
   const fetchData = async (
@@ -210,6 +218,21 @@ const PurchaserList = () => {
 
   const closeCancelModal = () => {
     setCancelModal((prev) => ({ ...prev, open: false }));
+  };
+
+  // 👇 NEW: open/close detail modal
+  const openDetailModal = (purchaseId) => {
+    setDetailModal({
+      open: true,
+      purchaseId,
+    });
+  };
+
+  const closeDetailModal = () => {
+    setDetailModal({
+      open: false,
+      purchaseId: null,
+    });
   };
 
   const handleFilterClick = (newFilter) => {
@@ -436,6 +459,15 @@ const PurchaserList = () => {
                                 : "—"}
                             </span>
                           </div>
+
+                          {/* 👇 NEW: nút View detail ở header */}
+                          <button
+                            onClick={() => openDetailModal(purchase.purchaseId)}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-blue-800 px-3 py-1.5 text-xs font-medium text-white transition-colors"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                            View detail
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -622,6 +654,18 @@ const PurchaserList = () => {
           toast.success("Order link cancelled successfully.");
         }}
       />
+
+      {/* 👉 Detail purchase modal */}
+      {detailModal.open && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40">
+          <div className="max-h-[90vh] w-full max-w-6xl overflow-y-auto">
+            <DetailPurchase
+              purchaseId={detailModal.purchaseId}
+              onClose={closeDetailModal}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
