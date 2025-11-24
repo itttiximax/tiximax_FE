@@ -11,12 +11,14 @@ import {
   Calendar,
   User,
   ShoppingCart,
-  Eye, // 👈 NEW
+  Eye,
+  Edit3, // 👈 NEW
 } from "lucide-react";
 import toast from "react-hot-toast";
 import orderlinkService from "../../Services/StaffPurchase/orderlinkService";
 import CancelPurchase from "./CancelPurchase";
-import DetailPurchase from "./DetailPurchase"; // 👈 NEW
+import DetailPurchase from "./DetailPurchase";
+import UpdatePurchase from "./UpdatePurchase"; // 👈 NEW
 
 const PAGE_SIZE_DEFAULT = 10;
 
@@ -105,10 +107,16 @@ const PurchaserList = () => {
     linkInfo: null,
   });
 
-  // 👇 NEW: state cho popup DetailPurchase
+  // Detail Purchase modal
   const [detailModal, setDetailModal] = useState({
     open: false,
     purchaseId: null,
+  });
+
+  // 👇 NEW: Update Purchase modal
+  const [updateModal, setUpdateModal] = useState({
+    open: false,
+    purchase: null,
   });
 
   const fetchData = async (
@@ -220,7 +228,7 @@ const PurchaserList = () => {
     setCancelModal((prev) => ({ ...prev, open: false }));
   };
 
-  // 👇 NEW: open/close detail modal
+  // Detail modal open/close
   const openDetailModal = (purchaseId) => {
     setDetailModal({
       open: true,
@@ -232,6 +240,21 @@ const PurchaserList = () => {
     setDetailModal({
       open: false,
       purchaseId: null,
+    });
+  };
+
+  // 👇 Update modal open/close
+  const openUpdateModal = (purchase) => {
+    setUpdateModal({
+      open: true,
+      purchase,
+    });
+  };
+
+  const closeUpdateModal = () => {
+    setUpdateModal({
+      open: false,
+      purchase: null,
     });
   };
 
@@ -433,11 +456,6 @@ const PurchaserList = () => {
                             <ShoppingCart className="h-4 w-4" />
                             {purchase.purchaseCode}
                           </span>
-                          {/* <span className="text-sm text-gray-600">
-                            <span className="font-medium text-gray-900">
-                              {purchase.orderCode}
-                            </span>
-                          </span> */}
                         </div>
 
                         <div className="flex flex-wrap items-center gap-4 text-xs text-gray-600">
@@ -460,14 +478,26 @@ const PurchaserList = () => {
                             </span>
                           </div>
 
-                          {/* 👇 NEW: nút View detail ở header */}
-                          <button
-                            onClick={() => openDetailModal(purchase.purchaseId)}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-blue-800 px-3 py-1.5 text-xs font-medium text-white transition-colors"
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                            View detail
-                          </button>
+                          {/* Buttons: View Detail & Edit */}
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() =>
+                                openDetailModal(purchase.purchaseId)
+                              }
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-800 px-3 py-1.5 text-xs font-medium text-white transition-colors"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                              View detail
+                            </button>
+
+                            <button
+                              onClick={() => openUpdateModal(purchase)}
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white transition-colors"
+                            >
+                              <Edit3 className="h-3.5 w-3.5" />
+                              Edit
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -655,13 +685,29 @@ const PurchaserList = () => {
         }}
       />
 
-      {/* 👉 Detail purchase modal */}
+      {/* Detail purchase modal */}
       {detailModal.open && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40">
           <div className="max-h-[90vh] w-full max-w-6xl overflow-y-auto">
             <DetailPurchase
               purchaseId={detailModal.purchaseId}
               onClose={closeDetailModal}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Update purchase modal */}
+      {updateModal.open && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto">
+            <UpdatePurchase
+              purchase={updateModal.purchase}
+              onClose={closeUpdateModal}
+              onUpdated={() => {
+                fetchData();
+                toast.success("Purchase updated.");
+              }}
             />
           </div>
         </div>

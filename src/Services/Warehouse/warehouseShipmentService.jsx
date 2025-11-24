@@ -13,5 +13,10 @@ const listShipments = async (shipmentIds) => {
   const response = await api.post(`/warehouse/list-shipment`, shipmentIds);
   return response.data;
 };
+const getShipmentInfo = async (orderId) => {
+  if (!orderId) throw new Error("Order ID is required");
 
-export { createShipment, listShipments };
+  const response = await api.get(`/orders/info-shipment/${orderId}`);
+  return response.data;
+};
+export { createShipment, listShipments, getShipmentInfo };

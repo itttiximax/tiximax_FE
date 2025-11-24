@@ -93,6 +93,18 @@ const createPurchaseService = {
       throw error;
     }
   },
+  updatePurchase: async (purchaseId, data) => {
+    if (!purchaseId) throw new Error("Purchase ID is required");
+    if (!data) throw new Error("Update data is required");
+
+    try {
+      const response = await api.patch(`/purchases/${purchaseId}`, data);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating purchase:", error);
+      throw error;
+    }
+  },
 };
 
 export default createPurchaseService;
