@@ -287,7 +287,6 @@ const WarehouseShipment = () => {
 
                   {/* Customer Code */}
                   <div className="flex items-center gap-2 bg-white/60 rounded-lg p-2.5">
-                    <div className="w-4 h-4 flex-shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-gray-600">Customer Code</p>
                       <p className="font-semibold text-gray-900">
@@ -298,7 +297,6 @@ const WarehouseShipment = () => {
 
                   {/* Order Type */}
                   <div className="flex items-center gap-2 bg-white/60 rounded-lg p-2.5">
-                    <div className="w-4 h-4 flex-shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-gray-600">Order Type</p>
                       <p className="font-semibold text-gray-900">
