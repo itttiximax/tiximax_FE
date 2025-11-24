@@ -134,7 +134,6 @@ const ProductManager = ({
     },
     [setProducts]
   );
-
   const handleCurrencyBlur = useCallback(
     (index, fieldName) => {
       setProducts((prev) => {
@@ -162,6 +161,7 @@ const ProductManager = ({
             }
           }
         }
+        // Không set "0" ở đây nữa, để trống
 
         return updatedProducts;
       });

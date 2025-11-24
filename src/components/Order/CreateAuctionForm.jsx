@@ -23,7 +23,7 @@ const CreateAuctionForm = () => {
   const [preliminary, setPreliminary] = useState({
     customerCode: "",
     routeId: "",
-    addressId: "", 
+    addressId: "",
     shippingFee: 0,
   });
 
@@ -125,26 +125,22 @@ const CreateAuctionForm = () => {
     }, 400);
   }, []);
   const handleShippingFeeBlur = () => {
-  const selectedRoute = masterData.routes.find(
-    (r) => r.routeId === Number(preliminary.routeId)
-  );
-
-  const minFee = selectedRoute?.unitBuyingPrice ?? 0;
-
-  if (preliminary.shippingFee < minFee) {
-    toast.error(
-      `Phí vận chuyển tối thiểu là ${minFee.toLocaleString()} đ`
+    const selectedRoute = masterData.routes.find(
+      (r) => r.routeId === Number(preliminary.routeId)
     );
 
-    // Reset về minFee cho đúng
-    setPreliminary((prev) => ({
-      ...prev,
-      shippingFee: minFee,
-    }));
-  }
-};
+    const minFee = selectedRoute?.unitBuyingPrice ?? 0;
 
+    if (preliminary.shippingFee < minFee) {
+      toast.error(`Phí vận chuyển tối thiểu là ${minFee.toLocaleString()} đ`);
 
+      // Reset về minFee cho đúng
+      setPreliminary((prev) => ({
+        ...prev,
+        shippingFee: minFee,
+      }));
+    }
+  };
 
   const handleCustomerCodeChange = useCallback(
     (e) => {
@@ -178,48 +174,48 @@ const CreateAuctionForm = () => {
     toast("Đã xóa thông tin khách hàng", { icon: "🗑️" });
   }, []);
 
- const handlePreliminaryChange = useCallback(
-  (e) => {
-    const { name, value } = e.target;
+  const handlePreliminaryChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
 
-    // ==== Nếu đổi tuyến đường ====
-    if (name === "routeId") {
-      const routeIdNum = Number(value || 0);
+      // ==== Nếu đổi tuyến đường ====
+      if (name === "routeId") {
+        const routeIdNum = Number(value || 0);
 
-      const selectedRoute = masterData.routes.find(
-        (route) => route.routeId === routeIdNum
-      );
+        const selectedRoute = masterData.routes.find(
+          (route) => route.routeId === routeIdNum
+        );
 
-      // cập nhật routeId + reset shippingFee = min
-      setPreliminary((prev) => ({
-        ...prev,
-        routeId: routeIdNum,
-        shippingFee: selectedRoute?.unitBuyingPrice ?? 0,
-      }));
-
-      setForm((prev) => ({
-      ...prev,
-      priceShip: selectedRoute?.unitBuyingPrice ?? 0,
-    }));
-
-      // cập nhật tỷ giá
-      if (selectedRoute?.exchangeRate) {
-        setForm((prev) => ({
+        // cập nhật routeId + reset shippingFee = min
+        setPreliminary((prev) => ({
           ...prev,
-          exchangeRate: Number(selectedRoute.exchangeRate) || "",
+          routeId: routeIdNum,
+          shippingFee: selectedRoute?.unitBuyingPrice ?? 0,
         }));
 
-        toast.success(
-          `Tỷ giá hôm nay: ${Number(
-            selectedRoute.exchangeRate || 0
-          ).toLocaleString()} VND`
-        );
+        setForm((prev) => ({
+          ...prev,
+          priceShip: selectedRoute?.unitBuyingPrice ?? 0,
+        }));
+
+        // cập nhật tỷ giá
+        if (selectedRoute?.exchangeRate) {
+          setForm((prev) => ({
+            ...prev,
+            exchangeRate: Number(selectedRoute.exchangeRate) || "",
+          }));
+
+          toast.success(
+            `Tỷ giá hôm nay: ${Number(
+              selectedRoute.exchangeRate || 0
+            ).toLocaleString()} VND`
+          );
+        }
+
+        return;
       }
 
-      return;
-    }
-
-        if (name === "shippingFee") {
+      if (name === "shippingFee") {
         const fee = Number(value);
 
         // Cập nhật preliminary (ui)
@@ -235,14 +231,14 @@ const CreateAuctionForm = () => {
         return;
       }
 
-    // ==== Các field khác ====
-    setPreliminary((prev) => ({
-      ...prev,
-      [name]: name === "addressId" ? Number(value || 0) : value,
-    }));
-  },
-  [masterData.routes, preliminary.routeId]
-);
+      // ==== Các field khác ====
+      setPreliminary((prev) => ({
+        ...prev,
+        [name]: name === "addressId" ? Number(value || 0) : value,
+      }));
+    },
+    [masterData.routes, preliminary.routeId]
+  );
 
   const handleChange = useCallback((e) => {
     const { name, value, type, checked } = e.target;
@@ -361,6 +357,11 @@ const CreateAuctionForm = () => {
           quantity: Number(p.quantity || 0),
           priceWeb: Number(p.priceWeb || 0),
           shipWeb: Number(p.shipWeb || 0),
+          purchaseFee: p.purchaseFee
+            ? p.purchaseFee.includes?.("%")
+              ? Number(p.purchaseFee.replace("%", "")) || 0
+              : Number(p.purchaseFee) || 0
+            : 0,
           productTypeId: Number(p.productTypeId || 0),
         })),
       };
@@ -541,31 +542,29 @@ const CreateAuctionForm = () => {
                   </div>
                 </div>
 
-                  {preliminary.routeId && (
-             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Phí vận chuyển <span className="text-red-500">*</span>
-              </label>
+                {preliminary.routeId && (
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Phí vận chuyển <span className="text-red-500">*</span>
+                    </label>
 
-                <input
-                type="number"
-                name="shippingFee"
-                value={preliminary.shippingFee}
-                onChange={handlePreliminaryChange}
-                onBlur={handleShippingFeeBlur}   // <--- validate khi rời khỏi ô input
-                min={
-                  masterData.routes.find(r => r.routeId === Number(preliminary.routeId))
-                    ?.unitBuyingPrice ?? 0
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg 
+                    <input
+                      type="number"
+                      name="shippingFee"
+                      value={preliminary.shippingFee}
+                      onChange={handlePreliminaryChange}
+                      onBlur={handleShippingFeeBlur} // <--- validate khi rời khỏi ô input
+                      min={
+                        masterData.routes.find(
+                          (r) => r.routeId === Number(preliminary.routeId)
+                        )?.unitBuyingPrice ?? 0
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg 
                           focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
                           text-sm"
-              />
-            </div>
-          )}
-
-
-
+                    />
+                  </div>
+                )}
 
                 <div className="border-t border-gray-200" />
 
