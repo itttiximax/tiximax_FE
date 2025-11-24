@@ -79,13 +79,13 @@ const OrderLinkList = () => {
     { bg: "bg-violet-500", text: "text-white", border: "border-violet-100" },
   ];
 
-  const getShopColor = (shopName, orderLinks) => {
+  const getShopColor = (shopName, orderLinks, linkId) => {
+    // Handle empty/null/undefined shop names
     if (!shopName || shopName === "string" || shopName === "N/A") {
-      return {
-        bg: "bg-red-600",
-        text: "text-white",
-        border: "border-gray-100",
-      };
+      // Use linkId to generate unique color for each empty shop
+      let hash = linkId || 0;
+      const colorIndex = Math.abs(hash) % shopColorPalette.length;
+      return shopColorPalette[colorIndex];
     }
 
     const uniqueShops = [
@@ -802,7 +802,8 @@ const OrderLinkList = () => {
                           ).map((link) => {
                             const shopColor = getShopColor(
                               link.groupTag,
-                              order.orderLinks
+                              order.orderLinks,
+                              link.linkId
                             );
                             const isDisabled = [
                               "DA_MUA",

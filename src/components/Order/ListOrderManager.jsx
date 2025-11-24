@@ -448,7 +448,7 @@ const ListOrderManager = () => {
                             Tổng trọng lượng:
                           </span>
                           <span className="font-medium text-gray-900">
-                            {formatCurrency(order.totalNetWeight)} kg
+                            {order.totalWeight} kg
                           </span>
                         </div>
                         {order.paymentCode && (
