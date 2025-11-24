@@ -12,7 +12,6 @@ import {
   ClipboardList,
   Phone,
   Mail,
-  MapPin,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -33,6 +32,49 @@ const formatDate = (isoStr) => {
   } catch {
     return isoStr;
   }
+};
+
+// Status label cho từng product link (bảng Product List)
+const getStatusLabel = (status) => {
+  const statusMap = {
+    DA_MUA: "Purchased",
+    HOAT_DONG: "Active",
+    CHO_MUA: "Pending Purchase",
+    TAM_DUNG: "On Hold",
+    HUY: "Cancelled",
+    CHO_NHAP_KHO_NN: "Awaiting Overseas Warehouse",
+    CHO_NHAP_KHO_VN: "Awaiting Vietnam Warehouse",
+  };
+
+  return statusMap[status] || status || "—";
+};
+
+// Chỉ lấy loại dịch vụ mua hộ / vận chuyển
+const getOrderTypeLabel = (order) => {
+  if (!order) return "—";
+
+  const typeMap = {
+    MUA_HO: "Mua hộ",
+    VAN_CHUYEN: "Vận chuyển",
+  };
+
+  return typeMap[order.orderType] || order.orderType || "—";
+};
+
+// Trạng thái đơn hàng
+const getOrderStatusLabel = (order) => {
+  if (!order) return "—";
+
+  const statusMap = {
+    CHO_NHAP_KHO_NN: "Chờ nhập kho nước ngoài",
+    CHO_NHAP_KHO_VN: "Chờ nhập kho Việt Nam",
+    DA_HOAN_THANH: "Đã hoàn thành",
+    DA_MUA: "Đã mua",
+    TAM_DUNG: "Tạm dừng",
+    HUY: "Đã hủy",
+  };
+
+  return statusMap[order.status] || order.status || "—";
 };
 
 const DetailPurchase = ({ purchaseId, onClose }) => {
@@ -107,73 +149,44 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
     orderLinks = [],
     staff,
     customer,
-    warehouses = [],
+    // warehouses = [], // đã bỏ không dùng
   } = purchase;
-
-  // helper: get initials from name
-  const getInitials = (name) => {
-    if (!name) return "?";
-    const parts = name.trim().split(" ");
-    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return (
-      parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
-    ).toUpperCase();
-  };
-
-  // Get status label in English
-  const getStatusLabel = (status) => {
-    const statusMap = {
-      DA_MUA: "Purchased",
-      HOAT_DONG: "Active",
-      CHO_MUA: "Pending Purchase",
-      TAM_DUNG: "On Hold",
-      HUY: "Cancelled",
-      CHO_NHAP_KHO_NN: "Awaiting Overseas Warehouse",
-    };
-    return statusMap[status] || status;
-  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="w-full max-w-6xl bg-white rounded-xl shadow-2xl border border-gray-100 max-h-[95vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-start justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-slate-50 via-white to-blue-50">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm">
-                <ShoppingCart className="w-5 h-5" />
+        <div className="sticky top-0 z-10 px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-slate-50 via-white to-blue-50">
+          <div className="flex items-start justify-between gap-4">
+            {/* Left: title + code + date */}
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
+                  <ShoppingCart className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">
+                    Purchase Detail
+                  </h2>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-slate-900">
-                  Purchase Detail
-                </h2>
-              </div>
-            </div>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-600">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-full shadow-sm">
-                <Tag className="w-3.5 h-3.5" />
-                <span className="uppercase tracking-wide text-gray-500 font-medium">
-                  Purchase
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-600">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-gray-200 rounded-full shadow-sm">
+                  <span className="uppercase tracking-wide text-gray-500 font-medium">
+                    Purchase
+                  </span>
+                  <strong className="text-gray-900 text-sm ml-1">
+                    {purchase.purchaseCode}
+                  </strong>
                 </span>
-                <strong className="text-gray-900 text-sm">
-                  {purchase.purchaseCode}
-                </strong>
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-full shadow-sm">
-                <Calendar className="w-3.5 h-3.5" />
-                <span className="font-medium">Date:</span>{" "}
-                {formatDate(purchase.purchaseTime)}
-              </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-gray-200 rounded-full shadow-sm">
+                  <span className="font-medium">Date:</span>{" "}
+                  {formatDate(purchase.purchaseTime)}
+                </span>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            {purchase.purchaseImage && (
-              <img
-                src={purchase.purchaseImage}
-                alt="Purchase"
-                className="w-16 h-16 rounded-lg object-cover border border-gray-200 shadow-sm"
-              />
-            )}
+
+            {/* Right: only close button */}
             {onClose && (
               <button
                 onClick={onClose}
@@ -187,87 +200,23 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
 
         {/* Grid layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 p-6">
-          {/* LEFT: Order & Products */}
+          {/* LEFT: Ảnh + Product */}
           <div className="lg:col-span-2 space-y-5">
-            {/* Order summary */}
-            <div className="border border-gray-200 rounded-xl p-5 bg-gradient-to-br from-slate-50 to-blue-50">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <ClipboardList className="w-5 h-5 text-gray-700" />
-                  <h3 className="font-bold text-base uppercase tracking-wide text-slate-800">
-                    Order Information
-                  </h3>
+            {/* Ảnh to bên dưới header */}
+            {purchase.purchaseImage && (
+              <div className="">
+                <h3 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                  Purchase Image
+                </h3>
+                <div className="w-full">
+                  <img
+                    src={purchase.purchaseImage}
+                    alt="Purchase"
+                    className="w-full max-h-80 object-contain rounded-xl border border-gray-200 shadow-md bg-slate-50"
+                  />
                 </div>
-                {orders?.orderCode && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-200 text-xs text-slate-700 shadow-sm">
-                    <Tag className="w-3.5 h-3.5" />
-                    Order:{" "}
-                    <span className="font-bold text-slate-900 text-sm">
-                      {orders.orderCode}
-                    </span>
-                  </span>
-                )}
               </div>
-              {orders ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs text-gray-700">
-                  <div className="bg-white rounded-lg p-2.5 border border-gray-200">
-                    <span className="font-semibold text-slate-800 block mb-0.5">
-                      Order Type:
-                    </span>
-                    <span className="text-sm">{orders.orderType}</span>
-                  </div>
-                  <div className="bg-white rounded-lg p-2.5 border border-gray-200">
-                    <span className="font-semibold text-slate-800 block mb-0.5">
-                      Status:
-                    </span>
-                    <span className="text-sm">{orders.status}</span>
-                  </div>
-                  <div className="bg-white rounded-lg p-2.5 border border-gray-200">
-                    <span className="font-semibold text-slate-800 block mb-0.5">
-                      Exchange Rate:
-                    </span>
-                    <span className="text-sm">
-                      {formatCurrency(orders.exchangeRate)}
-                    </span>
-                  </div>
-                  <div className="bg-white rounded-lg p-2.5 border border-gray-200">
-                    <span className="font-semibold text-slate-800 block mb-0.5">
-                      Final Order Price:
-                    </span>
-                    <span className="text-sm font-bold text-blue-700">
-                      {formatCurrency(orders.finalPriceOrder)}
-                    </span>
-                  </div>
-                  <div className="bg-white rounded-lg p-2.5 border border-gray-200">
-                    <span className="font-semibold text-slate-800 block mb-0.5">
-                      Shipping Fee:
-                    </span>
-                    <span className="text-sm">
-                      {formatCurrency(orders.priceShip)}
-                    </span>
-                  </div>
-                  <div className="bg-white rounded-lg p-2.5 border border-gray-200">
-                    <span className="font-semibold text-slate-800 block mb-0.5">
-                      Price Before Fee:
-                    </span>
-                    <span className="text-sm">
-                      {formatCurrency(orders.priceBeforeFee)}
-                    </span>
-                  </div>
-
-                  <div className="bg-white rounded-lg p-2.5 border border-gray-200 col-span-2">
-                    <span className="font-semibold text-slate-800 block mb-0.5">
-                      Order Created:
-                    </span>
-                    <span className="text-xs">
-                      {formatDate(orders.createdAt)}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-xs text-gray-500">No order information.</p>
-              )}
-            </div>
+            )}
 
             {/* Product list */}
             <div className="border border-gray-200 rounded-xl p-5 bg-white">
@@ -297,7 +246,6 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
                         <th className="px-3 py-2.5 text-right font-bold">
                           Web Total
                         </th>
-
                         <th className="px-3 py-2.5 text-left font-bold">
                           Status
                         </th>
@@ -327,7 +275,7 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
                                   href={link.productLink}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-base text-blue-600 hover:text-blue-800 hover:underline break-all font-medium leading-relaxed"
+                                  className="text-2xl text-blue-600 hover:text-blue-800 hover:underline break-all font-medium leading-relaxed"
                                 >
                                   {link.productLink}
                                 </a>
@@ -369,39 +317,26 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
                 <p className="text-xs text-gray-500">No products.</p>
               )}
             </div>
-
-            {/* Warehouses (if any) */}
-            <div className="border border-gray-200 rounded-xl p-5 bg-gradient-to-br from-slate-50 to-gray-50">
-              <div className="flex items-center gap-2 mb-3">
-                <MapPin className="w-5 h-5 text-gray-700" />
-                <h3 className="font-bold text-base uppercase tracking-wide text-slate-800">
-                  Warehouses
+            {/* Note */}
+            <div className="border border-gray-200 rounded-xl p-4 bg-gradient-to-br from-slate-50 to-amber-50">
+              <div className="flex items-center gap-2 mb-2">
+                <ClipboardList className="w-5 h-5 text-gray-700" />
+                <h3 className="font-bold text-sm uppercase tracking-wide text-slate-800">
+                  Note
                 </h3>
               </div>
-              {warehouses.length > 0 ? (
-                <ul className="text-xs text-gray-700 space-y-2">
-                  {warehouses.map((wh, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200"
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
-                      <span className="font-semibold">
-                        {wh.warehouseCode || "—"}
-                      </span>
-                      <span className="text-gray-500">-</span>
-                      <span>{wh.location || "—"}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-xs text-gray-500">No warehouse linked.</p>
-              )}
+              <div className="bg-white rounded-lg p-3 border border-gray-200 min-h-[60px]">
+                <p className="text-xs text-gray-700 whitespace-pre-line leading-relaxed">
+                  {purchase.note && purchase.note.trim() !== ""
+                    ? purchase.note
+                    : "No note for this purchase."}
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* RIGHT: Staff & Customer */}
-          <div className="space-y-5">
+          {/* RIGHT: Staff, Customer, Note, Order Info */}
+          <div className="space-y-4">
             {/* Staff Card */}
             <div className="border border-gray-200 rounded-xl p-5 bg-gradient-to-br from-slate-50 to-purple-50">
               <div className="flex items-center justify-between mb-4">
@@ -420,7 +355,7 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
                         {staff.name}
                       </span>
                       {staff.staffCode && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-white border border-blue-200 px-2 py-1 text-xl text-blue-700 font-semibold shadow-sm">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-white border border-blue-200 px-2 py-0.5 text-xs text-blue-700 font-semibold shadow-sm">
                           {staff.staffCode}
                         </span>
                       )}
@@ -460,7 +395,10 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
                         {customer.name}
                       </span>
                       {customer.customerCode && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-1 text-xl text-emerald-700 font-semibold shadow-sm">
+                        <span
+                          className="inline-flex items
+-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-xs text-emerald-700 font-semibold shadow-sm"
+                        >
                           {customer.customerCode}
                         </span>
                       )}
@@ -493,22 +431,86 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
                 </p>
               )}
             </div>
-
-            {/* Note */}
-            <div className="border border-gray-200 rounded-xl p-5 bg-gradient-to-br from-slate-50 to-amber-50">
-              <div className="flex items-center gap-2 mb-3">
-                <ClipboardList className="w-5 h-5 text-gray-700" />
-                <h3 className="font-bold text-base uppercase tracking-wide text-slate-800">
-                  Note
+            {/* Order summary */}
+            <div className="border border-gray-200 rounded-xl p-3 bg-slate-50">
+              <div className="flex items-center gap-2 mb-2">
+                <CreditCard className="w-4 h-4 text-gray-700" />
+                <h3 className="font-semibold text-xs uppercase tracking-wide text-slate-800">
+                  Order Information
                 </h3>
               </div>
-              <div className="bg-white rounded-lg p-3 border border-gray-200 min-h-[60px]">
-                <p className="text-xs text-gray-700 whitespace-pre-line leading-relaxed">
-                  {purchase.note && purchase.note.trim() !== ""
-                    ? purchase.note
-                    : "No note for this purchase."}
+
+              {orders ? (
+                <div className="grid grid-cols-2 gap-2 text-[11px] text-gray-700">
+                  {/* Order Type */}
+                  <div className="bg-white rounded-lg p-2 border border-gray-200 col-span-2">
+                    <span className="font-semibold text-slate-800 block mb-0.5">
+                      Order Type:
+                    </span>
+                    <span className="text-sm font-bold text-slate-900">
+                      {getOrderTypeLabel(orders)}
+                    </span>
+                  </div>
+
+                  {/* Order Status */}
+                  <div className="bg-white rounded-lg p-2 border border-gray-200 col-span-2">
+                    <span className="font-semibold text-slate-800 block mb-0.5">
+                      Order Status:
+                    </span>
+                    <span className="text-sm font-bold text-blue-700">
+                      {getOrderStatusLabel(orders)}
+                    </span>
+                  </div>
+
+                  {/* Exchange rate */}
+                  <div className="bg-white rounded-lg p-2 border border-gray-200">
+                    <span className="font-semibold text-slate-800 block mb-0.5">
+                      Exchange Rate:
+                    </span>
+                    <span className="text-black">
+                      {formatCurrency(orders.exchangeRate)}
+                    </span>
+                  </div>
+
+                  {/* Final price */}
+                  <div className="bg-white rounded-lg p-2 border border-gray-200">
+                    <span className="font-semibold text-slate-800 block mb-0.5">
+                      Final Order Price:
+                    </span>
+                    <span className="font-bold text-blue-700">
+                      {formatCurrency(orders.finalPriceOrder)}
+                    </span>
+                  </div>
+
+                  {/* Shipping fee */}
+                  <div className="bg-white rounded-lg p-2 border border-gray-200">
+                    <span className="font-semibold text-slate-800 block mb-0.5">
+                      Shipping Fee:
+                    </span>
+                    <span>{formatCurrency(orders.priceShip)}</span>
+                  </div>
+
+                  {/* Price before fee */}
+                  <div className="bg-white rounded-lg p-2 border border-gray-200">
+                    <span className="font-semibold text-slate-800 block mb-0.5">
+                      Price Before Fee:
+                    </span>
+                    <span>{formatCurrency(orders.priceBeforeFee)}</span>
+                  </div>
+
+                  {/* Created at */}
+                  <div className="bg-white rounded-lg p-2 border border-gray-200 col-span-2">
+                    <span className="font-semibold text-slate-800 block mb-0.5">
+                      Order Created:
+                    </span>
+                    <span>{formatDate(orders.createdAt)}</span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-[11px] text-gray-500">
+                  No order information.
                 </p>
-              </div>
+              )}
             </div>
           </div>
         </div>
