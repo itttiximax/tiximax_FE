@@ -5,14 +5,7 @@ import {
 } from "../../Services/Warehouse/warehouseShipmentService";
 import UploadImg from "../../common/UploadImg";
 import toast from "react-hot-toast";
-import {
-  Loader2,
-  Package,
-  CheckCircle2,
-  User,
-  Phone,
-  Hash,
-} from "lucide-react";
+import { Loader2, Package, CheckCircle2 } from "lucide-react";
 
 const WarehouseShipment = () => {
   const [formData, setFormData] = useState({
@@ -21,6 +14,7 @@ const WarehouseShipment = () => {
     height: "",
     weight: "",
     image: "",
+    imageCheck: "",
   });
   const [shipmentId, setShipmentId] = useState("");
   const [orderInfo, setOrderInfo] = useState(null);
@@ -30,27 +24,20 @@ const WarehouseShipment = () => {
   const shipmentInputRef = useRef(null);
   const debounceTimerRef = useRef(null);
 
-  // regex: allow empty while typing, otherwise must be integer or decimal like 12 or 12.34
   const numberRegex = /^\d+(\.\d+)?$/;
 
   useEffect(() => {
     shipmentInputRef.current?.focus();
-    // cleanup debounce timer on unmount
     return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
-      }
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     };
   }, []);
 
-  // Auto fetch order info when tracking number is entered
   const handleFetchOrderInfo = async (trackingNumber) => {
     if (!trackingNumber.trim()) {
       setOrderInfo(null);
       return;
     }
-
     setFetchingInfo(true);
     try {
       const data = await getShipmentInfo(trackingNumber.trim());
@@ -68,24 +55,15 @@ const WarehouseShipment = () => {
     }
   };
 
-  // Debounce tracking number input
   const handleTrackingChange = (e) => {
     const value = e.target.value;
     setShipmentId(value);
 
-    // Clear previous timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = null;
-    }
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
 
-    // Set new timer - fetch after 800ms of no typing
     debounceTimerRef.current = setTimeout(() => {
-      if (value.trim()) {
-        handleFetchOrderInfo(value);
-      } else {
-        setOrderInfo(null);
-      }
+      if (value.trim()) handleFetchOrderInfo(value);
+      else setOrderInfo(null);
       debounceTimerRef.current = null;
     }, 800);
   };
@@ -94,36 +72,24 @@ const WarehouseShipment = () => {
     const { name, value } = e.target;
 
     if (["length", "width", "height", "weight"].includes(name)) {
-      // allow empty string while typing
-      if (value !== "" && !numberRegex.test(value)) {
-        return;
-      }
+      if (value !== "" && !numberRegex.test(value)) return;
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = (imageUrl) => {
-    setFormData((prev) => ({
-      ...prev,
-      image: imageUrl,
-    }));
+  const handleImageUpload = (name, imageUrl) => {
+    setFormData((prev) => ({ ...prev, [name]: imageUrl }));
   };
 
-  const handleImageRemove = () => {
-    setFormData((prev) => ({
-      ...prev,
-      image: "",
-    }));
+  const handleImageRemove = (name) => {
+    setFormData((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
 
-    if (!shipmentId || !shipmentId.trim()) {
+    if (!shipmentId?.trim()) {
       toast.error("Please enter a tracking number");
       return;
     }
@@ -140,6 +106,18 @@ const WarehouseShipment = () => {
       formData.weight === ""
     ) {
       toast.error("Please fill in all dimension and weight fields");
+      return;
+    }
+
+    if (!formData.image) {
+      toast.error("Please upload the main image");
+      return;
+    }
+
+    // Logic mới: bắt buộc imageCheck nếu Check Required = NO – PASSED
+    const checkRequired = orderInfo.orders?.checkRequired; // true / false
+    if (checkRequired === false && !formData.imageCheck) {
+      toast.error("Please upload the check image since order is PASSED");
       return;
     }
 
@@ -162,14 +140,11 @@ const WarehouseShipment = () => {
         width: w,
         height: h,
         weight: wt,
-        image: formData.image || "",
+        image: formData.image,
+        imageCheck: formData.imageCheck || "",
       };
 
-      // Clear pending debounce (if any) to avoid subsequent fetches
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
-      }
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
 
       const result = await createShipment(shipmentId.trim(), shipmentData);
 
@@ -177,30 +152,27 @@ const WarehouseShipment = () => {
 
       const successMessage =
         result?.message || result?.data?.message || "Check-in successful!";
-
       toast.success(successMessage);
 
-      // Reset form
       setFormData({
         length: "",
         width: "",
         height: "",
         weight: "",
         image: "",
+        imageCheck: "",
       });
       setShipmentId("");
       setOrderInfo(null);
       shipmentInputRef.current?.focus();
     } catch (error) {
       toast.dismiss(loadingToast);
-
       const errorMessage =
         error?.response?.data?.error ||
         error?.response?.data?.message ||
         error?.response?.data?.detail ||
         error?.message ||
         "Cannot check in shipment";
-
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -208,14 +180,12 @@ const WarehouseShipment = () => {
   };
 
   const handleKeyDown = (e) => {
-    // If user presses Enter on any field, attempt submit only if not loading/fetching
     if (e.key === "Enter" && !loading && !fetchingInfo) {
       e.preventDefault();
       handleSubmit();
     }
   };
 
-  // Format status display
   const getStatusDisplay = (status) => {
     const statusMap = {
       CHO_NHAP_KHO_NN: "Pending Import",
@@ -228,9 +198,8 @@ const WarehouseShipment = () => {
   };
 
   return (
-    <div className="p-6 min-h-screen ">
+    <div className="p-6 min-h-screen">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="bg-blue-600 rounded-xl shadow-sm p-5 mb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
@@ -244,10 +213,9 @@ const WarehouseShipment = () => {
           </div>
         </div>
 
-        {/* Form Card */}
         <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Tracking number */}
+            {/* Tracking Number */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Tracking Number <span className="text-red-500">*</span>
@@ -261,7 +229,7 @@ const WarehouseShipment = () => {
                   onChange={handleTrackingChange}
                   onKeyDown={handleKeyDown}
                   placeholder="Example: SPX123456678"
-                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                   disabled={loading}
                   autoFocus
                   aria-label="Tracking Number"
@@ -278,7 +246,7 @@ const WarehouseShipment = () => {
               </div>
             </div>
 
-            {/* Order Info Card */}
+            {/* Order Info */}
             {orderInfo && (
               <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200 rounded-lg p-4 space-y-3">
                 <div className="flex items-center gap-2 mb-2">
@@ -327,7 +295,7 @@ const WarehouseShipment = () => {
                     </div>
                   </div>
 
-                  {/* Check Required – Centered Full Width */}
+                  {/* Check Required */}
                   <div
                     className={`md:col-span-2 flex flex-col items-center justify-center rounded-lg p-4 border ${
                       orderInfo.orders?.checkRequired
@@ -335,11 +303,11 @@ const WarehouseShipment = () => {
                         : "bg-green-50 border-green-400"
                     }`}
                   >
-                    <p className="text-xl font-semibold text-black-600 mb-1 text-center">
+                    <p className="text-xl font-semibold text-black mb-1 text-center">
                       Check Required
                     </p>
                     <p
-                      className={`font-semibold text-base  text-center ${
+                      className={`font-semibold text-base text-center ${
                         orderInfo.orders?.checkRequired
                           ? "text-red-700"
                           : "text-green-700"
@@ -357,108 +325,90 @@ const WarehouseShipment = () => {
             {/* Divider */}
             {orderInfo && <div className="border-t border-gray-200"></div>}
 
+            {/* Dimensions & Weight */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              {/* Dimensions & weight */}
               <div className="lg:col-span-2 space-y-4">
-                {/* Dimensions */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Dimensions (cm)
                   </label>
                   <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">
-                        Length <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="length"
-                        value={formData.length}
-                        onChange={handleInputChange}
-                        onKeyDown={handleKeyDown}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                        placeholder="0"
-                        disabled={loading || !orderInfo}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">
-                        Width <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="width"
-                        value={formData.width}
-                        onChange={handleInputChange}
-                        onKeyDown={handleKeyDown}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                        placeholder="0"
-                        disabled={loading || !orderInfo}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">
-                        Height <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="height"
-                        value={formData.height}
-                        onChange={handleInputChange}
-                        onKeyDown={handleKeyDown}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                        placeholder="0"
-                        disabled={loading || !orderInfo}
-                      />
-                    </div>
+                    {["length", "width", "height"].map((dim) => (
+                      <div key={dim}>
+                        <label className="block text-xs text-gray-600 mb-1 capitalize">
+                          {dim} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name={dim}
+                          value={formData[dim]}
+                          onChange={handleInputChange}
+                          onKeyDown={handleKeyDown}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                          placeholder="0"
+                          disabled={loading || !orderInfo}
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                {/* Weight */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Weight (kg)
                   </label>
-                  <div className="max-w-xs">
-                    <label className="block text-xs text-gray-600 mb-1">
-                      Total Weight <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="weight"
-                      value={formData.weight}
-                      onChange={handleInputChange}
-                      onKeyDown={handleKeyDown}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                      placeholder="0"
-                      disabled={loading || !orderInfo}
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    name="weight"
+                    value={formData.weight}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    placeholder="0"
+                    disabled={loading || !orderInfo}
+                  />
                 </div>
               </div>
 
-              {/* Image */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image
-                </label>
-                <UploadImg
-                  imageUrl={formData.image}
-                  onImageUpload={handleImageUpload}
-                  onImageRemove={handleImageRemove}
-                  maxSizeMB={3}
-                  placeholder="Upload image (max 3MB)"
-                  disabled={!orderInfo}
-                />
+              {/* Images */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Main Image <span className="text-red-500">*</span>
+                  </label>
+                  <UploadImg
+                    imageUrl={formData.image}
+                    onImageUpload={(url) => handleImageUpload("image", url)}
+                    onImageRemove={() => handleImageRemove("image")}
+                    maxSizeMB={3}
+                    placeholder="Upload main image (max 3MB)"
+                    disabled={!orderInfo}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Check Image{" "}
+                    {orderInfo?.orders?.checkRequired === false && (
+                      <span className="text-red-500">*</span>
+                    )}
+                  </label>
+                  <UploadImg
+                    imageUrl={formData.imageCheck}
+                    onImageUpload={(url) =>
+                      handleImageUpload("imageCheck", url)
+                    }
+                    onImageRemove={() => handleImageRemove("imageCheck")}
+                    maxSizeMB={3}
+                    placeholder="Upload check image (max 3MB)"
+                    disabled={!orderInfo}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Divider */}
             <div className="border-t border-gray-200"></div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading || fetchingInfo || !orderInfo}
