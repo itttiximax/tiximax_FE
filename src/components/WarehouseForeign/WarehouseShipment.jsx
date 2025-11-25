@@ -217,7 +217,7 @@ const WarehouseShipment = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Tracking Number */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-xl font-medium text-gray-700 mb-1.5">
                 Tracking Number <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -326,52 +326,35 @@ const WarehouseShipment = () => {
             {orderInfo && <div className="border-t border-gray-200"></div>}
 
             {/* Dimensions & Weight */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              <div className="lg:col-span-2 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Dimensions (cm)
-                  </label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {["length", "width", "height"].map((dim) => (
-                      <div key={dim}>
-                        <label className="block text-xs text-gray-600 mb-1 capitalize">
-                          {dim} <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          name={dim}
-                          value={formData[dim]}
-                          onChange={handleInputChange}
-                          onKeyDown={handleKeyDown}
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                          placeholder="0"
-                          disabled={loading || !orderInfo}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Weight (kg)
-                  </label>
-                  <input
-                    type="text"
-                    name="weight"
-                    value={formData.weight}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyDown}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                    placeholder="0"
-                    disabled={loading || !orderInfo}
-                  />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xl font-medium text-gray-700 mb-2">
+                  Dimensions & Weight
+                </label>
+                <div className="grid grid-cols-4 text-xl text-black gap-3">
+                  {["length", "width", "height", "weight"].map((dim) => (
+                    <div key={dim}>
+                      <label className="block text-xl text-black-600 mb-1 capitalize">
+                        {dim} <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name={dim}
+                        value={formData[dim]}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                        placeholder="0"
+                        disabled={loading || !orderInfo}
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
-
+              {/* Divider line */}
+              <div className="border-t border-gray-300 my-8"></div>
               {/* Images */}
-              <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Main Image <span className="text-red-500">*</span>

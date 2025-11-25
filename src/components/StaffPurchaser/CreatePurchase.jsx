@@ -66,6 +66,18 @@ const CreatePurchase = ({
     return formattedInteger;
   };
 
+  // Hàm format với 2 chữ số thập phân cho Grand Total và Suggested
+  const formatCurrencyWithDecimals = (value) => {
+    if (!value && value !== 0) return "0.00";
+
+    const number = Number(value);
+    const fixed = number.toFixed(2);
+    const [integerPart, decimalPart] = fixed.split(".");
+    const formattedInteger = parseInt(integerPart).toLocaleString("en-US");
+
+    return `${formattedInteger}.${decimalPart}`;
+  };
+
   const getRawValue = (value) => value.toString().replace(/,/g, "");
   const isValidDecimal = (value) => /^\d*\.?\d*$/.test(value) || value === "";
 
@@ -82,9 +94,11 @@ const CreatePurchase = ({
     if (currentValue) {
       const numValue = parseFloat(currentValue);
       if (!isNaN(numValue) && numValue >= 0) {
+        // Làm tròn lên 2 số thập phân
+        const roundedValue = numValue.toFixed(2);
         setPurchaseData((prev) => ({
           ...prev,
-          purchaseTotal: currentValue,
+          purchaseTotal: roundedValue,
         }));
       }
     }
@@ -290,7 +304,7 @@ const CreatePurchase = ({
                         Grand Total:
                       </td>
                       <td className="px-4 py-3 text-right font-bold text-blue-700 text-base">
-                        {formatCurrency(calculatedTotal)}
+                        {formatCurrencyWithDecimals(calculatedTotal)}
                       </td>
                     </tr>
                   </tfoot>
@@ -310,7 +324,7 @@ const CreatePurchase = ({
                   ) is <span className="font-semibold">HIGHER</span> than the
                   calculated product total (
                   <span className="font-semibold">
-                    {formatCurrency(calculatedTotal)}
+                    {formatCurrencyWithDecimals(calculatedTotal)}
                   </span>
                   )<p>Please contact your Sale team.</p>
                 </div>
@@ -335,7 +349,9 @@ const CreatePurchase = ({
                   onChange={handlePurchaseTotalChange}
                   onBlur={handlePurchaseTotalBlur}
                   className="w-full border-2 border-red-500 rounded-md px-3 py-2 focus:border-black focus:ring-0 outline-none"
-                  placeholder={`Suggested: ${formatCurrency(calculatedTotal)}`}
+                  placeholder={`Suggested: ${formatCurrencyWithDecimals(
+                    calculatedTotal
+                  )}`}
                 />
               </div>
 
