@@ -468,7 +468,6 @@ const UpdateShipmentCodeList = () => {
                           </div>
                         </div>
                       )}
-
                       {/* Links */}
                       {links.length === 0 ? (
                         <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-slate-200 p-6 text-center">
@@ -498,48 +497,36 @@ const UpdateShipmentCodeList = () => {
                                 )}
                               </div>
 
-                              <div className="space-y-1.5 text-xs text-slate-600">
-                                <div className="space-y-1.5">
-                                  {/* Hàng 1: icon + website */}
-                                  <div className="flex items-center gap-1.5">
-                                    <Globe className="h-4 w-4 text-blue-400" />
-                                    <span className="text-blue-400 font-medium">
-                                      {l.website}
-                                    </span>
-                                  </div>
+                              <div className="space-y-1.5 text-xl text-black font-semibold">
+                                {/* Hàng 1: icon + website */}
+                                <div className="flex items-center gap-1.5">
+                                  <Globe className="h-4 w-4 text-black" />
+                                  <span>{l.website}</span>
+                                </div>
 
-                                  {/* Hàng 2: separator + quantity */}
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-black text-xs ">
-                                      Qty: {l.quantity}
-                                    </span>
-                                  </div>
+                                {/* Hàng 2: separator + quantity */}
+                                <div className="flex items-center gap-1.5">
+                                  <span>Qty: {l.quantity}</span>
                                 </div>
 
                                 {l.classify && (
-                                  <div className="text-xl  text-black-600">
-                                    Category: {l.classify}
-                                  </div>
+                                  <div>Category: {l.classify}</div>
                                 )}
 
                                 <div className="flex items-start gap-1.5">
-                                  <span className="text-xl  text-black-500">
-                                    OrderCode:
-                                  </span>
-                                  <span className="flex-1 font-semibold text-xl  text-black-600">
+                                  <span>OrderCode:</span>
+                                  <span className="flex-1">
                                     {p.orderCode || "-"}
                                   </span>
                                 </div>
 
-                                <div className="flex items-start text-xl gap-1.5">
-                                  <span className="text-black-500">
-                                    Shipment:
-                                  </span>
+                                <div className="flex items-start gap-1.5">
+                                  <span>Shipment:</span>
                                   <span
-                                    className={`flex-1 font-mono text-xl ${
+                                    className={`flex-1 font-mono ${
                                       l.shipmentCode?.trim()
-                                        ? "text-green-700 text-xl font-semibold"
-                                        : "text-slate-400 text-xl"
+                                        ? "text-green-700"
+                                        : "text-slate-400"
                                     }`}
                                   >
                                     {l.shipmentCode?.trim() ||
@@ -551,60 +538,85 @@ const UpdateShipmentCodeList = () => {
                           ))}
                         </div>
                       )}
-
-                      {/* 🔥 Customer Info Card */}
-                      <div className="flex-1 mt-4">
-                        {customer.name && (
-                          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
-                            <div className="flex items-center gap-2 mb-3">
-                              <User className="h-4 w-4 text-blue-600" />
-                              <span className="text-sm font-semibold text-blue-900">
-                                Customer Information
-                              </span>
-                            </div>
-                            <div className="space-y-2">
+                      {/* /* 🔥 Staff Info Card */}
+                      <div className="mt-4"></div>
+                      {p.staff && (
+                        <div className="mb-4 rounded-lg border border-slate-300 bg-slate-100 p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <User className="h-4 w-4 text-black" />
+                            <span className="text-xl font-semibold text-black">
+                              Staff Information
+                            </span>
+                          </div>
+                          <div className="space-y-2 text-xl font-semibold text-black">
+                            {p.staff.name && (
                               <div className="flex items-center justify-between">
-                                <span className="text-xs text-slate-600">
-                                  Name:
-                                </span>
-                                <span className="text-sm font-semibold text-slate-900">
-                                  {customer.name}
+                                <span>Name:</span>
+                                <span>{p.staff.name}</span>
+                              </div>
+                            )}
+                            {p.staff.staffCode && (
+                              <div className="flex items-center justify-between">
+                                <span>Staff Code:</span>
+                                <span>{p.staff.staffCode}</span>
+                              </div>
+                            )}
+                            {p.staff.username && (
+                              <div className="flex items-center justify-between">
+                                <span>Username:</span>
+                                <span>{p.staff.username}</span>
+                              </div>
+                            )}
+                            {p.staff.email && (
+                              <div className="flex items-start justify-between gap-2">
+                                <span>Email:</span>
+                                <span className="text-right break-all">
+                                  {p.staff.email}
                                 </span>
                               </div>
-                              {customer.customerCode && (
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs text-slate-600">
-                                    Customer Code:
-                                  </span>
-                                  <span className="text-sm font-mono font-medium text-blue-700">
-                                    {customer.customerCode}
-                                  </span>
-                                </div>
-                              )}
-                              {customer.username && (
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs text-slate-600">
-                                    Username:
-                                  </span>
-                                  <span className="text-sm text-slate-700">
-                                    {customer.username}
-                                  </span>
-                                </div>
-                              )}
-                              {customer.email && (
-                                <div className="flex items-start justify-between gap-2">
-                                  <span className="text-xs text-slate-600 flex-shrink-0">
-                                    Email:
-                                  </span>
-                                  <span className="text-sm text-slate-700 text-right break-all">
-                                    {customer.email}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
+                            )}
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
+                      {/* 🔥 Customer Info Card */}
+                      {customer.name && (
+                        <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <User className="h-4 w-4 text-black" />
+                            <span className="text-xl font-semibold text-black">
+                              Customer Information
+                            </span>
+                          </div>
+                          <div className="space-y-2 text-xl font-semibold text-black">
+                            {customer.name && (
+                              <div className="flex items-center justify-between">
+                                <span>Name:</span>
+                                <span>{customer.name}</span>
+                              </div>
+                            )}
+                            {customer.customerCode && (
+                              <div className="flex items-center justify-between">
+                                <span>Customer Code:</span>
+                                <span>{customer.customerCode}</span>
+                              </div>
+                            )}
+                            {customer.username && (
+                              <div className="flex items-center justify-between">
+                                <span>Username:</span>
+                                <span>{customer.username}</span>
+                              </div>
+                            )}
+                            {customer.email && (
+                              <div className="flex items-start justify-between gap-2">
+                                <span>Email:</span>
+                                <span className="text-right break-all">
+                                  {customer.email}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
