@@ -90,7 +90,7 @@ const CreatePurchase = ({
     const enteredAmount = Number(getRawValue(purchaseData.purchaseTotal));
 
     // Chỉ show warning nếu cao hơn
-    if (enteredAmount > calculatedTotal) {
+    if (enteredAmount >= calculatedTotal) {
       return {
         isHigher: true,
         enteredAmount,
