@@ -23,6 +23,14 @@ const CustomerStaffList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSource, setSelectedSource] = useState("ALL");
 
+const [selectedCustomer, setSelectedCustomer] = useState(null);
+const [openDetailModal, setOpenDetailModal] = useState(false);
+
+const handleViewCustomer = (customer) => {
+  setSelectedCustomer(customer);   // Lưu toàn bộ object customer
+  setOpenDetailModal(true);        // Mở modal
+}
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -112,9 +120,9 @@ const CustomerStaffList = () => {
   );
 
   // Utility functions
-  const formatDate = useCallback((dateString) => {
-    return dateString ? new Date(dateString).toLocaleString("vi-VN") : "-";
-  }, []);
+  // const formatDate = useCallback((dateString) => {
+  //   return dateString ? new Date(dateString).toLocaleString("vi-VN") : "-";
+  // }, []);
 
   const getSourceColor = useCallback((source) => {
     const colorMap = {
@@ -282,9 +290,6 @@ const CustomerStaffList = () => {
                   Nguồn
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ngày tạo
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Thao tác
                 </th>
               </tr>
@@ -389,16 +394,15 @@ const CustomerStaffList = () => {
                           <span className="text-xs text-gray-400">-</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDate(customer.createdAt)}
-                      </td>
+                     
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <button
-                          title="Xem chi tiết"
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
+                       <button
+                  title="Xem chi tiết"
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  onClick={() => handleViewCustomer(customer)}
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
                       </td>
                     </tr>
                   ))}
@@ -459,9 +463,130 @@ const CustomerStaffList = () => {
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
+        
       )}
+     {openDetailModal && selectedCustomer && (
+       <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 p-4">
+         <div className="bg-white w-full max-w-3xl rounded-2xl shadow-xl overflow-hidden animate-[fadeIn_0.2s_ease] relative">
+     
+           {/* HEADER */}
+           <div className="px-8 py-6 border-b flex items-center justify-between">
+             <h2 className="text-2xl font-semibold flex items-center gap-2 text-gray-800">
+               <UserCircle className="w-7 h-7 text-blue-600" />
+               Thông Tin Khách Hàng
+             </h2>
+     
+             <button
+               className="text-gray-400 hover:text-gray-600 transition"
+               onClick={() => setOpenDetailModal(false)}
+             >
+               ✕
+             </button>
+           </div>
+     
+           {/* BODY */}
+           <div className="px-8 py-6 space-y-6">
+     
+             {/* GRID 2 CỘT */}
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+     
+               {/* Mã KH */}
+               <div className="p-4 border rounded-xl bg-gray-50">
+                 <p className="text-sm text-gray-500">Mã khách hàng</p>
+                 <p className="font-semibold text-gray-900 text-lg">
+                   {selectedCustomer.customerCode}
+                 </p>
+               </div>
+     
+               {/* Tên */}
+               <div className="p-4 border rounded-xl bg-gray-50">
+                 <p className="text-sm text-gray-500">Tên khách hàng</p>
+                 <p className="font-semibold text-gray-900 text-lg">
+                   {selectedCustomer.name}
+                 </p>
+               </div>
+     
+               {/* SĐT */}
+               <div className="p-4 border rounded-xl bg-gray-50 flex gap-3">
+                 <Phone className="w-5 h-5 text-green-600 mt-1" />
+                 <div>
+                   <p className="text-sm text-gray-500">Số điện thoại</p>
+                   <p className="font-semibold text-gray-900">{selectedCustomer.phone}</p>
+                 </div>
+               </div>
+     
+               {/* Email */}
+               <div className="p-4 border rounded-xl bg-gray-50 flex gap-3">
+                 <Mail className="w-5 h-5 text-purple-600 mt-1" />
+                 <div className="w-full">
+                   <p className="text-sm text-gray-500">Email</p>
+                   <p className="text-gray-900 break-words">{selectedCustomer.email}</p>
+                 </div>
+               </div>
+     
+           
+               {/* Trạng thái */}
+               <div className="p-4 border rounded-xl bg-gray-50 flex gap-3">
+                 <Tag className="w-5 h-5 text-blue-600 mt-1" />
+                 <div>
+                   <p className="text-sm text-gray-500">Trạng thái</p>
+                   <p className={`
+                     font-semibold 
+                     ${selectedCustomer.status === "HOAT_DONG"
+                       ? "text-green-600"
+                       : "text-red-600"}
+                   `}>
+                     {selectedCustomer.status === "HOAT_DONG"
+                       ? "Hoạt động"
+                       : "Không hoạt động"}
+                   </p>
+                 </div>
+               </div>
+     
+             </div>
+     
+             {/* ĐỊA CHỈ */}
+             <div className="p-4 border rounded-xl bg-gray-50">
+               <p className="text-sm text-gray-500 mb-2">Địa chỉ</p>
+               <div className="flex flex-col gap-2">
+     
+                 {selectedCustomer.addresses?.length > 0 ? (
+                   selectedCustomer.addresses.map((a, i) => (
+                     <div key={i} className="flex gap-2">
+                       <MapPin className="w-5 h-5 text-gray-500 mt-1" />
+                       <span className="text-gray-900 break-words">
+                         {a.addressName}
+                       </span>
+                     </div>
+                   ))
+                 ) : (
+                   <div className="flex gap-2">
+                     <MapPin className="w-5 h-5 text-gray-500 mt-1" />
+                     <span>-</span>
+                   </div>
+                 )}
+     
+               </div>
+             </div>
+           </div>
+     
+           {/* FOOTER */}
+           <div className="bg-gray-50 px-8 py-4 flex justify-end border-t">
+             <button
+               className="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium shadow hover:bg-blue-700 transition"
+               onClick={() => setOpenDetailModal(false)}
+             >
+               Đóng
+             </button>
+           </div>
+     
+         </div>
+       </div>
+     )}
+
     </div>
   );
 };
 
 export default CustomerStaffList;
+ 
