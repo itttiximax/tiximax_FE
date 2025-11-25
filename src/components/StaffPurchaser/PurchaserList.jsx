@@ -12,13 +12,13 @@ import {
   User,
   ShoppingCart,
   Eye,
-  Edit3, // 👈 NEW
+  Edit3,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import orderlinkService from "../../Services/StaffPurchase/orderlinkService";
 import CancelPurchase from "./CancelPurchase";
 import DetailPurchase from "./DetailPurchase";
-import UpdatePurchase from "./UpdatePurchase"; // 👈 NEW
+import UpdatePurchase from "./UpdatePurchase";
 
 const PAGE_SIZE_DEFAULT = 10;
 
@@ -90,7 +90,7 @@ const CardSkeleton = () => (
 
 const PurchaserList = () => {
   const [purchases, setPurchases] = useState([]);
-  const [page, setPage] = useState(1); // 1-based UI
+  const [page, setPage] = useState(1);
   const [size, setSize] = useState(PAGE_SIZE_DEFAULT);
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
@@ -107,17 +107,58 @@ const PurchaserList = () => {
     linkInfo: null,
   });
 
-  // Detail Purchase modal
   const [detailModal, setDetailModal] = useState({
     open: false,
     purchaseId: null,
   });
 
-  // 👇 NEW: Update Purchase modal
   const [updateModal, setUpdateModal] = useState({
     open: false,
     purchase: null,
   });
+
+  // 🔥 Helper: Optimistic update purchase
+  const updatePurchaseInState = (purchaseId, updatedFields) => {
+    setPurchases((prev) =>
+      prev.map((p) => {
+        if (p.purchaseId === purchaseId) {
+          // Merge updated fields
+          const updated = {
+            ...p,
+            ...updatedFields,
+          };
+
+          // Nếu có shipmentCode được update, apply vào tất cả pendingLinks
+          if (updatedFields.shipmentCode !== undefined) {
+            updated.pendingLinks = p.pendingLinks.map((link) => ({
+              ...link,
+              shipmentCode: updatedFields.shipmentCode,
+            }));
+          }
+
+          return updated;
+        }
+        return p;
+      })
+    );
+  };
+
+  // 🔥 Helper: Cancel link
+  const cancelLinkInState = (orderId, linkId) => {
+    setPurchases((prev) =>
+      prev.map((p) => {
+        if (p.orderId === orderId) {
+          return {
+            ...p,
+            pendingLinks: p.pendingLinks.map((link) =>
+              link.linkId === linkId ? { ...link, status: "DA_HUY" } : link
+            ),
+          };
+        }
+        return p;
+      })
+    );
+  };
 
   const fetchData = async (
     customPage = page,
@@ -154,13 +195,11 @@ const PurchaserList = () => {
     }
   };
 
-  // reload on page / filter / size change
   useEffect(() => {
     fetchData(page, size, filter);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, filter, size]);
 
-  // Filter purchases by search term
   const filteredPurchases = useMemo(() => {
     if (!searchTerm.trim()) return purchases;
 
@@ -181,7 +220,6 @@ const PurchaserList = () => {
     );
   }, [purchases, searchTerm]);
 
-  // Stats – only check shipment code for DA_MUA & DAU_GIA_THANH_CONG
   const stats = useMemo(() => {
     let totalLinks = 0;
     let needShipmentCode = 0;
@@ -228,7 +266,6 @@ const PurchaserList = () => {
     setCancelModal((prev) => ({ ...prev, open: false }));
   };
 
-  // Detail modal open/close
   const openDetailModal = (purchaseId) => {
     setDetailModal({
       open: true,
@@ -243,7 +280,6 @@ const PurchaserList = () => {
     });
   };
 
-  // 👇 Update modal open/close
   const openUpdateModal = (purchase) => {
     setUpdateModal({
       open: true,
@@ -263,7 +299,6 @@ const PurchaserList = () => {
     setPage(1);
   };
 
-  // Check if link needs shipment code
   const needsShipmentCode = (status) => {
     return status === "DA_MUA" || status === "DAU_GIA_THANH_CONG";
   };
@@ -271,7 +306,7 @@ const PurchaserList = () => {
   return (
     <div className="min-h-screen px-4 py-6">
       <div className="mx-auto">
-        {/* Header - unified blue bar style */}
+        {/* Header */}
         <div className="bg-blue-600 rounded-xl shadow-sm p-5 mb-6">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -299,7 +334,6 @@ const PurchaserList = () => {
 
         {/* Search & Filter */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          {/* Search */}
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
@@ -311,7 +345,6 @@ const PurchaserList = () => {
             />
           </div>
 
-          {/* Filter Tabs */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
             {filters.map((f) => {
               const Icon = f.icon;
@@ -478,13 +511,12 @@ const PurchaserList = () => {
                             </span>
                           </div>
 
-                          {/* Buttons: View Detail & Edit */}
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() =>
                                 openDetailModal(purchase.purchaseId)
                               }
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-800 px-3 py-1.5 text-xs font-medium text-white transition-colors"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-800 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-900"
                             >
                               <Eye className="h-3.5 w-3.5" />
                               View detail
@@ -492,7 +524,7 @@ const PurchaserList = () => {
 
                             <button
                               onClick={() => openUpdateModal(purchase)}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white transition-colors"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-amber-700"
                             >
                               <Edit3 className="h-3.5 w-3.5" />
                               Edit
@@ -525,7 +557,6 @@ const PurchaserList = () => {
                               className="group rounded-xl border border-gray-200 bg-gray-50 p-4 hover:bg-white hover:shadow-sm transition-all"
                             >
                               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                                {/* Left: Product Info */}
                                 <div className="flex-1 space-y-2">
                                   <div className="flex flex-wrap items-center gap-2">
                                     <h4 className="font-semibold text-gray-900">
@@ -574,8 +605,6 @@ const PurchaserList = () => {
                                     )}
                                   </div>
                                 </div>
-
-                                {/* Right: Shipment Code & Actions */}
                                 <div className="flex flex-col items-start gap-3 lg:items-end">
                                   {requiresShipmentCode && (
                                     <div className="flex items-center gap-2">
@@ -651,7 +680,6 @@ const PurchaserList = () => {
                 Next
               </button>
 
-              {/* Size selector */}
               <div className="ml-3 border-l border-gray-200 pl-3">
                 <select
                   value={size}
@@ -680,14 +708,15 @@ const PurchaserList = () => {
         orderCode={cancelModal.orderCode}
         linkInfo={cancelModal.linkInfo}
         onSuccess={() => {
-          fetchData();
+          // 🔥 Optimistic update: cancel link
+          cancelLinkInState(cancelModal.orderId, cancelModal.linkId);
           toast.success("Order link cancelled successfully.");
         }}
       />
 
       {/* Detail purchase modal */}
       {detailModal.open && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="max-h-[90vh] w-full max-w-6xl overflow-y-auto">
             <DetailPurchase
               purchaseId={detailModal.purchaseId}
@@ -698,22 +727,23 @@ const PurchaserList = () => {
       )}
 
       {/* Update purchase modal */}
-      {updateModal.open && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto">
-            <UpdatePurchase
-              purchase={updateModal.purchase}
-              onClose={closeUpdateModal}
-              onUpdated={() => {
-                fetchData();
-                toast.success("Purchase updated.");
-              }}
-            />
-          </div>
+      {updateModal.open && updateModal.purchase && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <UpdatePurchase
+            purchase={updateModal.purchase}
+            onClose={closeUpdateModal}
+            onUpdated={(updatedFields) => {
+              // 🔥 Optimistic update: merge updated fields
+              updatePurchaseInState(
+                updateModal.purchase.purchaseId,
+                updatedFields
+              );
+              toast.success("Purchase updated successfully!");
+            }}
+          />
         </div>
       )}
     </div>
   );
 };
-
 export default PurchaserList;
