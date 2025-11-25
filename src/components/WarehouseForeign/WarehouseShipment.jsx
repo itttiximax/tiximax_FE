@@ -30,8 +30,18 @@ const WarehouseShipment = () => {
   const shipmentInputRef = useRef(null);
   const debounceTimerRef = useRef(null);
 
+  // regex: allow empty while typing, otherwise must be integer or decimal like 12 or 12.34
+  const numberRegex = /^\d+(\.\d+)?$/;
+
   useEffect(() => {
     shipmentInputRef.current?.focus();
+    // cleanup debounce timer on unmount
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+    };
   }, []);
 
   // Auto fetch order info when tracking number is entered
@@ -49,8 +59,8 @@ const WarehouseShipment = () => {
     } catch (error) {
       setOrderInfo(null);
       const errorMsg =
-        error.response?.data?.error ||
-        error.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
         "Order information not found";
       toast.error(errorMsg);
     } finally {
@@ -66,6 +76,7 @@ const WarehouseShipment = () => {
     // Clear previous timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
     }
 
     // Set new timer - fetch after 800ms of no typing
@@ -75,6 +86,7 @@ const WarehouseShipment = () => {
       } else {
         setOrderInfo(null);
       }
+      debounceTimerRef.current = null;
     }, 800);
   };
 
@@ -82,8 +94,8 @@ const WarehouseShipment = () => {
     const { name, value } = e.target;
 
     if (["length", "width", "height", "weight"].includes(name)) {
-      const regex = /^\d*\.?\d*$/;
-      if (!regex.test(value)) {
+      // allow empty string while typing
+      if (value !== "" && !numberRegex.test(value)) {
         return;
       }
     }
@@ -122,22 +134,22 @@ const WarehouseShipment = () => {
     }
 
     if (
-      !formData.length ||
-      !formData.width ||
-      !formData.height ||
-      !formData.weight
+      formData.length === "" ||
+      formData.width === "" ||
+      formData.height === "" ||
+      formData.weight === ""
     ) {
       toast.error("Please fill in all dimension and weight fields");
       return;
     }
 
-    if (
-      Number(formData.length) <= 0 ||
-      Number(formData.width) <= 0 ||
-      Number(formData.height) <= 0 ||
-      Number(formData.weight) <= 0
-    ) {
-      toast.error("Dimensions and weight must be greater than 0");
+    const l = Number(formData.length);
+    const w = Number(formData.width);
+    const h = Number(formData.height);
+    const wt = Number(formData.weight);
+
+    if ([l, w, h, wt].some((v) => isNaN(v) || v <= 0)) {
+      toast.error("Dimensions and weight must be numbers greater than 0");
       return;
     }
 
@@ -146,12 +158,18 @@ const WarehouseShipment = () => {
 
     try {
       const shipmentData = {
-        length: Number(formData.length),
-        width: Number(formData.width),
-        height: Number(formData.height),
-        weight: Number(formData.weight),
+        length: l,
+        width: w,
+        height: h,
+        weight: wt,
         image: formData.image || "",
       };
+
+      // Clear pending debounce (if any) to avoid subsequent fetches
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
 
       const result = await createShipment(shipmentId.trim(), shipmentData);
 
@@ -177,10 +195,10 @@ const WarehouseShipment = () => {
       toast.dismiss(loadingToast);
 
       const errorMessage =
-        error.response?.data?.error ||
-        error.response?.data?.message ||
-        error.response?.data?.detail ||
-        error.message ||
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        error?.response?.data?.detail ||
+        error?.message ||
         "Cannot check in shipment";
 
       toast.error(errorMessage);
@@ -190,6 +208,7 @@ const WarehouseShipment = () => {
   };
 
   const handleKeyDown = (e) => {
+    // If user presses Enter on any field, attempt submit only if not loading/fetching
     if (e.key === "Enter" && !loading && !fetchingInfo) {
       e.preventDefault();
       handleSubmit();
@@ -235,6 +254,7 @@ const WarehouseShipment = () => {
               </label>
               <div className="relative">
                 <input
+                  id="trackingNumber"
                   ref={shipmentInputRef}
                   type="text"
                   value={shipmentId}
@@ -244,9 +264,14 @@ const WarehouseShipment = () => {
                   className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                   disabled={loading}
                   autoFocus
+                  aria-label="Tracking Number"
                 />
                 {fetchingInfo && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <div
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                    role="status"
+                    aria-live="polite"
+                  >
                     <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
                   </div>
                 )}
@@ -269,28 +294,16 @@ const WarehouseShipment = () => {
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-gray-600">Order Code</p>
                       <p className="font-semibold text-gray-900 truncate">
-                        {orderInfo.orders.orderCode}
+                        {orderInfo.orders?.orderCode}
                       </p>
                     </div>
                   </div>
-
-                  {/* Status */}
-                  {/* <div className="flex items-center gap-2 bg-white/60 rounded-lg p-2.5">
-                    <Package className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-gray-600">Status</p>
-                      <p className="font-semibold text-gray-900">
-                        {getStatusDisplay(orderInfo.orders.status)}
-                      </p>
-                    </div>
-                  </div> */}
-
                   {/* Customer Code */}
                   <div className="flex items-center gap-2 bg-white/60 rounded-lg p-2.5">
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-gray-600">Customer Code</p>
                       <p className="font-semibold text-gray-900">
-                        {orderInfo.customer.customerCode}
+                        {orderInfo.customer?.customerCode}
                       </p>
                     </div>
                   </div>
@@ -300,7 +313,7 @@ const WarehouseShipment = () => {
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-gray-600">Order Type</p>
                       <p className="font-semibold text-gray-900">
-                        {getStatusDisplay(orderInfo.orders.orderType)}
+                        {getStatusDisplay(orderInfo.orders?.orderType)}
                       </p>
                     </div>
                   </div>
@@ -309,9 +322,33 @@ const WarehouseShipment = () => {
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-gray-600">Customer Name</p>
                       <p className="font-semibold text-gray-900 truncate">
-                        {orderInfo.customer.name}
+                        {orderInfo.customer?.name}
                       </p>
                     </div>
+                  </div>
+
+                  {/* Check Required – Centered Full Width */}
+                  <div
+                    className={`md:col-span-2 flex flex-col items-center justify-center rounded-lg p-4 border ${
+                      orderInfo.orders?.checkRequired
+                        ? "bg-red-50 border-red-400"
+                        : "bg-green-50 border-green-400"
+                    }`}
+                  >
+                    <p className="text-xl font-semibold text-black-600 mb-1 text-center">
+                      Check Required
+                    </p>
+                    <p
+                      className={`font-semibold text-base  text-center ${
+                        orderInfo.orders?.checkRequired
+                          ? "text-red-700"
+                          : "text-green-700"
+                      }`}
+                    >
+                      {orderInfo.orders?.checkRequired
+                        ? "YES – MUST CHECK"
+                        : "NO – PASSED"}
+                    </p>
                   </div>
                 </div>
               </div>
