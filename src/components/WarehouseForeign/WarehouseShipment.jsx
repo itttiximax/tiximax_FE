@@ -116,7 +116,7 @@ const WarehouseShipment = () => {
 
     // Logic mới: bắt buộc imageCheck nếu Check Required = NO – PASSED
     const checkRequired = orderInfo.orders?.checkRequired; // true / false
-    if (checkRequired === false && !formData.imageCheck) {
+    if (checkRequired === true && !formData.imageCheck) {
       toast.error("Please upload the check image since order is PASSED");
       return;
     }
@@ -389,7 +389,7 @@ const WarehouseShipment = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Check Image{" "}
-                    {orderInfo?.orders?.checkRequired === false && (
+                    {orderInfo?.orders?.checkRequired === true && (
                       <span className="text-red-500">*</span>
                     )}
                   </label>
