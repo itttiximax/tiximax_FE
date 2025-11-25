@@ -318,6 +318,7 @@ const OrderAuctionList = () => {
       HUY: "bg-red-100 text-red-800",
       DA_HUY: "bg-red-600 text-white",
       HOAT_DONG: "bg-green-100 text-green-800",
+      DAU_GIA_THANH_CONG: "bg-emerald-600 text-white",
     };
     return colors[status] || "bg-gray-100 text-gray-800";
   };
@@ -330,6 +331,7 @@ const OrderAuctionList = () => {
       HUY: "Cancelled",
       DA_HUY: "Cancelled",
       HOAT_DONG: "Active",
+      DAU_GIA_THANH_CONG: "Auction won",
     };
     return texts[status] || status;
   };

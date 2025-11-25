@@ -9,7 +9,6 @@ import {
   Copy,
   Search,
   AlertTriangle,
-  CheckCircle2,
   Barcode,
   Package,
   X,
@@ -18,9 +17,8 @@ import {
   Globe,
   Truck,
   User,
-  Mail,
-  DollarSign,
   Image as ImageIcon,
+  CheckCircle2,
 } from "lucide-react";
 import UpdateShipmentCode from "./UpdateShipmentCode";
 import UpdateAuctionShip from "./UpdateAuctionShip";
@@ -52,14 +50,14 @@ const StatusBadge = ({ status, count }) => {
   return null;
 };
 
-const CardSkeleton = () => (
+const RowSkeleton = () => (
   <div className="rounded-lg border border-slate-200 bg-white">
-    <div className="animate-pulse p-6 space-y-4">
-      <div className="h-5 w-40 rounded bg-slate-200" />
-      <div className="h-4 w-full rounded bg-slate-100" />
-      <div className="space-y-3">
-        <div className="h-20 rounded bg-slate-50" />
-        <div className="h-20 rounded bg-slate-50" />
+    <div className="animate-pulse p-4">
+      <div className="flex items-center gap-4">
+        <div className="h-5 w-32 rounded bg-slate-200" />
+        <div className="h-5 w-24 rounded bg-slate-100" />
+        <div className="flex-1" />
+        <div className="h-8 w-24 rounded bg-slate-200" />
       </div>
     </div>
   </div>
@@ -93,7 +91,6 @@ const UpdateShipmentCodeList = () => {
   );
   const formatDate = (iso) => (iso ? dateFmt.format(new Date(iso)) : "-");
 
-  // Format số tiền
   const formatPrice = (num) => {
     if (!num && num !== 0) return "0";
     return Number(num).toLocaleString("en-US");
@@ -336,11 +333,11 @@ const UpdateShipmentCodeList = () => {
           </div>
         )}
 
-        {/* Content */}
+        {/* Content - List Layout */}
         {loading ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <CardSkeleton key={i} />
+              <RowSkeleton key={i} />
             ))}
           </div>
         ) : items.length === 0 ? (
@@ -368,7 +365,7 @@ const UpdateShipmentCodeList = () => {
           </div>
         ) : (
           <>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="space-y-4">
               {items.map((p) => {
                 const isCompleted = hasShipment(p);
                 const status = getPurchaseStatus(p);
@@ -381,242 +378,266 @@ const UpdateShipmentCodeList = () => {
                 return (
                   <div
                     key={p.purchaseId}
-                    className="flex flex-col rounded-lg border border-slate-200 bg-white overflow-hidden hover:shadow-lg transition-shadow"
+                    className="rounded-lg border border-slate-200 bg-white overflow-hidden hover:shadow-lg transition-shadow"
                   >
-                    {/* Card Header */}
+                    {/* Header */}
                     <div
-                      className={`border-b px-5 py-4 ${
+                      className={`p-4 border-b ${
                         isCompleted
                           ? isAuction
-                            ? "bg-yellow-300 border-yellow-300"
-                            : "bg-emerald-300 border-emerald-300"
+                            ? "bg-yellow-300 border-yellow-400"
+                            : "bg-emerald-300 border-emerald-400"
                           : isAuction
-                          ? "bg-yellow-200 border-yellow-200"
-                          : "bg-rose-300 border-rose-300"
+                          ? "bg-yellow-300 border-yellow-400"
+                          : "bg-rose-300 border-rose-400"
                       }`}
                     >
-                      <div className="mb-3 flex items-start justify-between gap-3">
+                      <div className="flex items-center justify-between gap-4">
+                        {/* Left - Purchase Info */}
                         <div className="min-w-0 flex-1">
-                          <h3 className="mb-1 font-mono text-lg font-semibold text-slate-900">
+                          <div className="font-mono text-lg font-semibold text-slate-900 mb-1">
                             {p.purchaseCode}
-                          </h3>
-                          <div className="flex flex-wrap items-center gap-2 text-sm">
-                            <span className="inline-flex items-center gap-1 text-slate-700">
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
+                            <span className="inline-flex items-center gap-1">
                               <Clock className="h-4 w-4" />
                               {formatDate(p.purchaseTime)}
                             </span>
+                            {p.orderCode && (
+                              <>
+                                <span>---</span>
+                                <span className="font-medium text-black">
+                                  Order: {p.orderCode}
+                                </span>
+                              </>
+                            )}
                           </div>
                         </div>
-                      </div>
 
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
+                        {/* Right - Status & Actions */}
+                        <div className="flex items-center gap-3 flex-shrink-0">
                           {status && (
                             <span
-                              className={`inline-flex items-center rounded px-2 py-1 text-xs font-medium ${
+                              className={`inline-flex items-center rounded-lg px-3 py-1.5 text-sm font-medium ${
                                 isAuction
-                                  ? "bg-gray-100 text-black-800 border border-yellow-300"
-                                  : "bg-gray-100 text-black-700 border border-blue-300"
+                                  ? "bg-yellow-100 text-black border border-yellow-300"
+                                  : "bg-blue-100 text-black border border-blue-300"
                               }`}
                             >
                               {purchaseStatusLabel(status)}
                             </span>
                           )}
-                        </div>
-                        {!isCompleted &&
-                          (isAuction ? (
+
+                          {isCompleted ? (
+                            <div className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 border border-emerald-300">
+                              <CheckCircle2 className="h-4 w-4" />
+                              Completed
+                            </div>
+                          ) : isAuction ? (
                             <button
                               onClick={() => openAuctionModal(p)}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-yellow-600 transition-colors"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 transition-colors"
                             >
-                              <Truck className="h-3.5 w-3.5" />
+                              <Truck className="h-4 w-4" />
                               Update shipping
                             </button>
                           ) : (
                             <button
                               onClick={() => openShipmentModal(p)}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
                             >
-                              <Package className="h-3.5 w-3.5" />
+                              <Package className="h-4 w-4" />
                               Update shipment
                             </button>
-                          ))}
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Card Body */}
-                    <div className="flex-1 p-5">
-                      {/* 🔥 Purchase Image Card */}
-                      {p.purchaseImage && (
-                        <div className="mb-4 rounded-lg border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-3">
-                          <div className="flex items-center gap-2 mb-2">
-                            <ImageIcon className="h-4 w-4 text-slate-500" />
-                          </div>
-                          <div className="flex justify-center">
-                            <img
-                              src={p.purchaseImage}
-                              alt="Purchase"
-                              className="h-32 w-32 rounded-lg border-2 border-slate-200 object-cover shadow-sm hover:scale-105 transition-transform cursor-pointer"
-                              onError={(e) => {
-                                e.target.parentElement.parentElement.style.display =
-                                  "none";
-                              }}
-                              onClick={() =>
-                                window.open(p.purchaseImage, "_blank")
-                              }
-                            />
-                          </div>
-                        </div>
-                      )}
-                      {/* Links */}
-                      {links.length === 0 ? (
-                        <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-slate-200 p-6 text-center">
-                          <p className="text-sm text-slate-500">
-                            No pending links.
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {links.map((l) => (
-                            <div
-                              key={l.linkId}
-                              className="rounded-lg border border-slate-300 bg-slate-50 p-4 hover:bg-white transition-colors"
-                            >
-                              <div className="mb-2 flex items-start justify-between gap-3">
-                                <h4 className="text-sm font-medium text-slate-900 line-clamp-2">
-                                  {l.productName}
-                                </h4>
-                                {l.trackingCode && (
-                                  <button
-                                    onClick={() => copy(l.trackingCode)}
-                                    className="flex-shrink-0 rounded-md border border-slate-200 bg-white p-1.5 text-slate-600 hover:bg-slate-50"
-                                    title="Copy tracking"
-                                  >
-                                    <Copy className="h-3.5 w-3.5" />
-                                  </button>
-                                )}
+                    {/* Body */}
+                    <div className="p-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                        {/* Left Column - Purchase Image (spans full height) */}
+                        <div className="lg:col-span-1">
+                          {p.purchaseImage ? (
+                            <div className="rounded-lg border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-3 h-full flex flex-col">
+                              <div className="flex items-center gap-2 mb-2">
+                                <ImageIcon className="h-4 w-4 text-slate-500" />
+                                <span className="text-sm font-medium text-slate-700">
+                                  Purchase Image
+                                </span>
                               </div>
-
-                              <div className="space-y-1.5 text-xl text-black font-semibold">
-                                {/* Hàng 1: icon + website */}
-                                <div className="flex items-center gap-1.5">
-                                  <Globe className="h-4 w-4 text-black" />
-                                  <span>{l.website}</span>
-                                </div>
-
-                                {/* Hàng 2: separator + quantity */}
-                                <div className="flex items-center gap-1.5">
-                                  <span>Qty: {l.quantity}</span>
-                                </div>
-
-                                {l.classify && (
-                                  <div>Category: {l.classify}</div>
-                                )}
-
-                                <div className="flex items-start gap-1.5">
-                                  <span>OrderCode:</span>
-                                  <span className="flex-1">
-                                    {p.orderCode || "-"}
-                                  </span>
-                                </div>
-
-                                <div className="flex items-start gap-1.5">
-                                  <span>Shipment:</span>
-                                  <span
-                                    className={`flex-1 font-mono ${
-                                      l.shipmentCode?.trim()
-                                        ? "text-green-700"
-                                        : "text-slate-400"
-                                    }`}
-                                  >
-                                    {l.shipmentCode?.trim() ||
-                                      "Not assigned yet"}
-                                  </span>
-                                </div>
+                              <div className="flex-1 flex items-center justify-center">
+                                <img
+                                  src={p.purchaseImage}
+                                  alt="Purchase"
+                                  className="max-h-80 w-full rounded-lg border-2 border-slate-200 object-contain shadow-sm hover:scale-105 transition-transform cursor-pointer"
+                                  onError={(e) => {
+                                    e.target.parentElement.parentElement.parentElement.style.display =
+                                      "none";
+                                  }}
+                                  onClick={() =>
+                                    window.open(p.purchaseImage, "_blank")
+                                  }
+                                />
                               </div>
                             </div>
-                          ))}
+                          ) : (
+                            <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-3 h-full flex items-center justify-center">
+                              <div className="text-center">
+                                <ImageIcon className="h-12 w-12 text-slate-300 mx-auto mb-2" />
+                                <p className="text-sm text-slate-400">
+                                  No image
+                                </p>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {/* /* 🔥 Staff Info Card */}
-                      <div className="mt-4"></div>
-                      {p.staff && (
-                        <div className="mb-4 rounded-lg border border-slate-300 bg-slate-100 p-4">
-                          <div className="flex items-center gap-2 mb-3">
-                            <User className="h-4 w-4 text-black" />
-                            <span className="text-xl font-semibold text-black">
-                              Staff Information
-                            </span>
+
+                        {/* Right Column - Product Links + Staff & Customer */}
+                        <div className="lg:col-span-3 space-y-4">
+                          {/* Product Links */}
+                          <div>
+                            <div className="mb-2">
+                              <h4 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                <Package className="h-4 w-4" />
+                                Product Links ({links.length})
+                              </h4>
+                            </div>
+
+                            {links.length === 0 ? (
+                              <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
+                                <p className="text-sm text-slate-500">
+                                  No pending links.
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                {links.map((l) => (
+                                  <div
+                                    key={l.linkId}
+                                    className="rounded-lg border border-slate-200 bg-slate-50 p-3 hover:bg-white hover:border-blue-300 transition-colors"
+                                  >
+                                    <div className="flex items-start justify-between gap-3 mb-2">
+                                      <h5 className="text-sm font-medium text-slate-900 flex-1 line-clamp-2">
+                                        {l.productName}
+                                      </h5>
+                                      {l.trackingCode && (
+                                        <button
+                                          onClick={() => copy(l.trackingCode)}
+                                          className="flex-shrink-0 rounded-md border border-slate-200 bg-white p-1.5 text-slate-600 hover:bg-slate-100"
+                                          title="Copy tracking"
+                                        >
+                                          <Copy className="h-3.5 w-3.5" />
+                                        </button>
+                                      )}
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm text-slate-600">
+                                      <div className="flex items-center gap-1.5">
+                                        <Globe className="h-3.5 w-3.5" />
+                                        <span>{l.website}</span>
+                                      </div>
+                                      <div>
+                                        <span className="font-medium">
+                                          Qty:
+                                        </span>{" "}
+                                        {l.quantity}
+                                      </div>
+                                      {l.classify && (
+                                        <div className="col-span-2">
+                                          <span className="font-medium">
+                                            Classify:
+                                          </span>{" "}
+                                          {l.classify}
+                                        </div>
+                                      )}
+                                      <div className="col-span-2 flex items-start gap-1.5">
+                                        <span className="font-medium">
+                                          Shipment:
+                                        </span>
+                                        <span
+                                          className={`flex-1 font-mono ${
+                                            l.shipmentCode?.trim()
+                                              ? "text-green-700 font-semibold"
+                                              : "text-slate-400"
+                                          }`}
+                                        >
+                                          {l.shipmentCode?.trim() ||
+                                            "Not assigned yet"}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                          <div className="space-y-2 text-xl font-semibold text-black">
-                            {p.staff.name && (
-                              <div className="flex items-center justify-between">
-                                <span>Name:</span>
-                                <span>{p.staff.name}</span>
+
+                          {/* Staff and Customer Info */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Staff Info */}
+                            {p.staff && (
+                              <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <User className="h-4 w-4 text-slate-600" />
+                                  <span className="text-sm font-semibold text-blue-700">
+                                    Staff Information
+                                  </span>
+                                </div>
+                                <div className="space-y-1.5 text-sm text-slate-600">
+                                  {p.staff.name && (
+                                    <div className="flex justify-between">
+                                      <span>Name:</span>
+                                      <span className="font-medium text-slate-900">
+                                        {p.staff.name}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {p.staff.staffCode && (
+                                    <div className="flex justify-between">
+                                      <span>StaffCode:</span>
+                                      <span className="font-medium text-slate-900">
+                                        {p.staff.staffCode}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             )}
-                            {p.staff.staffCode && (
-                              <div className="flex items-center justify-between">
-                                <span>Staff Code:</span>
-                                <span>{p.staff.staffCode}</span>
-                              </div>
-                            )}
-                            {p.staff.username && (
-                              <div className="flex items-center justify-between">
-                                <span>Username:</span>
-                                <span>{p.staff.username}</span>
-                              </div>
-                            )}
-                            {p.staff.email && (
-                              <div className="flex items-start justify-between gap-2">
-                                <span>Email:</span>
-                                <span className="text-right break-all">
-                                  {p.staff.email}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                      {/* 🔥 Customer Info Card */}
-                      {customer.name && (
-                        <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
-                          <div className="flex items-center gap-2 mb-3">
-                            <User className="h-4 w-4 text-black" />
-                            <span className="text-xl font-semibold text-black">
-                              Customer Information
-                            </span>
-                          </div>
-                          <div className="space-y-2 text-xl font-semibold text-black">
+
+                            {/* Customer Info */}
                             {customer.name && (
-                              <div className="flex items-center justify-between">
-                                <span>Name:</span>
-                                <span>{customer.name}</span>
-                              </div>
-                            )}
-                            {customer.customerCode && (
-                              <div className="flex items-center justify-between">
-                                <span>Customer Code:</span>
-                                <span>{customer.customerCode}</span>
-                              </div>
-                            )}
-                            {customer.username && (
-                              <div className="flex items-center justify-between">
-                                <span>Username:</span>
-                                <span>{customer.username}</span>
-                              </div>
-                            )}
-                            {customer.email && (
-                              <div className="flex items-start justify-between gap-2">
-                                <span>Email:</span>
-                                <span className="text-right break-all">
-                                  {customer.email}
-                                </span>
+                              <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <User className="h-4 w-4 text-blue-600" />
+                                  <span className="text-sm font-semibold text-blue-700">
+                                    Customer Information
+                                  </span>
+                                </div>
+                                <div className="space-y-1.5 text-sm text-blue-900">
+                                  {customer.name && (
+                                    <div className="flex justify-between">
+                                      <span>Name:</span>
+                                      <span className="font-medium">
+                                        {customer.name}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {customer.customerCode && (
+                                    <div className="flex justify-between">
+                                      <span>CustomerCode:</span>
+                                      <span className="font-medium">
+                                        {customer.customerCode}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             )}
                           </div>
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -705,5 +726,4 @@ const UpdateShipmentCodeList = () => {
     </div>
   );
 };
-
 export default UpdateShipmentCodeList;
