@@ -34,17 +34,36 @@ const CreatePurchase = ({
   const formatCurrency = (value) => {
     if (!value && value !== 0) return "";
 
-    const number = Number(value);
-    const fixed = number.toFixed(2);
-    const [integerPart, decimalPart] = fixed.split(".");
-    const formattedInteger = parseInt(integerPart).toLocaleString("en-US");
+    const stringValue = value.toString();
 
-    // Only show decimals if not .00
-    if (decimalPart === "00") {
-      return formattedInteger;
+    // Nếu đang nhập và kết thúc bằng dấu chấm, giữ nguyên
+    if (stringValue.endsWith(".")) {
+      const integerPart = stringValue.slice(0, -1);
+      if (integerPart === "") return ".";
+      const formattedInteger = parseInt(integerPart).toLocaleString("en-US");
+      return `${formattedInteger}.`;
     }
 
-    return `${formattedInteger}.${decimalPart}`;
+    const parts = stringValue.split(".");
+    const integerPart = parts[0];
+    const decimalPart = parts[1];
+
+    // Nếu chỉ có dấu chấm
+    if (integerPart === "" && decimalPart === undefined) {
+      return "";
+    }
+
+    // Format phần nguyên với dấu phẩy
+    const formattedInteger = integerPart
+      ? parseInt(integerPart).toLocaleString("en-US")
+      : "0";
+
+    // Nếu có phần thập phân, giữ nguyên
+    if (decimalPart !== undefined) {
+      return `${formattedInteger}.${decimalPart}`;
+    }
+
+    return formattedInteger;
   };
 
   const getRawValue = (value) => value.toString().replace(/,/g, "");
@@ -89,8 +108,8 @@ const CreatePurchase = ({
 
     const enteredAmount = Number(getRawValue(purchaseData.purchaseTotal));
 
-    // Chỉ show warning nếu cao hơn
-    if (enteredAmount >= calculatedTotal) {
+    // Chỉ show warning nếu cao hơn calculated total + 1
+    if (enteredAmount >= calculatedTotal + 1) {
       return {
         isHigher: true,
         enteredAmount,
