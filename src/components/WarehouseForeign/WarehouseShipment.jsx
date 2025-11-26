@@ -24,7 +24,8 @@ const WarehouseShipment = () => {
   const shipmentInputRef = useRef(null);
   const debounceTimerRef = useRef(null);
 
-  const numberRegex = /^\d+(\.\d+)?$/;
+  // Allow decimal input while typing (examples allowed: "1.25", "0.", ".5", ".", "")
+  const numberRegex = /^(\d+(\.\d*)?|\.\d*)$/;
 
   useEffect(() => {
     shipmentInputRef.current?.focus();
@@ -72,6 +73,7 @@ const WarehouseShipment = () => {
     const { name, value } = e.target;
 
     if (["length", "width", "height", "weight"].includes(name)) {
+      // allow empty string and intermediate decimal typing
       if (value !== "" && !numberRegex.test(value)) return;
     }
 
@@ -121,6 +123,7 @@ const WarehouseShipment = () => {
       return;
     }
 
+    // Convert to numbers for validation and API
     const l = Number(formData.length);
     const w = Number(formData.width);
     const h = Number(formData.height);
@@ -346,6 +349,8 @@ const WarehouseShipment = () => {
                         className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                         placeholder="0"
                         disabled={loading || !orderInfo}
+                        inputMode="decimal"
+                        aria-label={dim}
                       />
                     </div>
                   ))}
