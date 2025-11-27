@@ -44,6 +44,7 @@ const formatCurrency = (value) => {
     return value;
   }
 };
+
 const DetailPaymentOrder = ({ codeFromProp }) => {
   const params = useParams();
   const paymentCode = codeFromProp || params.paymentCode;
@@ -80,21 +81,13 @@ const DetailPaymentOrder = ({ codeFromProp }) => {
   const statusConfig =
     (payment && STATUS_CONFIG[payment.status]) || STATUS_CONFIG.CHO_THANH_TOAN;
 
+  const remainingAmount =
+    payment && payment.amount != null && payment.collectedAmount != null
+      ? payment.amount - payment.collectedAmount
+      : null;
+
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6">
-      {/* HEADER */}
-      {/* <div className="flex items-center gap-3 mb-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-gray-200 hover:bg-gray-50 transition"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h1 className="text-xl sm:text-2xl font-semibold">
-          Chi tiết thanh toán
-        </h1>
-      </div> */}
-
       {/* Loading */}
       {loading && !payment && (
         <div className="flex items-center justify-center py-12 text-gray-500 text-sm">
@@ -118,18 +111,21 @@ const DetailPaymentOrder = ({ codeFromProp }) => {
           <div className="space-y-4">
             {/* INFO BOX */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 space-y-4">
-              <div className="flex items-center justify-between">
+              {/* Dòng trên: icon + mã + status */}
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center">
                     <CreditCard className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-xl text-black-500">Mã thanh toán</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                      Mã thanh toán
+                    </p>
                     <button
                       onClick={() =>
                         handleCopy(payment.paymentCode, "Đã copy mã thanh toán")
                       }
-                      className="flex items-center gap-2 text-sm font-mono font-semibold hover:text-blue-600"
+                      className="flex items-center gap-2 text-lg font-mono font-semibold hover:text-blue-600"
                     >
                       {payment.paymentCode}
                       <Copy className="w-3 h-3" />
@@ -137,19 +133,21 @@ const DetailPaymentOrder = ({ codeFromProp }) => {
                   </div>
                 </div>
 
-                {/* <div
+                {/* Status badge */}
+                <div
                   className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium ${statusConfig.color}`}
                 >
                   <span
                     className={`w-2 h-2 rounded-full ${statusConfig.dot}`}
                   />
                   {statusConfig.label}
-                </div> */}
+                </div>
               </div>
 
+              {/* Order + merged info */}
               <div className="grid sm:grid-cols-2 gap-4 pt-3 border-t border-gray-100">
                 <div>
-                  <p className="text-xl text-black-500 mb-1">Đơn hàng</p>
+                  <p className="text-xs text-gray-500 mb-1">Đơn hàng</p>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-sm font-semibold">
                       {payment.content || "-"}
@@ -166,17 +164,11 @@ const DetailPaymentOrder = ({ codeFromProp }) => {
                     )}
                   </div>
                 </div>
+
                 <div>
-                  {/* <p className="text-xs text-gray-500 mb-1">Thời điểm tạo</p>
+                  <p className="text-xs text-gray-500 mb-1">Thanh toán gộp</p>
                   <div className="flex items-center gap-2 text-sm">
-                    <Clock className="w-4 h-4 text-gray-500" />
-                    {formatDateTime(payment.actionAt)}
-                  </div> */}
-                </div>
-                <div>
-                  <p className="text-xl text-black-500 mb-1">Thanh toán gộp</p>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Layers className="w-4 h-4 text-black-500" />
+                    <Layers className="w-4 h-4 text-gray-500" />
                     {payment.isMergedPayment ? "Có" : "Không"}
                   </div>
                 </div>
@@ -184,28 +176,41 @@ const DetailPaymentOrder = ({ codeFromProp }) => {
             </div>
 
             {/* AMOUNT INFO */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5">
-              <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 space-y-4">
+              <h2 className="text-sm font-semibold mb-1 flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 Thông tin số tiền
               </h2>
 
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="bg-gray-50 rounded-xl p-3">
+                {/* Số tiền cần thu */}
+                <div className="bg-gray-50 rounded-xl p-3 sm:p-4">
                   <p className="text-xs text-gray-500 mb-1">Số tiền cần thu</p>
-                  <p className="text-lg font-semibold">
+                  <p className="text-xl font-semibold">
                     {formatCurrency(payment.amount)}
                   </p>
                 </div>
 
-                <div className="bg-gray-50 rounded-xl p-3">
+                {/* Đã thu */}
+                <div className="bg-gray-50 rounded-xl p-3 sm:p-4">
                   <p className="text-xs text-gray-500 mb-1">Đã thu</p>
-                  <p className="text-lg font-semibold">
+                  <p className="text-xl font-semibold">
                     {formatCurrency(payment.collectedAmount)}
                   </p>
                 </div>
 
-                <div>
+                {/* Còn lại */}
+                <div className="bg-gray-50 rounded-xl p-3 sm:p-4">
+                  <p className="text-xs text-gray-500 mb-1">Còn lại</p>
+                  <p className="text-lg font-semibold text-blue-600">
+                    {remainingAmount != null
+                      ? formatCurrency(remainingAmount)
+                      : "-"}
+                  </p>
+                </div>
+
+                {/* Tỷ lệ đặt cọc */}
+                <div className="bg-gray-50 rounded-xl p-3 sm:p-4">
                   <p className="text-xs text-gray-500 mb-1">Tỷ lệ đặt cọc</p>
                   <p className="text-sm font-semibold">
                     {payment.depositPercent != null
@@ -217,7 +222,7 @@ const DetailPaymentOrder = ({ codeFromProp }) => {
             </div>
           </div>
 
-          {/* RIGHT – QR CODE */}
+          {/* RIGHT – QR CODE (giữ nguyên) */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:py-10 flex flex-col items-center">
             {payment.qrCode ? (
               <>
@@ -227,7 +232,7 @@ const DetailPaymentOrder = ({ codeFromProp }) => {
                   onClick={() =>
                     handleCopy(payment.qrCode, "Đã copy link mã QR")
                   }
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-sm"
+                  className="mt-4 inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-sm"
                 >
                   <Copy className="w-3 h-3" />
                   Copy link mã QR

@@ -78,10 +78,11 @@ const registrationByStaffService = {
     if (!data.phone) {
       errors.phone = "Số điện thoại là bắt buộc";
     } else {
-      // Vietnamese phone number validation
-      const phoneRegex = /^(0[3-9])[0-9]{8}$/;
-      if (!phoneRegex.test(data.phone)) {
-        errors.phone = "Số điện thoại không hợp lệ (10 số, bắt đầu bằng 03-09)";
+      // Remove all spaces and check if valid 10 digits
+      const cleanPhone = data.phone.replace(/\s/g, "");
+      const phoneRegex = /^[0-9]{10}$/;
+      if (!phoneRegex.test(cleanPhone)) {
+        errors.phone = "Số điện thoại phải có đúng 10 chữ số";
       }
     }
 

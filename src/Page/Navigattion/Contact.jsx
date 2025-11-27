@@ -32,7 +32,7 @@ const Contact = () => {
     e.preventDefault();
     setLoading(true);
 
-    // fake API
+    // Fake API Delay
     await new Promise((resolve) => setTimeout(resolve, 1200));
 
     setLoading(false);
@@ -67,7 +67,7 @@ const Contact = () => {
           Liên hệ với chúng tôi
         </motion.h1>
 
-        {/* TOP ROW: INFO + BANNER */}
+        {/* TOP ROW */}
         <div className="mt-12 grid lg:grid-cols-2 gap-8 lg:gap-12">
           {/* LEFT – COMPANY INFO */}
           <motion.div
@@ -81,9 +81,10 @@ const Contact = () => {
                 <MapPin className="w-5 h-5" />
               </span>
               <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wide text-gray-900">
-                Công ty CP Tiximax
+                Công ty Cổ phần TIXIMAX
               </h2>
             </div>
+
             <p className="mt-2 text-base text-gray-600 leading-relaxed">
               Nếu cần tư vấn hoặc hỗ trợ tham khảo thêm thông tin, vui lòng liên
               hệ với chúng tôi theo các thông tin sau:
@@ -93,41 +94,65 @@ const Contact = () => {
               <div className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-amber-600" />
                 <span className="font-medium text-gray-800">
-                  0707 123 456 789
+                  +84 901 834 283
                 </span>
               </div>
+
               <div className="flex items-center gap-3">
                 <Clock className="w-5 h-5 text-amber-600" />
                 <span className="text-gray-600">
-                  24/7 Hotline – phản hồi trong 2 giờ
+                  08:00 - 20:00 | Thứ Hai - Chủ Nhật
                 </span>
               </div>
+
               <div className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-amber-600" />
-                <span className="text-gray-600">inquiry@tiximax.vn</span>
+                <span className="text-gray-600">global.trans@tiximax.net</span>
               </div>
             </div>
 
             {/* Address */}
             <div className="mt-10">
               <h3 className="text-base font-semibold uppercase tracking-wide text-gray-800">
-                Địa chỉ văn phòng & kho hàng Tiximax
+                Địa chỉ văn phòng & kho hàng TIXIMAX
               </h3>
               <div className="mt-4 space-y-3 text-base text-gray-600">
                 <div className="flex gap-3 items-start">
                   <MapPin className="w-5 h-5 text-amber-600 flex-shrink-0" />
                   <span>
-                    65 Đ. 9, Hiệp Bình Phước, Thủ Đức, Thành phố Hồ Chí Minh
-                    100000
+                    Văn phòng: 65 Đ. 9, Hiệp Bình Phước, Thủ Đức, Thành phố Hồ
+                    Chí Minh 100000.
                   </span>
                 </div>
+
                 <div className="flex gap-3 items-start">
                   <MapPin className="w-5 h-5 text-amber-600 flex-shrink-0" />
-                  <span>Kho Chiba – Tiximax Japan</span>
+                  <span>
+                    Kho tại Indonesia: Alan Cinta No.2, RT.11/RW.3, Pinggir
+                    Kali, Kecamatan Pulogadung, Kota Jakarta Timur, Jakarta,
+                    Indonesia.
+                  </span>
                 </div>
+
                 <div className="flex gap-3 items-start">
                   <MapPin className="w-5 h-5 text-amber-600 flex-shrink-0" />
-                  <span>Kho Đà Nẵng – Tiximax Vietnam</span>
+                  <span>
+                    Kho tại Nhật Bản: 千葉県 白井市 復1449-8, Shiroi-shi, Chiba,
+                    Japan.
+                  </span>
+                </div>
+
+                <div className="flex gap-3 items-start">
+                  <MapPin className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                  <span>
+                    Kho tại Hàn Quốc: 인천광역시 부평구 부평동 284-136, 302호,
+                    Incheon, South Korea.
+                  </span>
+                </div>
+
+                <div className="flex gap-3 items-start">
+                  <MapPin className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                  <span>Kho tại Mỹ: Woodstock, Georgia, United States.</span>
                 </div>
               </div>
             </div>
@@ -141,21 +166,18 @@ const Contact = () => {
                 <a
                   href="#"
                   className="w-10 h-10 flex items-center justify-center rounded-full bg-amber-900 text-white hover:bg-amber-500 hover:text-gray-900 transition-colors"
-                  aria-label="Facebook"
                 >
                   <Facebook className="w-5 h-5" />
                 </a>
                 <a
                   href="#"
                   className="w-10 h-10 flex items-center justify-center rounded-full bg-amber-900 text-white hover:bg-amber-500 hover:text-gray-900 transition-colors"
-                  aria-label="Instagram"
                 >
                   <Instagram className="w-5 h-5" />
                 </a>
                 <a
                   href="#"
                   className="w-10 h-10 flex items-center justify-center rounded-full bg-amber-900 text-white hover:bg-amber-500 hover:text-gray-900 transition-colors"
-                  aria-label="LinkedIn"
                 >
                   <Linkedin className="w-5 h-5" />
                 </a>
@@ -170,7 +192,6 @@ const Contact = () => {
             animate="show"
             className="bg-white rounded-2xl shadow-sm border border-amber-100 overflow-hidden min-h-[500px] flex items-center justify-center"
           >
-            {/* Đổi ảnh này thành banner thật của bạn */}
             <img
               src="https://i.pinimg.com/736x/ee/4b/81/ee4b81d3a96a4e002225a7db7fadc147.jpg"
               alt="Banner Tiximax"
@@ -179,7 +200,7 @@ const Contact = () => {
           </motion.div>
         </div>
 
-        {/* BOTTOM ROW: MAP + FORM */}
+        {/* BOTTOM ROW */}
         <div className="mt-12 grid lg:grid-cols-2 gap-8 lg:gap-12">
           {/* MAP */}
           <motion.div
@@ -204,7 +225,7 @@ const Contact = () => {
             className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(245,158,11,0.25)] border border-amber-200 p-8 sm:p-10 min-h-[500px]"
           >
             <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wide text-gray-900">
-              Gửi thông tin cho Tiximax
+              Gửi yêu cầu nhận tư vấn
             </h2>
 
             <form onSubmit={onSubmit} className="mt-8 space-y-6 w-full">
@@ -212,28 +233,24 @@ const Contact = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold uppercase mb-2 text-gray-700">
-                    First Name
+                    Tên
                   </label>
                   <input
                     value={form.firstName}
                     onChange={handle("firstName")}
-                    className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm
-                    focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500
-                    transition-all bg-white placeholder-gray-400"
+                    className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500 transition-all bg-white placeholder-gray-400"
                     placeholder="Nhập tên"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold uppercase mb-2 text-gray-700">
-                    Last Name
+                    Họ
                   </label>
                   <input
                     value={form.lastName}
                     onChange={handle("lastName")}
-                    className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm
-                    focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500
-                    transition-all bg-white placeholder-gray-400"
+                    className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500 transition-all bg-white placeholder-gray-400"
                     placeholder="Nhập họ"
                   />
                 </div>
@@ -248,23 +265,20 @@ const Contact = () => {
                   <input
                     value={form.email}
                     onChange={handle("email")}
-                    className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm
-                    focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500
-                    transition-all bg-white placeholder-gray-400"
+                    className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500 transition-all bg-white placeholder-gray-400"
                     placeholder="email@example.com"
                   />
                 </div>
+
                 <div>
                   <label className="block text-sm font-semibold uppercase mb-2 text-gray-700">
-                    Phone
+                    Số điện thoại
                   </label>
                   <input
                     value={form.phone}
                     onChange={handle("phone")}
-                    className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm
-                    focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500
-                    transition-all bg-white placeholder-gray-400"
-                    placeholder="Số điện thoại"
+                    className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500 transition-all bg-white placeholder-gray-400"
+                    placeholder="Nhập số điện thoại"
                   />
                 </div>
               </div>
@@ -272,31 +286,27 @@ const Contact = () => {
               {/* Subject */}
               <div>
                 <label className="block text-sm font-semibold uppercase mb-2 text-gray-700">
-                  Subject
+                  Yêu cầu
                 </label>
                 <input
                   value={form.subject}
                   onChange={handle("subject")}
-                  className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm
-                  focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500
-                  transition-all bg-white placeholder-gray-400"
-                  placeholder="Chủ đề"
+                  className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500 transition-all bg-white placeholder-gray-400"
+                  placeholder="Nhập chủ đề"
                 />
               </div>
 
               {/* Message */}
               <div>
                 <label className="block text-sm font-semibold uppercase mb-2 text-gray-700">
-                  Message
+                  Ghi chú thêm
                 </label>
                 <textarea
                   rows="7"
                   value={form.message}
                   onChange={handle("message")}
-                  className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm resize-none
-                  focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500
-                  bg-white transition-all placeholder-gray-400"
-                  placeholder="Nội dung tin nhắn..."
+                  className="w-full border border-amber-200 rounded-lg px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500 bg-white transition-all placeholder-gray-400"
+                  placeholder="Nhập tin nhắn..."
                 />
               </div>
 
@@ -305,12 +315,9 @@ const Contact = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-8 py-3 text-sm font-semibold uppercase rounded-lg
-                  bg-amber-500 text-white tracking-wide shadow-md
-                  hover:bg-amber-600 hover:text-white transition-all
-                  disabled:opacity-60"
+                  className="px-8 py-3 text-sm font-semibold uppercase rounded-lg bg-amber-500 text-white tracking-wide shadow-md hover:bg-amber-600 transition-all disabled:opacity-60"
                 >
-                  {loading ? "Sending..." : "Send message"}
+                  {loading ? "Đang gửi..." : "Gửi tin nhắn"}
                 </button>
               </div>
 

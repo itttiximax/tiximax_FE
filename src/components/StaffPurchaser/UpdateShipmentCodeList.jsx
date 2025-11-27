@@ -17,6 +17,10 @@ import {
   Clock,
   Globe,
   Truck,
+  User,
+  Mail,
+  DollarSign,
+  Image as ImageIcon,
 } from "lucide-react";
 import UpdateShipmentCode from "./UpdateShipmentCode";
 import UpdateAuctionShip from "./UpdateAuctionShip";
@@ -30,7 +34,7 @@ const StatusBadge = ({ status, count }) => {
       <div className="inline-flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 border border-red-100">
         <div className="h-2 w-2 rounded-full bg-red-500" />
         <span className="text-sm font-medium text-red-700">
-          {count} đơn chưa có mã
+          {count} orders without shipment code
         </span>
       </div>
     );
@@ -40,7 +44,7 @@ const StatusBadge = ({ status, count }) => {
       <div className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 border border-emerald-100">
         <div className="h-2 w-2 rounded-full bg-emerald-500" />
         <span className="text-sm font-medium text-emerald-700">
-          {count} đơn đã có mã
+          {count} orders with shipment code
         </span>
       </div>
     );
@@ -89,6 +93,12 @@ const UpdateShipmentCodeList = () => {
   );
   const formatDate = (iso) => (iso ? dateFmt.format(new Date(iso)) : "-");
 
+  // Format số tiền
+  const formatPrice = (num) => {
+    if (!num && num !== 0) return "0";
+    return Number(num).toLocaleString("en-US");
+  };
+
   const fetchData = useCallback(
     async (p = page, s = size) => {
       setLoading(true);
@@ -107,7 +117,7 @@ const UpdateShipmentCodeList = () => {
           e?.response?.data?.message ||
           e?.response?.data?.error ||
           e?.message ||
-          "Lỗi tải dữ liệu";
+          "Failed to load data.";
         setErr(msg);
       } finally {
         setLoading(false);
@@ -134,11 +144,9 @@ const UpdateShipmentCodeList = () => {
     );
   };
 
-  // Helper function để lấy status từ links
   const getPurchaseStatus = (p) => {
     const links = Array.isArray(p.pendingLinks) ? p.pendingLinks : [];
     if (links.length === 0) return null;
-    // Lấy status từ link đầu tiên (giả sử tất cả links có cùng status)
     return links[0]?.status || null;
   };
 
@@ -156,7 +164,11 @@ const UpdateShipmentCodeList = () => {
     return list.filter((it) => {
       const inOrder =
         it.orderCode?.toLowerCase().includes(s) ||
-        it.staffName?.toLowerCase().includes(s);
+        it.staffName?.toLowerCase().includes(s) ||
+        it.purchaseCode?.toLowerCase().includes(s) ||
+        it.customer?.name?.toLowerCase().includes(s) ||
+        it.customer?.customerCode?.toLowerCase().includes(s) ||
+        it.customer?.email?.toLowerCase().includes(s);
       const inLinks = (it.pendingLinks || []).some((l) => {
         const lc = String(l.linkId).toLowerCase();
         return (
@@ -180,9 +192,9 @@ const UpdateShipmentCodeList = () => {
   const copy = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success("Đã copy tracking", { position: "top-right" });
+      toast.success("Tracking copied.", { position: "top-right" });
     } catch {
-      toast.error("Copy không thành công", { position: "top-right" });
+      toast.error("Copy failed.", { position: "top-right" });
     }
   };
 
@@ -212,113 +224,107 @@ const UpdateShipmentCodeList = () => {
 
   const purchaseStatusLabel = (status) => {
     const labels = {
-      DA_MUA: "Đã mua",
-      DAU_GIA_THANH_CONG: "Đấu giá thành công",
+      DA_MUA: "Purchased",
+      DAU_GIA_THANH_CONG: "Auction won",
     };
     return labels[status] || status;
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto px-6 py-8">
+    <div className="min-h-screen px-4 py-6">
+      <div className="mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
-              <Barcode className="h-5 w-5 text-white" />
+        <div className="bg-blue-600 rounded-xl shadow-sm p-5 mb-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/20">
+                <Barcode className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-white">
+                  Shipment Code Management
+                </h1>
+              </div>
             </div>
-            <h1 className="text-2xl font-semibold text-slate-900">
-              Quản lý mã vận đơn
-            </h1>
+            <button
+              onClick={() => fetchData(page, size)}
+              disabled={loading}
+              className="rounded-lg border border-white/30 bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 disabled:opacity-60 flex items-center gap-2"
+              title="Refresh"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </button>
           </div>
+        </div>
 
-          {/* Search & Filter Section */}
-          <div className="space-y-4">
-            <div className="flex flex-col gap-3 lg:flex-row">
-              {/* Search */}
-              <div className="relative flex-1">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-                <input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="Tìm kiếm theo mã đơn, nhân viên, tracking..."
-                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-                {q && (
-                  <button
-                    onClick={() => setQ("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-
-              {/* Filters */}
-              <div className="flex items-center gap-3">
-                {/* Purchase Status Filter */}
-                <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5">
-                  <Filter className="h-4 w-4 text-slate-500" />
-                  <select
-                    value={purchaseStatusFilter}
-                    onChange={(e) => setPurchaseStatusFilter(e.target.value)}
-                    className="border-none bg-transparent text-sm font-medium text-slate-700 focus:outline-none"
-                  >
-                    <option value="all">Tất cả trạng thái</option>
-                    <option value="DA_MUA">Đã mua</option>
-                    <option value="DAU_GIA_THANH_CONG">
-                      Đấu giá thành công
-                    </option>
-                  </select>
-                </div>
-
-                {/* Shipment Status Filter */}
-                <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5">
-                  <Package className="h-4 w-4 text-slate-500" />
-                  <select
-                    value={shipmentStatusFilter}
-                    onChange={(e) => setShipmentStatusFilter(e.target.value)}
-                    className="border-none bg-transparent text-sm font-medium text-slate-700 focus:outline-none"
-                  >
-                    <option value="all">Tất cả</option>
-                    <option value="missing">Chưa có mã</option>
-                    <option value="has">Đã có mã</option>
-                  </select>
-                </div>
-
+        {/* Search & Filter Section */}
+        <div className="mb-8 space-y-4">
+          <div className="flex flex-col gap-3 lg:flex-row">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search by Order code, Customer name, Purchase code, product..."
+                className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              {q && (
                 <button
-                  onClick={() => fetchData(page, size)}
-                  disabled={loading}
-                  className="rounded-lg border border-slate-200 bg-white p-2.5 text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-                  title="Làm mới"
+                  onClick={() => setQ("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
                 >
-                  <RefreshCw
-                    className={`h-5 w-5 ${loading ? "animate-spin" : ""}`}
-                  />
+                  <X className="h-4 w-4" />
                 </button>
-              </div>
-            </div>
-
-            {/* Status Info */}
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <div className="flex items-center gap-3">
-                {missingCountOnPage > 0 && (
-                  <StatusBadge status="missing" count={missingCountOnPage} />
-                )}
-                {completedCountOnPage > 0 && (
-                  <StatusBadge
-                    status="completed"
-                    count={completedCountOnPage}
-                  />
-                )}
-              </div>
-              {debouncedQ && (
-                <div className="text-sm text-slate-600">
-                  Tìm thấy <span className="font-medium">{items.length}</span>{" "}
-                  kết quả
-                </div>
               )}
             </div>
+
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5">
+                <Filter className="h-4 w-4 text-slate-500" />
+                <select
+                  value={purchaseStatusFilter}
+                  onChange={(e) => setPurchaseStatusFilter(e.target.value)}
+                  className="border-none bg-transparent text-sm font-medium text-slate-700 focus:outline-none"
+                >
+                  <option value="all">All purchase status</option>
+                  <option value="DA_MUA">Purchased</option>
+                  <option value="DAU_GIA_THANH_CONG">Auction won</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5">
+                <Package className="h-4 w-4 text-slate-500" />
+                <select
+                  value={shipmentStatusFilter}
+                  onChange={(e) => setShipmentStatusFilter(e.target.value)}
+                  className="border-none bg-transparent text-sm font-medium text-slate-700 focus:outline-none"
+                >
+                  <option value="all">All shipment status</option>
+                  <option value="missing">Missing shipment code</option>
+                  <option value="has">Has shipment code</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              {missingCountOnPage > 0 && (
+                <StatusBadge status="missing" count={missingCountOnPage} />
+              )}
+              {completedCountOnPage > 0 && (
+                <StatusBadge status="completed" count={completedCountOnPage} />
+              )}
+            </div>
+            {debouncedQ && (
+              <div className="text-sm text-slate-600">
+                Found <span className="font-medium">{items.length}</span>{" "}
+                result(s)
+              </div>
+            )}
           </div>
         </div>
 
@@ -343,10 +349,10 @@ const UpdateShipmentCodeList = () => {
               <Search className="h-6 w-6 text-slate-400" />
             </div>
             <h3 className="mb-2 text-base font-medium text-slate-900">
-              Không tìm thấy kết quả
+              No results found
             </h3>
             <p className="mb-4 text-sm text-slate-600">
-              Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm
+              Try adjusting your filters or search keyword.
             </p>
             <button
               onClick={() => {
@@ -357,7 +363,7 @@ const UpdateShipmentCodeList = () => {
               }}
               className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
             >
-              <RefreshCw className="h-4 w-4" /> Đặt lại bộ lọc
+              <RefreshCw className="h-4 w-4" /> Reset filters
             </button>
           </div>
         ) : (
@@ -370,24 +376,29 @@ const UpdateShipmentCodeList = () => {
                 const links = Array.isArray(p.pendingLinks)
                   ? p.pendingLinks
                   : [];
+                const customer = p.customer || {};
 
                 return (
                   <div
                     key={p.purchaseId}
-                    className="flex flex-col rounded-lg border border-slate-200 bg-white overflow-hidden"
+                    className="flex flex-col rounded-lg border border-slate-200 bg-white overflow-hidden hover:shadow-lg transition-shadow"
                   >
                     {/* Card Header */}
                     <div
                       className={`border-b px-5 py-4 ${
                         isCompleted
-                          ? "bg-emerald-300 border-emerald-300"
+                          ? isAuction
+                            ? "bg-yellow-300 border-yellow-300"
+                            : "bg-emerald-300 border-emerald-300"
+                          : isAuction
+                          ? "bg-yellow-200 border-yellow-200"
                           : "bg-rose-300 border-rose-300"
                       }`}
                     >
                       <div className="mb-3 flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
                           <h3 className="mb-1 font-mono text-lg font-semibold text-slate-900">
-                            {p.orderCode}
+                            {p.purchaseCode}
                           </h3>
                           <div className="flex flex-wrap items-center gap-2 text-sm">
                             <span className="inline-flex items-center gap-1 text-slate-700">
@@ -396,15 +407,6 @@ const UpdateShipmentCodeList = () => {
                             </span>
                           </div>
                         </div>
-                        {isCompleted ? (
-                          <div className="flex h-8 items-center rounded-md bg-emerald-50 px-2.5">
-                            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                          </div>
-                        ) : (
-                          <div className="flex h-8 items-center rounded-md bg-red-50 px-2.5">
-                            <AlertTriangle className="h-4 w-4 text-red-600" />
-                          </div>
-                        )}
                       </div>
 
                       <div className="flex items-center justify-between gap-2">
@@ -413,8 +415,8 @@ const UpdateShipmentCodeList = () => {
                             <span
                               className={`inline-flex items-center rounded px-2 py-1 text-xs font-medium ${
                                 isAuction
-                                  ? "bg-purple-50 text-purple-700"
-                                  : "bg-blue-50 text-blue-700"
+                                  ? "bg-gray-100 text-black-800 border border-yellow-300"
+                                  : "bg-gray-100 text-black-700 border border-blue-300"
                               }`}
                             >
                               {purchaseStatusLabel(status)}
@@ -425,18 +427,18 @@ const UpdateShipmentCodeList = () => {
                           (isAuction ? (
                             <button
                               onClick={() => openAuctionModal(p)}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-700"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-yellow-600 transition-colors"
                             >
                               <Truck className="h-3.5 w-3.5" />
-                              Cập nhật vận chuyển
+                              Update shipping
                             </button>
                           ) : (
                             <button
                               onClick={() => openShipmentModal(p)}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
                             >
                               <Package className="h-3.5 w-3.5" />
-                              Nhập mã vận đơn
+                              Update shipment
                             </button>
                           ))}
                       </div>
@@ -444,10 +446,33 @@ const UpdateShipmentCodeList = () => {
 
                     {/* Card Body */}
                     <div className="flex-1 p-5">
+                      {/* 🔥 Purchase Image Card */}
+                      {p.purchaseImage && (
+                        <div className="mb-4 rounded-lg border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-3">
+                          <div className="flex items-center gap-2 mb-2">
+                            <ImageIcon className="h-4 w-4 text-slate-500" />
+                          </div>
+                          <div className="flex justify-center">
+                            <img
+                              src={p.purchaseImage}
+                              alt="Purchase"
+                              className="h-32 w-32 rounded-lg border-2 border-slate-200 object-cover shadow-sm hover:scale-105 transition-transform cursor-pointer"
+                              onError={(e) => {
+                                e.target.parentElement.parentElement.style.display =
+                                  "none";
+                              }}
+                              onClick={() =>
+                                window.open(p.purchaseImage, "_blank")
+                              }
+                            />
+                          </div>
+                        </div>
+                      )}
+                      {/* Links */}
                       {links.length === 0 ? (
                         <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-slate-200 p-6 text-center">
                           <p className="text-sm text-slate-500">
-                            Không có link chờ xử lý
+                            No pending links.
                           </p>
                         </div>
                       ) : (
@@ -455,7 +480,7 @@ const UpdateShipmentCodeList = () => {
                           {links.map((l) => (
                             <div
                               key={l.linkId}
-                              className="rounded-lg border border-slate-300 bg-slate-50 p-4"
+                              className="rounded-lg border border-slate-300 bg-slate-50 p-4 hover:bg-white transition-colors"
                             >
                               <div className="mb-2 flex items-start justify-between gap-3">
                                 <h4 className="text-sm font-medium text-slate-900 line-clamp-2">
@@ -472,46 +497,124 @@ const UpdateShipmentCodeList = () => {
                                 )}
                               </div>
 
-                              <div className="space-y-1.5 text-xs text-slate-600">
+                              <div className="space-y-1.5 text-xl text-black font-semibold">
+                                {/* Hàng 1: icon + website */}
                                 <div className="flex items-center gap-1.5">
-                                  <Globe className="h-3.5 w-3.5 text-slate-400" />
+                                  <Globe className="h-4 w-4 text-black" />
                                   <span>{l.website}</span>
-                                  <span className="text-slate-400">-</span>
-                                  <span>SL: {l.quantity}</span>
+                                </div>
+
+                                {/* Hàng 2: separator + quantity */}
+                                <div className="flex items-center gap-1.5">
+                                  <span>Qty: {l.quantity}</span>
                                 </div>
 
                                 {l.classify && (
-                                  <div className="text-xs text-slate-600">
-                                    Phân loại: {l.classify}
-                                  </div>
+                                  <div>Category: {l.classify}</div>
                                 )}
 
                                 <div className="flex items-start gap-1.5">
-                                  <span className="text-slate-500">
-                                    Tracking:
-                                  </span>
-                                  <span className="flex-1 font-mono text-xs">
-                                    {l.trackingCode || "-"}
+                                  <span>OrderCode:</span>
+                                  <span className="flex-1">
+                                    {p.orderCode || "-"}
                                   </span>
                                 </div>
 
                                 <div className="flex items-start gap-1.5">
-                                  <span className="text-slate-500">
-                                    Mã vận đơn:
-                                  </span>
+                                  <span>Shipment:</span>
                                   <span
-                                    className={`flex-1 font-mono text-xs ${
+                                    className={`flex-1 font-mono ${
                                       l.shipmentCode?.trim()
-                                        ? "text-blue-700 font-medium"
+                                        ? "text-green-700"
                                         : "text-slate-400"
                                     }`}
                                   >
-                                    {l.shipmentCode?.trim() || "Chưa có"}
+                                    {l.shipmentCode?.trim() ||
+                                      "Not assigned yet"}
                                   </span>
                                 </div>
                               </div>
                             </div>
                           ))}
+                        </div>
+                      )}
+                      {/* /* 🔥 Staff Info Card */}
+                      <div className="mt-4"></div>
+                      {p.staff && (
+                        <div className="mb-4 rounded-lg border border-slate-300 bg-slate-100 p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <User className="h-4 w-4 text-black" />
+                            <span className="text-xl font-semibold text-black">
+                              Staff Information
+                            </span>
+                          </div>
+                          <div className="space-y-2 text-xl font-semibold text-black">
+                            {p.staff.name && (
+                              <div className="flex items-center justify-between">
+                                <span>Name:</span>
+                                <span>{p.staff.name}</span>
+                              </div>
+                            )}
+                            {p.staff.staffCode && (
+                              <div className="flex items-center justify-between">
+                                <span>Staff Code:</span>
+                                <span>{p.staff.staffCode}</span>
+                              </div>
+                            )}
+                            {p.staff.username && (
+                              <div className="flex items-center justify-between">
+                                <span>Username:</span>
+                                <span>{p.staff.username}</span>
+                              </div>
+                            )}
+                            {p.staff.email && (
+                              <div className="flex items-start justify-between gap-2">
+                                <span>Email:</span>
+                                <span className="text-right break-all">
+                                  {p.staff.email}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {/* 🔥 Customer Info Card */}
+                      {customer.name && (
+                        <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <User className="h-4 w-4 text-black" />
+                            <span className="text-xl font-semibold text-black">
+                              Customer Information
+                            </span>
+                          </div>
+                          <div className="space-y-2 text-xl font-semibold text-black">
+                            {customer.name && (
+                              <div className="flex items-center justify-between">
+                                <span>Name:</span>
+                                <span>{customer.name}</span>
+                              </div>
+                            )}
+                            {customer.customerCode && (
+                              <div className="flex items-center justify-between">
+                                <span>Customer Code:</span>
+                                <span>{customer.customerCode}</span>
+                              </div>
+                            )}
+                            {customer.username && (
+                              <div className="flex items-center justify-between">
+                                <span>Username:</span>
+                                <span>{customer.username}</span>
+                              </div>
+                            )}
+                            {customer.email && (
+                              <div className="flex items-start justify-between gap-2">
+                                <span>Email:</span>
+                                <span className="text-right break-all">
+                                  {customer.email}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -523,8 +626,8 @@ const UpdateShipmentCodeList = () => {
             {/* Pagination */}
             <div className="mt-6 flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3">
               <div className="text-sm text-slate-600">
-                Hiển thị <span className="font-medium">{items.length}</span> kết
-                quả
+                Showing <span className="font-medium">{items.length}</span>{" "}
+                result(s)
               </div>
 
               <div className="flex items-center gap-2">
@@ -532,7 +635,7 @@ const UpdateShipmentCodeList = () => {
                   onClick={() => setPage(0)}
                   disabled={!hasPrev || loading}
                   className="rounded-md p-1.5 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent"
-                  title="Trang đầu"
+                  title="First page"
                 >
                   <ChevronsLeft className="h-5 w-5" />
                 </button>
@@ -540,20 +643,20 @@ const UpdateShipmentCodeList = () => {
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={!hasPrev || loading}
                   className="rounded-md p-1.5 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent"
-                  title="Trang trước"
+                  title="Previous page"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
 
                 <div className="mx-2 flex h-8 min-w-[80px] items-center justify-center rounded-md bg-slate-50 px-3 text-sm font-medium text-slate-700">
-                  Trang {page + 1}
+                  Page {page + 1}
                 </div>
 
                 <button
                   onClick={() => setPage((p) => p + 1)}
                   disabled={!hasNext || loading}
                   className="rounded-md p-1.5 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent"
-                  title="Trang sau"
+                  title="Next page"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>
@@ -563,7 +666,7 @@ const UpdateShipmentCodeList = () => {
                   }}
                   disabled={!hasNext || !data?.totalPages}
                   className="rounded-md p-1.5 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent"
-                  title="Trang cuối"
+                  title="Last page"
                 >
                   <ChevronsRight className="h-5 w-5" />
                 </button>
@@ -574,9 +677,9 @@ const UpdateShipmentCodeList = () => {
                     onChange={(e) => setSize(Number(e.target.value))}
                     className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
-                    <option value={10}>10 / trang</option>
-                    <option value={20}>20 / trang</option>
-                    <option value={50}>50 / trang</option>
+                    <option value={10}>10 / page</option>
+                    <option value={20}>20 / page</option>
+                    <option value={50}>50 / page</option>
                   </select>
                 </div>
               </div>

@@ -10,12 +10,39 @@ const BankOrderList = ({
   label = "Chọn tài khoản thanh toán (Proxy)",
   onLoadingChange,
   onAccountsChange,
+  autoSelectFirst = false,
+  cachedAccounts = [], // ✅ THÊM: Nhận cached data từ parent
+  initialLoading = false, // ✅ THÊM: Loading state từ parent
 }) => {
-  const [loading, setLoading] = useState(false);
-  const [accounts, setAccounts] = useState([]);
+  const [loading, setLoading] = useState(initialLoading);
+  const [accounts, setAccounts] = useState(cachedAccounts);
   const [error, setError] = useState("");
 
+  // ✅ THÊM: Sync với cached accounts từ parent
+  useEffect(() => {
+    if (cachedAccounts && cachedAccounts.length > 0) {
+      setAccounts(cachedAccounts);
+      onAccountsChange?.(cachedAccounts);
+
+      // Auto-select nếu cần
+      if (autoSelectFirst && !value) {
+        onChange?.(String(cachedAccounts[0].id));
+      }
+    }
+  }, [cachedAccounts]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ✅ THÊM: Sync loading state từ parent
+  useEffect(() => {
+    setLoading(initialLoading);
+    onLoadingChange?.(initialLoading);
+  }, [initialLoading]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const fetchAccounts = async () => {
+    // ✅ SỬA: Nếu đã có cached data, không cần fetch lại
+    if (cachedAccounts && cachedAccounts.length > 0) {
+      return;
+    }
+
     try {
       setLoading(true);
       onLoadingChange?.(true);
@@ -24,6 +51,10 @@ const BankOrderList = ({
       const arr = Array.isArray(data) ? data : [];
       setAccounts(arr);
       onAccountsChange?.(arr);
+
+      if (autoSelectFirst && arr.length > 0 && !value) {
+        onChange?.(String(arr[0].id));
+      }
     } catch (e) {
       const msg =
         e?.response?.data?.message ||
@@ -91,7 +122,7 @@ const BankOrderList = ({
           aria-invalid={Boolean(error)}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
         >
-          <option value=""> Chưa chọn tài khoản </option>
+          <option value="">Chưa chọn tài khoản</option>
           {accounts.map((acc) => {
             const optionValue = String(acc.id);
             const holder = acc.accountHolder || "Chưa rõ tên";

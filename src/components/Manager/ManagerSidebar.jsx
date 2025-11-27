@@ -71,7 +71,7 @@ const ManagerSidebar = () => {
       title: t("pages"),
       items: [
         {
-          text: t("Báo giá"),
+          text: t("Xác nhận đơn hàng"),
           icon: <FileText />,
           path: "/manager/quote",
         },
@@ -92,8 +92,11 @@ const ManagerSidebar = () => {
           isOpen: openCost,
           onToggle: () => setOpenCost(!openCost),
           submenuItems: [
-            { text: t("paylater"), path: "/manager/cost/paylater" },
-            { text: t("paybefore"), path: "/manager/cost/paybefore" },
+            { text: t("Tài khoản ngân hàng"), path: "/manager/cost/paylater" },
+            {
+              text: t("Thanh toán khách hàng"),
+              path: "/manager/cost/paybefore",
+            },
           ],
         },
         {

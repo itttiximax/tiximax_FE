@@ -13,15 +13,53 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
     if (!v) return "-";
     const d = new Date(v);
     if (Number.isNaN(d.getTime())) return "-";
-    return d.toLocaleString("vi-VN", {
+    return d.toLocaleString("en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
     });
   };
 
+  // Normalize backend Vietnamese to English status codes
+  const normalizeStatusCode = (rawStatus) => {
+    if (!rawStatus) return null;
+    const s = String(rawStatus).toUpperCase().trim();
+
+    const map = {
+      DA_NHAP_KHO: "STORED",
+      DANG_DONG_GOI: "PACKED",
+      DA_HOAN_THANH: "DONE",
+
+      READY: "READY",
+      PENDING: "PENDING",
+      STORED: "STORED",
+      PACKED: "PACKED",
+      ERROR: "ERROR",
+      DONE: "DONE",
+    };
+
+    return map[s] || s;
+  };
+
+  // Display readable English labels
+  const displayStatus = (rawStatus) => {
+    const code = normalizeStatusCode(rawStatus);
+
+    const labelMap = {
+      READY: "Ready",
+      PENDING: "Pending",
+      STORED: "Stored in Warehouse",
+      PACKED: "Packed",
+      ERROR: "Error",
+      DONE: "Completed",
+    };
+
+    return labelMap[code] || "Unknown";
+  };
+
   const statusBadge = useMemo(() => {
-    const s = (detail?.status || "").toUpperCase();
+    const code = normalizeStatusCode(detail?.status);
+
     const map = {
       READY: "bg-blue-100 text-blue-700 ring-blue-200",
       PENDING: "bg-amber-100 text-amber-700 ring-amber-200",
@@ -30,7 +68,8 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
       ERROR: "bg-red-100 text-red-700 ring-red-200",
       DONE: "bg-emerald-100 text-emerald-700 ring-emerald-200",
     };
-    return map[s] || "bg-gray-100 text-gray-700 ring-gray-200";
+
+    return map[code] || "bg-gray-100 text-gray-700 ring-gray-200";
   }, [detail]);
 
   const fetchDetail = async () => {
@@ -42,7 +81,7 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
       setDetail(data);
     } catch {
       setDetail(null);
-      setErr("Không thể tải chi tiết kho hàng.");
+      setErr("Failed to load warehouse details.");
     } finally {
       setLoading(false);
     }
@@ -50,7 +89,6 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
 
   useEffect(() => {
     fetchDetail();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, warehouseId]);
 
   useEffect(() => {
@@ -71,15 +109,15 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
     >
       <div
         ref={cardRef}
-        className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5"
+        className="w-full max-w-3xl max-h-[90vh] overflow-y-auto overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 sticky top-0 bg-white z-10">
           <div>
             <div className="mt-0.5 flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-semibold text-gray-900">
-                Chi tiết kho hàng
+                Warehouse Details
               </h2>
             </div>
           </div>
@@ -87,9 +125,9 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="rounded-lg p-1.5 text-red-400 hover:bg-gray-100 hover:text-gray-600"
-              title="Đóng"
-              aria-label="Đóng"
+              className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              title="Close"
+              aria-label="Close"
             >
               <X className="h-6 w-6" />
             </button>
@@ -99,7 +137,6 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
         {/* Body */}
         <div className="bg-gray-50/60 px-5 py-4">
           {loading ? (
-            // Skeleton loading
             <div className="space-y-4">
               <div className="h-4 w-40 animate-pulse rounded bg-gray-200" />
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -123,16 +160,53 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
                     <span
                       className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold shadow-sm ring-1 ${statusBadge}`}
                     >
-                      {detail.status || "UNKNOWN"}
+                      {displayStatus(detail.status)}
                     </span>
                   </div>
                   <div className="text-xs text-gray-500">
-                    Tạo lúc:{" "}
+                    Created at:{" "}
                     <span className="font-medium text-gray-700">
                       {formatDate(detail.createdAt)}
                     </span>
                   </div>
                 </div>
+
+                {/* Images */}
+                {(detail.image || detail.imageCheck) && (
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                    {detail.image && (
+                      <div className="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-100">
+                        <div className="text-xs font-medium text-gray-500 mb-2">
+                          Warehouse Image
+                        </div>
+                        <img
+                          src={detail.image}
+                          alt="Warehouse"
+                          className="w-full h-48 object-cover rounded-lg border border-gray-200"
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {detail.imageCheck && (
+                      <div className="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-100">
+                        <div className="text-xs font-medium text-gray-500 mb-2">
+                          Check Image
+                        </div>
+                        <img
+                          src={detail.imageCheck}
+                          alt="Check"
+                          className="w-full h-48 object-cover rounded-lg border border-gray-200"
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Meta info */}
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -147,7 +221,7 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
 
                   <div className="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-100">
                     <div className="text-xs font-medium text-gray-500">
-                      Mã đơn
+                      Order Code
                     </div>
                     <div className="mt-1 text-sm font-semibold text-gray-900">
                       {detail.orderCode || "-"}
@@ -156,7 +230,7 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
 
                   <div className="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-100">
                     <div className="text-xs font-medium text-gray-500">
-                      Cân nặng (Gross)
+                      Weight (Gross)
                     </div>
                     <div className="mt-1 text-sm font-semibold text-gray-900">
                       {detail.weight != null ? `${detail.weight} kg` : "-"}
@@ -165,7 +239,7 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
 
                   <div className="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-100">
                     <div className="text-xs font-medium text-gray-500">
-                      TL thực (Net)
+                      Weight (Net)
                     </div>
                     <div className="mt-1 text-sm font-semibold text-gray-900">
                       {detail.netWeight != null
@@ -173,26 +247,57 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
                         : "-"}
                     </div>
                   </div>
+                </div>
 
-                  <div className="md:col-span-2 rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-100">
+                {/* Dimensions - Detailed */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-100">
                     <div className="text-xs font-medium text-gray-500">
-                      Kích thước (Dim)
+                      Length
                     </div>
                     <div className="mt-1 text-sm font-semibold text-gray-900">
-                      {detail.dim || "-"}
+                      {detail.length != null ? `${detail.length} cm` : "-"}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-100">
+                    <div className="text-xs font-medium text-gray-500">
+                      Width
+                    </div>
+                    <div className="mt-1 text-sm font-semibold text-gray-900">
+                      {detail.width != null ? `${detail.width} cm` : "-"}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-100">
+                    <div className="text-xs font-medium text-gray-500">
+                      Height
+                    </div>
+                    <div className="mt-1 text-sm font-semibold text-gray-900">
+                      {detail.height != null ? `${detail.height} cm` : "-"}
                     </div>
                   </div>
                 </div>
 
-                {/* Note */}
+                {/* Volume */}
+                <div className="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-100">
+                  <div className="text-xs font-medium text-gray-500">
+                    Volume (CBM)
+                  </div>
+                  <div className="mt-1 text-sm font-semibold text-gray-900">
+                    {detail.dim != null ? `${detail.dim} m³` : "-"}
+                  </div>
+                </div>
+
+                {/* Notes */}
                 <div className="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-100">
                   <div className="flex items-center justify-between">
                     <div className="text-xs font-medium text-gray-500">
-                      Ghi chú
+                      Notes
                     </div>
                   </div>
                   <div className="mt-1 text-sm text-gray-800 whitespace-pre-line">
-                    {detail.note || "Không có ghi chú"}
+                    {detail.note || "No notes"}
                   </div>
                 </div>
               </div>

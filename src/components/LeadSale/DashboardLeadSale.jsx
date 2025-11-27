@@ -32,31 +32,31 @@ import {
 const DashboardLeadSale = () => {
   const COMPACT = true;
 
-  // ===== Data =====
+  // ===== Summary stats =====
   const stats = [
     {
-      title: "Tổng Leads",
+      title: "Total Leads",
       value: "1,245",
       change: "+15%",
       positive: true,
       gradient: "from-blue-500 to-cyan-500",
     },
     {
-      title: "Tỷ lệ Chuyển đổi",
+      title: "Conversion Rate",
       value: "28.5%",
       change: "+3.2%",
       positive: true,
       gradient: "from-emerald-500 to-teal-500",
     },
     {
-      title: "Doanh thu Tháng",
+      title: "Monthly Revenue",
       value: "$89,750",
       change: "+22%",
       positive: true,
       gradient: "from-violet-500 to-purple-500",
     },
     {
-      title: "Deals Đóng",
+      title: "Closed Deals",
       value: "156",
       change: "+8",
       positive: true,
@@ -65,6 +65,7 @@ const DashboardLeadSale = () => {
   ];
   const statIcons = [Target, TrendingUp, DollarSign, Award];
 
+  // ===== Data =====
   const leadsBySource = [
     { source: "Website", leads: 420, value: 45000 },
     { source: "Facebook", leads: 380, value: 32000 },
@@ -99,17 +100,17 @@ const DashboardLeadSale = () => {
   const recentActivities = [
     {
       id: 1,
-      action: "New Lead: Công ty ABC",
+      action: "New Lead: ABC Company",
       source: "Website",
-      time: "5 phút trước",
+      time: "5 minutes ago",
       type: "lead",
       value: "$2,500",
     },
     {
       id: 2,
-      action: "Deal Closed: Startup Tech",
+      action: "Deal Closed: Tech Startup",
       source: "Facebook",
-      time: "15 phút trước",
+      time: "15 minutes ago",
       type: "deal",
       value: "$12,500",
     },
@@ -117,7 +118,7 @@ const DashboardLeadSale = () => {
       id: 3,
       action: "Qualified Lead: XYZ Corp",
       source: "LinkedIn",
-      time: "45 phút trước",
+      time: "45 minutes ago",
       type: "qualified",
       value: "$8,000",
     },
@@ -125,28 +126,28 @@ const DashboardLeadSale = () => {
       id: 4,
       action: "Proposal Sent: DEF Solutions",
       source: "Email",
-      time: "2 giờ trước",
+      time: "2 hours ago",
       type: "proposal",
       value: "$15,000",
     },
     {
       id: 5,
-      action: "Follow-up: GHI Industries",
+      action: "Follow-up Call: GHI Industries",
       source: "Referral",
-      time: "3 giờ trước",
+      time: "3 hours ago",
       type: "followup",
       value: "$5,500",
     },
   ];
 
   const topPerformers = [
-    { name: "Nguyễn Văn A", deals: 42, revenue: 125000, conversion: 32 },
-    { name: "Trần Thị B", deals: 38, revenue: 118000, conversion: 29 },
-    { name: "Lê Văn C", deals: 35, revenue: 95000, conversion: 28 },
-    { name: "Phạm Thị D", deals: 31, revenue: 89000, conversion: 25 },
+    { name: "Nguyen Van A", deals: 42, revenue: 125000, conversion: 32 },
+    { name: "Tran Thi B", deals: 38, revenue: 118000, conversion: 29 },
+    { name: "Le Van C", deals: 35, revenue: 95000, conversion: 28 },
+    { name: "Pham Thi D", deals: 31, revenue: 89000, conversion: 25 },
   ];
 
-  // ===== Compact sizes =====
+  // ===== Layout sizes =====
   const chartHBig = COMPACT ? 240 : 350;
   const chartHPie = COMPACT ? 220 : 320;
   const chartHLine = COMPACT ? 220 : 300;
@@ -154,11 +155,11 @@ const DashboardLeadSale = () => {
   const titleText = COMPACT ? "text-xl" : "text-2xl";
   const headerH1 = COMPACT ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl";
   const cardPad = COMPACT ? "p-4" : "p-6";
-  const outerPad = COMPACT ? "p-4 sm:p-5 lg:p-6" : "p-4 sm:p-6 lg:p-8";
+  const outerPad = COMPACT ? "px-4 py-6" : "px-4 py-8";
   const rounder = COMPACT ? "rounded-2xl" : "rounded-3xl";
   const gapMain = COMPACT ? "gap-4" : "gap-6";
 
-  // ===== Tooltips (compact) =====
+  // ===== Tooltips =====
   const CustomBarTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
@@ -206,9 +207,7 @@ const DashboardLeadSale = () => {
   };
 
   return (
-    <div
-      className={`min-h-screen bg-gradient-to-br from-slate-50 p-4 ${outerPad} font-sans`}
-    >
+    <div className={`min-h-screen  ${outerPad} font-sans`}>
       <div className="max-w-[1600px] mx-auto space-y-5">
         {/* Header */}
         <div
@@ -220,15 +219,12 @@ const DashboardLeadSale = () => {
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h1 className={`${headerH1} font-black text-white mb-1`}>
-                  Lead Sale Dashboard
+                  Lead Sales Dashboard
                 </h1>
-                <p className="text-blue-100 text-xs sm:text-sm">
-                  Tổng quan hiệu suất bán hàng • Cập nhật realtime
-                </p>
               </div>
               <div className="hidden lg:flex items-center gap-2 bg-white/20 backdrop-blur-xl px-4 py-2 rounded-xl">
                 <span className="text-white text-xs font-medium">
-                  Tháng 10, 2024
+                  October 2024
                 </span>
               </div>
             </div>
@@ -281,7 +277,7 @@ const DashboardLeadSale = () => {
         <div className={`grid grid-cols-1 lg:grid-cols-3 ${gapMain}`}>
           {/* Leads by Source */}
           <div
-            className={`lg:col-span-2 bg-white/95 backdrop-blur-xl ${rounder} ${cardPad} sm:p-6 shadow-xl border border-gray-100`}
+            className={`lg:col-span-2 bg-white ${rounder} ${cardPad} sm:p-6 shadow-xl border border-gray-100`}
           >
             <div className="flex items-center justify-between mb-4">
               <h2
@@ -325,7 +321,7 @@ const DashboardLeadSale = () => {
                   dataKey="value"
                   fill="url(#revenueGradient)"
                   radius={[6, 6, 0, 0]}
-                  name="Revenue ($)"
+                  name="Revenue (USD)"
                 />
                 <defs>
                   <linearGradient
@@ -355,7 +351,7 @@ const DashboardLeadSale = () => {
 
           {/* Conversion Funnel */}
           <div
-            className={`bg-white/95 backdrop-blur-xl ${rounder} ${cardPad} shadow-xl border border-gray-100`}
+            className={`bg-white ${rounder} ${cardPad} shadow-xl border border-gray-100`}
           >
             <h2 className={`${titleText} font-bold text-gray-900 mb-4`}>
               Conversion Funnel
@@ -413,7 +409,7 @@ const DashboardLeadSale = () => {
 
         {/* Monthly Performance */}
         <div
-          className={`bg-white/95 backdrop-blur-xl ${rounder} ${cardPad} sm:p-6 shadow-xl border border-gray-100`}
+          className={`bg-white ${rounder} ${cardPad} sm:p-6 shadow-xl border border-gray-100`}
         >
           <div className="flex items-center justify-between mb-4">
             <h2 className={`${titleText} font-bold text-gray-900`}>
@@ -469,7 +465,7 @@ const DashboardLeadSale = () => {
         <div className={`grid grid-cols-1 lg:grid-cols-2 ${gapMain}`}>
           {/* Recent Activities */}
           <div
-            className={`bg-white/95 backdrop-blur-xl ${rounder} ${cardPad} shadow-xl border border-gray-100`}
+            className={`bg-white ${rounder} ${cardPad} shadow-xl border border-gray-100`}
           >
             <h2 className={`${titleText} font-bold text-gray-900 mb-4`}>
               Recent Activities
@@ -536,7 +532,7 @@ const DashboardLeadSale = () => {
 
           {/* Top Performers */}
           <div
-            className={`bg-white/95 backdrop-blur-xl ${rounder} ${cardPad} shadow-xl border border-gray-100`}
+            className={`bg-white ${rounder} ${cardPad} shadow-xl border border-gray-100`}
           >
             <h2 className={`${titleText} font-bold text-gray-900 mb-4`}>
               Top Performers
@@ -582,7 +578,7 @@ const DashboardLeadSale = () => {
                         </span>
                         <span className="text-[11px] text-gray-400">•</span>
                         <span className="text-[11px] text-gray-600">
-                          {performer.conversion}% rate
+                          {performer.conversion}% conversion rate
                         </span>
                       </div>
                     </div>
@@ -598,7 +594,7 @@ const DashboardLeadSale = () => {
           </div>
         </div>
 
-        {/* defs gradients for Bar (fallback for non-inline defs) */}
+        {/* Fallback gradients (if needed) */}
         <svg width="0" height="0" style={{ position: "absolute" }}>
           <defs>
             <linearGradient id="leadsGradient" x1="0" y1="0" x2="0" y2="1">

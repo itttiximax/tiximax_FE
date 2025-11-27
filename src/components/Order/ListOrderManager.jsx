@@ -18,6 +18,7 @@ import {
 import toast from "react-hot-toast";
 import createOrderPaymentService from "../../Services/Payment/createOrderPaymentService";
 import DetailPaymentOrder from "../PaymentOrder/DetailPaymentOrder";
+
 const ListOrderManager = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -34,7 +35,7 @@ const ListOrderManager = () => {
     last: true,
   });
 
-  // 👉 state dialog thanh toán
+  // State dialog thanh toán
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [selectedPaymentCode, setSelectedPaymentCode] = useState(null);
 
@@ -55,10 +56,17 @@ const ListOrderManager = () => {
       textColor: "text-orange-700",
       borderColor: "border-orange-500",
     },
-
+    {
+  key: " DAU_GIA_THANH_CONG",
+  label: "Đấu giá thành công",
+  color: "purple",
+  bgColor: "bg-purple-50",
+  textColor: "text-purple-700",
+  borderColor: "border-purple-500",
+  },
     {
       key: "DA_DU_HANG",
-      label: "Đã đủ hàng",
+      label: "Đã đủ đơn",
       color: "blue",
       bgColor: "bg-blue-50",
       textColor: "text-blue-700",
@@ -176,23 +184,45 @@ const ListOrderManager = () => {
     return texts[type] || type;
   };
 
-  const filteredOrders = orders
-    .filter((order) =>
-      searchTerm
-        ? order.orderCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          order.customer?.name
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          order.customer?.customerCode
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase())
-        : true
-    )
-    .filter((order) =>
-      filterDate
-        ? new Date(order.createdAt).toISOString().slice(0, 10) === filterDate
-        : true
-    );
+  // Filter orders - Tìm kiếm trên nhiều trường
+  const filteredOrders = orders.filter((order) => {
+    // Filter by search term (tìm kiếm chung)
+    if (searchTerm) {
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      const matchesOrderCode = order.orderCode
+        ?.toLowerCase()
+        .includes(lowerSearchTerm);
+      const matchesCustomerCode = order.customer?.customerCode
+        ?.toLowerCase()
+        .includes(lowerSearchTerm);
+      const matchesCustomerName = order.customer?.name
+        ?.toLowerCase()
+        .includes(lowerSearchTerm);
+      const matchesPaymentCode = order.paymentCode
+        ?.toLowerCase()
+        .includes(lowerSearchTerm);
+
+      // Nếu không match bất kỳ trường nào thì filter ra
+      if (
+        !matchesOrderCode &&
+        !matchesCustomerCode &&
+        !matchesCustomerName &&
+        !matchesPaymentCode
+      ) {
+        return false;
+      }
+    }
+
+    // Filter by Date
+    if (
+      filterDate &&
+      new Date(order.createdAt).toISOString().slice(0, 10) !== filterDate
+    ) {
+      return false;
+    }
+
+    return true;
+  });
 
   const handlePageSizeChange = (e) => {
     const newSize = parseInt(e.target.value);
@@ -200,9 +230,15 @@ const ListOrderManager = () => {
     fetchOrders(0, newSize);
   };
 
+  // Xóa tất cả filters
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setFilterDate("");
+  };
+
   const currentTab = tabs.find((tab) => tab.key === activeTab);
 
-  // 👉 Mở dialog thanh toán
+  // Mở dialog thanh toán
   const openPaymentDialog = (order) => {
     if (!order.paymentCode) {
       toast.error("Đơn hàng này chưa có mã thanh toán");
@@ -212,7 +248,7 @@ const ListOrderManager = () => {
     setIsPaymentDialogOpen(true);
   };
 
-  // 👉 Đóng dialog
+  // Đóng dialog
   const closePaymentDialog = () => {
     setIsPaymentDialogOpen(false);
     setSelectedPaymentCode(null);
@@ -267,47 +303,77 @@ const ListOrderManager = () => {
 
         {/* Controls */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
-          <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-3 flex-1">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm mã đơn, khách hàng..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:border-black focus:ring-0"
-                />
-              </div>
-
-              <div className="relative">
-                <Calendar className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="date"
-                  value={filterDate}
-                  onChange={(e) => setFilterDate(e.target.value)}
-                  className="pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:border-black focus:ring-0"
-                />
-              </div>
-
-              <select
-                value={pagination.pageSize}
-                onChange={handlePageSizeChange}
-                disabled={loading}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-              >
-                <option value={10}>10 / trang</option>
-                <option value={15}>15 / trang</option>
-                <option value={20}>20 / trang</option>
-                <option value={30}>30 / trang</option>
-                <option value={50}>50 / trang</option>
-              </select>
+          <div className="flex flex-col gap-3">
+            {/* Search Box - Tìm kiếm chung */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm theo mã đơn, mã KH, tên KH, mã thanh toán..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none text-sm transition-all"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
 
-            <div className="text-sm text-gray-600">
-              Tổng:{" "}
-              <span className="font-semibold">{pagination.totalElements}</span>{" "}
-              đơn
+            {/* Date Filter, Page Size and Stats */}
+            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative">
+                  <Calendar className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="date"
+                    value={filterDate}
+                    onChange={(e) => setFilterDate(e.target.value)}
+                    className="pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+                  />
+                </div>
+
+                <select
+                  value={pagination.pageSize}
+                  onChange={handlePageSizeChange}
+                  disabled={loading}
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                >
+                  <option value={10}>10 / trang</option>
+                  <option value={15}>15 / trang</option>
+                  <option value={20}>20 / trang</option>
+                  <option value={30}>30 / trang</option>
+                  <option value={50}>50 / trang</option>
+                </select>
+
+                {/* Clear Filters Button */}
+                {(searchTerm || filterDate) && (
+                  <button
+                    onClick={handleClearFilters}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                    Xóa bộ lọc
+                  </button>
+                )}
+              </div>
+
+              <div className="text-sm text-gray-600">
+                Tổng:{" "}
+                <span className="font-semibold">
+                  {pagination.totalElements}
+                </span>{" "}
+                đơn
+                {filteredOrders.length !== orders.length && (
+                  <span className="ml-2 text-blue-600">
+                    (Hiển thị: {filteredOrders.length})
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -330,8 +396,8 @@ const ListOrderManager = () => {
               Không có đơn hàng nào
             </h3>
             <p className="text-gray-500 text-sm">
-              {searchTerm
-                ? "Không tìm thấy kết quả phù hợp."
+              {searchTerm || filterDate
+                ? "Không tìm thấy kết quả phù hợp với bộ lọc."
                 : `Chưa có đơn hàng ${currentTab?.label.toLowerCase()}.`}
             </p>
           </div>
@@ -371,14 +437,14 @@ const ListOrderManager = () => {
                             {getOrderTypeText(order.orderType)}
                           </span>
                         </h3>
-                        <div className="text-2xs text-black-600 mt-1">
+                        <div className="text-xs text-gray-600 mt-1">
                           {formatDate(order.createdAt)}
                         </div>
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <div className="text-xl font-medium text-black-500">
+                      <div className="text-xs font-medium text-gray-500">
                         Tổng tiền
                       </div>
                       <div className="text-base font-bold text-gray-900">
@@ -393,11 +459,11 @@ const ListOrderManager = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {/* Customer Info */}
                     <div className="space-y-2">
-                      <h4 className="text-sx font-medium text-black-700 flex items-center gap-1.5 mb-2">
+                      <h4 className="text-sm font-medium text-gray-700 flex items-center gap-1.5 mb-2">
                         <User className="w-4 h-4 text-blue-600" />
                         Thông tin khách hàng
                       </h4>
-                      <div className="bg-gray-100 rounded-lg p-3 space-y-2">
+                      <div className="bg-gray-50 rounded-lg p-3 space-y-2">
                         <div className="flex items-center gap-2">
                           <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">
                             {order.customer?.customerCode || "N/A"}
@@ -412,7 +478,7 @@ const ListOrderManager = () => {
                           </div>
                         </div>
                         {order.customer?.email && (
-                          <div className="flex items-center gap-2 text-sm text-black-600">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Mail className="w-4 h-4 text-gray-500" />
                             <span className="text-xs">
                               {order.customer.email}
@@ -420,7 +486,7 @@ const ListOrderManager = () => {
                           </div>
                         )}
                         {order.customer?.phone && (
-                          <div className="flex items-center gap-2 text-sm text-black-600">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Phone className="w-4 h-4 text-gray-500" />
                             <span className="text-xs font-medium">
                               {order.customer.phone}
@@ -436,19 +502,19 @@ const ListOrderManager = () => {
                         <FileText className="w-4 h-4 text-green-600" />
                         Chi tiết đơn hàng
                       </h4>
-                      <div className="bg-gray-100 rounded-lg p-3 space-y-2 text-sm">
+                      <div className="bg-gray-50 rounded-lg p-3 space-y-2 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-black-600 ">Tổng tiền:</span>
+                          <span className="text-gray-600">Tổng tiền:</span>
                           <span className="font-medium text-gray-900">
-                            {order.finalPriceOrder?.toLocaleString() || "N/A"}
+                            {formatCurrency(order.finalPriceOrder)} ₫
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-black-600">
+                          <span className="text-gray-600">
                             Tổng trọng lượng:
                           </span>
                           <span className="font-medium text-gray-900">
-                            {formatCurrency(order.totalNetWeight)} kg
+                            {order.totalWeight} kg
                           </span>
                         </div>
                         {order.paymentCode && (
@@ -548,7 +614,7 @@ const ListOrderManager = () => {
         )}
       </div>
 
-      {/* 👉 Dialog thanh toán */}
+      {/* Dialog thanh toán */}
       {isPaymentDialogOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"

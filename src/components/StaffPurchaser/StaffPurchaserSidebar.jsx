@@ -35,44 +35,45 @@ const StaffPurchaserSidebar = () => {
 
     fetchProfile();
   }, []);
+
   const menuItems = [
     {
-      section: "NHÂN VIÊN MUA HÀNG",
+      section: "PURCHASING STAFF",
       items: [
         {
           to: "/staff-purchaser/dashboard",
           icon: LayoutDashboard,
-          label: "Tổng quan",
+          label: "Dashboard",
         },
         {
           to: "/staff-purchaser/orders",
           icon: Package,
-          label: "Đơn hàng mua hộ",
+          label: "Purchase Orders",
         },
         {
           to: "/staff-purchaser/auction",
           icon: Landmark,
-          label: "Đơn hàng đấu giá",
+          label: "Auction Orders",
         },
         {
           to: "/staff-purchaser/inventory",
           icon: Truck,
-          label: "Thêm mã vận đơn",
+          label: "Add Tracking Number",
         },
         {
           type: "dropdown",
           icon: Warehouse,
-          label: "Quản lý mua hàng",
+          label: "Management",
           dropdownItems: [
             {
               to: "/staff-purchaser/inventorystock",
               icon: Warehouse,
-              label: "Trạng thái đơn",
+              label: "Management Purchase",
             },
             {
               to: "/staff-purchaser/inventory/audit",
               icon: Package,
-              label: "Kiểm kho",
+              label: "Management Inventory",
             },
           ],
           isOpen: isInventoryDropdownOpen,
@@ -200,7 +201,7 @@ const StaffPurchaserSidebar = () => {
           {isExpanded ? (
             <>
               <span className="text-sm font-medium text-slate-700 mx-auto">
-                Nhân viên mua hàng
+                Purchasing Staff
               </span>
               <ChevronLeft className="w-6 h-6 text-slate-600" />
             </>
@@ -234,7 +235,7 @@ const StaffPurchaserSidebar = () => {
                 : "opacity-0 max-h-0 -translate-y-2"
             }`}
           >
-            {profile?.name || "Đang tải..."}
+            {profile?.name || "Loading..."}
           </span>
         </Link>
       </div>
@@ -267,11 +268,11 @@ const StaffPurchaserSidebar = () => {
             redirectTo="/signin"
             showIcon={true}
             useConfirm={true}
-            confirmMessage="Bạn có chắc chắn muốn đăng xuất?"
+            confirmMessage="Are you sure you want to log out?"
           />
           {isExpanded && (
             <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm font-medium text-gray-700">
-              Đăng xuất
+              Log Out
             </span>
           )}
         </div>

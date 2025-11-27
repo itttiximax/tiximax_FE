@@ -1,5 +1,5 @@
 // src/Components/Payment/CreateDividePaymentShip.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { X, Info, Scissors } from "lucide-react";
 import createPaymentShipService from "../../Services/Payment/createPaymentShipService";
@@ -38,6 +38,8 @@ const DividePaymentShipConfigModal = ({
   formatCurrency,
   isCreating,
   accountId,
+  cachedBankAccounts = [], // ✅ THÊM prop
+  bankAccountsLoading = false, // ✅ THÊM prop
 }) => {
   const [customerVoucherId, setCustomerVoucherId] = useState(null);
   const [isUseBalance, setIsUseBalance] = useState(true);
@@ -45,6 +47,18 @@ const DividePaymentShipConfigModal = ({
 
   const [bankId, setBankId] = useState(null);
   const [bankLoading, setBankLoading] = useState(false);
+
+  // ✅ THÊM: Auto-set bank đầu tiên khi có cached data
+  useEffect(() => {
+    if (
+      cachedBankAccounts &&
+      cachedBankAccounts.length > 0 &&
+      !bankId &&
+      isOpen
+    ) {
+      setBankId(String(cachedBankAccounts[0].id));
+    }
+  }, [cachedBankAccounts, isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ✅ Voucher KHÔNG bắt buộc nữa
   const confirmDisabled =
@@ -114,6 +128,9 @@ const DividePaymentShipConfigModal = ({
             label="Chọn tài khoản nhận cước (bắt buộc)"
             onLoadingChange={setBankLoading}
             onAccountsChange={() => {}}
+            autoSelectFirst={true} // ✅ THÊM
+            cachedAccounts={cachedBankAccounts} // ✅ THÊM
+            initialLoading={bankAccountsLoading} // ✅ THÊM
           />
           {!bankId && (
             <div className="text-xs text-amber-600 -mt-3 mb-3">
@@ -225,6 +242,8 @@ const CreateDividePaymentShip = ({
   onError,
   disabled = false,
   accountId,
+  cachedBankAccounts = [], // ✅ THÊM prop
+  bankAccountsLoading = false, // ✅ THÊM prop
 }) => {
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -285,7 +304,7 @@ const CreateDividePaymentShip = ({
       <button
         onClick={openModal}
         disabled={buttonDisabled}
-        className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center"
+        className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center"
         title={
           buttonDisabled
             ? "Hãy chọn ít nhất một tracking để tách đơn"
@@ -298,10 +317,7 @@ const CreateDividePaymentShip = ({
             Đang tạo...
           </>
         ) : (
-          <>
-            <Scissors className="w-4 h-4 mr-2" />
-            Tạo thanh toán tách đơn
-          </>
+          <>Tạo thanh toán tách đơn</>
         )}
       </button>
 
@@ -314,6 +330,8 @@ const CreateDividePaymentShip = ({
         formatCurrency={formatCurrency || ((v) => v)}
         isCreating={isCreating}
         accountId={accountId}
+        cachedBankAccounts={cachedBankAccounts} // ✅ THÊM
+        bankAccountsLoading={bankAccountsLoading} // ✅ THÊM
       />
     </>
   );

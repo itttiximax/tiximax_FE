@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import createPurchaseService from "../../Services/StaffPurchase/createPurchaseService";
 import UploadImg from "../../common/UploadImg";
-import { Package } from "lucide-react";
+import { Package, ShoppingCart } from "lucide-react";
 
 const CreatePurchase = ({
   isOpen,
   onClose,
   orderCode,
   selectedTrackingCodes = [],
+  selectedProducts = [],
   onSuccess,
 }) => {
   const [purchaseData, setPurchaseData] = useState({
@@ -31,17 +32,38 @@ const CreatePurchase = ({
   }, [isOpen]);
 
   const formatCurrency = (value) => {
-    if (!value) return "";
+    if (!value && value !== 0) return "";
+
     const stringValue = value.toString();
+
+    // Nếu đang nhập và kết thúc bằng dấu chấm, giữ nguyên
+    if (stringValue.endsWith(".")) {
+      const integerPart = stringValue.slice(0, -1);
+      if (integerPart === "") return ".";
+      const formattedInteger = parseInt(integerPart).toLocaleString("en-US");
+      return `${formattedInteger}.`;
+    }
+
     const parts = stringValue.split(".");
-    const integerPart = parts[0].replace(/,/g, "");
+    const integerPart = parts[0];
     const decimalPart = parts[1];
+
+    // Nếu chỉ có dấu chấm
+    if (integerPart === "" && decimalPart === undefined) {
+      return "";
+    }
+
+    // Format phần nguyên với dấu phẩy
     const formattedInteger = integerPart
       ? parseInt(integerPart).toLocaleString("en-US")
-      : "";
-    return decimalPart !== undefined
-      ? formattedInteger + "." + decimalPart
-      : formattedInteger;
+      : "0";
+
+    // Nếu có phần thập phân, giữ nguyên
+    if (decimalPart !== undefined) {
+      return `${formattedInteger}.${decimalPart}`;
+    }
+
+    return formattedInteger;
   };
 
   const getRawValue = (value) => value.toString().replace(/,/g, "");
@@ -74,29 +96,54 @@ const CreatePurchase = ({
   const handleImageRemove = () =>
     setPurchaseData((prev) => ({ ...prev, image: "" }));
 
+  // Calculate total from selected products
+  const calculatedTotal = selectedProducts.reduce(
+    (sum, product) => sum + (product.totalWeb || 0),
+    0
+  );
+
+  // Check if entered amount is higher than calculated
+  const getAmountWarning = () => {
+    if (!purchaseData.purchaseTotal) return null;
+
+    const enteredAmount = Number(getRawValue(purchaseData.purchaseTotal));
+
+    // Chỉ show warning nếu cao hơn calculated total + 1
+    if (enteredAmount >= calculatedTotal + 1) {
+      return {
+        isHigher: true,
+        enteredAmount,
+      };
+    }
+
+    return null;
+  };
+
+  const amountWarning = getAmountWarning();
+
   const handleSubmitPurchase = async () => {
     try {
       setCreatingPurchase(true);
 
       if (selectedTrackingCodes.length === 0) {
-        toast.error("Không có sản phẩm nào được chọn");
+        toast.error("No products selected");
         return;
       }
 
       const rawPurchaseTotal = getRawValue(purchaseData.purchaseTotal);
       if (!rawPurchaseTotal || Number(rawPurchaseTotal) <= 0) {
-        toast.error("Vui lòng nhập tổng tiền hợp lệ (> 0)");
+        toast.error("Please enter a valid total amount (> 0)");
         return;
       }
 
       if (!purchaseData.image || purchaseData.image === "string") {
-        toast.error("Vui lòng upload ảnh purchase");
+        toast.error("Please upload purchase image");
         return;
       }
 
       const token = localStorage.getItem("jwt");
       if (!token) {
-        toast.error("Không tìm thấy token. Vui lòng đăng nhập lại.");
+        toast.error("Token not found. Please login again.");
         return;
       }
 
@@ -110,11 +157,11 @@ const CreatePurchase = ({
 
       await createPurchaseService.createPurchase(orderCode, payload, token);
 
-      toast.success("Tạo purchase thành công!");
+      toast.success("Purchase created successfully!");
       handleClose();
       onSuccess?.();
     } catch (error) {
-      let errorMessage = "Có lỗi xảy ra khi tạo purchase";
+      let errorMessage = "An error occurred while creating purchase";
 
       if (error.response) {
         const { data, status } = error.response;
@@ -129,7 +176,7 @@ const CreatePurchase = ({
 
         if (status === 401) {
           localStorage.removeItem("jwt");
-          errorMessage = "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.";
+          errorMessage = "Session expired. Please login again.";
         }
       }
 
@@ -153,18 +200,15 @@ const CreatePurchase = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                 <span className="inline-block w-1 h-6 bg-blue-600 rounded"></span>
-                Mua hộ - {orderCode}
+                Purchase Order - {orderCode}
               </h3>
-              <div className="flex items-center gap-2 mt-1 text-2xs text-black-600">
-                <span>Đã chọn {selectedTrackingCodes.length} sản phẩm</span>
-              </div>
             </div>
             <button
               onClick={handleClose}
@@ -174,33 +218,116 @@ const CreatePurchase = ({
             </button>
           </div>
 
-          {/* Selected Products Summary */}
-          <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h4 className="text-sm font-medium text-blue-900 mb-2">
-              Sản phẩm đã chọn:
+          {/* Product Details Table */}
+          <div className="mb-6">
+            <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <Package className="w-4 h-4" />
+              Selected Product Details
             </h4>
-            <div className="flex flex-wrap gap-2">
-              {selectedTrackingCodes.map((code, index) => (
-                <span
-                  key={index}
-                  className="inline-block px-2 py-1 bg-white text-blue-700 rounded text-xs font-medium border border-blue-200"
-                >
-                  {code}
-                </span>
-              ))}
+
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-4 py-3 text-left font-medium text-gray-700">
+                        No.
+                      </th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-700">
+                        Product Name
+                      </th>
+                      <th className="px-4 py-3 text-center font-medium text-gray-700">
+                        Quantity
+                      </th>
+                      <th className="px-4 py-3 text-right font-medium text-gray-700">
+                        Web Price
+                      </th>
+                      <th className="px-4 py-3 text-right font-medium text-gray-700">
+                        Shipping
+                      </th>
+                      <th className="px-4 py-3 text-right font-medium text-gray-700">
+                        Total
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {selectedProducts.map((product, index) => (
+                      <tr
+                        key={product.trackingCode || index}
+                        className="hover:bg-gray-50"
+                      >
+                        <td className="px-4 py-3 text-gray-600">{index + 1}</td>
+
+                        <td className="px-4 py-3 text-gray-900">
+                          <div
+                            className="max-w-xs truncate"
+                            title={product.productName}
+                          >
+                            {product.productName || "N/A"}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-center text-gray-900 font-medium">
+                          {product.quantity || 0}
+                        </td>
+                        <td className="px-4 py-3 text-right text-gray-900">
+                          {formatCurrency(product.priceWeb || 0)}
+                        </td>
+                        <td className="px-4 py-3 text-right text-gray-900">
+                          {formatCurrency(product.shipWeb || 0)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-semibold text-gray-900">
+                          {formatCurrency(product.totalWeb || 0)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="bg-blue-50 border-t-2 border-blue-200">
+                    <tr>
+                      <td
+                        colSpan="5"
+                        className="px-4 py-3 text-right font-bold text-gray-900"
+                      >
+                        Grand Total:
+                      </td>
+                      <td className="px-4 py-3 text-right font-bold text-blue-700 text-base">
+                        {formatCurrency(calculatedTotal)}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
             </div>
+
+            {/* Warning if entered amount is higher than calculated */}
+            {amountWarning && (
+              <div className="mt-3 p-3 border rounded-lg flex items-start gap-2 bg-red-50 border-red-200">
+                <div className="text-sm text-red-800">
+                  <span className="font-medium">Warning:</span> The total amount
+                  is (
+                  <span className="font-semibold">
+                    {formatCurrency(amountWarning.enteredAmount)}
+                  </span>
+                  ) is <span className="font-semibold">HIGHER</span> than the
+                  calculated product total (
+                  <span className="font-semibold">
+                    {formatCurrency(calculatedTotal)}
+                  </span>
+                  )<p>Please contact your Sale team.</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Purchase Form */}
           <div className="space-y-4">
             <h4 className="text-lg font-medium text-gray-900">
-              Thông tin Purchase
+              Purchase Information
             </h4>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Tổng tiền <span className="text-red-500">*</span>
+                  Total Amount <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -208,13 +335,13 @@ const CreatePurchase = ({
                   onChange={handlePurchaseTotalChange}
                   onBlur={handlePurchaseTotalBlur}
                   className="w-full border-2 border-red-500 rounded-md px-3 py-2 focus:border-black focus:ring-0 outline-none"
-                  placeholder="000000"
+                  placeholder={`Suggested: ${formatCurrency(calculatedTotal)}`}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Mã vận đơn (Tùy chọn)
+                  Tracking Number (Optional)
                 </label>
                 <input
                   type="text"
@@ -226,7 +353,7 @@ const CreatePurchase = ({
                     }))
                   }
                   className="w-full border-2 border-gray-500 rounded-md px-3 py-2 focus:border-black focus:ring-0 outline-none"
-                  placeholder="Nhập mã vận đơn"
+                  placeholder="Shipment code"
                 />
               </div>
             </div>
@@ -235,13 +362,13 @@ const CreatePurchase = ({
               imageUrl={purchaseData.image}
               onImageUpload={handleImageUpload}
               onImageRemove={handleImageRemove}
-              label="Hình ảnh Purchase"
+              label="Purchase Image"
               required={true}
               maxSizeMB={3}
             />
 
             <div>
-              <label className="block text-sm font-medium mb-1">Ghi chú</label>
+              <label className="block text-sm font-medium mb-1">Notes</label>
               <textarea
                 value={purchaseData.note}
                 onChange={(e) =>
@@ -249,7 +376,7 @@ const CreatePurchase = ({
                 }
                 rows={3}
                 className="w-full border-2 border-gray-500 rounded-md px-3 py-2 focus:border-black focus:ring-0 outline-none"
-                placeholder="Ghi chú (tùy chọn)"
+                placeholder="Add notes (optional)"
               />
             </div>
           </div>
@@ -260,7 +387,7 @@ const CreatePurchase = ({
               onClick={handleClose}
               className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              Hủy
+              Cancel
             </button>
 
             <button
@@ -276,7 +403,7 @@ const CreatePurchase = ({
               {creatingPurchase && (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
               )}
-              {creatingPurchase ? "Đang tạo..." : "Xác nhận mua hộ"}
+              {creatingPurchase ? "Creating..." : "Create Purchase"}
             </button>
           </div>
         </div>

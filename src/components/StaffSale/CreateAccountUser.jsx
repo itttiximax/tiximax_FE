@@ -10,7 +10,6 @@ import {
   FiUserPlus,
   FiLock,
   FiAlertCircle,
-  FiCheckCircle,
   FiInfo,
 } from "react-icons/fi";
 import registrationByStaffService from "../../Services/Auth/RegistrationByStaffService";
@@ -73,27 +72,11 @@ const InputField = React.memo(
   )
 );
 
-// Display components with React.memo
-const SuccessAlert = React.memo(() => (
-  <div className="bg-green-50 border border-green-200 text-green-700 text-sm p-4 rounded-lg flex items-center">
-    <FiCheckCircle className="w-5 h-5 mr-3" />
-    <div className="font-medium">Tạo tài khoản thành công!</div>
-  </div>
-));
-
-const InfoAlert = React.memo(() => (
-  <div className="bg-blue-50 border border-blue-200 text-blue-700 text-sm p-4 rounded-lg mb-6 flex items-start">
-    <FiInfo className="w-4 h-4 mr-2 mt-0.5" />
-    <div className="font-medium">
-      Tên đăng nhập và mật khẩu sẽ được tạo tự động
-    </div>
-  </div>
-));
-
+// Hiển thị trạng thái khi chưa có account
 const EmptyLoginState = React.memo(() => (
   <div className="text-center py-12 text-gray-500">
     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-      <FiLock className="w-8 h-8 text-gray-00" />
+      <FiLock className="w-8 h-8 text-gray-300" />
     </div>
     <p className="text-sm font-medium">Chưa có thông tin đăng nhập</p>
     <p className="text-xs">
@@ -287,22 +270,16 @@ const CreateAccountUser = () => {
 
   // Memoized login info copy handler
   const handleCopyLogin = useCallback(() => {
+    if (!createdAccount) return;
+
     const loginText = `Tên đăng nhập: ${createdAccount.username}\nMật khẩu: 123456`;
     copyToClipboard(loginText, "login");
-  }, [createdAccount?.username, copyToClipboard]);
+  }, [createdAccount, copyToClipboard]);
 
   return (
     <div className="min-h-screen py-8 px-4">
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: "#363636",
-            color: "#fff",
-          },
-        }}
-      />
+      {/* Dùng Toaster mặc định của react-hot-toast, không custom CSS nữa */}
+      <Toaster position="top-right" />
 
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
@@ -321,7 +298,20 @@ const CreateAccountUser = () => {
               </h2>
             </div>
 
-            <InfoAlert />
+            {/* Thông tin hướng dẫn bằng text nhỏ, không dùng alert box */}
+            <div className="flex items-start text-xs text-gray-600 bg-blue-50 border border-blue-100 rounded-lg p-3 mb-4">
+              <FiInfo className="w-3 h-3 mr-2 mt-0.5 text-blue-500" />
+              <span>
+                Tên đăng nhập và mật khẩu mặc định sẽ được hệ thống tạo tự động.
+              </span>
+            </div>
+
+            {errors.general && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-3 rounded-lg mb-4 flex items-center">
+                <FiAlertCircle className="w-3 h-3 mr-2" />
+                {errors.general}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <InputField
@@ -380,13 +370,6 @@ const CreateAccountUser = () => {
                 error={errors.source}
               />
 
-              {/* {errors.general && (
-                <div className="bg-red-50 border border-red-200 text-red-700 text-sm p-4 rounded-lg flex items-center">
-                  <FiAlertCircle className="w-4 h-4 mr-2" />
-                  {errors.general}
-                </div>
-              )} */}
-
               <button
                 type="submit"
                 disabled={loading}
@@ -418,8 +401,6 @@ const CreateAccountUser = () => {
 
             {createdAccount ? (
               <div className="space-y-6">
-                <SuccessAlert />
-
                 {/* Login Info */}
                 <div className="border border-gray-200 rounded-lg">
                   <div className="bg-gray-50 px-4 py-3 flex justify-between items-center">

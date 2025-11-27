@@ -12,10 +12,14 @@ import managerOrderService from "../../Services/Manager/managerOrderService";
 import DetailOrder from "../Manager/DetailOrder";
 
 const OrderList = () => {
-  // Dữ liệu phân trang từ backend
+  // Pagination & Data states
   const [orders, setOrders] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
+
+  // UI states
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -25,22 +29,19 @@ const OrderList = () => {
   const [selectedOrderType, setSelectedOrderType] = useState("ALL");
   const [dateFilter, setDateFilter] = useState({ from: "", to: "" });
 
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
-
-  // Detail modal
+  // Detail modal states
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
+  // Constants
   const availableStatuses = useMemo(
     () => managerOrderService.getAvailableStatuses(),
     []
   );
-  const pageSizeOptions = [10, 20, 30, 50, 100];
+  const pageSizeOptions = useMemo(() => [10, 20, 30, 50, 100], []);
 
-  // Fetch orders với phân trang
+  // Fetch orders from API
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -66,12 +67,13 @@ const OrderList = () => {
     fetchOrders();
   }, [fetchOrders]);
 
-  // Lọc dữ liệu (frontend - chỉ áp dụng trên trang hiện tại)
+  // Apply frontend filters
   const filteredOrders = useMemo(() => {
     let filtered = [...orders];
 
+    // Search filter
     if (searchTerm) {
-      const search = searchTerm.toLowerCase();
+      const search = searchTerm.toLowerCase().trim();
       filtered = filtered.filter(
         (order) =>
           order.orderCode?.toLowerCase().includes(search) ||
@@ -81,18 +83,22 @@ const OrderList = () => {
       );
     }
 
+    // Status filter
     if (selectedStatus !== "ALL") {
       filtered = filtered.filter((order) => order.status === selectedStatus);
     }
 
+    // Order type filter
     if (selectedOrderType !== "ALL") {
       filtered = filtered.filter(
         (order) => order.orderType === selectedOrderType
       );
     }
 
+    // Date range filter
     if (dateFilter.from) {
       const fromDate = new Date(dateFilter.from);
+      fromDate.setHours(0, 0, 0, 0);
       filtered = filtered.filter(
         (order) => new Date(order.createdAt) >= fromDate
       );
@@ -120,56 +126,59 @@ const OrderList = () => {
     [totalPages, loading]
   );
 
-  const handlePageSizeChange = useCallback(
-    (newSize) => {
-      setPageSize(newSize);
-      setCurrentPage(0);
-    },
-    []
-  );
+  const handlePageSizeChange = useCallback((newSize) => {
+    setPageSize(Number(newSize));
+    setCurrentPage(0);
+  }, []);
 
-  // Export CSV (chỉ dữ liệu trang hiện tại + đã lọc)
+  // Export to CSV
   const handleExport = useCallback(() => {
     if (filteredOrders.length === 0) {
       alert("Không có dữ liệu để xuất");
       return;
     }
 
-    const csv = [
-      [
-        "Mã đơn",
-        "Loại đơn",
-        "Trạng thái",
-        "Tỷ giá",
-        "Tổng tiền",
-        "Ngày tạo",
-        "Khách hàng",
-      ].join(","),
-      ...filteredOrders.map((order) =>
-        [
-          order.orderCode,
-          order.orderType,
-          order.status,
-          order.exchangeRate || "",
-          order.finalPriceOrder || "",
-          new Date(order.createdAt).toLocaleDateString("vi-VN"),
-          order.customer?.name || "",
-        ].join(",")
-      ),
-    ].join("\n");
+    const headers = [
+      "Mã đơn",
+      "Loại đơn",
+      "Trạng thái",
+      "Tỷ giá",
+      "Tổng tiền",
+      "Ngày tạo",
+      "Khách hàng",
+    ];
+
+    const rows = filteredOrders.map((order) => [
+      order.orderCode || "",
+      getOrderTypeText(order.orderType),
+      availableStatuses.find((s) => s.key === order.status)?.label ||
+        order.status,
+      order.exchangeRate
+        ? `${order.exchangeRate.toLocaleString("vi-VN")} VNĐ`
+        : "",
+      order.finalPriceOrder
+        ? order.finalPriceOrder.toLocaleString("vi-VN")
+        : "",
+      new Date(order.createdAt).toLocaleDateString("vi-VN"),
+      order.customer?.name || "",
+    ]);
+
+    const csv = [headers.join(","), ...rows.map((row) => row.join(","))].join(
+      "\n"
+    );
 
     const blob = new Blob(["\uFEFF" + csv], {
       type: "text/csv;charset=utf-8;",
     });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `orders_page${currentPage + 1}_${new Date()
-      .toISOString()
-      .split("T")[0]}.csv`;
+    link.download = `orders_page${currentPage + 1}_${
+      new Date().toISOString().split("T")[0]
+    }.csv`;
     link.click();
-  }, [filteredOrders, currentPage]);
+  }, [filteredOrders, currentPage, availableStatuses]);
 
-  // Detail order
+  // Detail order handlers
   const fetchOrderDetail = useCallback(async (orderId) => {
     setLoadingDetail(true);
     try {
@@ -198,18 +207,18 @@ const OrderList = () => {
     setLoadingDetail(false);
   }, []);
 
-  // Utility
+  // Utility functions
   const formatDate = useCallback((dateString) => {
-    return dateString ? new Date(dateString).toLocaleString("vi-VN") : "-";
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString("vi-VN");
   }, []);
-
   const formatPrice = useCallback((price) => {
-    return price
-      ? new Intl.NumberFormat("vi-VN", {
-          style: "currency",
-          currency: "VND",
-        }).format(price)
-      : "-";
+    if (price === null || price === undefined || price === "") return "-";
+
+    const number = Number(price);
+    if (isNaN(number)) return "-";
+
+    return number.toLocaleString("vi-VN");
   }, []);
 
   const getStatusColor = useCallback((color) => {
@@ -232,15 +241,36 @@ const OrderList = () => {
   }, []);
 
   const getOrderTypeText = useCallback((type) => {
-    return type === "MUA_HO"
-      ? "Mua hộ"
-      : type === "VAN_CHUYEN"
-      ? "Vận chuyển"
-      : type;
+    const orderTypes = {
+      MUA_HO: "Mua hộ",
+      VAN_CHUYEN: "Vận chuyển",
+      DAU_GIA: "Đấu giá",
+      KY_GUI: "Ký gửi",
+    };
+    return orderTypes[type] || type;
   }, []);
 
+  // Reset filters
+  const handleResetFilters = useCallback(() => {
+    setSearchTerm("");
+    setSelectedStatus("ALL");
+    setSelectedOrderType("ALL");
+    setDateFilter({ from: "", to: "" });
+  }, []);
+
+  // Check if filters are active
+  const hasActiveFilters = useMemo(() => {
+    return (
+      searchTerm ||
+      selectedStatus !== "ALL" ||
+      selectedOrderType !== "ALL" ||
+      dateFilter.from ||
+      dateFilter.to
+    );
+  }, [searchTerm, selectedStatus, selectedOrderType, dateFilter]);
+
   return (
-    <div className="p-6">
+    <div className="p-6 min-h-screen">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Danh sách đơn hàng</h1>
@@ -248,12 +278,23 @@ const OrderList = () => {
 
       {/* Filters Section */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Filter className="w-5 h-5 text-gray-700" />
-          <h2 className="text-lg font-semibold text-gray-900">Bộ lọc</h2>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Filter className="w-5 h-5 text-gray-700" />
+            <h2 className="text-lg font-semibold text-gray-900">Bộ lọc</h2>
+          </div>
+          {hasActiveFilters && (
+            <button
+              onClick={handleResetFilters}
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
+              Xóa bộ lọc
+            </button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -261,14 +302,15 @@ const OrderList = () => {
               placeholder="Tìm mã đơn, khách hàng, SĐT..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
+          {/* Status Filter */}
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="ALL">Tất cả trạng thái</option>
             {availableStatuses.map((status) => (
@@ -278,36 +320,44 @@ const OrderList = () => {
             ))}
           </select>
 
+          {/* Order Type Filter */}
           <select
             value={selectedOrderType}
             onChange={(e) => setSelectedOrderType(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="ALL">Tất cả loại đơn</option>
             <option value="MUA_HO">Mua hộ</option>
             <option value="VAN_CHUYEN">Vận chuyển</option>
+            <option value="DAU_GIA">Đấu giá</option>
+            <option value="KY_GUI">Ký gửi</option>
           </select>
 
+          {/* From Date */}
           <input
             type="date"
             value={dateFilter.from}
             onChange={(e) =>
               setDateFilter({ ...dateFilter, from: e.target.value })
             }
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Từ ngày"
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+          {/* To Date */}
           <input
             type="date"
             value={dateFilter.to}
             onChange={(e) =>
               setDateFilter({ ...dateFilter, to: e.target.value })
             }
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Đến ngày"
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
 
+          {/* Export Button */}
           <button
             onClick={handleExport}
             disabled={loading || filteredOrders.length === 0}
@@ -318,20 +368,23 @@ const OrderList = () => {
           </button>
         </div>
 
+        {/* Filter Summary */}
         <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
           <div className="text-sm text-gray-600">
             Hiển thị{" "}
             <span className="font-semibold text-blue-600">
               {loading ? "..." : filteredOrders.length}
             </span>{" "}
-            trong tổng số{" "}
-            <span className="font-semibold">{totalElements}</span> đơn hàng
+            / <span className="font-semibold">{totalElements}</span> đơn hàng
+            {hasActiveFilters && (
+              <span className="ml-2 text-gray-500">(đã lọc)</span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Hiển thị:</span>
             <select
               value={pageSize}
-              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+              onChange={(e) => handlePageSizeChange(e.target.value)}
               className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {pageSizeOptions.map((size) => (
@@ -344,11 +397,24 @@ const OrderList = () => {
         </div>
       </div>
 
-      {/* Error */}
+      {/* Error Alert */}
       {error && (
-        <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="flex">
-            <div className="ml-3">
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg
+                className="h-5 w-5 text-red-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="ml-3 flex-1">
               <h3 className="text-sm font-medium text-red-800">
                 Có lỗi xảy ra
               </h3>
@@ -359,7 +425,7 @@ const OrderList = () => {
                 <button
                   onClick={fetchOrders}
                   disabled={loading}
-                  className="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-2 rounded-md text-sm disabled:opacity-50"
+                  className="bg-red-100 hover:bg-red-200 text-red-800 px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "Đang tải..." : "Thử lại"}
                 </button>
@@ -385,9 +451,6 @@ const OrderList = () => {
                   Trạng thái
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Khách hàng
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Tỷ giá
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -403,37 +466,35 @@ const OrderList = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {loading
-                ? [...Array(8)].map((_, idx) => (
+                ? // Loading skeleton
+                  [...Array(8)].map((_, idx) => (
                     <tr key={idx} className="animate-pulse">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="h-3 w-28 bg-gray-200 rounded mb-2" />
-                        <div className="h-3 w-20 bg-gray-100 rounded" />
+                        <div className="h-4 w-28 bg-gray-200 rounded" />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="h-3 w-20 bg-gray-200 rounded" />
+                        <div className="h-4 w-20 bg-gray-200 rounded" />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="h-5 w-24 bg-gray-200 rounded-full" />
+                        <div className="h-6 w-24 bg-gray-200 rounded-full" />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="h-3 w-32 bg-gray-200 rounded mb-2" />
-                        <div className="h-3 w-24 bg-gray-100 rounded" />
+                        <div className="h-4 w-24 bg-gray-200 rounded" />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="h-3 w-16 bg-gray-200 rounded" />
+                        <div className="h-4 w-28 bg-gray-200 rounded" />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="h-3 w-24 bg-gray-200 rounded" />
+                        <div className="h-4 w-24 bg-gray-200 rounded" />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="h-3 w-28 bg-gray-200 rounded" />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="h-8 w-16 bg-gray-200 rounded-lg" />
+                        <div className="h-9 w-20 bg-gray-200 rounded-lg" />
                       </td>
                     </tr>
                   ))
-                : filteredOrders.map((order) => {
+                : filteredOrders.length > 0
+                ? // Data rows
+                  filteredOrders.map((order) => {
                     const orderStatus = availableStatuses.find(
                       (s) => s.key === order.status
                     );
@@ -445,9 +506,6 @@ const OrderList = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
                             {order.orderCode}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            ID: {order.orderId}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -464,22 +522,12 @@ const OrderList = () => {
                             {orderStatus ? orderStatus.label : order.status}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {order.customer?.name || "-"}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {order.customer?.phone || "-"}
-                          </div>
-                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {order.exchangeRate
-                            ? `${order.exchangeRate.toLocaleString(
-                                "vi-VN"
-                              )} VNĐ`
+                            ? `${order.exchangeRate.toLocaleString("vi-VN")} `
                             : "-"}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                           {formatPrice(order.finalPriceOrder)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -490,15 +538,16 @@ const OrderList = () => {
                             onClick={() =>
                               handleViewDetail(order.orderId, order)
                             }
-                            className="group inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-lg shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-300"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors"
                           >
-                            <Eye className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                            <Eye className="w-4 h-4" />
                             <span>Xem</span>
                           </button>
                         </td>
                       </tr>
                     );
-                  })}
+                  })
+                : null}
             </tbody>
           </table>
         </div>
@@ -506,7 +555,7 @@ const OrderList = () => {
 
       {/* Empty State */}
       {!loading && filteredOrders.length === 0 && !error && (
-        <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+        <div className="text-center py-12 bg-white rounded-lg border border-gray-200 mt-6">
           <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <p className="text-lg font-medium text-gray-900 mb-2">
             Không tìm thấy đơn hàng
@@ -514,14 +563,14 @@ const OrderList = () => {
           <p className="text-sm text-gray-500">
             {totalElements === 0
               ? "Chưa có đơn hàng nào trong hệ thống"
-              : "Thử thay đổi điều kiện lọc"}
+              : "Thử thay đổi điều kiện lọc hoặc tìm kiếm"}
           </p>
         </div>
       )}
 
       {/* Pagination */}
       {!loading && totalElements > 0 && totalPages > 1 && (
-        <div className="flex items-center justify-between mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between mt-6 bg-white rounded-lg shadow-sm border border-gray-200 px-6 py-4">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 0}
@@ -532,12 +581,12 @@ const OrderList = () => {
             }`}
           >
             <ChevronLeft className="w-5 h-5" />
-            Trang trước
+            <span>Trang trước</span>
           </button>
 
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">Trang</span>
-            <span className="px-3 py-1 bg-green-100 text-green-700 rounded-lg font-semibold">
+            <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg font-semibold">
               {currentPage + 1}
             </span>
             <span className="text-sm text-gray-500">/ {totalPages}</span>
@@ -552,7 +601,7 @@ const OrderList = () => {
                 : "text-gray-700 hover:bg-gray-100"
             }`}
           >
-            Trang sau
+            <span>Trang sau</span>
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>

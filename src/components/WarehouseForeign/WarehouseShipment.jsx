@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
-import { createShipment } from "../../Services/Warehouse/warehouseShipmentService";
+import {
+  createShipment,
+  getShipmentInfo,
+} from "../../Services/Warehouse/warehouseShipmentService";
 import UploadImg from "../../common/UploadImg";
 import toast from "react-hot-toast";
-import { Loader2, Package } from "lucide-react";
+import { Loader2, Package, CheckCircle2 } from "lucide-react";
 
 const WarehouseShipment = () => {
   const [formData, setFormData] = useState({
@@ -11,93 +14,144 @@ const WarehouseShipment = () => {
     height: "",
     weight: "",
     image: "",
+    imageCheck: "",
   });
   const [shipmentId, setShipmentId] = useState("");
+  const [orderInfo, setOrderInfo] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [fetchingInfo, setFetchingInfo] = useState(false);
 
   const shipmentInputRef = useRef(null);
+  const debounceTimerRef = useRef(null);
+
+  const numberRegex = /^\d+(\.\d+)?$/;
 
   useEffect(() => {
     shipmentInputRef.current?.focus();
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
   }, []);
+
+  const handleFetchOrderInfo = async (trackingNumber) => {
+    if (!trackingNumber.trim()) {
+      setOrderInfo(null);
+      return;
+    }
+    setFetchingInfo(true);
+    try {
+      const data = await getShipmentInfo(trackingNumber.trim());
+      setOrderInfo(data);
+      toast.success("Order information loaded!");
+    } catch (error) {
+      setOrderInfo(null);
+      const errorMsg =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        "Order information not found";
+      toast.error(errorMsg);
+    } finally {
+      setFetchingInfo(false);
+    }
+  };
+
+  const handleTrackingChange = (e) => {
+    const value = e.target.value;
+    setShipmentId(value);
+
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+
+    debounceTimerRef.current = setTimeout(() => {
+      if (value.trim()) handleFetchOrderInfo(value);
+      else setOrderInfo(null);
+      debounceTimerRef.current = null;
+    }, 800);
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
     if (["length", "width", "height", "weight"].includes(name)) {
-      const regex = /^\d*\.?\d*$/;
-      if (!regex.test(value)) {
-        return;
-      }
+      if (value !== "" && !numberRegex.test(value)) return;
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = (imageUrl) => {
-    setFormData((prev) => ({
-      ...prev,
-      image: imageUrl,
-    }));
+  const handleImageUpload = (name, imageUrl) => {
+    setFormData((prev) => ({ ...prev, [name]: imageUrl }));
   };
 
-  const handleImageRemove = () => {
-    setFormData((prev) => ({
-      ...prev,
-      image: "",
-    }));
+  const handleImageRemove = (name) => {
+    setFormData((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
 
-    if (!shipmentId || !shipmentId.trim()) {
-      toast.error("Vui lòng nhập Mã vận đơn");
+    if (!shipmentId?.trim()) {
+      toast.error("Please enter a tracking number");
+      return;
+    }
+
+    if (!orderInfo) {
+      toast.error("Please wait for order information to load");
       return;
     }
 
     if (
-      !formData.length ||
-      !formData.width ||
-      !formData.height ||
-      !formData.weight
+      formData.length === "" ||
+      formData.width === "" ||
+      formData.height === "" ||
+      formData.weight === ""
     ) {
-      toast.error("Vui lòng điền đầy đủ thông tin kích thước và trọng lượng");
+      toast.error("Please fill in all dimension and weight fields");
       return;
     }
 
-    if (
-      Number(formData.length) <= 0 ||
-      Number(formData.width) <= 0 ||
-      Number(formData.height) <= 0 ||
-      Number(formData.weight) <= 0
-    ) {
-      toast.error("Kích thước và trọng lượng phải lớn hơn 0");
+    if (!formData.image) {
+      toast.error("Please upload the main image");
+      return;
+    }
+
+    // Logic mới: bắt buộc imageCheck nếu Check Required = NO – PASSED
+    const checkRequired = orderInfo.orders?.checkRequired; // true / false
+    if (checkRequired === true && !formData.imageCheck) {
+      toast.error("Please upload the check image since order is PASSED");
+      return;
+    }
+
+    const l = Number(formData.length);
+    const w = Number(formData.width);
+    const h = Number(formData.height);
+    const wt = Number(formData.weight);
+
+    if ([l, w, h, wt].some((v) => isNaN(v) || v <= 0)) {
+      toast.error("Dimensions and weight must be numbers greater than 0");
       return;
     }
 
     setLoading(true);
-    const loadingToast = toast.loading("Đang nhập kho...");
+    const loadingToast = toast.loading("Checking in shipment...");
 
     try {
       const shipmentData = {
-        length: Number(formData.length),
-        width: Number(formData.width),
-        height: Number(formData.height),
-        weight: Number(formData.weight),
-        image: formData.image || "",
+        length: l,
+        width: w,
+        height: h,
+        weight: wt,
+        image: formData.image,
+        imageCheck: formData.imageCheck || "",
       };
+
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
 
       const result = await createShipment(shipmentId.trim(), shipmentData);
 
       toast.dismiss(loadingToast);
 
       const successMessage =
-        result?.message || result?.data?.message || "Nhập kho thành công!";
-
+        result?.message || result?.data?.message || "Check-in successful!";
       toast.success(successMessage);
 
       setFormData({
@@ -106,19 +160,19 @@ const WarehouseShipment = () => {
         height: "",
         weight: "",
         image: "",
+        imageCheck: "",
       });
       setShipmentId("");
+      setOrderInfo(null);
       shipmentInputRef.current?.focus();
     } catch (error) {
       toast.dismiss(loadingToast);
-
       const errorMessage =
-        error.response?.data?.error ||
-        error.response?.data?.message ||
-        error.response?.data?.detail ||
-        error.message ||
-        "Không thể nhập kho";
-
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        error?.response?.data?.detail ||
+        error?.message ||
+        "Cannot check in shipment";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -126,16 +180,26 @@ const WarehouseShipment = () => {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !loading) {
+    if (e.key === "Enter" && !loading && !fetchingInfo) {
       e.preventDefault();
       handleSubmit();
     }
   };
 
+  const getStatusDisplay = (status) => {
+    const statusMap = {
+      CHO_NHAP_KHO_NN: "Pending Import",
+      MUA_HO: "Purchase Order",
+      DAU_GIA: "Auction Order",
+      KY_GUI: "Consignment Order",
+      HOAT_DONG: "Active",
+    };
+    return statusMap[status] || status;
+  };
+
   return (
     <div className="p-6 min-h-screen">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="bg-blue-600 rounded-xl shadow-sm p-5 mb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
@@ -143,146 +207,223 @@ const WarehouseShipment = () => {
             </div>
             <div>
               <h1 className="text-xl font-semibold text-white">
-                Nhập Kho & Cân Ký
+                Warehouse Import & Weighing
               </h1>
             </div>
           </div>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
+        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Mã vận đơn */}
+            {/* Tracking Number */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Mã vận đơn <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Tracking Number <span className="text-red-500">*</span>
               </label>
-              <input
-                ref={shipmentInputRef}
-                type="text"
-                value={shipmentId}
-                onChange={(e) => setShipmentId(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Ví dụ: SPX123456678"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                disabled={loading}
-                autoFocus
-              />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              {/* Kích thước & trọng lượng */}
-              <div className="lg:col-span-2 space-y-4">
-                {/* Kích thước */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Kích thước (cm)
-                  </label>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">
-                        Dài <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="length"
-                        value={formData.length}
-                        onChange={handleInputChange}
-                        onKeyDown={handleKeyDown}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder="0"
-                        disabled={loading}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">
-                        Rộng <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="width"
-                        value={formData.width}
-                        onChange={handleInputChange}
-                        onKeyDown={handleKeyDown}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder="0"
-                        disabled={loading}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">
-                        Cao <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="height"
-                        value={formData.height}
-                        onChange={handleInputChange}
-                        onKeyDown={handleKeyDown}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder="0"
-                        disabled={loading}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Trọng lượng */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Trọng lượng (kg)
-                  </label>
-                  <div className="max-w-xs">
-                    <label className="block text-xs text-gray-600 mb-1">
-                      Tổng trọng lượng <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="weight"
-                      value={formData.weight}
-                      onChange={handleInputChange}
-                      onKeyDown={handleKeyDown}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                      placeholder="0"
-                      disabled={loading}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Ảnh */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ảnh kiện hàng
-                </label>
-                <UploadImg
-                  imageUrl={formData.image}
-                  onImageUpload={handleImageUpload}
-                  onImageRemove={handleImageRemove}
-                  maxSizeMB={3}
-                  placeholder="Tải ảnh (tối đa 3MB)"
+              <div className="relative">
+                <input
+                  id="trackingNumber"
+                  ref={shipmentInputRef}
+                  type="text"
+                  value={shipmentId}
+                  onChange={handleTrackingChange}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Example: SPX123456678"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  disabled={loading}
+                  autoFocus
+                  aria-label="Tracking Number"
                 />
+                {fetchingInfo && (
+                  <div
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Order Info */}
+            {orderInfo && (
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200 rounded-lg p-4 space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle2 className="w-5 h-5 text-blue-600" />
+                  <h3 className="font-semibold text-blue-900">
+                    Order Information
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {/* Order Code */}
+                  <div className="flex items-center gap-2 bg-white/60 rounded-lg p-2.5">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-600">Order Code</p>
+                      <p className="font-semibold text-gray-900 truncate">
+                        {orderInfo.orders?.orderCode}
+                      </p>
+                    </div>
+                  </div>
+                  {/* Customer Code */}
+                  <div className="flex items-center gap-2 bg-white/60 rounded-lg p-2.5">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-600">Customer Code</p>
+                      <p className="font-semibold text-gray-900">
+                        {orderInfo.customer?.customerCode}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Order Type */}
+                  <div className="flex items-center gap-2 bg-white/60 rounded-lg p-2.5">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-600">Order Type</p>
+                      <p className="font-semibold text-gray-900">
+                        {getStatusDisplay(orderInfo.orders?.orderType)}
+                      </p>
+                    </div>
+                  </div>
+                  {/* Customer Name */}
+                  <div className="flex items-center gap-2 bg-white/60 rounded-lg p-2.5">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-600">Customer Name</p>
+                      <p className="font-semibold text-gray-900 truncate">
+                        {orderInfo.customer?.name}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Check Required */}
+                  <div
+                    className={`md:col-span-2 flex flex-col items-center justify-center rounded-lg p-4 border ${
+                      orderInfo.orders?.checkRequired
+                        ? "bg-red-50 border-red-400"
+                        : "bg-green-50 border-green-400"
+                    }`}
+                  >
+                    <p className="text-xl font-semibold text-black mb-1 text-center">
+                      Check Required
+                    </p>
+                    <p
+                      className={`font-semibold text-base text-center ${
+                        orderInfo.orders?.checkRequired
+                          ? "text-red-700"
+                          : "text-green-700"
+                      }`}
+                    >
+                      {orderInfo.orders?.checkRequired
+                        ? "YES – MUST CHECK"
+                        : "NO – PASSED"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Divider */}
+            {orderInfo && <div className="border-t border-gray-200"></div>}
+
+            {/* Dimensions & Weight */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              <div className="lg:col-span-2 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Dimensions (cm)
+                  </label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {["length", "width", "height"].map((dim) => (
+                      <div key={dim}>
+                        <label className="block text-xs text-gray-600 mb-1 capitalize">
+                          {dim} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name={dim}
+                          value={formData[dim]}
+                          onChange={handleInputChange}
+                          onKeyDown={handleKeyDown}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                          placeholder="0"
+                          disabled={loading || !orderInfo}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Weight (kg)
+                  </label>
+                  <input
+                    type="text"
+                    name="weight"
+                    value={formData.weight}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    placeholder="0"
+                    disabled={loading || !orderInfo}
+                  />
+                </div>
+              </div>
+
+              {/* Images */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Main Image <span className="text-red-500">*</span>
+                  </label>
+                  <UploadImg
+                    imageUrl={formData.image}
+                    onImageUpload={(url) => handleImageUpload("image", url)}
+                    onImageRemove={() => handleImageRemove("image")}
+                    maxSizeMB={3}
+                    placeholder="Upload main image (max 3MB)"
+                    disabled={!orderInfo}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Check Image{" "}
+                    {orderInfo?.orders?.checkRequired === true && (
+                      <span className="text-red-500">*</span>
+                    )}
+                  </label>
+                  <UploadImg
+                    imageUrl={formData.imageCheck}
+                    onImageUpload={(url) =>
+                      handleImageUpload("imageCheck", url)
+                    }
+                    onImageRemove={() => handleImageRemove("imageCheck")}
+                    maxSizeMB={3}
+                    placeholder="Upload check image (max 3MB)"
+                    disabled={!orderInfo}
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="border-t border-gray-200"></div>
 
-            {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || fetchingInfo || !orderInfo}
               className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Đang nhập kho...
+                  Processing...
                 </>
               ) : (
-                <>Nhập kho</>
+                <>
+                  <Package className="w-4 h-4" />
+                  Check In
+                </>
               )}
             </button>
           </form>

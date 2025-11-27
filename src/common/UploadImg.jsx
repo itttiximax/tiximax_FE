@@ -106,7 +106,7 @@ const UploadImg = ({
                 Uploading...
               </>
             ) : (
-              "Chọn ảnh"
+              "Upload Img"
             )}
             <input
               type="file"

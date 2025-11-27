@@ -31,12 +31,9 @@ const PurchaseLater = ({
 
       const token = localStorage.getItem("jwt");
       if (!token) {
-        throw new Error(
-          "Không tìm thấy token xác thực. Vui lòng đăng nhập lại."
-        );
+        throw new Error("Authentication token not found. Please login again.");
       }
 
-      // Gọi service (truyền thêm token nếu service có nhận)
       await createPurchaseService.markBuyLaterForLink(orderId, linkId, token);
 
       setSuccess(true);
@@ -45,13 +42,12 @@ const PurchaseLater = ({
         onClose();
       }, 1500);
     } catch (err) {
-      let msg = "Không thể chuyển sang 'Mua sau'.";
+      let msg = "Unable to mark as 'Buy Later'.";
 
       if (err.response) {
         const { data } = err.response;
         if (data?.message) msg = data.message;
         else if (data?.error) msg = data.error;
-        // ví dụ: "Chỉ có thể chuyển sang MUA SAU nếu trạng thái hiện tại là CHỜ MUA!"
         else if (typeof data === "string") msg = data;
       } else if (err.message) {
         msg = err.message;
@@ -79,15 +75,15 @@ const PurchaseLater = ({
   const statusBadgeText = (status) => {
     switch (status) {
       case "CHO_MUA":
-        return "Chờ mua";
+        return "Pending";
       case "DANG_MUA":
-        return "Đang mua";
+        return "Processing";
       case "DA_MUA":
-        return "Đã mua";
+        return "Purchased";
       case "MUA_SAU":
-        return "Mua sau";
+        return "Buy Later";
       case "DA_HUY":
-        return "Đã hủy";
+        return "Cancelled";
       default:
         return status;
     }
@@ -102,7 +98,7 @@ const PurchaseLater = ({
             <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
               <Clock className="w-4 h-4 text-indigo-600" />
             </div>
-            <h2 className="text-base font-semibold text-gray-900">Mua sau</h2>
+            <h2 className="text-base font-semibold text-gray-900">Buy Later</h2>
           </div>
           <button
             onClick={onClose}
@@ -121,17 +117,17 @@ const PurchaseLater = ({
                 <CheckCircle2 className="w-6 h-6 text-green-600" />
               </div>
               <h3 className="text-sm font-semibold text-gray-900 mb-1">
-                Đã chuyển sang "Mua sau"!
+                Marked as "Buy Later"!
               </h3>
-              <p className="text-xs text-gray-600">Đang cập nhật...</p>
+              <p className="text-xs text-gray-600">Updating...</p>
             </div>
           ) : (
             <>
               {/* Note */}
               <div className="bg-indigo-50 border border-indigo-200 rounded-md p-3 mb-3">
                 <p className="text-xs text-indigo-800">
-                  Link sẽ không được xử lý trong đợt mua hiện tại cho đến khi
-                  bạn kích hoạt lại.
+                  This link will not be processed in the current purchase round
+                  until you reactivate it.
                 </p>
               </div>
 
@@ -139,7 +135,7 @@ const PurchaseLater = ({
               <div className="space-y-2 mb-4">
                 {orderCode && (
                   <div className="flex justify-between items-center py-1.5 border-b border-gray-200">
-                    <span className="text-xs text-gray-600">Mã đơn:</span>
+                    <span className="text-xs text-gray-600">Order Code:</span>
                     <span className="text-xs font-semibold text-gray-900">
                       {orderCode}
                     </span>
@@ -164,7 +160,7 @@ const PurchaseLater = ({
                   <>
                     {linkInfo.productName && (
                       <div className="flex justify-between items-start py-1.5 border-b border-gray-200">
-                        <span className="text-xs text-gray-600">Sản phẩm:</span>
+                        <span className="text-xs text-gray-600">Product:</span>
                         <span className="text-xs font-medium text-gray-900 text-right max-w-[60%]">
                           {linkInfo.productName}
                         </span>
@@ -182,9 +178,7 @@ const PurchaseLater = ({
 
                     {linkInfo.status && (
                       <div className="flex justify-between items-center py-1.5">
-                        <span className="text-xs text-gray-600">
-                          Trạng thái:
-                        </span>
+                        <span className="text-xs text-gray-600">Status:</span>
                         <span
                           className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusBadgeClass(
                             linkInfo.status
@@ -208,7 +202,7 @@ const PurchaseLater = ({
               {/* Confirm */}
               <div className="bg-gray-50 rounded-md p-3">
                 <p className="text-xs text-gray-700 text-center font-medium">
-                  Xác nhận chuyển link này sang "Mua sau"?
+                  Confirm marking this link as "Buy Later"?
                 </p>
               </div>
             </>
@@ -223,7 +217,7 @@ const PurchaseLater = ({
               disabled={loading}
               className="flex-1 px-3 py-2 bg-white border border-gray-300 text-gray-700 rounded-md text-xs font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
-              Hủy
+              Cancel
             </button>
             <button
               onClick={handleMarkBuyLater}
@@ -233,10 +227,10 @@ const PurchaseLater = ({
               {loading ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  Đang xử lý...
+                  Processing...
                 </>
               ) : (
-                <>Xác nhận</>
+                <>Confirm</>
               )}
             </button>
           </div>

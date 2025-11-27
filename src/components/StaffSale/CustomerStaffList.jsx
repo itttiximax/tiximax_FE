@@ -13,11 +13,13 @@ import {
   Users,
 } from "lucide-react";
 import userService from "../../Services/Manager/userService";
+import DetailCustomer from "../Manager/DetailCustomer";
 
 const CustomerStaffList = () => {
   const [customerList, setCustomerList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,13 +41,28 @@ const handleViewCustomer = (customer) => {
 
   const pageSizeOptions = [10, 20, 30, 50];
 
-  // Available sources (extract from data or predefined)
+  // Giá trị đặc biệt cho KH không có source
+  const EMPTY_SOURCE_VALUE = "__EMPTY__";
+
+  // Build nguồn từ dữ liệu (không hardcode)
   const availableSources = useMemo(() => {
-    const sources = [
-      ...new Set(customerList.map((c) => c.source).filter((s) => s)),
-    ];
-    return ["Facebook", "Zalo", "Website", "Giới thiệu", "Khác", ...sources];
+    const raw = customerList.map((c) =>
+      c.source && c.source.trim() !== "" ? c.source : EMPTY_SOURCE_VALUE
+    );
+
+    const unique = [...new Set(raw)];
+
+    return unique.sort((a, b) => {
+      if (a === EMPTY_SOURCE_VALUE) return 1;
+      if (b === EMPTY_SOURCE_VALUE) return -1;
+      return a.localeCompare(b, "vi");
+    });
   }, [customerList]);
+
+  const getSourceLabel = (value) => {
+    if (!value || value === EMPTY_SOURCE_VALUE) return "(Không có nguồn)";
+    return value;
+  };
 
   // Fetch my customers (assigned to current staff)
   const fetchMyCustomers = useCallback(
@@ -92,9 +109,15 @@ const handleViewCustomer = (customer) => {
 
     // Source filter
     if (selectedSource !== "ALL") {
-      filtered = filtered.filter(
-        (customer) => customer.source === selectedSource
-      );
+      if (selectedSource === EMPTY_SOURCE_VALUE) {
+        filtered = filtered.filter(
+          (customer) => !customer.source || customer.source.trim() === ""
+        );
+      } else {
+        filtered = filtered.filter(
+          (customer) => customer.source === selectedSource
+        );
+      }
     }
 
     return filtered;
@@ -131,6 +154,9 @@ const handleViewCustomer = (customer) => {
       Website: "bg-purple-100 text-purple-800",
       "Giới thiệu": "bg-green-100 text-green-800",
     };
+    if (!source || source === EMPTY_SOURCE_VALUE) {
+      return "bg-gray-100 text-gray-800";
+    }
     return colorMap[source] || "bg-gray-100 text-gray-800";
   }, []);
 
@@ -208,9 +234,9 @@ const handleViewCustomer = (customer) => {
             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="ALL">Tất cả nguồn</option>
-            {availableSources.map((source) => (
-              <option key={source} value={source}>
-                {source || "(Không có)"}
+            {availableSources.map((sourceValue) => (
+              <option key={sourceValue} value={sourceValue}>
+                {getSourceLabel(sourceValue)}
               </option>
             ))}
           </select>
@@ -297,8 +323,7 @@ const handleViewCustomer = (customer) => {
 
             <tbody className="bg-white divide-y divide-gray-200">
               {loading
-                ? // Skeleton rows (8 rows)
-                  [...Array(8)].map((_, idx) => (
+                ? [...Array(8)].map((_, idx) => (
                     <tr key={idx} className="animate-pulse">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
@@ -330,9 +355,13 @@ const handleViewCustomer = (customer) => {
                       </td>
                     </tr>
                   ))
-                : filteredCustomers.map((customer) => (
+                : filteredCustomers.map((customer, index) => (
                     <tr
-                      key={customer.accountId}
+                      key={
+                        customer.accountId ??
+                        customer.customerCode ??
+                        `customer-${index}`
+                      }
                       className="hover:bg-blue-50 transition-colors"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -373,11 +402,12 @@ const handleViewCustomer = (customer) => {
                         <div className="flex items-start gap-1 text-sm text-gray-900 max-w-xs">
                           <MapPin className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
                           <span className="line-clamp-2">
-                    {customer.addresses?.length > 0
-                      ? customer.addresses.map(a => a.addressName).join(", ")
-                      : "-"
-                    }
-                  </span>
+                            {customer.addresses?.length > 0
+                              ? customer.addresses
+                                  .map((a) => a.addressName)
+                                  .join(", ")
+                              : "-"}
+                          </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -391,7 +421,14 @@ const handleViewCustomer = (customer) => {
                             {customer.source}
                           </span>
                         ) : (
-                          <span className="text-xs text-gray-400">-</span>
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${getSourceColor(
+                              EMPTY_SOURCE_VALUE
+                            )}`}
+                          >
+                            <Tag className="w-3 h-3" />
+                            {getSourceLabel(EMPTY_SOURCE_VALUE)}
+                          </span>
                         )}
                       </td>
                      

@@ -341,6 +341,13 @@ const createOrderPaymentService = {
     return response.data;
   },
 
+  getPendingPaymentAuction: async (page = 0, size = 10) => {
+    const response = await api.get(
+      `/orders/for-payment/${page}/${size}/ DAU_GIA_THANH_CONG`
+    );
+    return response.data;
+  },
+
   // Lấy danh sách đơn hàng đã đủ hàng
   getPendingWarehouseVNOrders: async (page = 0, size = 10) => {
     const response = await api.get(
@@ -354,11 +361,13 @@ const createOrderPaymentService = {
     const [
       confirmedOrders,
       pendingShipOrders,
+      pendingPaymentAuction,
       pendingPaymentOrders,
       pendingWarehouseVNOrders,
     ] = await Promise.all([
       createOrderPaymentService.getConfirmedOrders(page, size),
       createOrderPaymentService.getPendingShipPaymentOrders(page, size),
+      createOrderPaymentService.getPendingPaymentAuction(page, size),
       createOrderPaymentService.getPendingPaymentOrders(page, size),
       createOrderPaymentService.getPendingWarehouseVNOrders(page, size),
     ]);
@@ -366,6 +375,7 @@ const createOrderPaymentService = {
     return {
       confirmedOrders,
       pendingShipOrders,
+      pendingPaymentAuction,
       pendingPaymentOrders,
       pendingWarehouseVNOrders,
       totalOrders: [

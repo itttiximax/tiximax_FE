@@ -120,12 +120,12 @@ const LeadSaleSideBar = () => {
         {
           type: "dropdown",
           icon: Banknote,
-          label: "Theo dõi đơn hàng",
+          label: "Theo dõi thanh toán",
           dropdownItems: [
             {
               to: "/lead-sale/order-payment",
               icon: Banknote,
-              label: "Quy trình đơn hàng",
+              label: "Quy trình thanh toám",
             },
             // {
             //   to: "/lead-sale/ship-payment",

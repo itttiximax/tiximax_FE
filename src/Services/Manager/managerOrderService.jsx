@@ -14,10 +14,13 @@ const managerOrderService = {
         "CHO_XAC_NHAN",
         "DA_XAC_NHAN",
         "CHO_THANH_TOAN",
+        "CHO_THANH_TOAN_DAU_GIA",
+        "CHO_THANH_TOAN_SHIP",
         "CHO_MUA",
         "CHO_NHAP_KHO_NN",
         "CHO_DONG_GOI",
         "DANG_XU_LY",
+        "DA_GIAO",
         "DA_HOAN_THANH",
         "DA_HUY",
       ];
@@ -85,7 +88,8 @@ const managerOrderService = {
       };
     } catch (error) {
       console.error(`Error fetching orders page ${page}, size ${size}:`, error);
-      if (error.response?.status === 404) throw new Error("API endpoint not found");
+      if (error.response?.status === 404)
+        throw new Error("API endpoint not found");
       if (error.response?.status === 403) throw new Error("Access denied");
       if (error.response?.status === 500) throw new Error("Server error");
       throw error;
@@ -102,10 +106,17 @@ const managerOrderService = {
     { key: "CHO_XAC_NHAN", label: "Chờ xác nhận", color: "yellow" },
     { key: "DA_XAC_NHAN", label: "Đã xác nhận", color: "green" },
     { key: "CHO_THANH_TOAN", label: "Chờ thanh toán", color: "orange" },
+    {
+      key: "CHO_THANH_TOAN_DAU_GIA",
+      label: "Chờ thanh toán đấu giá",
+      color: "pink",
+    },
+    { key: "CHO_THANH_TOAN_SHIP", label: "Chờ thanh toán ship", color: "teal" },
     { key: "CHO_MUA", label: "Chờ mua", color: "blue" },
     { key: "CHO_NHAP_KHO_NN", label: "Chờ nhập kho NN", color: "cyan" },
     { key: "CHO_DONG_GOI", label: "Chờ đóng gói", color: "purple" },
     { key: "DANG_XU_LY", label: "Đang xử lý", color: "indigo" },
+    { key: "DA_GIAO", label: "Đã giao", color: "emerald" },
     { key: "DA_HOAN_THANH", label: "Đã hoàn thành", color: "emerald" },
     { key: "DA_HUY", label: "Đã hủy", color: "red" },
   ],

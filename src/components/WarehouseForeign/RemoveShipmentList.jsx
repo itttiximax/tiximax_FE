@@ -13,7 +13,7 @@ import {
   PackageX,
   X,
   CheckCircle,
-} from "lucide-react"; // ⟵ ĐÃ bỏ ChevronDown/ChevronUp
+} from "lucide-react";
 import packingsService from "../../Services/Warehouse/packingsService";
 import RemoveShipment from "./RemoveShipment";
 
@@ -39,13 +39,13 @@ const RemoveShipmentList = () => {
       setTotalPages(data?.totalPages || 0);
 
       if (data?.content?.length > 0) {
-        toast.success(`Đã tải ${data.content.length} packing`, {
+        toast.success(`Loaded ${data.content.length} packings`, {
           icon: "📦",
           duration: 2000,
         });
       }
     } catch {
-      toast.error("Không thể tải danh sách awaiting-flight!");
+      toast.error("Cannot load awaiting-flight packing list!");
     } finally {
       setLoading(false);
     }
@@ -53,6 +53,7 @@ const RemoveShipmentList = () => {
 
   useEffect(() => {
     fetchAwaiting();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   const handleViewDetail = async (packingId) => {
@@ -68,7 +69,7 @@ const RemoveShipmentList = () => {
       setPackingCache((prev) => ({ ...prev, [packingId]: data }));
       setShowDetailModal(true);
     } catch {
-      toast.error("Không thể tải chi tiết packing");
+      toast.error("Cannot load packing details.");
     }
   };
 
@@ -114,7 +115,7 @@ const RemoveShipmentList = () => {
               >
                 <X className="w-6 h-6" />
               </button>
-              <h2 className="text-xl font-bold">Chi tiết Packing</h2>
+              <h2 className="text-xl font-bold">Packing Details</h2>
               <p className="text-blue-100 text-sm mt-1">
                 #{selectedPacking.packingId}
               </p>
@@ -127,7 +128,7 @@ const RemoveShipmentList = () => {
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="flex items-center gap-2 text-gray-600 mb-2">
                     <Package className="w-4 h-4" />
-                    <span className="text-sm font-medium">Mã Packing</span>
+                    <span className="text-sm font-medium">Packing Code</span>
                   </div>
                   <p className="text-lg font-semibold text-gray-900">
                     {selectedPacking.packingCode}
@@ -137,11 +138,11 @@ const RemoveShipmentList = () => {
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="flex items-center gap-2 text-gray-600 mb-2">
                     <Calendar className="w-4 h-4" />
-                    <span className="text-sm font-medium">Ngày Đóng Gói</span>
+                    <span className="text-sm font-medium">Packing Date</span>
                   </div>
                   <p className="text-lg font-semibold text-gray-900">
                     {new Date(selectedPacking.packedDate).toLocaleString(
-                      "vi-VN"
+                      "en-US"
                     )}
                   </p>
                 </div>
@@ -149,7 +150,7 @@ const RemoveShipmentList = () => {
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="flex items-center gap-2 text-gray-600 mb-2">
                     <CheckCircle className="w-4 h-4" />
-                    <span className="text-sm font-medium">Trạng Thái</span>
+                    <span className="text-sm font-medium">Status</span>
                   </div>
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                     {selectedPacking.status}
@@ -159,10 +160,11 @@ const RemoveShipmentList = () => {
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="flex items-center gap-2 text-gray-600 mb-2">
                     <Package className="w-4 h-4" />
-                    <span className="text-sm font-medium">Số Shipment</span>
+                    <span className="text-sm font-medium">Total Shipments</span>
                   </div>
                   <p className="text-lg font-semibold text-gray-900">
                     {selectedPacking.packingList?.length || 0} shipment
+                    {selectedPacking.packingList?.length > 1 ? "s" : ""}
                   </p>
                 </div>
               </div>
@@ -170,7 +172,7 @@ const RemoveShipmentList = () => {
               {/* Shipment List */}
               <div className="mb-6">
                 <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  Danh Sách Shipment
+                  Shipment List
                 </h3>
                 <div className="bg-gray-50 rounded-lg border border-gray-200 divide-y divide-gray-200 max-h-64 overflow-y-auto">
                   {selectedPacking.packingList?.map((code, index) => (
@@ -191,12 +193,12 @@ const RemoveShipmentList = () => {
             </div>
 
             {/* Footer */}
-            <div className="bg-gray-50 px-6 py-4 border-t">
+            <div className="bg-gray-50 px-6 py-4 border-top">
               <button
                 onClick={() => setShowDetailModal(false)}
                 className="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition"
               >
-                Đóng
+                Close
               </button>
             </div>
           </div>
@@ -214,17 +216,17 @@ const RemoveShipmentList = () => {
         </div>
       </div>
       <h3 className="text-lg font-semibold text-gray-900 mb-2">
-        Không có dữ liệu
+        No data available
       </h3>
       <p className="text-gray-600 mb-6 max-w-sm mx-auto">
-        Không có packing nào trong trạng thái "Awaiting Flight" lúc này.
+        There is no packing in "Awaiting Flight" status at the moment.
       </p>
       <button
         onClick={() => fetchAwaiting(page)}
         className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition shadow-sm"
       >
         <RefreshCw className="w-4 h-4" />
-        Tải lại
+        Reload
       </button>
     </div>
   );
@@ -233,15 +235,15 @@ const RemoveShipmentList = () => {
     <div className="min-h-screen bg-gradient-to-br p-6">
       <div className="mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-blue-600 rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="bg-blue-100 rounded-lg p-3">
-                <PackageSearch className="w-6 h-6 text-blue-600" />
+              <div className="bg-blue-600 rounded-lg p-3">
+                <PackageSearch className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Quản Lý Packing
+                <h1 className="text-2xl font-bold text-white">
+                  Packing Management
                 </h1>
               </div>
             </div>
@@ -253,7 +255,7 @@ const RemoveShipmentList = () => {
               <RefreshCw
                 className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
               />
-              Tải lại
+              Reload
             </button>
           </div>
         </div>
@@ -263,8 +265,10 @@ const RemoveShipmentList = () => {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12">
             <div className="flex flex-col items-center justify-center">
               <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
-              <p className="text-gray-600 font-medium">Đang tải danh sách...</p>
-              <p className="text-sm text-gray-400 mt-1">Vui lòng đợi</p>
+              <p className="text-gray-600 font-medium">
+                Loading packing list...
+              </p>
+              <p className="text-sm text-gray-400 mt-1">Please wait</p>
             </div>
           </div>
         ) : packings.length > 0 ? (
@@ -275,7 +279,7 @@ const RemoveShipmentList = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 font-medium">
-                      Tổng Packing
+                      Total Packings
                     </p>
                     <p className="text-2xl font-bold text-gray-900 mt-1">
                       {packings.length}
@@ -291,7 +295,7 @@ const RemoveShipmentList = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 font-medium">
-                      Trang hiện tại
+                      Current Page
                     </p>
                     <p className="text-2xl font-bold text-gray-900 mt-1">
                       {page + 1}/{totalPages}
@@ -306,7 +310,9 @@ const RemoveShipmentList = () => {
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 font-medium">Đã chọn</p>
+                    <p className="text-sm text-gray-600 font-medium">
+                      Selected Shipments
+                    </p>
                     <p className="text-2xl font-bold text-gray-900 mt-1">
                       {
                         Object.keys(selectedShipment).filter(
@@ -329,19 +335,19 @@ const RemoveShipmentList = () => {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Mã Packing
+                        Packing Code
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Ngày Đóng Gói
+                        Packing Date
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Trạng Thái
+                        Status
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Số Shipment
+                        Total Shipments
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Hành Động
+                        Actions
                       </th>
                     </tr>
                   </thead>
@@ -366,7 +372,7 @@ const RemoveShipmentList = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Calendar className="w-4 h-4 text-gray-400" />
-                            {new Date(item.packedDate).toLocaleString("vi-VN")}
+                            {new Date(item.packedDate).toLocaleString("en-US")}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -377,6 +383,7 @@ const RemoveShipmentList = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="text-sm font-medium text-gray-900">
                             {item.packingList?.length || 0} shipment
+                            {item.packingList?.length > 1 ? "s" : ""}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -393,7 +400,7 @@ const RemoveShipmentList = () => {
                                 }
                                 className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white hover:border-gray-400 transition"
                               >
-                                <option value="">-- Chọn shipment --</option>
+                                <option value="">-- Select shipment --</option>
                                 {item.packingList?.map((code) => (
                                   <option key={code} value={code}>
                                     {code}
@@ -418,7 +425,7 @@ const RemoveShipmentList = () => {
                               className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition shadow-sm hover:shadow active:scale-95"
                             >
                               <Eye className="w-4 h-4" />
-                              Xem chi tiết
+                              View details
                             </button>
                           </div>
                         </td>
@@ -432,11 +439,11 @@ const RemoveShipmentList = () => {
               <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-gray-600">
-                    Hiển thị{" "}
+                    Showing{" "}
                     <span className="font-semibold text-gray-900">
                       {packings.length}
                     </span>{" "}
-                    kết quả
+                    results
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -445,7 +452,7 @@ const RemoveShipmentList = () => {
                       className="inline-flex items-center gap-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
                     >
                       <ChevronLeft className="w-4 h-4" />
-                      Trước
+                      Previous
                     </button>
 
                     <div className="hidden sm:flex items-center gap-1">
@@ -480,7 +487,7 @@ const RemoveShipmentList = () => {
                       disabled={page === totalPages - 1}
                       className="inline-flex items-center gap-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
                     >
-                      Sau
+                      Next
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>

@@ -289,33 +289,31 @@ const ManagerPromotion = () => {
   const SkeletonRow = () => (
     <tr className="animate-pulse">
       <td className="px-4 py-3">
-        <div className="h-3 w-24 bg-gray-200 rounded" />
+        <div className="h-3 w-24 bg-slate-100 rounded" />
       </td>
       <td className="px-4 py-3 text-center">
-        <div className="inline-block h-5 w-16 bg-gray-200 rounded-full" />
+        <div className="inline-block h-5 w-16 bg-slate-100 rounded-full" />
       </td>
       <td className="px-4 py-3 text-center">
-        <div className="h-3 w-16 bg-gray-200 rounded mx-auto" />
+        <div className="h-3 w-16 bg-slate-100 rounded mx-auto" />
       </td>
       <td className="px-4 py-3">
-        <div className="h-3 w-24 bg-gray-200 rounded" />
+        <div className="h-3 w-24 bg-slate-100 rounded" />
       </td>
       <td className="px-4 py-3">
-        <div className="h-3 w-24 bg-gray-200 rounded" />
+        <div className="h-3 w-24 bg-slate-100 rounded" />
       </td>
       <td className="px-4 py-3">
-        <div className="h-5 w-24 bg-gray-200 rounded" />
+        <div className="h-5 w-24 bg-slate-100 rounded" />
       </td>
       <td className="px-4 py-3 text-center">
-        <div className="h-7 w-32 bg-gray-200 rounded mx-auto" />
+        <div className="h-7 w-32 bg-slate-100 rounded mx-auto" />
       </td>
     </tr>
   );
 
-  // ====== UI ======
   const renderTableContent = () => {
     if (loading) {
-      // Loading skeleton
       const rows = Math.min(size || 10, 10);
       return Array.from({ length: rows }).map((_, i) => (
         <SkeletonRow key={i} />
@@ -324,9 +322,9 @@ const ManagerPromotion = () => {
     if (vouchers.length === 0) {
       return (
         <tr>
-          <td colSpan="8" className="px-4 py-8 text-center">
-            <FiGift className="w-10 h-10 mx-auto text-gray-400 mb-2" />
-            <p className="text-sm text-gray-500">Chưa có voucher nào</p>
+          <td colSpan="7" className="px-4 py-10 text-center text-slate-500">
+            <FiGift className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+            <p className="text-sm font-medium">Chưa có voucher nào</p>
           </td>
         </tr>
       );
@@ -334,8 +332,8 @@ const ManagerPromotion = () => {
     return vouchers.map((v) => {
       const vid = v.id ?? v.voucherId;
       return (
-        <tr key={vid} className="hover:bg-blue-50 transition-colors">
-          <td className="px-4 py-3 text-xs font-bold text-gray-900">
+        <tr key={vid} className="hover:bg-slate-50 transition-colors">
+          <td className="px-4 py-3 text-xs font-bold text-slate-900">
             {v.code}
           </td>
           <td className="px-4 py-3 text-center">
@@ -343,7 +341,7 @@ const ManagerPromotion = () => {
               className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold ${
                 v.type === "PHAN_TRAM"
                   ? "bg-purple-100 text-purple-700"
-                  : "bg-green-100 text-green-700"
+                  : "bg-emerald-100 text-emerald-700"
               }`}
             >
               {v.type === "PHAN_TRAM" ? (
@@ -359,27 +357,27 @@ const ManagerPromotion = () => {
               ? `${v.value}%`
               : `${Number(v.value).toLocaleString("vi-VN")} ₫`}
           </td>
-          <td className="px-4 py-3 text-xs text-gray-600">
+          <td className="px-4 py-3 text-xs text-slate-600">
             {formatDate(v.startDate)}
           </td>
-          <td className="px-4 py-3 text-xs text-gray-600">
+          <td className="px-4 py-3 text-xs text-slate-600">
             {formatDate(v.endDate)}
           </td>
           <td className="px-4 py-3">
             {v.routeIds && v.routeIds.length > 0 ? (
-              <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-semibold">
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-semibold border border-blue-100">
                 <FiMapPin className="w-3 h-3" />
                 {v.routeIds.length} tuyến
               </span>
             ) : (
-              <span className="text-xs text-gray-400">Tất cả</span>
+              <span className="text-xs text-slate-400">Tất cả</span>
             )}
           </td>
           <td className="px-4 py-3 text-center">
             <div className="flex items-center justify-center gap-2">
               <button
                 onClick={() => openEditForm(v)}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-blue-600 border border-blue-300 hover:bg-blue-50 transition-all"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-blue-700 border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-all"
                 title="Sửa voucher"
               >
                 <FiEdit className="w-3.5 h-3.5" />
@@ -387,7 +385,7 @@ const ManagerPromotion = () => {
               </button>
               <button
                 onClick={() => openDelete(vid)}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-red-600 border border-red-300 hover:bg-red-50 transition-all"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-red-700 border border-red-200 bg-red-50 hover:bg-red-100 transition-all"
                 title="Xóa voucher"
               >
                 <FiTrash2 className="w-3.5 h-3.5" />
@@ -401,57 +399,66 @@ const ManagerPromotion = () => {
   };
 
   return (
-    <>
+    <div className="min-h-screen  p-4 md:p-6">
+      {/* GIỮ NGUYÊN TOASTER NHƯ BẠN ĐANG DÙNG */}
       <Toaster
         position="top-center"
         toastOptions={{ duration: 3000, style: { fontSize: "13px" } }}
       />
 
-      <div className="p-4 sm:p-6 space-y-5">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <h1 className="text-2xl font-extrabold text-gray-900">
-            Quản lý chương trình khuyến mãi
-          </h1>
+      <div className="mx-auto space-y-6">
+        {/* Header card xanh – đồng bộ */}
+        <div className="border border-blue-400 bg-blue-600 text-white rounded-xl px-5 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-white/10 flex items-center justify-center">
+              <FiGift className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg md:text-xl font-semibold">
+                Quản lý chương trình khuyến mãi
+              </h1>
+            </div>
+          </div>
+
           <button
             onClick={openCreateForm}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all"
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-blue-300 bg-white/10 hover:bg-white/20 text-white shadow-sm"
           >
             <FiPlus className="w-4 h-4" />
-            Tạo Voucher Mới
+            Tạo voucher mới
           </button>
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        {/* Table card */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-2.5 text-left text-xs font-bold text-gray-700 uppercase">
-                    Mã Voucher
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">
+                    Mã voucher
                   </th>
-                  <th className="px-4 py-2.5 text-center text-xs font-bold text-gray-700 uppercase">
+                  <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase">
                     Loại
                   </th>
-                  <th className="px-4 py-2.5 text-center text-xs font-bold text-gray-700 uppercase">
-                    Giá Trị
+                  <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase">
+                    Giá trị
                   </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-bold text-gray-700 uppercase">
-                    Bắt Đầu
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">
+                    Bắt đầu
                   </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-bold text-gray-700 uppercase">
-                    Kết Thúc
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">
+                    Kết thúc
                   </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-bold text-gray-700 uppercase">
-                    Tuyến Đường
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">
+                    Tuyến đường
                   </th>
-                  <th className="px-4 py-2.5 text-center text-xs font-bold text-gray-700 uppercase">
-                    Thao Tác
+                  <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase">
+                    Thao tác
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-slate-100">
                 {renderTableContent()}
               </tbody>
             </table>
@@ -459,23 +466,21 @@ const ManagerPromotion = () => {
 
           {/* Pagination */}
           {vouchers.length > 0 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-gray-50 border-t border-gray-200">
-              <div className="text-xs text-gray-600 font-medium">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-3 px-4 py-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-600">
+              <div>
                 Trang{" "}
-                <span className="text-blue-600 font-bold">{page + 1}</span> /{" "}
-                {totalPages} • Tổng{" "}
-                <span className="text-blue-600 font-bold">{totalElements}</span>{" "}
+                <span className="font-semibold text-blue-600">{page + 1}</span>{" "}
+                / {totalPages} • Tổng{" "}
+                <span className="font-semibold text-blue-600">
+                  {totalElements}
+                </span>{" "}
                 voucher
               </div>
               <div className="flex items-center gap-2">
                 <button
                   disabled={page <= 0}
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
-                  className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    page <= 0
-                      ? "text-gray-400 bg-gray-100 cursor-not-allowed"
-                      : "text-gray-700 bg-white border border-gray-300 hover:border-blue-500 hover:text-blue-600 hover:shadow-sm"
-                  }`}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 text-xs"
                 >
                   <FiChevronLeft className="w-3.5 h-3.5" />
                   Trước
@@ -485,11 +490,7 @@ const ManagerPromotion = () => {
                   onClick={() =>
                     setPage((p) => (p + 1 < totalPages ? p + 1 : p))
                   }
-                  className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    page + 1 >= totalPages
-                      ? "text-gray-400 bg-gray-100 cursor-not-allowed"
-                      : "text-gray-700 bg-white border border-gray-300 hover:border-blue-500 hover:text-blue-600 hover:shadow-sm"
-                  }`}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 text-xs"
                 >
                   Sau
                   <FiChevronRight className="w-3.5 h-3.5" />
@@ -501,7 +502,7 @@ const ManagerPromotion = () => {
                     setSize(Number(e.target.value));
                     setPage(0);
                   }}
-                  className="ml-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none bg-white"
+                  className="ml-1 border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none bg-white"
                   title="Số voucher / trang"
                 >
                   {[10, 20, 50, 100].map((n) => (
@@ -516,15 +517,16 @@ const ManagerPromotion = () => {
         </div>
       </div>
 
-      {/* ========= Modal Form: Tạo / Cập nhật ========= */}
+      {/* ========= Modal Form ========= */}
       {showForm && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-[1px] flex items-center justify-center p-3">
-          <div className="bg-white w-full max-w-2xl rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-[1px] flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-2xl rounded-xl shadow-xl border border-slate-200 overflow-hidden">
             {/* Header */}
-            <div className="px-4 py-3 border-b flex items-center justify-between">
+            <div className="px-5 py-3 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold text-gray-800">
-                  {editingId ? "Cập Nhật Voucher" : "Tạo Voucher Mới"}
+                <FiGift className="w-4 h-4 text-blue-600" />
+                <h2 className="text-sm font-semibold text-slate-900">
+                  {editingId ? "Cập nhật voucher" : "Tạo voucher mới"}
                 </h2>
               </div>
               <button
@@ -532,10 +534,10 @@ const ManagerPromotion = () => {
                   resetForm();
                   setShowForm(false);
                 }}
-                className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500"
+                className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500"
                 aria-label="Đóng"
               >
-                <FiX className="w-5 h-5" />
+                <FiX className="w-4 h-4" />
               </button>
             </div>
 
@@ -543,18 +545,18 @@ const ManagerPromotion = () => {
             <div className="max-h-[70vh] overflow-y-auto">
               {loadingDetail ? (
                 <div className="py-10 text-center">
-                  <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                  <p className="text-sm text-gray-500 mt-3">
+                  <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  <p className="text-sm text-slate-500 mt-3">
                     Đang tải thông tin voucher...
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="p-4 space-y-4">
+                <form onSubmit={handleSubmit} className="p-5 space-y-4 text-sm">
                   {/* Code + Type */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
-                        Mã Voucher
+                      <label className="block text-[12px] font-medium text-slate-700 mb-1 uppercase">
+                        Mã voucher
                       </label>
                       <input
                         type="text"
@@ -562,21 +564,21 @@ const ManagerPromotion = () => {
                         onChange={(e) =>
                           setFormData({ ...formData, code: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
                         placeholder="VD: SUMMER2024"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
-                        Loại Giảm Giá
+                      <label className="block text-[12px] font-medium text-slate-700 mb-1 uppercase">
+                        Loại giảm giá
                       </label>
                       <select
                         value={formData.type}
                         onChange={(e) =>
                           setFormData({ ...formData, type: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
                       >
                         {VOUCHER_TYPES.map((t) => (
                           <option key={t.value} value={t.value}>
@@ -588,15 +590,15 @@ const ManagerPromotion = () => {
                   </div>
 
                   {/* Value + Min Order */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
+                      <label className="block text-[12px] font-medium text-slate-700 mb-1 uppercase">
                         {formData.type === "PHAN_TRAM" ? (
                           <FiPercent className="inline w-3 h-3 mr-1" />
                         ) : (
                           <FiDollarSign className="inline w-3 h-3 mr-1" />
                         )}
-                        Giá Trị
+                        Giá trị
                       </label>
                       <input
                         type="number"
@@ -604,7 +606,7 @@ const ManagerPromotion = () => {
                         onChange={(e) =>
                           setFormData({ ...formData, value: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
                         placeholder={
                           formData.type === "PHAN_TRAM" ? "VD: 10" : "VD: 50000"
                         }
@@ -614,8 +616,8 @@ const ManagerPromotion = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
-                        Giá Trị Đơn Tối Thiểu
+                      <label className="block text-[12px] font-medium text-slate-700 mb-1 uppercase">
+                        Giá trị đơn tối thiểu
                       </label>
                       <input
                         type="number"
@@ -626,7 +628,7 @@ const ManagerPromotion = () => {
                             minOrderValue: e.target.value,
                           })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
                         placeholder="VD: 100000"
                         min="0"
                       />
@@ -635,8 +637,8 @@ const ManagerPromotion = () => {
 
                   {/* Description */}
                   <div>
-                    <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
-                      Mô Tả
+                    <label className="block text-[12px] font-medium text-slate-700 mb-1 uppercase">
+                      Mô tả
                     </label>
                     <textarea
                       value={formData.description}
@@ -646,17 +648,17 @@ const ManagerPromotion = () => {
                           description: e.target.value,
                         })
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none resize-none"
                       placeholder="Mô tả chi tiết về voucher..."
-                      rows="3"
+                      rows={3}
                     />
                   </div>
 
                   {/* Date Range */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
-                        Ngày Bắt Đầu
+                      <label className="block text-[12px] font-medium text-slate-700 mb-1 uppercase">
+                        Ngày bắt đầu
                       </label>
                       <input
                         type="datetime-local"
@@ -667,29 +669,32 @@ const ManagerPromotion = () => {
                             startDate: e.target.value,
                           })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
                       />
                     </div>
                     <div>
-                      <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
-                        Ngày Kết Thúc
+                      <label className="block text-[12px] font-medium text-slate-700 mb-1 uppercase">
+                        Ngày kết thúc
                       </label>
                       <input
                         type="datetime-local"
                         value={formData.endDate}
                         onChange={(e) =>
-                          setFormData({ ...formData, endDate: e.target.value })
+                          setFormData({
+                            ...formData,
+                            endDate: e.target.value,
+                          })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
                       />
                     </div>
                   </div>
 
                   {/* Assign Type */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
-                        Kiểu Phân Phối
+                      <label className="block text-[12px] font-medium text-slate-700 mb-1 uppercase">
+                        Kiểu phân phối
                       </label>
                       <select
                         value={formData.assignType}
@@ -699,7 +704,7 @@ const ManagerPromotion = () => {
                             assignType: e.target.value,
                           })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
                       >
                         {ASSIGN_TYPES.map((t) => (
                           <option key={t.value} value={t.value}>
@@ -710,8 +715,8 @@ const ManagerPromotion = () => {
                     </div>
                     {formData.assignType === "DAT_CHI_TIEU" && (
                       <div>
-                        <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
-                          Ngưỡng Chỉ Tiêu (₫)
+                        <label className="block text-[12px] font-medium text-slate-700 mb-1 uppercase">
+                          Ngưỡng chỉ tiêu (₫)
                         </label>
                         <input
                           type="number"
@@ -722,7 +727,7 @@ const ManagerPromotion = () => {
                               thresholdAmount: e.target.value,
                             })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
                           placeholder="VD: 1000000"
                           min="0"
                         />
@@ -732,29 +737,29 @@ const ManagerPromotion = () => {
 
                   {/* Route Selection */}
                   <div>
-                    <label className="block text-[12px] font-bold text-gray-700 mb-1 uppercase">
-                      Áp Dụng Cho Tuyến Đường
-                      <span className="ml-1 text-xs font-normal text-gray-500 normal-case">
+                    <label className="block text-[12px] font-medium text-slate-700 mb-1 uppercase">
+                      Áp dụng cho tuyến đường
+                      <span className="ml-1 text-xs font-normal text-slate-500 normal-case">
                         ({formData.routeIds?.length || 0} đã chọn)
                       </span>
                     </label>
 
                     {loadingRoutes ? (
-                      <div className="p-4 bg-gray-50 rounded-lg text-center">
-                        <div className="inline-block w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-xs text-gray-500 mt-2">
+                      <div className="p-4 bg-slate-50 rounded-lg text-center">
+                        <div className="inline-block w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                        <p className="text-xs text-slate-500 mt-2">
                           Đang tải danh sách tuyến đường...
                         </p>
                       </div>
                     ) : routes.length === 0 ? (
-                      <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <p className="text-xs text-yellow-700">
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                        <p className="text-xs text-amber-700">
                           Không có tuyến đường nào. Vui lòng kiểm tra hoặc thêm
                           tuyến mới.
                         </p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1 border border-gray-200 rounded-lg bg-gray-50">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1 border border-slate-200 rounded-lg bg-slate-50">
                         {routes.map((route) => {
                           const isSelected = formData.routeIds?.includes(
                             route.routeId
@@ -764,8 +769,8 @@ const ManagerPromotion = () => {
                               key={route.routeId}
                               className={`flex items-center gap-2 p-2 border-2 rounded-lg cursor-pointer transition-all ${
                                 isSelected
-                                  ? "border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm"
-                                  : "border-gray-200 bg-white hover:border-gray-300"
+                                  ? "border-blue-500 bg-blue-50 shadow-sm"
+                                  : "border-slate-200 bg-white hover:border-slate-300"
                               }`}
                             >
                               <input
@@ -780,7 +785,7 @@ const ManagerPromotion = () => {
                                 className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center ${
                                   isSelected
                                     ? "border-blue-500 bg-blue-500"
-                                    : "border-gray-300 bg-white"
+                                    : "border-slate-300 bg-white"
                                 }`}
                               >
                                 <FiCheck
@@ -796,14 +801,14 @@ const ManagerPromotion = () => {
                                   className={`flex-shrink-0 w-3 h-3 ${
                                     isSelected
                                       ? "text-blue-600"
-                                      : "text-gray-400"
+                                      : "text-slate-400"
                                   }`}
                                 />
                                 <span
                                   className={`text-xs font-medium truncate ${
                                     isSelected
                                       ? "text-blue-900"
-                                      : "text-gray-700"
+                                      : "text-slate-700"
                                   }`}
                                   title={route.routeName}
                                 >
@@ -822,24 +827,24 @@ const ManagerPromotion = () => {
 
             {/* Footer actions */}
             {!loadingDetail && (
-              <div className="px-4 py-3 border-t flex items-center justify-end gap-2">
+              <div className="px-5 py-3 border-t border-slate-200 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => {
                     resetForm();
                     setShowForm(false);
                   }}
-                  className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-semibold transition-all"
+                  className="px-4 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition-colors"
                 >
-                  Hủy bỏ
+                  Hủy
                 </button>
                 <button
                   onClick={handleSubmit}
                   disabled={saving}
-                  className={`inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-sm font-semibold shadow-md transition-all ${
+                  className={`inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-xs font-medium shadow-sm transition-all ${
                     saving
-                      ? "bg-gray-400 cursor-not-allowed text-white"
-                      : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white hover:shadow-lg"
+                      ? "bg-slate-400 text-white cursor-not-allowed"
+                      : "bg-indigo-600 hover:bg-indigo-700 text-white"
                   }`}
                 >
                   {saving
@@ -871,7 +876,7 @@ const ManagerPromotion = () => {
         loading={deleting}
         type="danger"
       />
-    </>
+    </div>
   );
 };
 

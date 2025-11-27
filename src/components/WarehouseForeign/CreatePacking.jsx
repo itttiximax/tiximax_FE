@@ -48,7 +48,7 @@ const CreatePacking = () => {
       const data = await managerDestinationService.getDestinations();
       setDestinations(data);
     } catch {
-      setError("Không thể tải danh sách điểm đến");
+      setError("Cannot load destination list.");
     } finally {
       setLoadingDestinations(false);
     }
@@ -107,7 +107,7 @@ const CreatePacking = () => {
       );
 
       if (filteredShipmentCodes.length === 0) {
-        setError("Vui lòng nhập ít nhất một mã vận đơn");
+        setError("Please enter at least one shipment code.");
         setLoading(false);
         return;
       }
@@ -131,7 +131,7 @@ const CreatePacking = () => {
         err.response?.data?.error ||
         err.response?.data?.message ||
         err.message ||
-        "Đã xảy ra lỗi không xác định";
+        "An unknown error occurred.";
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -139,40 +139,48 @@ const CreatePacking = () => {
   };
 
   return (
-    <div className="min-h-screen py-8 px-4">
+    <div className="p-6 min-h-screen">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <Package className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-800">Đóng hàng</h1>
+        {/* Header - đồng bộ style với các màn khác */}
+        <div className="bg-blue-600 rounded-xl shadow-sm p-5 mb-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                <Package className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-white">
+                  Create Packing
+                </h1>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Form */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <FileText className="w-6 h-6 text-gray-700" />
-              <h2 className="text-2xl font-semibold text-gray-800">
-                Chi tiết đóng hàng
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Form Card */}
+          <div className="bg-white border border-gray-200 rounded-xl p-5">
+            {/* <div className="flex items-center gap-2 mb-4">
+              <FileText className="w-5 h-5 text-gray-700" />
+              <h2 className="text-base font-semibold text-gray-800">
+                Packing details
               </h2>
-            </div>
+            </div> */}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {/* Destination Selection */}
               <div>
                 <label
                   htmlFor="destinationId"
-                  className="block text-2xl font-medium text-black-700 mb-2 flex items-center gap-2"
+                  className="block text-xl font-medium text-gray-700 mb-2 flex items-center gap-2"
                 >
                   <MapPin className="w-4 h-4 text-blue-500" />
-                  Chọn điểm đến <span className="text-red-500">*</span>
+                  Select destination <span className="text-red-500">*</span>
                 </label>
                 {loadingDestinations ? (
                   <div className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 flex items-center gap-2">
-                    <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-                    <span className="text-gray-500">Đang tải...</span>
+                    <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+                    <span className="text-gray-500 text-sm">Loading...</span>
                   </div>
                 ) : (
                   <select
@@ -181,9 +189,9 @@ const CreatePacking = () => {
                     value={formData.destinationId}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:border-red-600 focus:outline-none"
+                    className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   >
-                    <option value="">Chọn điểm đến</option>
+                    <option value="">Select destination</option>
                     {destinations.map((destination) => (
                       <option
                         key={destination.destinationId}
@@ -195,21 +203,22 @@ const CreatePacking = () => {
                   </select>
                 )}
                 {destinations.length === 0 && !loadingDestinations && (
-                  <p className="text-sm text-red-500 mt-1 flex items-center gap-1">
-                    <AlertCircle className="w-6 h-6" />
-                    Không có điểm đến
+                  <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" />
+                    No destination found.
                   </p>
                 )}
               </div>
 
               {/* Shipment Codes */}
               <div>
-                <label className="block text-2xl font-medium text-black-700 mb-2 flex items-center gap-2">
+                <label className="block text-xl font-medium text-gray-700 mb-2 flex items-center gap-2">
                   <Barcode className="w-4 h-4 text-blue-500" />
-                  Mã vận đơn <span className="text-red-500">*</span>
+                  Shipment codes <span className="text-red-500">*</span>
                 </label>
-                <p className="text-sm font-medium text-black-700 mb-3">
-                  Hỗ trợ quét barcode
+                <p className="text-xs font-medium text-gray-500 mb-3">
+                  You can type or scan barcode. Press Enter to jump to the next
+                  field.
                 </p>
                 <div className="space-y-3">
                   {formData.shipmentCodes.map((code, index) => (
@@ -223,8 +232,8 @@ const CreatePacking = () => {
                             handleShipmentCodeChange(index, e.target.value)
                           }
                           onKeyDown={(e) => handleKeyDown(e, index)}
-                          placeholder={`Mã vận đơn ${index + 1}`}
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:border-red-600 focus:outline-none"
+                          placeholder={`Shipment code ${index + 1}`}
+                          className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
                         />
                       </div>
                       {formData.shipmentCodes.length > 1 && (
@@ -232,9 +241,9 @@ const CreatePacking = () => {
                           type="button"
                           onClick={() => removeShipmentCode(index)}
                           className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Xóa mã vận đơn"
+                          title="Remove shipment code"
                         >
-                          <X className="w-5 h-5" />
+                          <X className="w-4 h-4" />
                         </button>
                       )}
                     </div>
@@ -243,96 +252,99 @@ const CreatePacking = () => {
                   <button
                     type="button"
                     onClick={addShipmentCode}
-                    className="w-full py-3 px-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors flex items-center justify-center gap-2"
+                    className="w-full py-2.5 px-4 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors flex items-center justify-center gap-2"
                   >
-                    <Plus className="w-5 h-5" />
-                    Thêm mã vận đơn
+                    <Plus className="w-4 h-4" />
+                    Add shipment code
                   </button>
                 </div>
               </div>
 
+              {/* Submit */}
               <button
                 type="submit"
                 disabled={loading || !formData.destinationId}
-                className="w-full py-3 px-6 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                className="w-full py-2.5 px-6 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Đang tạo...
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Creating...
                   </>
                 ) : (
                   <>
-                    <Package className="w-5 h-5" />
-                    Tạo đóng gói
+                    <Package className="w-4 h-4" />
+                    Create packing
                   </>
                 )}
               </button>
             </form>
           </div>
 
-          {/* Results */}
-          <div className="space-y-6">
+          {/* Right Column: Result / Error / Guide */}
+          <div className="space-y-4">
             {/* Error Message */}
             {error && (
               <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-lg">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                  <p className="text-red-700">{error}</p>
+                  <p className="text-sm text-red-700">{error}</p>
                 </div>
               </div>
             )}
 
             {/* Success Result */}
             {result && (
-              <div className="bg-white rounded-lg shadow-lg p-6 border-l-4 border-green-400">
-                <div className="flex items-center gap-2 mb-4">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
-                  <h3 className="text-lg font-semibold text-green-800">
-                    Hoàn thành đóng gói!
+              <div className="bg-white rounded-xl shadow-sm border border-green-200 p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <h3 className="text-sm font-semibold text-green-800">
+                    Packing created
                   </h3>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
                     <span className="text-gray-600 flex items-center gap-2">
                       <Package className="w-4 h-4" />
-                      Packing ID:
+                      Packing ID
                     </span>
                     <span className="font-semibold">{result.packingId}</span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
                     <span className="text-gray-600 flex items-center gap-2">
                       <Barcode className="w-4 h-4" />
-                      Packing Code:
+                      Packing Code
                     </span>
                     <span className="font-mono text-blue-600 font-semibold">
                       {result.packingCode}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Flight Code:</span>
+                  <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
+                    <span className="text-gray-600">Flight Code</span>
                     <span className="font-semibold">
                       {result.flightCode || (
-                        <span className="text-yellow-600">Chưa phân</span>
+                        <span className="text-yellow-600">
+                          Not assigned yet
+                        </span>
                       )}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Ngày đóng gói:</span>
+                  <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
+                    <span className="text-gray-600">Packing date</span>
                     <span className="font-semibold">
-                      {new Date(result.packedDate).toLocaleString("vi-VN")}
+                      {new Date(result.packedDate).toLocaleString("en-US")}
                     </span>
                   </div>
-                  <div>
-                    <span className="text-gray-600 block mb-2 font-medium">
-                      Danh sách mã vận đơn:
+                  <div className="pt-1.5">
+                    <span className="text-gray-600 block mb-1.5 font-medium">
+                      Shipment code list
                     </span>
                     <div className="bg-gray-50 rounded-lg p-3 max-h-40 overflow-y-auto">
                       {result.packingList.map((item, index) => (
                         <div
                           key={index}
-                          className="font-mono text-sm py-1 flex items-center gap-2"
+                          className="font-mono text-xs py-1 flex items-center gap-2"
                         >
                           <Barcode className="w-3 h-3 text-gray-400" />
                           {item}
@@ -346,26 +358,26 @@ const CreatePacking = () => {
 
             {/* Instructions */}
             {!result && !error && (
-              <div className="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-400">
-                <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Hướng dẫn đóng gói
+              <div className="bg-blue-50 rounded-xl p-5 border border-blue-100">
+                <h3 className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  Packing guide
                 </h3>
-                <ol className="space-y-3 text-blue-700">
+                <ol className="space-y-2 text-sm text-blue-800">
                   <li className="flex items-start gap-2">
-                    <span className="font-bold min-w-[20px]">1.</span>
-                    <span>Chọn điểm đến từ danh sách thả xuống</span>
+                    <span className="font-bold min-w-[18px]">1.</span>
+                    <span>Select a destination from the list.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="font-bold min-w-[20px]">2.</span>
+                    <span className="font-bold min-w-[18px]">2.</span>
                     <span>
-                      Nhập mã vận đơn thủ công hoặc quét barcode. Nhấn Enter sau
-                      mỗi mã để tự động tạo ô mới
+                      Enter shipment codes manually or scan barcodes. Press
+                      Enter after each code to move to the next field.
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="font-bold min-w-[20px]">3.</span>
-                    <span>Nhấn "Tạo đóng gói" để hoàn thành</span>
+                    <span className="font-bold min-w-[18px]">3.</span>
+                    <span>Click &quot;Create packing&quot; to save.</span>
                   </li>
                 </ol>
               </div>

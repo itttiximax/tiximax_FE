@@ -349,7 +349,7 @@ const MergedPaymentConfigModal = ({
 };
 
 /** Nút tạo thanh toán gộp */
-const CreateMergedPaymentOrder = ({
+const CreateMergedPaymentAuction = ({
   selectedOrders, // string[] hoặc id thanh toán
   totalAmount,
   formatCurrency,
@@ -378,13 +378,12 @@ const CreateMergedPaymentOrder = ({
     try {
       setIsCreating(true);
 
-      const result = await mergedPaymentService.mergePayments(
+      const result = await mergedPaymentService.mergePaymentAuction(
         depositPercent,
         isUseBalance,
         bankId,
-        selectedOrders // body: danh sách paymentIds
+        selectedOrders 
       );
-
       toast.success(
         `Tạo thanh toán ${
           selectedOrders.length > 1 ? "gộp " : ""
@@ -392,7 +391,7 @@ const CreateMergedPaymentOrder = ({
           result?.paymentCode || result?.id || "N/A"
         }`
       );
-
+      
       setShowConfigModal(false);
       onSuccess?.(result);
     } catch (error) {
@@ -445,4 +444,4 @@ const CreateMergedPaymentOrder = ({
   );
 };
 
-export default CreateMergedPaymentOrder;
+export default CreateMergedPaymentAuction;

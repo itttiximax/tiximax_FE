@@ -4,6 +4,8 @@ import toast from "react-hot-toast";
 
 const DetailOrderLink = ({ linkId, onClose }) => {
   const [orderLink, setOrderLink] = useState(null);
+  const [staff, setStaff] = useState(null);
+  const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -12,6 +14,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
     if (linkId) {
       fetchOrderLinkDetail();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [linkId]);
 
   const fetchOrderLinkDetail = async () => {
@@ -19,11 +22,19 @@ const DetailOrderLink = ({ linkId, onClose }) => {
       setLoading(true);
       setError(null);
       const data = await orderlinkService.getOrderLinkById(linkId);
-      setOrderLink(data);
-    } catch (error) {
-      console.error("Error fetching order link detail:", error);
-      setError(error.message);
-      toast.error("Không thể tải chi tiết sản phẩm");
+
+      // Expecting structure: { orderLink: {...}, staff: {...}, customer: {...} }
+      setOrderLink(data?.orderLink || null);
+      setStaff(data?.staff || null);
+      setCustomer(data?.customer || null);
+    } catch (err) {
+      console.error("Error fetching order link detail:", err);
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Something went wrong while loading details.";
+      setError(message);
+      toast.error("Unable to load order link details");
     } finally {
       setLoading(false);
     }
@@ -31,11 +42,14 @@ const DetailOrderLink = ({ linkId, onClose }) => {
 
   // Format currency
   const formatCurrency = (amount) => {
-    if (amount === null || amount === undefined) return "N/A";
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
+    if (amount === null || amount === undefined || isNaN(Number(amount))) {
+      return "N/A";
+    }
+    try {
+      return Number(amount).toLocaleString("en-US");
+    } catch {
+      return String(amount);
+    }
   };
 
   // Get status color
@@ -43,6 +57,8 @@ const DetailOrderLink = ({ linkId, onClose }) => {
     switch (status) {
       case "HOAT_DONG":
         return "bg-green-100 text-green-800";
+      case "CHO_MUA":
+        return "bg-blue-100 text-blue-800";
       case "TAM_DUNG":
         return "bg-yellow-100 text-yellow-800";
       case "HUY":
@@ -52,13 +68,24 @@ const DetailOrderLink = ({ linkId, onClose }) => {
     }
   };
 
+  // Get status label (English)
+  const getStatusLabel = (status) => {
+    const labels = {
+      HOAT_DONG: "Active",
+      CHO_MUA: "Pending purchase",
+      TAM_DUNG: "On hold",
+      HUY: "Cancelled",
+    };
+    return labels[status] || status || "Unknown";
+  };
+
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-2 text-gray-600">Đang tải chi tiết...</span>
+            <span className="ml-2 text-gray-600">Loading details...</span>
           </div>
         </div>
       </div>
@@ -84,7 +111,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
               />
             </svg>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Không thể tải chi tiết
+              Unable to load details
             </h3>
             <p className="text-gray-600 mb-4">{error}</p>
             <div className="flex space-x-2 justify-center">
@@ -92,13 +119,13 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                 onClick={fetchOrderLinkDetail}
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
               >
-                Thử lại
+                Retry
               </button>
               <button
                 onClick={onClose}
                 className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
               >
-                Đóng
+                Close
               </button>
             </div>
           </div>
@@ -113,7 +140,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center space-x-3">
@@ -134,7 +161,7 @@ const DetailOrderLink = ({ linkId, onClose }) => {
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
-                Chi tiết sản phẩm
+                Order Link Details
               </h2>
             </div>
           </div>
@@ -161,8 +188,9 @@ const DetailOrderLink = ({ linkId, onClose }) => {
         {/* Content */}
         <div className="p-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Product Information */}
+            {/* LEFT COLUMN: Product + Staff */}
             <div className="space-y-6">
+              {/* Product Information (kèm hình) */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                   <svg
@@ -178,24 +206,25 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                       d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  Thông tin sản phẩm
+                  Product Information
                 </h3>
 
                 <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Tên sản phẩm
+                      Product Name
                     </label>
                     <p className="text-gray-900">
-                      {orderLink.productName !== "string"
+                      {orderLink.productName &&
+                      orderLink.productName !== "string"
                         ? orderLink.productName
-                        : "Chưa có tên sản phẩm"}
+                        : "No product name"}
                     </p>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Link sản phẩm
+                      Product Link
                     </label>
                     {orderLink.productLink &&
                     orderLink.productLink !== "string" ? (
@@ -203,12 +232,12 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                         href={orderLink.productLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 break-all"
+                        className="text-blue-600 hover:text-blue-800 break-all text-sm"
                       >
                         {orderLink.productLink}
                       </a>
                     ) : (
-                      <p className="text-gray-500">Chưa có link</p>
+                      <p className="text-gray-500">No link available</p>
                     )}
                   </div>
 
@@ -218,90 +247,134 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                         Website
                       </label>
                       <p className="text-gray-900">
-                        {orderLink.website !== "string"
+                        {orderLink.website && orderLink.website !== "string"
                           ? orderLink.website
                           : "N/A"}
                       </p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Số lượng
+                        Quantity
                       </label>
-                      <p className="text-gray-900">{orderLink.quantity}</p>
+                      <p className="text-gray-900 font-semibold">
+                        {orderLink.quantity || 0}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Variant
+                      </label>
+                      <p className="text-gray-900">
+                        {orderLink.classify && orderLink.classify !== "string"
+                          ? orderLink.classify
+                          : "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Shop Name
+                      </label>
+                      <p className="text-gray-900">
+                        {orderLink.groupTag && orderLink.groupTag !== "string"
+                          ? orderLink.groupTag
+                          : "N/A"}
+                      </p>
                     </div>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Mã tracking
-                    </label>
-                    <div className="inline-flex items-center px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
-                      <span className="text-blue-900 font-mono text-sm">
-                        {orderLink.trackingCode}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Group Tag
+                      Note
                     </label>
                     <p className="text-gray-900">
-                      {orderLink.groupTag !== "string"
-                        ? orderLink.groupTag
-                        : "N/A"}
+                      {orderLink.note && orderLink.note !== "string"
+                        ? orderLink.note
+                        : "No note"}
                     </p>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Trạng thái
+                      Status
                     </label>
                     <span
                       className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
                         orderLink.status
                       )}`}
                     >
-                      {orderLink.status}
+                      {getStatusLabel(orderLink.status)}
                     </span>
                   </div>
+
+                  {/* Product Image gộp vào cuối card */}
+                  {orderLink.purchaseImage &&
+                    orderLink.purchaseImage !== "string" &&
+                    orderLink.purchaseImage !== "" && (
+                      <div className="pt-4 border-t border-gray-200 mt-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Product Image
+                        </label>
+                        <div className="text-center">
+                          <img
+                            src={orderLink.purchaseImage}
+                            alt="Product"
+                            className="max-w-full h-auto rounded-lg shadow-md mx-auto"
+                            style={{ maxHeight: "260px" }}
+                          />
+                        </div>
+                      </div>
+                    )}
                 </div>
               </div>
 
-              {/* Product Image */}
-              {orderLink.purchaseImage &&
-                orderLink.purchaseImage !== "string" && (
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                      <svg
-                        className="w-5 h-5 mr-2 text-green-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                      Hình ảnh sản phẩm
-                    </h3>
-                    <div className="text-center">
-                      <img
-                        src={orderLink.purchaseImage}
-                        alt="Product"
-                        className="max-w-full h-auto rounded-lg shadow-md mx-auto"
-                        style={{ maxHeight: "300px" }}
-                      />
-                    </div>
+              {/* Staff Information */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <svg
+                    className="w-5 h-5 mr-2 text-purple-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M16 14c2.21 0 4-1.79 4-4s-1.79-4-4-4M8 14c2.21 0 4-1.79 4-4S10.21 6 8 6m8 4v.01M8 10v.01M12 14v6m0 0H6m6 0h6"
+                    />
+                  </svg>
+                  Staff Information
+                </h3>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm text-gray-600">Staff Name</label>
+                    <p className="font-medium text-gray-900">
+                      {staff?.name || "N/A"}
+                    </p>
                   </div>
-                )}
+                  <div>
+                    <label className="text-sm text-gray-600">Email</label>
+                    <p className="text-gray-900">{staff?.email || "N/A"}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-600">Phone</label>
+                    <p className="text-gray-900">{staff?.phone || "N/A"}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-600">Staff Code</label>
+                    <p className="text-gray-900">{staff?.staffCode || "N/A"}</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Pricing Information */}
+            {/* RIGHT COLUMN: Customer + Pricing */}
             <div className="space-y-6">
+              {/* Pricing Information */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                   <svg
@@ -317,56 +390,114 @@ const DetailOrderLink = ({ linkId, onClose }) => {
                       d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
                     />
                   </svg>
-                  Thông tin giá cả
+                  Pricing Information
                 </h3>
 
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white rounded-lg p-3 border border-gray-200">
-                      <div className="text-sm text-gray-600 mb-1">Giá web</div>
-                      <div className="text-lg font-semibold text-gray-900">
-                        {orderLink.priceWeb?.toLocaleString() || 0}
+                  {/* Web Pricing */}
+                  <div className="bg-white rounded-lg p-4 border-2 border-blue-200">
+                    <h4 className="text-sm font-semibold text-blue-800 mb-3">
+                      Web Purchase
+                    </h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">
+                          Web Price:
+                        </span>
+                        <span className="font-semibold text-gray-900">
+                          {formatCurrency(orderLink.priceWeb || 0)}
+                        </span>
                       </div>
-                    </div>
-                    <div className="bg-white rounded-lg p-3 border border-gray-200">
-                      <div className="text-sm text-gray-600 mb-1">Phí ship</div>
-                      <div className="text-lg font-semibold text-gray-900">
-                        {orderLink.shipWeb?.toLocaleString() || 0}
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">
+                          Shipping Fee:
+                        </span>
+                        <span className="font-semibold text-gray-900">
+                          {formatCurrency(orderLink.shipWeb || 0)}
+                        </span>
                       </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-lg p-3 border border-gray-200">
-                    <div className="text-sm text-gray-600 mb-1">Tổng web</div>
-                    <div className="text-xl font-bold text-blue-600">
-                      {orderLink.totalWeb?.toLocaleString() || 0}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white rounded-lg p-3 border border-gray-200">
-                      <div className="text-sm text-gray-600 mb-1">
-                        Phí mua hộ
-                      </div>
-                      <div className="text-lg font-semibold text-gray-900">
-                        {orderLink.purchaseFee?.toLocaleString() || 0}
-                      </div>
-                    </div>
-                    <div className="bg-white rounded-lg p-3 border border-gray-200">
-                      <div className="text-sm text-gray-600 mb-1">Phụ phí</div>
-                      <div className="text-lg font-semibold text-gray-900">
-                        {orderLink.extraCharge?.toLocaleString() || 0}
+                      <div className="pt-2 mt-2 border-t border-blue-200">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium text-blue-700">
+                            Web Total:
+                          </span>
+                          <span className="text-lg font-bold text-blue-700">
+                            {formatCurrency(orderLink.totalWeb || 0)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-green-50 rounded-lg p-4 border-2 border-green-200">
-                    <div className="text-sm text-green-700 mb-1 font-medium">
-                      Thành tiền (VND)
+                  {/* Additional Fees */}
+                  <div className="bg-white rounded-lg p-4 border-2 border-amber-200">
+                    <h4 className="text-sm font-semibold text-amber-800 mb-3">
+                      Additional Fees
+                    </h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">
+                          Purchase Fee:
+                        </span>
+                        <span className="font-semibold text-gray-900">
+                          {orderLink.purchaseFee || 0}%
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">
+                          Extra Charge:
+                        </span>
+                        <span className="font-semibold text-gray-900">
+                          {formatCurrency(orderLink.extraCharge || 0)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-2xl font-bold text-green-800">
-                      {formatCurrency(orderLink.finalPriceVnd)}
-                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Customer Information */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <svg
+                    className="w-5 h-5 mr-2 text-orange-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                  Customer Information
+                </h3>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm text-gray-600">
+                      Customer Name
+                    </label>
+                    <p className="font-medium text-gray-900">
+                      {customer?.name || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-600">Phone</label>
+                    <p className="text-gray-900">{customer?.phone || "N/A"}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-600">Email</label>
+                    <p className="text-gray-900">{customer?.email || "N/A"}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-600">
+                      Customer Code
+                    </label>
+                    <p className="text-gray-900">
+                      {customer?.customerCode || "N/A"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -378,9 +509,9 @@ const DetailOrderLink = ({ linkId, onClose }) => {
         <div className="flex justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
           >
-            Đóng
+            Close
           </button>
         </div>
       </div>

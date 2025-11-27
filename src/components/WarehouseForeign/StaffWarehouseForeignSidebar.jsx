@@ -13,7 +13,6 @@ import {
   PackagePlus,
   Plane,
   Warehouse,
-  LogOut,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -37,62 +36,58 @@ const StaffWarehouseForeignSidebar = () => {
 
     fetchProfile();
   }, []);
+
   const menuGroups = [
     {
       title: "Dashboard",
       items: [
         {
-          text: "Tổng quan",
+          text: "Overview",
           icon: <LayoutDashboard className="w-6 h-6" />,
           path: "/staff-warehouse-foreign/dashboard",
         },
         {
-          text: "Kho",
+          text: "Warehouse",
           icon: <Warehouse className="w-6 h-6" />,
           path: "/staff-warehouse-foreign/warehouse",
         },
       ],
     },
     {
-      title: "Inbound (Nhập kho)",
+      title: "Inbound (Indonesia)",
       items: [
         {
-          text: "Nhập kho Indonesia",
+          text: "Receive Stock",
           icon: <PackagePlus className="w-6 h-6" />,
           path: "/staff-warehouse-foreign/imports",
         },
         {
-          text: "Nhập kho",
-          icon: <PackageCheck className="w-6 h-6" />,
-          path: "/staff-warehouse-foreign/importproduct",
-        },
-        {
-          text: "Đóng hàng",
+          text: "Packing",
           icon: <PackageOpen className="w-6 h-6" />,
           path: "/staff-warehouse-foreign/packings",
         },
       ],
     },
     {
-      title: "Outbound (Xuất kho)",
+      title: "Outbound (Export)",
       items: [
         {
-          text: "Hàng đủ điều kiện",
+          text: "Ready to Fly",
           icon: <PackageCheck className="w-6 h-6" />,
           path: "/staff-warehouse-foreign/outbound/packingeligible",
         },
         {
-          text: "Chờ chuyến bay",
+          text: "Waiting to Fly",
           icon: <Plane className="w-6 h-6" />,
           path: "/staff-warehouse-foreign/outbound/packingawaiting",
         },
         {
-          text: "Xử lí đơn lỗi",
+          text: "Problem Orders",
           icon: <FolderOutput className="w-6 h-6" />,
           path: "/staff-warehouse-foreign/stock/location",
         },
         {
-          text: "Xem trạng thái đóng gói",
+          text: "Packing Status",
           icon: <FolderOutput className="w-6 h-6" />,
           path: "/staff-warehouse-foreign/outbound/packinginwarehouse",
         },
@@ -107,9 +102,24 @@ const StaffWarehouseForeignSidebar = () => {
           path: "/staff-warehouse-foreign/stock/serial",
         },
         {
-          text: "Vị trí hàng",
+          text: "Stock Location",
           icon: <Package className="w-6 h-6" />,
           path: "/staff-warehouse-foreign/outbound/orders",
+        },
+      ],
+    },
+    {
+      title: "Inbound (KOR-JAP-AME)",
+      items: [
+        {
+          text: "Inventory Count",
+          icon: <ListChecks className="w-6 h-6" />,
+          path: "/staff-warehouse-foreign/audit/check",
+        },
+        {
+          text: "Packing",
+          icon: <PackageOpen className="w-6 h-6" />,
+          path: "/staff-warehouse-foreign/packings",
         },
       ],
     },
@@ -117,27 +127,27 @@ const StaffWarehouseForeignSidebar = () => {
       title: "Inventory Audit",
       items: [
         {
-          text: "Kiểm kê",
-          icon: <ListChecks className="w-6 h-6" />,
-          path: "/staff-warehouse-foreign/audit/check",
+          text: "Stock Inbound",
+          icon: <PackageCheck className="w-6 h-6" />,
+          path: "/staff-warehouse-foreign/importproduct",
         },
         {
-          text: "Đối chiếu",
+          text: "Reconcile",
           icon: <ClipboardCheck className="w-6 h-6" />,
           path: "/staff-warehouse-foreign/audit/reconcile",
         },
       ],
     },
     {
-      title: "Báo cáo & Thống kê",
+      title: "Reports & Stats",
       items: [
         {
-          text: "Báo cáo nhập/xuất/tồn",
+          text: "In/Out/Stock Report",
           icon: <BarChart className="w-6 h-6" />,
           path: "/staff-warehouse-foreign/reports/dashboard",
         },
         {
-          text: "Hiệu suất",
+          text: "Performance",
           icon: <BarChart className="w-6 h-6" />,
           path: "/staff-warehouse-foreign/reports/performance",
         },
@@ -162,7 +172,7 @@ const StaffWarehouseForeignSidebar = () => {
           {isExpanded ? (
             <>
               <span className="text-sm font-medium text-slate-700 mx-auto">
-                Nhân viên kho ngoại
+                Foreign Warehouse Staff
               </span>
               <ChevronLeft className="w-6 h-6 text-slate-600" />
             </>
@@ -196,7 +206,7 @@ const StaffWarehouseForeignSidebar = () => {
                 : "opacity-0 max-h-0 -translate-y-2"
             }`}
           >
-            {profile?.name || "Đang tải..."}
+            {profile?.name || "Loading..."}
           </span>
         </Link>
       </div>
@@ -255,15 +265,15 @@ const StaffWarehouseForeignSidebar = () => {
               isExpanded ? "justify-start" : "justify-center"
             }`}
             iconSize={20}
-            buttonText="" // không hiển thị text mặc định
+            buttonText=""
             redirectTo="/signin"
             showIcon={true}
             useConfirm={true}
-            confirmMessage="Bạn có chắc chắn muốn đăng xuất?"
+            confirmMessage="Are you sure you want to log out?"
           />
           {isExpanded && (
             <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm font-medium text-white">
-              Đăng xuất
+              Log Out
             </span>
           )}
         </div>
