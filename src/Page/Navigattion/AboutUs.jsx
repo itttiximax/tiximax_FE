@@ -58,26 +58,28 @@ const values = [
 
 const milestones = [
   {
-    year: "2019",
-    title: "Khởi nguồn tại Việt Nam",
-    detail: "Bắt đầu với dịch vụ mua hộ & vận chuyển quốc tế quy mô nhỏ.",
-  },
-  {
-    year: "2021",
-    title: "Mở rộng kho ngoại quan",
-    detail: "Thiết lập quy trình đóng gói & kiểm soát chất lượng chuẩn hoá.",
-  },
-  {
-    year: "2023",
-    title: "Nâng cấp hệ thống số",
+    year: "2022",
+    title: "THÀNH LẬP CÔNG TY TIXIMAX",
     detail:
-      "Ra mắt cổng khách hàng, tracking thời gian thực và hoá đơn điện tử.",
+      "Công ty Tiximax ra đời, bắt đầu với lĩnh vực xây dựng và thương mại điện tử quốc tế.",
+  },
+  {
+    year: "2023-2024",
+    title: "HOẠT ĐỘNG TẠI ĐÀ NĂNG",
+    detail:
+      "Hoạt động tại trụ sở Đà Nẵng, bắt đầu phát triển tuyến Indonesia - Việt Nam.",
   },
   {
     year: "2025",
-    title: "Vươn tầm khu vực",
-    detail: "Vận hành đa tuyến Nhật – Hàn – Indo – Mỹ về Việt Nam với SLA cao.",
+    title: "MỞ VĂN PHÒNG TẠI HỒ CHÍ MINH",
+    detail:
+      "Mở văn phòng tại Hồ Chí Minh, phát triển thêm các tuyến Nhật - Việt, Hàn - Việt, Mỹ - Việt.",
   },
+  // {
+  //   year: "2026",
+  //   title: "Vươn tầm khu vực",
+  //   detail: "Vận hành đa tuyến Nhật – Hàn – Indo – Mỹ về Việt Nam với SLA cao.",
+  // },
 ];
 
 const footprints = [

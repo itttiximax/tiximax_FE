@@ -17,7 +17,7 @@ const OrderList = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(100);
 
   // UI states
   const [loading, setLoading] = useState(false);
@@ -71,14 +71,14 @@ const OrderList = () => {
   const filteredOrders = useMemo(() => {
     let filtered = [...orders];
 
-    // Search filter
+    // Search filter - Tìm theo mã đơn, mã khách hàng, tên khách hàng
     if (searchTerm) {
       const search = searchTerm.toLowerCase().trim();
       filtered = filtered.filter(
         (order) =>
           order.orderCode?.toLowerCase().includes(search) ||
+          order.customer?.customerCode?.toLowerCase().includes(search) ||
           order.customer?.name?.toLowerCase().includes(search) ||
-          order.customer?.phone?.includes(search) ||
           order.orderId?.toString().includes(search)
       );
     }
@@ -145,7 +145,8 @@ const OrderList = () => {
       "Tỷ giá",
       "Tổng tiền",
       "Ngày tạo",
-      "Khách hàng",
+      "Mã khách hàng",
+      "Tên khách hàng",
     ];
 
     const rows = filteredOrders.map((order) => [
@@ -160,6 +161,7 @@ const OrderList = () => {
         ? order.finalPriceOrder.toLocaleString("vi-VN")
         : "",
       new Date(order.createdAt).toLocaleDateString("vi-VN"),
+      order.customer?.customerCode || "",
       order.customer?.name || "",
     ]);
 
@@ -212,6 +214,7 @@ const OrderList = () => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString("vi-VN");
   }, []);
+
   const formatPrice = useCallback((price) => {
     if (price === null || price === undefined || price === "") return "-";
 
@@ -294,12 +297,12 @@ const OrderList = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Search */}
+          {/* Search - Updated placeholder */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Tìm mã đơn, khách hàng, SĐT..."
+              placeholder="Tìm mã đơn, mã KH, tên KH..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -451,6 +454,12 @@ const OrderList = () => {
                   Trạng thái
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Mã khách hàng
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tên khách hàng
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Tỷ giá
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -477,6 +486,12 @@ const OrderList = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="h-6 w-24 bg-gray-200 rounded-full" />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-4 w-24 bg-gray-200 rounded" />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-4 w-32 bg-gray-200 rounded" />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="h-4 w-24 bg-gray-200 rounded" />
@@ -521,6 +536,16 @@ const OrderList = () => {
                           >
                             {orderStatus ? orderStatus.label : order.status}
                           </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-blue-600">
+                            {order.customer?.customerCode || "-"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {order.customer?.name || "-"}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {order.exchangeRate
