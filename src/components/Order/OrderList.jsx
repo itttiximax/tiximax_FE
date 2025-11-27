@@ -9,7 +9,8 @@ import {
   Download,
 } from "lucide-react";
 import managerOrderService from "../../Services/Manager/managerOrderService";
-import DetailOrder from "../Manager/DetailOrder";
+// import DetailOrder from "../Manager/DetailOrder";
+import DetailOrderSale from "../Manager/DetailForSale/DetailOrderSale";
 
 const OrderList = () => {
   // Pagination & Data states
@@ -634,7 +635,7 @@ const OrderList = () => {
 
       {/* Detail Modal */}
       {showDetailModal && selectedOrder && (
-        <DetailOrder
+        <DetailOrderSale
           orderData={selectedOrder}
           onClose={handleCloseDetail}
           availableStatuses={availableStatuses}

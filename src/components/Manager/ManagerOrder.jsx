@@ -15,7 +15,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 import managerOrderService from "../../Services/Manager/managerOrderService";
-import DetailOrder from "./DetailOrder";
+// import DetailOrder from "./DetailOrder";
+import DetailOrderSale from "./DetailForSale/DetailOrderSale";
 
 const ManagerOrder = () => {
   const [orders, setOrders] = useState([]);
@@ -708,7 +709,7 @@ const ManagerOrder = () => {
 
         {/* Detail Order Modal */}
         {showDetailModal && selectedOrder && (
-          <DetailOrder
+          <DetailOrderSale
             orderData={selectedOrder}
             onClose={handleCloseDetail}
             availableStatuses={availableStatuses}
