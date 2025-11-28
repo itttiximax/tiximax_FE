@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import BannerWebsite from "../Assets/BannerWebsite.png";
+import BannerWebsite from "../assets/BannerWebsite.png";
 /** Dữ liệu demo — thay bằng API thật nếu có */
 const RAW_PROMOS = [
   {

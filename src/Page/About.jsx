@@ -1,7 +1,7 @@
 import React from "react";
 import { ArrowRight, Award, Clock, Shield, Users } from "lucide-react";
-import BannerWebsiteMain from "../assets/BannerWebsiteMain.png"; // chỉnh đường dẫn cho đúng
-
+// import BannerWebsiteMain from "../assets/BannerWebsiteMain.png"; // chỉnh đường dẫn cho đúng
+import BannerWebsiteMain from "../assets/BannerWebsiteMain.png";
 const About = () => {
   return (
     <section

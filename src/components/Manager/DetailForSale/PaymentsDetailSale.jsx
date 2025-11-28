@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { X, CreditCard } from "lucide-react";
 
 const PaymentsDetailSale = ({ payments, onClose }) => {
+  const [previewImage, setPreviewImage] = useState(null);
+
   const getPaymentStatusDisplay = (status) => {
     const statusMap = {
       DA_XAC_NHAN: {
@@ -143,7 +145,8 @@ const PaymentsDetailSale = ({ payments, onClose }) => {
                       <img
                         src={payment.qrCode}
                         alt="QR Code"
-                        className="w-48 h-48 object-contain border rounded"
+                        className="w-48 h-48 object-contain border rounded cursor-pointer hover:border-green-500 hover:shadow-md transition-all"
+                        onClick={() => setPreviewImage(payment.qrCode)}
                       />
                     </div>
                   )}
@@ -153,6 +156,42 @@ const PaymentsDetailSale = ({ payments, onClose }) => {
           )}
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 bg-black/80 z-[70] flex items-center justify-center p-4"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh]">
+            <button
+              onClick={() => setPreviewImage(null)}
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors flex items-center gap-2 bg-black/50 px-3 py-2 rounded-lg"
+            >
+              <span className="text-sm font-medium">Close</span>
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="max-w-full max-h-[85vh] rounded-lg shadow-2xl border-4 border-white"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

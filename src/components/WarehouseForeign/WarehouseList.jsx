@@ -8,10 +8,13 @@ import {
   Calendar,
   RefreshCw,
   Eye,
+  ImageIcon,
+  Edit,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import warehouseService from "../../Services/Warehouse/warehouseService";
 import DetailWarehouse from "../Warehouse/DetailWarehouse";
+import UpdateWarehouse from "./UpdateWarehouse";
 
 const WarehouseList = () => {
   const [warehouses, setWarehouses] = useState([]);
@@ -24,6 +27,9 @@ const WarehouseList = () => {
   const [filterDate, setFilterDate] = useState("");
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailId, setDetailId] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [updateOpen, setUpdateOpen] = useState(false);
+  const [updateData, setUpdateData] = useState(null);
 
   useEffect(() => {
     fetchWarehouses();
@@ -112,9 +118,32 @@ const WarehouseList = () => {
     setDetailId(null);
   };
 
+  const openUpdate = (item) => {
+    setUpdateData(item);
+    setUpdateOpen(true);
+  };
+
+  const closeUpdate = () => {
+    setUpdateOpen(false);
+    setUpdateData(null);
+  };
+
+  const handleUpdateSuccess = () => {
+    toast.success("Cập nhật thành công!");
+    fetchWarehouses();
+  };
+
   const clearFilters = () => {
     setSearchTerm("");
     setFilterDate("");
+  };
+
+  const openImagePreview = (imageUrl) => {
+    setPreviewImage(imageUrl);
+  };
+
+  const closeImagePreview = () => {
+    setPreviewImage(null);
   };
 
   return (
@@ -248,6 +277,9 @@ const WarehouseList = () => {
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       No.
                     </th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Image
+                    </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Tracking Code
                     </th>
@@ -280,7 +312,23 @@ const WarehouseList = () => {
                       <td className="px-4 py-3 text-gray-900">
                         {currentPage * pageSize + index + 1}
                       </td>
-                      <td className="px-6 py-3 text-gray-900 font-medium">
+                      <td className="px-4 py-3">
+                        <div className="flex justify-center">
+                          {item.image ? (
+                            <img
+                              src={item.image}
+                              alt={item.trackingCode}
+                              onClick={() => openImagePreview(item.image)}
+                              className="w-14 h-14 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all"
+                            />
+                          ) : (
+                            <div className="w-14 h-14 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-gray-200">
+                              <ImageIcon size={22} className="text-gray-400" />
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-gray-900 font-medium">
                         {item.trackingCode}
                       </td>
                       <td className="px-4 py-3 text-gray-700">
@@ -292,18 +340,27 @@ const WarehouseList = () => {
                       <td className="px-4 py-3 text-gray-900">
                         {item.netWeight} kg
                       </td>
-                      <td className="px-4 py-3 text-gray-900">{item.dim} m³</td>
+                      <td className="px-4 py-3 text-gray-900">{item.dim} kg</td>
                       <td className="px-4 py-3 text-xs text-gray-500">
                         {formatDate(item.createdAt)}
                       </td>
-                      <td className="px-4 py-3 text-center">
-                        <button
-                          onClick={() => openDetail(item.warehouseId)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                        >
-                          <Eye size={14} />
-                          View
-                        </button>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => openDetail(item.warehouseId)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                          >
+                            <Eye size={14} />
+                            View
+                          </button>
+                          <button
+                            onClick={() => openUpdate(item)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                          >
+                            <Edit size={14} />
+                            Update
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -312,7 +369,7 @@ const WarehouseList = () => {
             </div>
 
             {/* Pagination */}
-            <div className="bg-white border border-gray-200 rounded-xl px-6 py-3">
+            <div className="bg-white border-t border-gray-200 px-6 py-3">
               <div className="flex items-center justify-between text-sm">
                 <button
                   onClick={prevPage}
@@ -355,6 +412,50 @@ const WarehouseList = () => {
         warehouseId={detailId}
         onClose={closeDetail}
       />
+
+      {/* Update Modal */}
+      <UpdateWarehouse
+        isOpen={updateOpen}
+        onClose={closeUpdate}
+        warehouseData={updateData}
+        onSuccess={handleUpdateSuccess}
+      />
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          onClick={closeImagePreview}
+        >
+          <div className="relative max-w-4xl max-h-[90vh]">
+            <button
+              onClick={closeImagePreview}
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors flex items-center gap-2 bg-black/50 px-3 py-2 rounded-lg"
+            >
+              <span className="text-sm font-medium">Close</span>
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="max-w-full max-h-[85vh] rounded-lg shadow-2xl border-4 border-white"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
