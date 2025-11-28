@@ -81,6 +81,7 @@ const PaymentOrderList = () => {
     "CHO_THANH_TOAN",
     "CHO_THANH_TOAN_SHIP",
     "DA_DU_HANG",
+    "CHO_THANH_TOAN_DAU_GIA",
   ];
   const savedTab = localStorage.getItem("activeTab");
   const initialTab = validTabs.includes(savedTab) ? savedTab : "DA_XAC_NHAN";
@@ -139,7 +140,7 @@ const PaymentOrderList = () => {
       icon: Clock,
       color: "orange",
     },
-      {
+    {
       key: "CHO_THANH_TOAN_DAU_GIA",
       label: "Chờ thanh toán đấu giá",
       icon: Clock,
@@ -225,7 +226,7 @@ const PaymentOrderList = () => {
       ];
     }
 
-     if (activeTab === "CHO_THANH_TOAN_DAU_GIA") {
+    if (activeTab === "CHO_THANH_TOAN_DAU_GIA") {
       return [
         { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
         { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" },
@@ -236,7 +237,11 @@ const PaymentOrderList = () => {
         },
         { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
         { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
-        { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-1" },
+        {
+          key: "paymentAfterAuction",
+          label: "Tổng tiền",
+          colSpan: "col-span-1",
+        },
         { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-1" },
         { key: "actions", label: "Thao tác", colSpan: "col-span-2" },
       ];
@@ -291,8 +296,11 @@ const PaymentOrderList = () => {
       const code = order?.code || order?.orderCode || "—";
       const payCode = order?.paymentCode || order?.transactionCode || "—";
       const typeLabel = orderTypeLabel(order?.orderType);
-      const price = formatCurrency(order?.finalPriceOrder ?? order?.finalPrice);
-      const afterAuction = formatCurrency(order?.finalPriceAfterPayment);
+      const price = formatCurrency(
+        activeTab === "CHO_THANH_TOAN_DAU_GIA"
+          ? order?.paymentAfterAuction
+          : order?.finalPriceOrder ?? order?.finalPrice
+      );
       const created = formatDate(order?.createdAt || order?.createdDate);
       const badge = statusBadge(order?.status || activeTab);
 
