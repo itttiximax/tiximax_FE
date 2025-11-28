@@ -5,7 +5,7 @@ import {
 } from "../../Services/Warehouse/warehouseShipmentService";
 import UploadImg from "../../common/UploadImg";
 import toast from "react-hot-toast";
-import { Loader2, Package, CheckCircle2 } from "lucide-react";
+import { Loader2, Package, CheckCircle2, MapPin } from "lucide-react";
 
 const WarehouseShipment = () => {
   const [formData, setFormData] = useState({
@@ -274,7 +274,7 @@ const WarehouseShipment = () => {
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-gray-600">Customer Code</p>
                       <p className="font-semibold text-gray-900">
-                        {orderInfo.customer?.customerCode}
+                        {orderInfo.orders?.customer?.customerCode}
                       </p>
                     </div>
                   </div>
@@ -293,12 +293,24 @@ const WarehouseShipment = () => {
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-gray-600">Customer Name</p>
                       <p className="font-semibold text-gray-900 truncate">
-                        {orderInfo.customer?.name}
+                        {orderInfo.orders?.customer?.name}
                       </p>
                     </div>
                   </div>
 
-                  {/* Check Required */}
+                  {/* Destination - Big Box */}
+                  <div className="md:col-span-2 flex flex-col items-center justify-center rounded-lg p-4 border bg-yellow-300 border-yellơw-400">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="text-xl font-semibold text-black text-center">
+                        Destination
+                      </p>
+                    </div>
+                    <p className="font-semibold text-base text-black text-xl text-center">
+                      {orderInfo.destinationName || "N/A"}
+                    </p>
+                  </div>
+
+                  {/* Check Required - Big Box */}
                   <div
                     className={`md:col-span-2 flex flex-col items-center justify-center rounded-lg p-4 border ${
                       orderInfo.orders?.checkRequired

@@ -281,7 +281,7 @@ const WarehouseList = () => {
                       Image
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Tracking Code
+                      Shipment Code
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Order Code
