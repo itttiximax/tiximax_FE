@@ -161,9 +161,6 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
             {/* Left: title + code + date */}
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
-                  <ShoppingCart className="w-5 h-5" />
-                </div>
                 <div>
                   <h2 className="text-xl font-bold text-slate-900">
                     Purchase Detail
@@ -172,10 +169,10 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
               </div>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-600">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-gray-200 rounded-full shadow-sm">
-                  <span className="text-xl text-black-500 font-medium">
+                  <span className="text-xs text-black-500 font-medium">
                     Purchase Code --
                   </span>
-                  <strong className="text-gray-900 text-xl ml-1">
+                  <strong className="text-gray-900 text-xs ml-1">
                     {purchase.purchaseCode}
                   </strong>
                 </span>
@@ -255,56 +252,79 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
                     </thead>
                     <tbody>
                       {orderLinks.map((link, idx) => (
-                        <tr
-                          key={link.linkId}
-                          className={`border-t ${
-                            idx % 2 === 0 ? "bg-white" : "bg-slate-50"
-                          }`}
-                        >
-                          <td className="px-3 py-2.5 align-top">
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-gray-900 text-sm mb-1.5">
-                                {link.productName || "—"}
+                        <React.Fragment key={link.linkId || `${idx}`}>
+                          {/* main row */}
+                          <tr
+                            className={`border-t ${
+                              idx % 2 === 0 ? "bg-white" : "bg-slate-50"
+                            }`}
+                          >
+                            <td className="px-3 py-2.5 align-top">
+                              <div className="flex flex-col">
+                                <span className="font-semibold text-gray-900 text-sm mb-1.5">
+                                  {link.productName || "—"}
+                                </span>
+                                {/* keep productName here; productLink will be on separate full-width row */}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2.5 text-center align-top">
+                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-bold text-xs">
+                                {link.quantity}
                               </span>
-                              {link.productLink && (
+                            </td>
+                            <td className="px-3 py-2.5 text-right align-top font-medium">
+                              {formatCurrency(link.priceWeb)}
+                            </td>
+                            <td className="px-3 py-2.5 text-right align-top font-medium">
+                              {formatCurrency(link.shipWeb)}
+                            </td>
+                            <td className="px-3 py-2.5 text-right align-top font-medium">
+                              {formatCurrency(link.totalWeb)}
+                            </td>
+
+                            <td className="px-3 py-2.5 text-left align-top">
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                {getStatusLabel(link.status)}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2.5 text-left align-top">
+                              {link.website || "—"}
+                            </td>
+                            <td className="px-3 py-2.5 text-left align-top font-mono text-[10px]">
+                              {link.trackingCode || "—"}
+                            </td>
+                          </tr>
+
+                          {/* link row: span full columns, show ellipsis with title for full url */}
+                          <tr
+                            className={`${
+                              idx % 2 === 0 ? "bg-white" : "bg-slate-50"
+                            }`}
+                          >
+                            <td colSpan={8} className="px-3 py-2.5">
+                              {link.productLink ? (
                                 <a
                                   href={link.productLink}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-2xl text-blue-600 hover:text-blue-800 hover:underline break-all font-medium leading-relaxed"
+                                  title={link.productLink}
+                                  className="block w-full overflow-hidden whitespace-nowrap text-ellipsis text-xl font-semibold text-blue-500 break-all hover:underline"
+                                  style={{ textOverflow: "ellipsis" }}
                                 >
+                                  {/* To prefer ellipsis but allow break when necessary, we combine CSS:
+                                      - whitespace-nowrap + overflow-hidden + text-overflow: ellipsis
+                                      - break-all as fallback for extremely long tokens
+                                  */}
                                   {link.productLink}
                                 </a>
+                              ) : (
+                                <span className="text-xs text-gray-500">
+                                  No link
+                                </span>
                               )}
-                            </div>
-                          </td>
-                          <td className="px-3 py-2.5 text-center align-top">
-                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-bold text-xs">
-                              {link.quantity}
-                            </span>
-                          </td>
-                          <td className="px-3 py-2.5 text-right align-top font-medium">
-                            {formatCurrency(link.priceWeb)}
-                          </td>
-                          <td className="px-3 py-2.5 text-right align-top font-medium">
-                            {formatCurrency(link.shipWeb)}
-                          </td>
-                          <td className="px-3 py-2.5 text-right align-top font-medium">
-                            {formatCurrency(link.totalWeb)}
-                          </td>
-
-                          <td className="px-3 py-2.5 text-left align-top">
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                              {getStatusLabel(link.status)}
-                            </span>
-                          </td>
-                          <td className="px-3 py-2.5 text-left align-top">
-                            {link.website || "—"}
-                          </td>
-                          <td className="px-3 py-2.5 text-left align-top font-mono text-[10px]">
-                            {link.trackingCode || "—"}
-                          </td>
-                        </tr>
+                            </td>
+                          </tr>
+                        </React.Fragment>
                       ))}
                     </tbody>
                   </table>
@@ -313,6 +333,7 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
                 <p className="text-xs text-gray-500">No products.</p>
               )}
             </div>
+
             {/* Note */}
             <div className="border border-gray-200 rounded-xl p-4 bg-gradient-to-br from-slate-50 to-amber-50">
               <div className="flex items-center gap-2 mb-2">
@@ -356,10 +377,7 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-lg border border-gray-200">
-                      <Phone className="w-3.5 h-3.5 text-gray-500" />
-                      <span className="font-medium">{staff.phone || "—"}</span>
-                    </div>
+
                     <div className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-lg border border-gray-200">
                       <Mail className="w-3.5 h-3.5 text-gray-500" />
                       <span className="truncate font-medium">
@@ -391,10 +409,7 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
                         {customer.name}
                       </span>
                       {customer.customerCode && (
-                        <span
-                          className="inline-flex items
--center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-xs text-emerald-700 font-semibold shadow-sm"
-                        >
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-xs text-emerald-700 font-semibold shadow-sm">
                           {customer.customerCode}
                         </span>
                       )}
@@ -411,14 +426,6 @@ const DetailPurchase = ({ purchaseId, onClose }) => {
                         {customer.email || "—"}
                       </span>
                     </div>
-                    {customer.source && (
-                      <div className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-lg border border-gray-200">
-                        <ClipboardList className="w-3.5 h-3.5 text-gray-500" />
-                        <span className="font-medium">
-                          Source: {customer.source}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
               ) : (

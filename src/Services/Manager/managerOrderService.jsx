@@ -3,10 +3,10 @@ import api from "../../config/api.js";
 
 const managerOrderService = {
   // Get orders with pagination and status filter
-  getOrdersPaging: async (page = 0, size = 20, status = "DA_XAC_NHAN") => {
+  getOrdersPaging: async (page = 0, size = 100, status = "DA_XAC_NHAN") => {
     try {
       // Basic validation
-      if (page < 0 || size < 1 || size > 100 || !status) {
+      if (page < 0 || size < 1 || size > 200 || !status) {
         throw new Error("Invalid parameters");
       }
 

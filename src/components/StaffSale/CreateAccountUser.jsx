@@ -14,7 +14,7 @@ import {
 } from "react-icons/fi";
 import registrationByStaffService from "../../Services/Auth/RegistrationByStaffService";
 import { getToken } from "../../Services/Auth/authService";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 // Optimized InputField component with React.memo
 const InputField = React.memo(
@@ -157,8 +157,7 @@ const CreateAccountUser = () => {
       copyTimeoutRef.current = setTimeout(() => {
         setCopiedField("");
       }, 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
+    } catch {
       toast.error("Sao chép thất bại!");
     }
   }, []);
@@ -226,7 +225,29 @@ const CreateAccountUser = () => {
         setCreatedAccount(result);
         toast.success("Tạo tài khoản thành công!");
       } catch (err) {
-        const message = err.response?.data || "Tạo tài khoản thất bại!";
+        // Xử lý object error đúng cách
+        let message = "Tạo tài khoản thất bại!";
+
+        if (err.response?.data) {
+          // Nếu data là object có key error
+          if (
+            typeof err.response.data === "object" &&
+            err.response.data.error
+          ) {
+            message = err.response.data.error;
+          }
+          // Nếu data là string
+          else if (typeof err.response.data === "string") {
+            message = err.response.data;
+          }
+          // Nếu có message property
+          else if (err.response.data.message) {
+            message = err.response.data.message;
+          }
+        } else if (err.message) {
+          message = err.message;
+        }
+
         setErrors({ general: message });
         toast.error(message);
       } finally {
@@ -253,7 +274,7 @@ const CreateAccountUser = () => {
     setFormData(initialFormData);
     errorTimeoutRef.current = {};
 
-    toast("Đã làm mới form!");
+    toast.success("Đã làm mới form!");
   }, [initialFormData]);
 
   // Cleanup timeouts on unmount
@@ -278,9 +299,6 @@ const CreateAccountUser = () => {
 
   return (
     <div className="min-h-screen py-8 px-4">
-      {/* Dùng Toaster mặc định của react-hot-toast, không custom CSS nữa */}
-      <Toaster position="top-right" />
-
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">

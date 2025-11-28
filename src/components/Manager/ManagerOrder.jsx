@@ -15,14 +15,15 @@ import {
   RefreshCw,
 } from "lucide-react";
 import managerOrderService from "../../Services/Manager/managerOrderService";
-import DetailOrder from "./DetailOrder";
+// import DetailOrder from "./DetailOrder";
+import DetailOrderSale from "./DetailForSale/DetailOrderSale";
 
 const ManagerOrder = () => {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activeStatus, setActiveStatus] = useState("DA_XAC_NHAN");
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(50);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalElements: 0,
@@ -30,6 +31,9 @@ const ManagerOrder = () => {
     first: true,
     last: false,
   });
+
+  //  Search state
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Detail modal states
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -42,7 +46,7 @@ const ManagerOrder = () => {
   );
 
   // Page size options
-  const pageSizeOptions = [10, 20, 30, 50, 100];
+  const pageSizeOptions = [10, 20, 30, 50, 100, 200];
 
   // Fetch orders data
   const fetchOrders = useCallback(
@@ -73,6 +77,20 @@ const ManagerOrder = () => {
     },
     [activeStatus, pageSize]
   );
+
+  // ✅ Filter orders based on search term
+  const filteredOrders = useMemo(() => {
+    if (!searchTerm) return orders;
+
+    const search = searchTerm.toLowerCase().trim();
+    return orders.filter(
+      (order) =>
+        order.orderCode?.toLowerCase().includes(search) ||
+        order.customer?.customerCode?.toLowerCase().includes(search) ||
+        order.customer?.name?.toLowerCase().includes(search) ||
+        order.orderId?.toString().includes(search)
+    );
+  }, [orders, searchTerm]);
 
   // Fetch order detail
   const fetchOrderDetail = useCallback(async (orderId) => {
@@ -112,6 +130,7 @@ const ManagerOrder = () => {
     (status) => {
       if (status === activeStatus) return;
       setActiveStatus(status);
+      setSearchTerm(""); // ✅ Reset search khi đổi status
       fetchOrders(1, status, pageSize);
     },
     [activeStatus, pageSize, fetchOrders]
@@ -373,33 +392,80 @@ const ManagerOrder = () => {
           </div>
         </div>
 
-        {/* Controls Bar */}
-        <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white rounded-xl p-4 shadow-sm border border-gray-200">
-          <div className="flex items-center gap-3">
-            <label className="text-sm font-medium text-gray-700">
-              Hiển thị:
-            </label>
-            <select
-              value={pageSize}
-              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-              disabled={loading}
-              className="border-2 border-gray-300 rounded-lg px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed bg-white hover:border-gray-400 transition-colors"
-            >
-              {pageSizeOptions.map((size) => (
-                <option key={size} value={size}>
-                  {size} đơn/trang
-                </option>
-              ))}
-            </select>
+        {/* ✅ Search Bar & Controls */}
+        <div className="mb-6 bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+            {/* Search Box */}
+            <div className="w-full lg:w-96">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Tìm mã đơn, mã KH, tên KH..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <XCircle className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Page Size & Stats */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
+              <div className="flex items-center gap-3">
+                <label className="text-sm font-medium text-gray-700">
+                  Hiển thị:
+                </label>
+                <select
+                  value={pageSize}
+                  onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                  disabled={loading}
+                  className="border-2 border-gray-300 rounded-lg px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed bg-white hover:border-gray-400 transition-colors"
+                >
+                  {pageSizeOptions.map((size) => (
+                    <option key={size} value={size}>
+                      {size} đơn/trang
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-gray-600">
+                  {searchTerm ? "Tìm thấy:" : "Tổng cộng:"}
+                </span>
+                <span className="px-3 py-1 bg-blue-100 text-blue-700 font-bold rounded-lg">
+                  {filteredOrders.length.toLocaleString()}
+                </span>
+                <span className="text-gray-600">
+                  {searchTerm && <>/ {orders.length.toLocaleString()} </>}
+                  đơn hàng
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-600">Tổng cộng:</span>
-            <span className="px-3 py-1 bg-blue-100 text-blue-700 font-bold rounded-lg">
-              {pagination.totalElements.toLocaleString()}
-            </span>
-            <span className="text-gray-600">đơn hàng</span>
-          </div>
+          {/* Search Info */}
+          {searchTerm && (
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Filter className="w-4 h-4" />
+                <span>
+                  Đang tìm kiếm:{" "}
+                  <span className="font-semibold text-blue-600">
+                    {searchTerm}
+                  </span>
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Error State */}
@@ -455,6 +521,12 @@ const ManagerOrder = () => {
                       Trạng thái
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      Mã khách hàng
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      Tên khách hàng
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       Tỷ giá
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
@@ -469,7 +541,7 @@ const ManagerOrder = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
-                  {orders.map((order, index) => {
+                  {filteredOrders.map((order, index) => {
                     const orderStatus = availableStatuses.find(
                       (s) => s.key === order.status
                     );
@@ -506,6 +578,16 @@ const ManagerOrder = () => {
                           >
                             {orderStatus ? orderStatus.label : order.status}
                           </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-blue-600">
+                            {order.customer?.customerCode || "-"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {order.customer?.name || "-"}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="text-sm font-semibold text-gray-900">
@@ -545,25 +627,46 @@ const ManagerOrder = () => {
         )}
 
         {/* Empty State */}
-        {!loading && orders.length === 0 && !error && (
+        {!loading && filteredOrders.length === 0 && !error && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 py-16">
             <div className="text-center">
               <div className="inline-flex p-4 bg-gray-100 rounded-full mb-4">
                 <FileText className="h-12 w-12 text-gray-400" />
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">
-                Không có đơn hàng nào
+                {searchTerm
+                  ? "Không tìm thấy kết quả"
+                  : "Không có đơn hàng nào"}
               </h3>
               <p className="text-sm text-gray-600 max-w-sm mx-auto">
-                Chưa có đơn hàng nào với trạng thái{" "}
-                <span className="font-semibold">"{currentStatus?.label}"</span>
+                {searchTerm ? (
+                  <>
+                    Không tìm thấy đơn hàng nào với từ khóa{" "}
+                    <span className="font-semibold">"{searchTerm}"</span>
+                  </>
+                ) : (
+                  <>
+                    Chưa có đơn hàng nào với trạng thái{" "}
+                    <span className="font-semibold">
+                      "{currentStatus?.label}"
+                    </span>
+                  </>
+                )}
               </p>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  Xóa tìm kiếm
+                </button>
+              )}
             </div>
           </div>
         )}
 
         {/* Pagination */}
-        {!loading && orders.length > 0 && (
+        {!loading && filteredOrders.length > 0 && (
           <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 px-6 py-4">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <button
@@ -578,7 +681,6 @@ const ManagerOrder = () => {
                 <ChevronLeft className="w-5 h-5" />
                 Trang trước
               </button>
-
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-600">Trang</span>
                 <div className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg font-bold shadow-md">
@@ -607,7 +709,7 @@ const ManagerOrder = () => {
 
         {/* Detail Order Modal */}
         {showDetailModal && selectedOrder && (
-          <DetailOrder
+          <DetailOrderSale
             orderData={selectedOrder}
             onClose={handleCloseDetail}
             availableStatuses={availableStatuses}
@@ -617,5 +719,4 @@ const ManagerOrder = () => {
     </div>
   );
 };
-
 export default ManagerOrder;

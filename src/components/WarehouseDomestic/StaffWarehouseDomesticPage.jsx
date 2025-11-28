@@ -106,8 +106,8 @@ const StaffWarehouseDomesticPage = () => {
   ];
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
+    <div className="p-6 min-h-screen">
+      <div className="mx-auto">
         {/* Header */}
         <div className="bg-blue-600 rounded-xl shadow-sm p-5 mb-4">
           <div className="flex items-center gap-3">

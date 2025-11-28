@@ -11,6 +11,7 @@ import {
   Landmark,
   ChevronLeft,
   ChevronRight,
+  Tags,
 } from "lucide-react";
 import Logout from "../../Page/Logout";
 import profileService from "../../Services/SharedService/profileService";
@@ -59,6 +60,11 @@ const StaffPurchaserSidebar = () => {
           to: "/staff-purchaser/inventory",
           icon: Truck,
           label: "Add Tracking Number",
+        },
+         {
+          to: "/staff-purchaser/auction-inventory",
+          icon: Tags,
+          label: "Add Auction Tracking",
         },
         {
           type: "dropdown",

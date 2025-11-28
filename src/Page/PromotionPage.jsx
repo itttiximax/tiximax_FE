@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-
+import BannerWebsite from "../Assets/BannerWebsite.png";
 /** Dữ liệu demo — thay bằng API thật nếu có */
 const RAW_PROMOS = [
   {
@@ -314,49 +314,14 @@ const PromoBanner = () => {
             </a>
           </div>
         </div>
-        <div className="relative h-60 md:h-72 lg:h-[320px] overflow-hidden rounded-2xl">
+        <div className="relative w-full  overflow-hidden rounded-2xl">
           <img
-            src="https://bcp.cdnchinhphu.vn/334894974524682240/2022/4/28/130706795logistic-la-gi-2-1651149124088794339588.jpg"
+            src={BannerWebsite}
             alt="Promo"
             className="h-full w-full object-cover"
             loading="lazy"
           />
         </div>
-      </div>
-    </div>
-  );
-};
-
-const FAQ = () => {
-  const items = [
-    {
-      q: "Mã khuyến mãi áp dụng thế nào?",
-      a: "Nhập mã tại bước xác nhận đơn hoặc gửi cho CSKH khi tạo đơn qua nhân viên. Mỗi mã có điều kiện đi kèm và thời hạn cụ thể.",
-    },
-    {
-      q: "Doanh nghiệp muốn ký hợp đồng thì sao?",
-      a: "Liên hệ đội ngũ Sales để nhận báo giá B2B, ưu đãi theo sản lượng/tháng, tích hợp API & đối soát hóa đơn.",
-    },
-    {
-      q: "Có hoàn hủy đơn khi dùng mã không?",
-      a: "Được phép nếu chưa bàn giao cho đơn vị vận chuyển. Giá trị giảm sẽ được hoàn về hình thức thanh toán đã dùng.",
-    },
-  ];
-  return (
-    <div className="mt-20">
-      <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-8">
-        Câu hỏi thường gặp
-      </h2>
-      <div className="grid gap-6 md:grid-cols-3">
-        {items.map((it, idx) => (
-          <div
-            key={idx}
-            className="rounded-2xl border-2 border-gray-200 bg-white p-8 shadow-lg hover:shadow-xl transition-shadow hover:border-yellow-400"
-          >
-            <h4 className="text-xl font-bold text-gray-900 mb-4">{it.q}</h4>
-            <p className="text-base text-gray-600 leading-relaxed">{it.a}</p>
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -465,11 +430,6 @@ const PromotionPage = () => {
             <div className="w-3 h-3 bg-yellow-400 rotate-45"></div>
             <div className="w-24 h-0.5 bg-gray-300"></div>
           </div>
-          {/* <p className="text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Tối ưu mọi tuyến vận chuyển với loạt ưu đãi thiết kế riêng cho cá
-            nhân và doanh nghiệp. Điều kiện & thời hạn áp dụng theo từng chương
-            trình.
-          </p> */}
         </div>
 
         {/* Banner */}
@@ -540,33 +500,7 @@ const PromotionPage = () => {
           )}
 
           {/* FAQ & Newsletter */}
-          <FAQ />
           <Newsletter />
-
-          {/* Bottom CTA */}
-          {/* <div className="mt-20 rounded-2xl bg-white p-12 text-center shadow-2xl border-2 border-gray-200">
-            <h4 className="text-3xl md:text-5xl font-bold text-gray-900">
-              Sẵn sàng bùng nổ đơn hàng?
-            </h4>
-            <p className="mt-4 text-base md:text-lg text-gray-600 leading-relaxed">
-              Kết nối kho bãi, tối ưu tuyến quốc tế & nội địa — bắt đầu ngay hôm
-              nay.
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-6">
-              <a
-                href="/signup"
-                className="rounded-full bg-gray-900 px-8 py-4 text-base font-bold text-white hover:bg-gray-800 transition shadow-lg"
-              >
-                Tạo tài khoản miễn phí
-              </a>
-              <a
-                href="/pricing"
-                className="rounded-full border-2 border-gray-900 px-8 py-4 text-base font-bold text-gray-900 hover:bg-gray-900 hover:text-white transition"
-              >
-                Bảng giá & gói dịch vụ
-              </a>
-            </div>
-          </div> */}
         </main>
       </div>
     </section>
