@@ -57,6 +57,14 @@ const ListOrderManager = () => {
       borderColor: "border-orange-500",
     },
     {
+  key: " DAU_GIA_THANH_CONG",
+  label: "Đấu giá thành công",
+  color: "purple",
+  bgColor: "bg-purple-50",
+  textColor: "text-purple-700",
+  borderColor: "border-purple-500",
+  },
+    {
       key: "DA_DU_HANG",
       label: "Đã đủ đơn",
       color: "blue",

@@ -50,6 +50,12 @@ const StatusBadge = ({ status, count }) => {
   return null;
 };
 
+const hasShipWebZero = (p) => {
+  const links = Array.isArray(p.pendingLinks) ? p.pendingLinks : [];
+  return links.some((l) => Number(l.shipWeb) === 0);
+};
+
+
 const RowSkeleton = () => (
   <div className="rounded-lg border border-slate-200 bg-white">
     <div className="animate-pulse p-4">
@@ -63,7 +69,7 @@ const RowSkeleton = () => (
   </div>
 );
 
-const UpdateShipmentCodeList = () => {
+const UpdateShipmentCodeAuctionList = () => {
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(PAGE_SIZE_DEFAULT);
   const [loading, setLoading] = useState(false);
@@ -96,7 +102,6 @@ const UpdateShipmentCodeList = () => {
     return Number(num).toLocaleString("en-US");
   };
 
-  
   const fetchData = useCallback(
   async (p = page, s = size) => {
     setLoading(true);
@@ -106,7 +111,7 @@ const UpdateShipmentCodeList = () => {
       const res = await orderlinkService.getPurchasesShipmentCode(
         p,
         s,
-        "DA_MUA"
+        "DAU_GIA_THANH_CONG"
       );
       setData(res);
     } catch (e) {
@@ -221,7 +226,6 @@ const UpdateShipmentCodeList = () => {
 
   const purchaseStatusLabel = (status) => {
     const labels = {
-      DA_MUA: "Purchased",
       DAU_GIA_THANH_CONG: "Auction won",
     };
     return labels[status] || status;
@@ -279,7 +283,7 @@ const UpdateShipmentCodeList = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              
+             
 
               <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5">
                 <Package className="h-4 w-4 text-slate-500" />
@@ -419,26 +423,26 @@ const UpdateShipmentCodeList = () => {
 
                           {isCompleted ? (
                             <div className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 border border-emerald-300">
-                              <CheckCircle2 className="h-4 w-4" />
-                              Completed
+                                <CheckCircle2 className="h-4 w-4" />
+                                Completed
                             </div>
-                          ) : isAuction ? (
+                            ) : hasShipWebZero(p) ? (
                             <button
-                              onClick={() => openAuctionModal(p)}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 transition-colors"
+                                onClick={() => openAuctionModal(p)}
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 transition-colors"
                             >
-                              <Truck className="h-4 w-4" />
-                              Update shipping
+                                <Truck className="h-4 w-4" />
+                                Update shipping
                             </button>
-                          ) : (
+                            ) : (
                             <button
-                              onClick={() => openShipmentModal(p)}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                                onClick={() => openShipmentModal(p)}
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
                             >
-                              <Package className="h-4 w-4" />
-                              Update shipment
+                                <Package className="h-4 w-4" />
+                                Update shipment
                             </button>
-                          )}
+                            )}
                         </div>
                       </div>
                     </div>
@@ -715,4 +719,4 @@ const UpdateShipmentCodeList = () => {
     </div>
   );
 };
-export default UpdateShipmentCodeList;
+export default UpdateShipmentCodeAuctionList;

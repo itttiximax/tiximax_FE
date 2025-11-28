@@ -123,6 +123,7 @@ import PurchaserList from "../components/StaffPurchaser/PurchaserList";
 import TrackingCodeList from "../components/WarehouseDomestic/TrackingCodeList";
 import ListOrderManager from "../components/Order/ListOrderManager";
 import ExportOrder from "../components/WarehouseDomestic/ExportOrder";
+import UpdateShipmentCodeAuctionList from "../components/StaffPurchaser/UpdateShipmentCodeAuctionList";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -345,6 +346,7 @@ const Router = createBrowserRouter([
       { path: "orders", element: <OrderLinkList /> },
       { path: "auction", element: <OrderAuctionList /> },
       { path: "inventory", element: <UpdateShipmentCodeList /> },
+      { path: "auction-inventory", element: <UpdateShipmentCodeAuctionList /> },
       { path: "inventorystock", element: <PurchaserList /> },
       { path: "inventory/audit", element: <NotFound /> },
     ],
