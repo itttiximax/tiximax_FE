@@ -482,7 +482,7 @@ const AuctionManager = ({
                   <div >
                     <div className="col-span-5">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Giá sản phẩm (vui lòng nhập 50% giá max của website)<span className="text-red-500">*</span>
+                        Giá sản phẩm <span className="text-red-500">*</span>
                       </label>
 
                       <input

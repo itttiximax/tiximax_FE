@@ -49,6 +49,10 @@ const statusBadge = (status) => {
       text: "Chờ thanh toán",
       cls: "bg-orange-50 text-orange-700 border-orange-200",
     },
+    CHO_THANH_TOAN_DAU_GIA: {
+      text: "Chờ thanh toán đấu giá",
+      cls: "bg-orange-50 text-orange-700 border-orange-200",
+    },
     DA_DU_HANG: {
       text: "Đã đủ hàng",
       cls: "bg-blue-50 text-blue-700 border-blue-200",
@@ -135,7 +139,12 @@ const PaymentOrderList = () => {
       icon: Clock,
       color: "orange",
     },
-
+      {
+      key: "CHO_THANH_TOAN_DAU_GIA",
+      label: "Chờ thanh toán đấu giá",
+      icon: Clock,
+      color: "orange",
+    },
     { key: "DA_DU_HANG", label: "Đã đủ hàng", icon: Package, color: "blue" },
     {
       key: "CHO_THANH_TOAN_SHIP",
@@ -216,6 +225,23 @@ const PaymentOrderList = () => {
       ];
     }
 
+     if (activeTab === "CHO_THANH_TOAN_DAU_GIA") {
+      return [
+        { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
+        { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" },
+        {
+          key: "paymentCode",
+          label: "Mã giao dịch ship",
+          colSpan: "col-span-2",
+        },
+        { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
+        { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
+        { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-1" },
+        { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-1" },
+        { key: "actions", label: "Thao tác", colSpan: "col-span-2" },
+      ];
+    }
+
     if (activeTab === "CHO_THANH_TOAN_SHIP") {
       return [
         { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
@@ -266,6 +292,7 @@ const PaymentOrderList = () => {
       const payCode = order?.paymentCode || order?.transactionCode || "—";
       const typeLabel = orderTypeLabel(order?.orderType);
       const price = formatCurrency(order?.finalPriceOrder ?? order?.finalPrice);
+      const afterAuction = formatCurrency(order?.finalPriceAfterPayment);
       const created = formatDate(order?.createdAt || order?.createdDate);
       const badge = statusBadge(order?.status || activeTab);
 
@@ -285,6 +312,9 @@ const PaymentOrderList = () => {
           <div className="col-span-1 text-gray-600 text-sm">{created}</div>
           <div className="col-span-2 flex justify-end">
             {activeTab === "CHO_THANH_TOAN" && (
+              <ConfirmPayment order={order} mode="order" onDone={refreshAll} />
+            )}
+            {activeTab === "CHO_THANH_TOAN_DAU_GIA" && (
               <ConfirmPayment order={order} mode="order" onDone={refreshAll} />
             )}
             {activeTab === "CHO_THANH_TOAN_SHIP" && (

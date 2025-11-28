@@ -96,32 +96,32 @@ const UpdateShipmentCodeList = () => {
     return Number(num).toLocaleString("en-US");
   };
 
+  
   const fetchData = useCallback(
-    async (p = page, s = size) => {
-      setLoading(true);
-      setErr(null);
-      try {
-        const statusParam =
-          purchaseStatusFilter === "all" ? null : purchaseStatusFilter;
-        const res = await orderlinkService.getPurchasesShipmentCode(
-          p,
-          s,
-          statusParam
-        );
-        setData(res);
-      } catch (e) {
-        const msg =
-          e?.response?.data?.message ||
-          e?.response?.data?.error ||
-          e?.message ||
-          "Failed to load data.";
-        setErr(msg);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [page, size, purchaseStatusFilter]
-  );
+  async (p = page, s = size) => {
+    setLoading(true);
+    setErr(null);
+    try {
+      // luôn fix status
+      const res = await orderlinkService.getPurchasesShipmentCode(
+        p,
+        s,
+        "DA_MUA"
+      );
+      setData(res);
+    } catch (e) {
+      const msg =
+        e?.response?.data?.message ||
+        e?.response?.data?.error ||
+        e?.message ||
+        "Failed to load data.";
+      setErr(msg);
+    } finally {
+      setLoading(false);
+    }
+  },
+  [page, size]
+);
 
   useEffect(() => {
     setPage(0);
@@ -279,18 +279,7 @@ const UpdateShipmentCodeList = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5">
-                <Filter className="h-4 w-4 text-slate-500" />
-                <select
-                  value={purchaseStatusFilter}
-                  onChange={(e) => setPurchaseStatusFilter(e.target.value)}
-                  className="border-none bg-transparent text-sm font-medium text-slate-700 focus:outline-none"
-                >
-                  <option value="all">All purchase status</option>
-                  <option value="DA_MUA">Purchased</option>
-                  <option value="DAU_GIA_THANH_CONG">Auction won</option>
-                </select>
-              </div>
+              
 
               <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5">
                 <Package className="h-4 w-4 text-slate-500" />

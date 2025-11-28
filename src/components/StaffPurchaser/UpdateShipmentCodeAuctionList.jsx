@@ -50,6 +50,12 @@ const StatusBadge = ({ status, count }) => {
   return null;
 };
 
+const hasShipWebZero = (p) => {
+  const links = Array.isArray(p.pendingLinks) ? p.pendingLinks : [];
+  return links.some((l) => Number(l.shipWeb) === 0);
+};
+
+
 const RowSkeleton = () => (
   <div className="rounded-lg border border-slate-200 bg-white">
     <div className="animate-pulse p-4">
@@ -417,26 +423,26 @@ const UpdateShipmentCodeAuctionList = () => {
 
                           {isCompleted ? (
                             <div className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 border border-emerald-300">
-                              <CheckCircle2 className="h-4 w-4" />
-                              Completed
+                                <CheckCircle2 className="h-4 w-4" />
+                                Completed
                             </div>
-                          ) : isAuction ? (
+                            ) : hasShipWebZero(p) ? (
                             <button
-                              onClick={() => openAuctionModal(p)}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 transition-colors"
+                                onClick={() => openAuctionModal(p)}
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 transition-colors"
                             >
-                              <Truck className="h-4 w-4" />
-                              Update shipping
+                                <Truck className="h-4 w-4" />
+                                Update shipping
                             </button>
-                          ) : (
+                            ) : (
                             <button
-                              onClick={() => openShipmentModal(p)}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                                onClick={() => openShipmentModal(p)}
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
                             >
-                              <Package className="h-4 w-4" />
-                              Update shipment
+                                <Package className="h-4 w-4" />
+                                Update shipment
                             </button>
-                          )}
+                            )}
                         </div>
                       </div>
                     </div>
