@@ -9,10 +9,12 @@ import {
   RefreshCw,
   Eye,
   ImageIcon,
+  Edit,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import warehouseService from "../../Services/Warehouse/warehouseService";
 import DetailWarehouse from "../Warehouse/DetailWarehouse";
+import UpdateWarehouse from "./UpdateWarehouse";
 
 const WarehouseList = () => {
   const [warehouses, setWarehouses] = useState([]);
@@ -26,6 +28,8 @@ const WarehouseList = () => {
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailId, setDetailId] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [updateOpen, setUpdateOpen] = useState(false);
+  const [updateData, setUpdateData] = useState(null);
 
   useEffect(() => {
     fetchWarehouses();
@@ -112,6 +116,21 @@ const WarehouseList = () => {
   const closeDetail = () => {
     setDetailOpen(false);
     setDetailId(null);
+  };
+
+  const openUpdate = (item) => {
+    setUpdateData(item);
+    setUpdateOpen(true);
+  };
+
+  const closeUpdate = () => {
+    setUpdateOpen(false);
+    setUpdateData(null);
+  };
+
+  const handleUpdateSuccess = () => {
+    toast.success("Cập nhật thành công!");
+    fetchWarehouses();
   };
 
   const clearFilters = () => {
@@ -321,18 +340,27 @@ const WarehouseList = () => {
                       <td className="px-4 py-3 text-gray-900">
                         {item.netWeight} kg
                       </td>
-                      <td className="px-4 py-3 text-gray-900">{item.dim} m³</td>
+                      <td className="px-4 py-3 text-gray-900">{item.dim} kg</td>
                       <td className="px-4 py-3 text-xs text-gray-500">
                         {formatDate(item.createdAt)}
                       </td>
-                      <td className="px-4 py-3 text-center">
-                        <button
-                          onClick={() => openDetail(item.warehouseId)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                        >
-                          <Eye size={14} />
-                          View
-                        </button>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => openDetail(item.warehouseId)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                          >
+                            <Eye size={14} />
+                            View
+                          </button>
+                          <button
+                            onClick={() => openUpdate(item)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                          >
+                            <Edit size={14} />
+                            Update
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -383,6 +411,14 @@ const WarehouseList = () => {
         open={detailOpen}
         warehouseId={detailId}
         onClose={closeDetail}
+      />
+
+      {/* Update Modal */}
+      <UpdateWarehouse
+        isOpen={updateOpen}
+        onClose={closeUpdate}
+        warehouseData={updateData}
+        onSuccess={handleUpdateSuccess}
       />
 
       {/* Image Preview Modal */}
