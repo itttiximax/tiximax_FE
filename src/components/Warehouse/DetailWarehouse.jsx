@@ -1,4 +1,3 @@
-// Components/Warehouse/DetailWarehouse.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { RefreshCw, X, Clipboard, Check } from "lucide-react";
 import warehouseService from "../../Services/Warehouse/warehouseService";
@@ -7,6 +6,7 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+  const [previewImage, setPreviewImage] = useState(null);
   const cardRef = useRef(null);
 
   const formatDate = (v) => {
@@ -182,10 +182,11 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
                         <img
                           src={detail.image}
                           alt="Warehouse"
-                          className="w-full h-48 object-cover rounded-lg border border-gray-200"
+                          className="w-full h-48 object-cover rounded-lg border border-gray-200 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all"
                           onError={(e) => {
                             e.target.style.display = "none";
                           }}
+                          onClick={() => setPreviewImage(detail.image)}
                         />
                       </div>
                     )}
@@ -198,10 +199,11 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
                         <img
                           src={detail.imageCheck}
                           alt="Check"
-                          className="w-full h-48 object-cover rounded-lg border border-gray-200"
+                          className="w-full h-48 object-cover rounded-lg border border-gray-200 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all"
                           onError={(e) => {
                             e.target.style.display = "none";
                           }}
+                          onClick={() => setPreviewImage(detail.imageCheck)}
                         />
                       </div>
                     )}
@@ -305,6 +307,42 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
           )}
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 bg-black/80 z-[70] flex items-center justify-center p-4"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh]">
+            <button
+              onClick={() => setPreviewImage(null)}
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors flex items-center gap-2 bg-black/50 px-3 py-2 rounded-lg"
+            >
+              <span className="text-sm font-medium">Close</span>
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="max-w-full max-h-[85vh] rounded-lg shadow-2xl border-4 border-white"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

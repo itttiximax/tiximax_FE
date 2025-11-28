@@ -20,8 +20,6 @@ import CancelPurchase from "./CancelPurchase";
 import DetailPurchase from "./DetailPurchase";
 import UpdatePurchase from "./UpdatePurchase";
 
-const PAGE_SIZE_DEFAULT = 10;
-
 // Normalize shipment code
 const normalizeShipmentCode = (code) => {
   if (!code) return "";
@@ -91,7 +89,7 @@ const CardSkeleton = () => (
 const PurchaserList = () => {
   const [purchases, setPurchases] = useState([]);
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(PAGE_SIZE_DEFAULT);
+  const [size, setSize] = useState(100);
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -363,6 +361,21 @@ const PurchaserList = () => {
                 </button>
               );
             })}
+
+            {/* Page Size Selector - Moved here */}
+            <select
+              value={size}
+              onChange={(e) => {
+                setSize(Number(e.target.value));
+                setPage(1);
+              }}
+              className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+            >
+              <option value={10}>10 / page</option>
+              <option value={20}>20 / page</option>
+              <option value={50}>50 / page</option>
+              <option value={100}>100 / page</option>
+            </select>
           </div>
         </div>
 
@@ -679,21 +692,6 @@ const PurchaserList = () => {
               >
                 Next
               </button>
-
-              <div className="ml-3 border-l border-gray-200 pl-3">
-                <select
-                  value={size}
-                  onChange={(e) => {
-                    setSize(Number(e.target.value));
-                    setPage(1);
-                  }}
-                  className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value={10}>10 / page</option>
-                  <option value={20}>20 / page</option>
-                  <option value={50}>50 / page</option>
-                </select>
-              </div>
             </div>
           </div>
         )}
