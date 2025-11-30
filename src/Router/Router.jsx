@@ -124,6 +124,7 @@ import TrackingCodeList from "../components/WarehouseDomestic/TrackingCodeList";
 import ListOrderManager from "../components/Order/ListOrderManager";
 import ExportOrder from "../components/WarehouseDomestic/ExportOrder";
 import UpdateShipmentCodeAuctionList from "../components/StaffPurchaser/UpdateShipmentCodeAuctionList";
+import DashboardManager from "../components/Manager/DashboardManager";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -233,10 +234,10 @@ const Router = createBrowserRouter([
       { path: "quote", element: <PaymentOrderList /> },
       { path: "refund", element: <RefundOrder /> },
       { path: "cost/paylater", element: <ManagerBankAccountList /> },
-      { path: "cost/paybefore", element: <NotFound /> },
+      { path: "cost/paybefore", element: <ManagerDashboard /> },
       { path: "routes", element: <ManagerRoutes /> },
       { path: "transfer", element: <ManagerDestination /> },
-      { path: "dashboard", element: <ManagerDashboard /> },
+      { path: "dashboard", element: <DashboardManager /> },
       { path: "producttype", element: <ManagerProductType /> },
       { path: "order", element: <ManagerOrder /> },
       { path: "website", element: <ManagerWebsite /> },
