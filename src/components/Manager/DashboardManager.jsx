@@ -162,23 +162,23 @@ const DashboardManager = () => {
     <div className="min-h-screen px-4 py-6">
       <div className="mx-auto">
         {/* Header mới – chuyên nghiệp + đồng bộ tone */}
-        <div className="mb-6 rounded-2xl border border-gray-200 bg-blue-100 px-6 py-4 shadow-sm">
+        <div className="mb-6 rounded-2xl border border-gray-200 bg-sky-300 px-6 py-4 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             {/* Left: Title + description */}
             <div>
               {/* Breadcrumb nhỏ */}
-              <div className="flex items-center gap-2 text-xs font-medium text-black-500 mb-1">
+              <div className="flex items-center gap-2 text-xs font-medium text-black mb-1">
                 <span>Dashboard</span>
                 <span className="h-1 w-1 rounded-full bg-black-300" />
                 <span>Doanh thu & đơn hàng</span>
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
-                  <Banknote className="h-5 w-5 text-blue-600" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white">
+                  <Banknote className="h-5 w-5 text-sky-600" />
                 </div>
                 <div>
-                  <h1 className="text-lg md:text-xl font-semibold text-gray-900">
+                  <h1 className="text-lg md:text-xl font-semibold text-black">
                     Thống kê doanh thu & đơn hàng
                   </h1>
                 </div>
