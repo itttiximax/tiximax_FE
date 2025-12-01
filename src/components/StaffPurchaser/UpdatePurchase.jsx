@@ -3,26 +3,34 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { Info, DollarSign, Package, FileText } from "lucide-react";
 import createPurchaseService from "../../Services/StaffPurchase/createPurchaseService";
+import UploadImg from "../../common/UploadImg";
 
 const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
+  // Shipment & image hiện tại lấy từ nhiều nguồn
+  const currentShipmentCode =
+    purchase?.pendingLinks?.[0]?.shipmentCode || purchase?.shipmentCode || "";
+
+  const currentImagePurchased =
+    purchase?.imagePurchased ||
+    purchase?.purchaseImage || // từ list
+    purchase?.pendingLinks?.[0]?.imagePurchased ||
+    purchase?.pendingLinks?.[0]?.purchaseImage ||
+    "";
+
   const [form, setForm] = useState({
     finalPriceOrder: purchase?.finalPriceOrder || "",
     note: purchase?.note || "",
-    shipmentCode: purchase?.shipmentCode || "",
+    shipmentCode: currentShipmentCode || "",
+    imagePurchased: currentImagePurchased || "",
   });
 
   const [loading, setLoading] = useState(false);
 
-  // Lấy shipmentCode từ link đầu tiên (nếu có)
-  const currentShipmentCode = purchase?.pendingLinks?.[0]?.shipmentCode || "";
-
-  // 🔥 Format số tiền với dấu phẩy
   const formatNumber = (num) => {
     if (!num && num !== 0) return "";
     return Number(num).toLocaleString("en-US");
   };
 
-  // 🔥 Remove format để lưu vào state (chỉ giữ số)
   const parseNumber = (str) => {
     if (!str) return "";
     return str.replace(/,/g, "");
@@ -31,21 +39,19 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Nếu là finalPriceOrder, chỉ cho phép số và dấu phẩy
     if (name === "finalPriceOrder") {
       const cleanValue = parseNumber(value);
-      // Chỉ cho phép số
       if (cleanValue && !/^\d*\.?\d*$/.test(cleanValue)) return;
 
-      setForm({
-        ...form,
+      setForm((prev) => ({
+        ...prev,
         [name]: cleanValue,
-      });
+      }));
     } else {
-      setForm({
-        ...form,
+      setForm((prev) => ({
+        ...prev,
         [name]: value,
-      });
+      }));
     }
   };
 
@@ -65,6 +71,7 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
           finalPriceOrder: form.finalPriceOrder,
           note: form.note,
           shipmentCode: form.shipmentCode,
+          imagePurchased: form.imagePurchased,
         });
       }
 
@@ -91,11 +98,9 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
               <h2 className="text-xl font-semibold text-white">
                 Update Purchase
               </h2>
-              <p className="text-sm text-blue-100">
-                {purchase?.purchaseCode || "N/A"}
-              </p>
             </div>
           </div>
+
           <button
             type="button"
             onClick={onClose}
@@ -119,7 +124,7 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
       </div>
 
       <div className="p-6">
-        {/* Current Info Display */}
+        {/* Current Info */}
         <div className="mb-6 rounded-xl bg-blue-50 border border-blue-200 p-4">
           <div className="flex items-center gap-2 mb-3">
             <Info className="h-4 w-4 text-blue-600" />
@@ -130,10 +135,10 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
 
           <div className="space-y-2 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Final Price:</span>
+              <span className="text-gray-600">Price Purchase:</span>
               <span className="font-semibold text-gray-900">
                 {purchase?.finalPriceOrder
-                  ? `${formatNumber(purchase.finalPriceOrder)} `
+                  ? `${formatNumber(purchase.finalPriceOrder)}`
                   : "Not set"}
               </span>
             </div>
@@ -143,6 +148,20 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
               <span className="font-mono font-semibold text-gray-900">
                 {currentShipmentCode || "Not set"}
               </span>
+            </div>
+
+            <div className="flex items-start justify-between gap-3">
+              <span className="text-gray-600 mt-1">Image Purchased:</span>
+              {currentImagePurchased ? (
+                <div className="h-16 w-16 rounded-lg overflow-hidden border border-blue-200 bg-white">
+                  <img
+                    src={currentImagePurchased}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ) : (
+                <span className="font-medium text-gray-500">No image</span>
+              )}
             </div>
 
             <div className="flex items-start justify-between">
@@ -159,30 +178,26 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
           {/* Final Price */}
           <div>
             <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-700">
-              <DollarSign className="h-4 w-4 text-gray-500" />
-              Final price{" "}
+              Price Purchase{" "}
               <span className="text-yellow-500 font-normal">(Optional)</span>
             </label>
-            <div className="relative">
-              <input
-                type="text"
-                name="finalPriceOrder"
-                value={formatNumber(form.finalPriceOrder)}
-                onChange={handleChange}
-                placeholder={
-                  purchase?.finalPriceOrder
-                    ? `Current: ${formatNumber(purchase.finalPriceOrder)}`
-                    : "Enter final price"
-                }
-                className="w-full rounded-lg border border-gray-300 pl-4 pr-10 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-              />
-            </div>
+            <input
+              type="text"
+              name="finalPriceOrder"
+              value={formatNumber(form.finalPriceOrder)}
+              onChange={handleChange}
+              placeholder={
+                purchase?.finalPriceOrder
+                  ? `Current: ${formatNumber(purchase.finalPriceOrder)}`
+                  : "Enter price purchase"
+              }
+              className="w-full rounded-lg border border-gray-300 pl-4 pr-10 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+            />
           </div>
 
           {/* Shipment Code */}
           <div>
             <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-700">
-              <Package className="h-4 w-4 text-gray-500" />
               Shipment code{" "}
               <span className="text-yellow-500 font-normal">(Optional)</span>
             </label>
@@ -199,6 +214,21 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
               className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-mono focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
             />
           </div>
+
+          {/* Image Upload */}
+          <UploadImg
+            imageUrl={form.imagePurchased}
+            onImageUpload={(url) =>
+              setForm((prev) => ({ ...prev, imagePurchased: url }))
+            }
+            onImageRemove={() =>
+              setForm((prev) => ({ ...prev, imagePurchased: "" }))
+            }
+            label="Image Purchased"
+            placeholder="Chưa có ảnh sản phẩm"
+            maxSizeMB={3}
+            className=""
+          />
 
           {/* Note */}
           <div>

@@ -120,18 +120,20 @@ const PurchaserList = () => {
     setPurchases((prev) =>
       prev.map((p) => {
         if (p.purchaseId === purchaseId) {
-          // Merge updated fields
           const updated = {
             ...p,
             ...updatedFields,
           };
 
-          // Nếu có shipmentCode được update, apply vào tất cả pendingLinks
           if (updatedFields.shipmentCode !== undefined) {
             updated.pendingLinks = p.pendingLinks.map((link) => ({
               ...link,
               shipmentCode: updatedFields.shipmentCode,
             }));
+          }
+
+          if (updatedFields.imagePurchased !== undefined) {
+            updated.purchaseImage = updatedFields.imagePurchased; // ⭐ map ngược lại
           }
 
           return updated;
@@ -140,7 +142,6 @@ const PurchaserList = () => {
       })
     );
   };
-
   // 🔥 Helper: Cancel link
   const cancelLinkInState = (orderId, linkId) => {
     setPurchases((prev) =>
@@ -281,7 +282,14 @@ const PurchaserList = () => {
   const openUpdateModal = (purchase) => {
     setUpdateModal({
       open: true,
-      purchase,
+      purchase: {
+        ...purchase,
+        imagePurchased:
+          purchase.imagePurchased ||
+          purchase.purchaseImage || // ⭐ THÊM DÒNG NÀY
+          purchase.pendingLinks?.[0]?.purchaseImage ||
+          "",
+      },
     });
   };
 
