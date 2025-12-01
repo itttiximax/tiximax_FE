@@ -2,17 +2,17 @@
 import api from "../../config/api";
 
 const managerBankAccountService = {
-  async getProxyAccounts() {
-    try {
-      const response = await api.get("/bankAccounts/filter", {
-        params: { isProxy: true, isRevenue: false },
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching proxy accounts:", error);
-      throw error;
-    }
-  },
+  // async getProxyAccounts() {
+  //   try {
+  //     const response = await api.get("/bankAccounts/filter", {
+  //       params: { isProxy: true, isRevenue: false },
+  //     });
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Error fetching proxy accounts:", error);
+  //     throw error;
+  //   }
+  // },
   async getProxyAccountsV2() {
     try {
       const response = await api.get("/bankAccounts/filter/proxy");
