@@ -3,22 +3,26 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { Info, DollarSign, Package, FileText } from "lucide-react";
 import createPurchaseService from "../../Services/StaffPurchase/createPurchaseService";
-import UploadImg from "../../common/UploadImg";
+import UploadImg from "../../common/UploadImg"; // chỉnh lại path nếu khác
 
 const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
-  // Shipment & image hiện tại lấy từ nhiều nguồn
+  // Lấy shipment + image hiện tại từ nhiều nguồn
   const currentShipmentCode =
     purchase?.pendingLinks?.[0]?.shipmentCode || purchase?.shipmentCode || "";
 
   const currentImagePurchased =
     purchase?.imagePurchased ||
-    purchase?.purchaseImage || // từ list
+    purchase?.purchaseImage || // từ purchaseList nếu BE trả field này
     purchase?.pendingLinks?.[0]?.imagePurchased ||
     purchase?.pendingLinks?.[0]?.purchaseImage ||
     "";
 
   const [form, setForm] = useState({
-    finalPriceOrder: purchase?.finalPriceOrder || "",
+    finalPriceOrder:
+      purchase?.finalPriceOrder !== undefined &&
+      purchase?.finalPriceOrder !== null
+        ? String(purchase.finalPriceOrder)
+        : "",
     note: purchase?.note || "",
     shipmentCode: currentShipmentCode || "",
     imagePurchased: currentImagePurchased || "",
@@ -26,9 +30,18 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
 
   const [loading, setLoading] = useState(false);
 
-  const formatNumber = (num) => {
-    if (!num && num !== 0) return "";
-    return Number(num).toLocaleString("en-US");
+  // 🔹 Bỏ Number(), xử lý string để hỗ trợ số thập phân an toàn
+  const formatNumber = (value) => {
+    if (value === "" || value === null || value === undefined) return "";
+
+    const str = String(value);
+    const [intPart, decimalPart] = str.split(".");
+
+    const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+    return decimalPart !== undefined
+      ? `${formattedInt}.${decimalPart}`
+      : formattedInt;
   };
 
   const parseNumber = (str) => {
@@ -39,20 +52,24 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    // Xử lý riêng cho Final Price
     if (name === "finalPriceOrder") {
-      const cleanValue = parseNumber(value);
-      if (cleanValue && !/^\d*\.?\d*$/.test(cleanValue)) return;
+      const raw = parseNumber(value);
+
+      // Chỉ cho phép số + tối đa 1 dấu chấm (số thập phân)
+      if (!/^\d*\.?\d*$/.test(raw)) return;
 
       setForm((prev) => ({
         ...prev,
-        [name]: cleanValue,
+        finalPriceOrder: raw, // lưu dạng string, BE parse BigDecimal
       }));
-    } else {
-      setForm((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      return;
     }
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleUpdate = async () => {
@@ -64,6 +81,7 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
     setLoading(true);
 
     try {
+      // Gửi form với finalPriceOrder dạng string (BE tự parse BigDecimal/Decimal)
       await createPurchaseService.updatePurchase(purchase.purchaseId, form);
 
       if (onUpdated) {
@@ -88,7 +106,7 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
   return (
     <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-t-2xl px-6 py-4">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-600 rounded-t-2xl px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20">
@@ -135,10 +153,12 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
 
           <div className="space-y-2 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Price Purchase:</span>
+              <span className="text-gray-600">Price purchase:</span>
               <span className="font-semibold text-gray-900">
-                {purchase?.finalPriceOrder
-                  ? `${formatNumber(purchase.finalPriceOrder)}`
+                {purchase?.finalPriceOrder !== undefined &&
+                purchase?.finalPriceOrder !== null &&
+                purchase?.finalPriceOrder !== ""
+                  ? formatNumber(String(purchase.finalPriceOrder))
                   : "Not set"}
               </span>
             </div>
@@ -177,8 +197,8 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
         <div className="space-y-4">
           {/* Final Price */}
           <div>
-            <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-700">
-              Price Purchase{" "}
+            <label className="mb-1 flex items-center gap-2 text-sm font-medium text-gray-700">
+              Pirce purchase{" "}
               <span className="text-yellow-500 font-normal">(Optional)</span>
             </label>
             <input
@@ -188,10 +208,10 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
               onChange={handleChange}
               placeholder={
                 purchase?.finalPriceOrder
-                  ? `Current: ${formatNumber(purchase.finalPriceOrder)}`
-                  : "Enter price purchase"
+                  ? `Current: ${formatNumber(String(purchase.finalPriceOrder))}`
+                  : "Enter final price"
               }
-              className="w-full rounded-lg border border-gray-300 pl-4 pr-10 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+              className="w-full rounded-lg border border-gray-300 pl-4 pr-10 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
             />
           </div>
 
@@ -211,7 +231,7 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
                   ? `Current: ${currentShipmentCode}`
                   : "Enter shipment code"
               }
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-mono focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-mono focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
             />
           </div>
 
@@ -227,12 +247,11 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
             label="Image Purchased"
             placeholder="Chưa có ảnh sản phẩm"
             maxSizeMB={3}
-            className=""
           />
 
-          {/* Note */}
+          {/* Note - compact */}
           <div>
-            <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-700">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
               <FileText className="h-4 w-4 text-gray-500" />
               Note
             </label>
@@ -240,13 +259,9 @@ const UpdatePurchase = ({ purchase, onClose, onUpdated }) => {
               name="note"
               value={form.note}
               onChange={handleChange}
-              rows={4}
-              placeholder={
-                purchase?.note
-                  ? `Current: ${purchase.note}`
-                  : "Enter notes or additional information..."
-              }
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all resize-none"
+              rows={2}
+              placeholder="Enter notes..."
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40 transition-all resize-none"
             />
           </div>
         </div>

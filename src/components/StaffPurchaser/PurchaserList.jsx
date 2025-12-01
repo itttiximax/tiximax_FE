@@ -624,6 +624,14 @@ const PurchaserList = () => {
                                         </span>
                                       </span>
                                     )}
+                                    {purchase.purchaseCode && (
+                                      <span>
+                                        Price purchase:{" "}
+                                        <span className="font-medium text-gray-900">
+                                          {purchase.finalPriceOrder}
+                                        </span>
+                                      </span>
+                                    )}
                                   </div>
                                 </div>
                                 <div className="flex flex-col items-start gap-3 lg:items-end">
