@@ -130,7 +130,7 @@ const UploadImg = ({
                   Deleting...
                 </>
               ) : (
-                "Xóa ảnh"
+                "Delete Img"
               )}
             </button>
           )}
