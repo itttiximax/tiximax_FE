@@ -12,7 +12,7 @@ import {
   Settings,
   Search,
 } from "lucide-react";
-
+import Logo1 from "../assets/Logo1.png";
 // Mock hooks for demo - Toggle để test UI
 const MockAuthProvider = () => {
   const [isAuth, setIsAuth] = React.useState(true);
@@ -180,12 +180,24 @@ const Header = () => {
       <div className="max-w-[1600px] mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* LEFT: LOGO - dời sát lề trái */}
-          <div className="flex-shrink-0">
+          {/* <div className="flex-shrink-0">
             <Link
               to={isInternal ? dashboardPath : "/"}
               className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 bg-clip-text text-transparent hover:from-amber-500 hover:via-yellow-500 hover:to-amber-600 transition-all"
             >
               TIXIMAX
+            </Link>
+          </div> */}
+          <div className="flex-shrink-0">
+            <Link
+              to={isInternal ? dashboardPath : "/"}
+              className="flex items-center"
+            >
+              <img
+                src={Logo1}
+                alt="TIXIMAX Logo"
+                className="h-12 sm:h-14 w-auto object-contain"
+              />
             </Link>
           </div>
 

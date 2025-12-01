@@ -18,27 +18,23 @@ const BankOrderList = ({
   const [accounts, setAccounts] = useState(cachedAccounts);
   const [error, setError] = useState("");
 
-  // ✅ THÊM: Sync với cached accounts từ parent
   useEffect(() => {
     if (cachedAccounts && cachedAccounts.length > 0) {
       setAccounts(cachedAccounts);
       onAccountsChange?.(cachedAccounts);
 
-      // Auto-select nếu cần
       if (autoSelectFirst && !value) {
         onChange?.(String(cachedAccounts[0].id));
       }
     }
   }, [cachedAccounts]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ✅ THÊM: Sync loading state từ parent
   useEffect(() => {
     setLoading(initialLoading);
     onLoadingChange?.(initialLoading);
   }, [initialLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchAccounts = async () => {
-    // ✅ SỬA: Nếu đã có cached data, không cần fetch lại
     if (cachedAccounts && cachedAccounts.length > 0) {
       return;
     }
@@ -47,7 +43,7 @@ const BankOrderList = ({
       setLoading(true);
       onLoadingChange?.(true);
       setError("");
-      const data = await managerBankAccountService.getProxyAccounts();
+      const data = await managerBankAccountService.getProxyAccountsV2();
       const arr = Array.isArray(data) ? data : [];
       setAccounts(arr);
       onAccountsChange?.(arr);

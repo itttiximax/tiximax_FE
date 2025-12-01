@@ -13,12 +13,30 @@ const managerBankAccountService = {
       throw error;
     }
   },
+  async getProxyAccountsV2() {
+    try {
+      const response = await api.get("/bankAccounts/filter/proxy");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching proxy accounts v2:", error);
+      throw error;
+    }
+  },
 
+  // async getRevenueAccounts() {
+  //   try {
+  //     const response = await api.get("/bankAccounts/filter", {
+  //       params: { isProxy: false, isRevenue: true },
+  //     });
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Error fetching revenue accounts:", error);
+  //     throw error;
+  //   }
+  // },
   async getRevenueAccounts() {
     try {
-      const response = await api.get("/bankAccounts/filter", {
-        params: { isProxy: false, isRevenue: true },
-      });
+      const response = await api.get("/bankAccounts/filter/revenue");
       return response.data;
     } catch (error) {
       console.error("Error fetching revenue accounts:", error);

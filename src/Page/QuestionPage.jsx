@@ -16,25 +16,25 @@ const QuestionPage = () => {
       id: 1,
       question: "Thời gian vận chuyển hàng hóa là bao lâu?",
       answer:
-        "Thời gian vận chuyển phụ thuộc vào khoảng cách và loại hình dịch vụ. Trong nội thành: 1-2 ngày. Liên tỉnh: 3-5 ngày. Quốc tế: 7-15 ngày tùy theo điểm đến.",
+        "Tùy thuộc vào từng tuyến mà thời gian vận chuyển hàng có thể từ từ 7 - 15 ngày. Hãy liên hệ với Tiximax để được tư vấn rõ thời gian xử lý đơn hàng của bạn.",
     },
     {
       id: 2,
       question: "Chi phí vận chuyển được tính như thế nào?",
       answer:
-        "Chi phí được tính dựa trên: Khối lượng và kích thước hàng hóa, khoảng cách vận chuyển, loại hình dịch vụ (nhanh/tiêu chuẩn), và các dịch vụ bổ sung nếu có. Liên hệ để nhận báo giá chi tiết.",
+        "Với mỗi một tuyến, Tiximax sẽ có một mức chi phí khác nhau. Dao động từ 145.000 VNĐ đến 245.000 VNĐ/KG, để tìm hiểu chi tiết hãy nhắn tin để nhân viên chúng tôi hỗ trợ tư vấn.",
     },
     {
       id: 3,
       question: "Hàng hóa có được bảo hiểm không?",
       answer:
-        "Có, tất cả hàng hóa đều được bảo hiểm cơ bản miễn phí. Chúng tôi cũng cung cấp gói bảo hiểm mở rộng với mức phí hợp lý để bảo vệ tốt hơn cho hàng hóa có giá trị cao.",
+        "Tiximax có cung cấp gói bảo hiểm hàng hóa với mức đền bù lên đến 100% cho khách hàng. Nếu mua sắm các hàng hóa giá trị cao, hàng dễ vỡ, chúng tôi khuyên bạn nên lựa chọn gói bảo hiểm này để được đảm bảo.",
     },
     {
       id: 4,
       question: "Làm thế nào để theo dõi đơn hàng của tôi?",
       answer:
-        "Bạn có thể theo dõi đơn hàng 24/7 qua hệ thống tracking trực tuyến của chúng tôi. Chỉ cần nhập mã vận đơn vào trang web hoặc ứng dụng di động để xem vị trí hàng hóa theo thời gian thực.",
+        "Hiện Tiximax có hệ thống Tracking - cho phép khách hàng theo dõi đơn hàng dựa trên mã vận đơn của mình. Bạn có thể truy cập vào website tiximax.net và nhấn nút '' Tracking đơn hàng '' trên thanh menu để tiến hành tra cứu thông tin.",
     },
   ];
 

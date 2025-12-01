@@ -3,9 +3,9 @@ import React, { useState } from "react";
 const services = [
   {
     id: 1,
-    title: "Gửi Hàng Về Việt Nam",
+    title: "Dịch Vụ Vận Chuyển",
     description:
-      "Gửi hàng từ người thân tại Mỹ và Ship hàng Mỹ về Việt Nam bằng đường hàng không, bưu điện, đường biển an toàn, nhanh chóng và tiết kiệm.",
+      "Dịch vụ vận chuyển quốc tế trọn gói tuyến Mỹ, Nhật, Hàn, Indonesia về Việt Nam. Tiximax cam kết quy trình minh bạch, tối ưu cước phí và thời gian vận chuyển nhanh chóng. Chúng tôi đảm bảo hàng hóa đến tay bạn an toàn và đúng hẹn, giúp bạn tiết kiệm chi phí logistics tối đa.",
     image:
       "https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55?w=500&q=80",
     icon: (
@@ -26,18 +26,18 @@ const services = [
   },
   {
     id: 2,
-    title: "Mua Hộ Hàng Hóa",
+    title: "Dịch Vụ Mua Hộ",
     description:
-      "Khách hàng chỉ cần cung cấp thông tin về sản phẩm và website muốn ship hàng Mỹ không thuế, nhanh, uy tín, VietCargo sẽ thực hiện từ A-Z các khâu còn lại theo yêu cầu của Quý Khách.",
+      "Cần mua hộ hàng Mỹ, Nhật, Hàn, Indonesia? Đội ngũ Tiximax giúp bạn mua sắm tại mọi website. Cam kết mua đúng link, đúng sản phẩm với mức phí ưu đãi nhất. Sử dụng dịch vụ mua hộ để tiếp cận hàng hóa toàn cầu chính hãng mà không cần thẻ quốc tế phức tạp.",
     image:
       "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500&q=80",
     brands: ["Amazon", "eBay", "Walmart", "Zara"],
   },
   {
     id: 3,
-    title: "Đấu Giá ",
+    title: "Dịch Vụ Đấu Giá",
     description:
-      "Đấu giá & tư vấn miễn phí, tỷ lệ giành chiến thắng cao, khấu trừ đấu giá, mua hàng, vận chuyển hàng nhanh chóng. Dịch vụ ship hàng Mỹ về Việt Nam uy tín.",
+      "Thỏa sức săn hàng độc và giá trị cao từ các sàn đấu giá eBay, Yahoo Auction. Dịch vụ đấu giá hộ Tiximax giúp bạn tham gia đấu giá an toàn, dễ dàng, tăng cơ hội thắng với mức phí cạnh tranh. Nhận tư vấn chi tiết quy trình và thủ tục nhanh chóng.",
     image:
       "https://images.unsplash.com/photo-1505778276668-26b3ff7af103?w=500&q=80",
     icon: (
@@ -58,9 +58,9 @@ const services = [
   },
   {
     id: 4,
-    title: "Ký Gửi Đi Nước Ngoài",
+    title: "Dịch Vụ Thông Quan Hộ",
     description:
-      "Nhận gửi hàng nội địa tại Mỹ tiết kiệm, nhanh chóng và đảm bảo. Chuyển phát nhanh UPS, Fedex, USPS, Ontrack,...",
+      "Giải pháp thông quan hải quan chuyên nghiệp cho hàng hóa xuất nhập khẩu số lượng lớn. Tiximax giúp bạn xử lý toàn bộ thủ tục pháp lý, hồ sơ hải quan nhanh gọn, tránh rủi ro và phạt. Đảm bảo lô hàng được thông quan suôn sẻ, đúng luật và tối ưu thời gian.",
     image:
       "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?w=500&q=80",
     icon: (
@@ -81,9 +81,9 @@ const services = [
   },
   {
     id: 5,
-    title: "Gửi Hàng Đi Nước Ngoài",
+    title: "Dịch Vụ Ký Gửi Kho",
     description:
-      "Dịch vụ vận chuyển hàng hóa từ Việt Nam đi các nước trên thế giới. Hỗ trợ đầy đủ thủ tục xuất khẩu, đóng gói chuyên nghiệp, giao hàng nhanh chóng và an toàn.",
+      "Dịch vụ ký gửi kho hàng và gom hàng tại Mỹ, Nhật, Hàn miễn phí trong thời gian quy định. Tiximax cung cấp địa chỉ kho uy tín, hỗ trợ kiểm đếm, đóng gói chuẩn quốc tế. Tận dụng ký gửi kho để tối ưu chi phí vận chuyển và gom đơn hàng tiện lợi.",
     image:
       "https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=500&q=80",
     icon: (

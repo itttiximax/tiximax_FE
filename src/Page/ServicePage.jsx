@@ -1,25 +1,33 @@
 import React, { useState } from "react";
 
 const services = [
-  {
-    id: 7,
-    domain: "tiximax.vn",
-    country:
-      "https://upload.wikimedia.org/wikipedia/commons/2/21/Flag_of_Vietnam.svg",
-    market: "Vietnam",
-    description:
-      "Tuyến nội địa và đầu mối gom hàng toàn quốc, kết nối tất cả tuyến quốc tế.",
-    specialties: ["Kho vận", "Giao hàng nội địa", "Hỗ trợ doanh nghiệp"],
-    estimatedTime: "1–3 ngày",
-  },
+  // {
+  //   id: 7,
+  //   domain: "tiximax.vn",
+  //   country:
+  //     "https://upload.wikimedia.org/wikipedia/commons/2/21/Flag_of_Vietnam.svg",
+  //   market: "Vietnam",
+  //   description:
+  //     "Tuyến nội địa và đầu mối gom hàng toàn quốc, kết nối tất cả tuyến quốc tế.",
+  //   specialties: ["Kho vận", "Giao hàng nội địa", "Hỗ trợ doanh nghiệp"],
+  //   estimatedTime: "1–3 ngày",
+  // },
   {
     id: 1,
     domain: "tiximaxindo.com",
     country:
       "https://upload.wikimedia.org/wikipedia/commons/9/9f/Flag_of_Indonesia.svg",
     market: "Indonesia",
-    description: "Chuyên tuyến vận chuyển và mua hàng từ Indonesia",
-    specialties: ["E-commerce", "Textiles", "Skincare", "Food & Spices"],
+    description:
+      "Cung cấp dịch vụ vận chuyển - đấu giá - mua hộ 2 chiều Indonesia - Việt Nam.",
+    specialties: [
+      "Thương mại điện tử",
+      "Dệt may",
+      "Thức ăn cá",
+      "Thực phẩm & Gia vị",
+      "Phụ tùng xe máy",
+      "Đồ gia dụng",
+    ],
     estimatedTime: "5-7 ngày",
   },
   {
@@ -27,8 +35,18 @@ const services = [
     domain: "tiximax.jp",
     country: "https://upload.wikimedia.org/wikipedia/en/9/9e/Flag_of_Japan.svg",
     market: "Japan",
-    description: "Chuyên tuyến vận chuyển và mua hàng từ Nhật Bản",
-    specialties: ["Electronics", "Cosmetics", "Fashion", "Skincare"],
+    description:
+      "CCung cấp dịch vụ vận chuyển - đấu giá - mua hộ từ Nhật Bản về Việt Nam.",
+    specialties: [
+      "Điện tử",
+      "Mỹ phẩm",
+      "Thời trang",
+      "Chăm sóc da",
+      "Máy móc",
+      "Thẻ bài",
+      "Đấu giá đồ cũ",
+      "Thực phẩm chức năng",
+    ],
     estimatedTime: "7-10 ngày",
   },
   {
@@ -37,8 +55,16 @@ const services = [
     country:
       "https://upload.wikimedia.org/wikipedia/commons/0/09/Flag_of_South_Korea.svg",
     market: "South Korea",
-    description: "Chuyên tuyến vận chuyển và mua hàng từ Hàn Quốc",
-    specialties: ["K-Beauty", "Fashion", "Electronics", "Skincare"],
+    description:
+      "Chuyên vận chuyển - đấu giá - mua hộ từ Hàn Quốc về Việt Nam.",
+    specialties: [
+      "Làm đẹp Hàn Quốc (K-Beauty)",
+      "Thời trang",
+      "Điện tử",
+      "Chăm sóc da",
+      "Thực phẩm chức năng",
+      "Công nghệ",
+    ],
     estimatedTime: "6-9 ngày",
   },
   {
@@ -47,30 +73,38 @@ const services = [
     country:
       "https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg",
     market: "USA",
-    description: "Chuyên tuyến vận chuyển và mua hàng từ Mỹ",
-    specialties: ["Tech", "Supplements", "Books", "Skincare"],
+    description: "Chuyên vận chuyển - đấu giá - mua hộ từ Mỹ về Việt Nam.",
+    specialties: [
+      "Công nghệ",
+      "Thực phẩm chức năng",
+      "Sách",
+      "Chăm sóc da",
+      "Thời trang",
+      "Đấu giá đồ cũ",
+      "Phụ kiện xe",
+    ],
     estimatedTime: "10-14 ngày",
   },
-  {
-    id: 5,
-    domain: "tiximax.hk",
-    country:
-      "https://upload.wikimedia.org/wikipedia/commons/5/5b/Flag_of_Hong_Kong.svg",
-    market: "Hong Kong",
-    description: "Chuyên tuyến vận chuyển và mua hàng từ Hong Kong",
-    specialties: ["Electronics", "Jewelry", "Fashion", "Skincare"],
-    estimatedTime: "4-7 ngày",
-  },
-  {
-    id: 6,
-    domain: "tiximax.net",
-    country:
-      "https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg",
-    market: "Global",
-    description: "Tổng quan tất cả dịch vụ vận chuyển và mua hàng quốc tế",
-    specialties: ["Multi-platform", "Consolidated", "Express", "Skincare"],
-    estimatedTime: "Varies",
-  },
+  // {
+  //   id: 5,
+  //   domain: "tiximax.hk",
+  //   country:
+  //     "https://upload.wikimedia.org/wikipedia/commons/5/5b/Flag_of_Hong_Kong.svg",
+  //   market: "Hong Kong",
+  //   description: "Chuyên tuyến vận chuyển và mua hàng từ Hong Kong",
+  //   specialties: ["Electronics", "Jewelry", "Fashion", "Skincare"],
+  //   estimatedTime: "4-7 ngày",
+  // },
+  // {
+  //   id: 6,
+  //   domain: "tiximax.net",
+  //   country:
+  //     "https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg",
+  //   market: "Global",
+  //   description: "Tổng quan tất cả dịch vụ vận chuyển và mua hàng quốc tế",
+  //   specialties: ["Multi-platform", "Consolidated", "Express", "Skincare"],
+  //   estimatedTime: "Varies",
+  // },
 ];
 
 const ServicesPage = () => {

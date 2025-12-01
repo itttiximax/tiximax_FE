@@ -1,13 +1,13 @@
 import React from "react";
 import { ArrowRight, Award, Clock, Shield, Users } from "lucide-react";
 // import BannerWebsiteMain from "../assets/BannerWebsiteMain.png"; // chỉnh đường dẫn cho đúng
-import BannerWebsiteMain from "../assets/BannerWebsiteMain.png";
+import BannerWebsite2 from "../assets/BannerWebsite2.png";
 const About = () => {
   return (
     <section
-      className="relative w-full h-[800px] flex items-center justify-center bg-no-repeat bg-center text-white overflow-hidden"
+      className="relative w-full h-[550px] flex items-center justify-center bg-no-repeat bg-center text-white overflow-hidden"
       style={{
-        backgroundImage: `url(${BannerWebsiteMain})`,
+        backgroundImage: `url(${BannerWebsite2})`,
         backgroundSize: "contain",
         backgroundPosition: "center 0%",
       }}
