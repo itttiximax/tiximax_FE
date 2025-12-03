@@ -113,7 +113,7 @@ const ServiceList = () => {
   return (
     <main className="min-h-screen bg-gradient-to-b from-white to-amber-50/30">
       {/* Hero */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden  flex justify-center text-center">
         <div className="absolute inset-0 -z-10 opacity-20 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-300 via-yellow-200 to-transparent" />
         <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-14 pb-10 lg:pt-24 lg:pb-16">
           <motion.div
@@ -126,11 +126,10 @@ const ServiceList = () => {
               <PackageSearch className="w-3.5 h-3.5" /> Dịch vụ Logistics
             </span>
             <h1 className="mt-5 text-3xl sm:text-4xl lg:text-5xl font-black leading-tight text-gray-900">
-              Dịch vụ Tiximax – Giải pháp Vận chuyển & Mua hộ Toàn diện
+              Dịch Vụ Tiximax - Giải Pháp Logistics Đường Bay Toàn Diện
             </h1>
-            <p className="mt-5 text-gray-600 text-lg leading-8">
-              Từ mua hộ quốc tế đến giao nhận tận nơi, chúng tôi mang hàng hóa
-              toàn cầu về Việt Nam nhanh chóng, an toàn và tối ưu chi phí.
+            <p className="mt-5 text-black text-lg leading-8">
+              Cùng khám phá về những dịch vụ mà chúng tôi cung cấp
             </p>
           </motion.div>
         </div>

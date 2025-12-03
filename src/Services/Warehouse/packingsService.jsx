@@ -161,6 +161,18 @@ class PackingsService {
     const response = await api.patch(endpoint, shipmentCodes);
     return response.data;
   }
+
+  async exportPackings(ids = []) {
+    try {
+      const response = await api.post("/packings/export", ids, {
+        responseType: "blob",
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error exporting packings:", error);
+      throw error;
+    }
+  }
 }
 
 // Create and export a singleton instance

@@ -125,6 +125,7 @@ import ListOrderManager from "../components/Order/ListOrderManager";
 import ExportOrder from "../components/WarehouseDomestic/ExportOrder";
 import UpdateShipmentCodeAuctionList from "../components/StaffPurchaser/UpdateShipmentCodeAuctionList";
 import DashboardManager from "../components/Manager/DashboardManager";
+import ExportPacking from "../components/Packing/ExportPacking";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -324,7 +325,7 @@ const Router = createBrowserRouter([
       { path: "tracking", element: <Tracking /> }, // Chưa triển khai
       { path: "warehouses", element: <Tracking /> }, // Chưa triển khai
       { path: "telesale", element: <PerformnanceMy /> }, // Chưa triển khai
-      { path: "knowledge", element: <NotFound /> }, // Chưa triển khai
+      { path: "knowledge", element: <ExportPacking /> }, // Chưa triển khai
       { path: "schedule", element: <NotFound /> }, // Chưa triển khai
       { path: "dashboard", element: <DashboardSale /> },
       { path: "performance", element: <PerformanceStaff /> },

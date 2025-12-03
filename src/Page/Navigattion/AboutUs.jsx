@@ -16,6 +16,10 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
+// import CEOPIC from "../../assets/CEOPIC.png";
+import CEOPIC from "../../assets/CEOPIC.png";
+import DUNGLE from "../../assets/DUNGLE.jpg";
+import DUCLE from "../../assets/DUCLE.jpg";
 /**
  * AboutUs.jsx — Tiximax (with imagery for Vision / Mission / Values)
  * Added hero images to V/M/V cards while preserving brand palette (amber / white / black).
@@ -75,11 +79,6 @@ const milestones = [
     detail:
       "Mở văn phòng tại Hồ Chí Minh, phát triển thêm các tuyến Nhật - Việt, Hàn - Việt, Mỹ - Việt.",
   },
-  // {
-  //   year: "2026",
-  //   title: "Vươn tầm khu vực",
-  //   detail: "Vận hành đa tuyến Nhật – Hàn – Indo – Mỹ về Việt Nam với SLA cao.",
-  // },
 ];
 
 const footprints = [
@@ -141,22 +140,25 @@ const strengths = [
 
 const leaders = [
   {
-    name: "Nguyễn A.",
-    role: "Giám đốc Vận hành",
-    bio: "10+ năm quản lý chuỗi cung ứng khu vực APAC.",
-    initials: "NA",
+    name: "Nguyễn Ngọc Hoàng Anh",
+    role: "CEO & Founder của Tiximax",
+    bio: "Email: hoanganh@tiximax.net",
+    initials: "HA",
+    image: CEOPIC,
   },
   {
-    name: "Trần B.",
-    role: "Head of Sales",
-    bio: "Phát triển đối tác & khách hàng xuyên biên giới.",
-    initials: "TB",
+    name: "Lê Trung Dũng",
+    role: "Giám đốc Kinh doanh Tiximax",
+    bio: "Email:dung.le@tiximax.net",
+    initials: "DL",
+    image: DUCLE,
   },
   {
-    name: "Lê C.",
-    role: "Ops Tech Lead",
-    bio: "Tự động hoá hệ thống, tracking & báo cáo real-time.",
-    initials: "LC",
+    name: "Trần Minh Đức",
+    role: "Phó Giám đốc Kinh doanh Tiximax",
+    bio: "Email: ductm@tiximax.net",
+    initials: "DT",
+    image: DUNGLE,
   },
 ];
 
@@ -352,7 +354,7 @@ const AboutUs = () => {
       </section>
 
       {/* Global footprint */}
-      <section className="py-10">
+      {/* <section className="py-10">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
@@ -390,10 +392,10 @@ const AboutUs = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Strengths */}
-      <section className="py-10">
+      {/* <section className="py-10">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="mb-8">
             <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900">
@@ -427,7 +429,7 @@ const AboutUs = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Leadership */}
       <section className="py-10">
@@ -436,11 +438,11 @@ const AboutUs = () => {
             <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900">
               Đội ngũ lãnh đạo
             </h2>
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-black-600">
               Những người dẫn dắt Tiximax phát triển bền vững và khác biệt.
             </p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {leaders.map((p) => (
               <motion.div
                 key={p.name}
@@ -448,20 +450,27 @@ const AboutUs = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.45 }}
-                className="rounded-2xl bg-white border border-gray-100 p-5 shadow-sm"
+                className="rounded-3xl bg-white border border-gray-100 overflow-hidden shadow-lg group"
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 font-bold grid place-items-center shadow-inner">
-                    {p.initials}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">{p.name}</p>
-                    <p className="text-sm text-amber-700 font-medium">
+                <div className="relative h-96 overflow-hidden">
+                  <img
+                    src={p.image}
+                    alt={p.name}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <p className="font-bold text-white text-xl mb-1">
+                      {p.name}
+                    </p>
+                    <p className="text-base text-amber-300 font-medium">
                       {p.role}
                     </p>
                   </div>
                 </div>
-                <p className="mt-3 text-sm text-gray-600">{p.bio}</p>
+                <div className="p-6">
+                  <p className="text-xl font-medium text-black-600">{p.bio}</p>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -469,7 +478,7 @@ const AboutUs = () => {
       </section>
 
       {/* Trust & CTA */}
-      <section className="py-12 lg:py-16">
+      {/* <section className="py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="grid lg:grid-cols-2 gap-8 items-center">
             <motion.div
@@ -516,6 +525,7 @@ const AboutUs = () => {
                 >
                   Liên hệ tư vấn
                 </a>
+
                 <a
                   href="/services/shipping"
                   className="inline-flex items-center justify-center rounded-xl px-5 py-3 font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
@@ -526,7 +536,7 @@ const AboutUs = () => {
             </motion.div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Footer badge */}
       <section className="pb-14">

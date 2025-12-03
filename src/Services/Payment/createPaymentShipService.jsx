@@ -6,6 +6,7 @@ const createPaymentShipService = {
     isUseBalance,
     customerVoucherId,
     bankId,
+    priceShipDos,
     itemCodes
   ) {
     if (!Array.isArray(itemCodes) || !itemCodes.length)
@@ -14,7 +15,7 @@ const createPaymentShipService = {
 
     const flag = !!isUseBalance;
     const voucherSeg = customerVoucherId ?? "null"; // khi không có voucher -> "null"
-    const url = `/payments/merged-shipping/${flag}/${bankId}/${voucherSeg}`;
+    const url = `/payments/merged-shipping/${flag}/${bankId}/${priceShipDos}/${voucherSeg}`;
 
     const { data } = await api.post(url, itemCodes); // body là mảng
     return data;
