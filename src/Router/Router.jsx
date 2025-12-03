@@ -266,7 +266,7 @@ const Router = createBrowserRouter([
       { path: "prospects", element: <NotFound /> },
       { path: "dashboard", element: <DashboardLeadSale /> },
       { path: "team", element: <ManagerTeam /> },
-      { path: "salesreport", element: <PerformanceStaff /> },
+      { path: "salesreport", element: <DashboardSale /> },
       { path: "team-performance", element: <NotFound /> },
       { path: "customers", element: <CustomerStaffList /> },
       { path: "orders", element: <OrderList /> },
@@ -328,7 +328,8 @@ const Router = createBrowserRouter([
       { path: "knowledge", element: <ExportPacking /> }, // Chưa triển khai
       { path: "schedule", element: <NotFound /> }, // Chưa triển khai
       { path: "dashboard", element: <DashboardSale /> },
-      { path: "performance", element: <PerformanceStaff /> },
+      // { path: "performance", element: <PerformanceStaff /> },
+      { path: "performance", element: <NotFound /> },
     ],
   },
   {

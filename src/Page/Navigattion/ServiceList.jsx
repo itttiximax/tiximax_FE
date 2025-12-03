@@ -79,33 +79,23 @@ const services = [
 const strengths = [
   {
     icon: <ShieldCheck className="w-6 h-6" />,
-    title: "An toàn & Tuân thủ",
-    desc: "Tuân thủ quy định hải quan, bảo mật dữ liệu khách hàng.",
+    title: "GỬI YÊU CẦU",
+    desc: "Khách hàng gửi yêu cầu mua hộ, vận chuyển hoặc đấu giá qua website hoặc fanpage Tiximax. Hãy cung cấp chi tiết về sản phẩm để chúng tôi có thể xử lý yêu cầu của bạn nhanh chóng và chính xác nhất.",
   },
   {
     icon: <Clock className="w-6 h-6" />,
-    title: "Tốc độ Cao",
-    desc: "Lead time rút ngắn nhờ tuyến bay tối ưu và tự động hóa.",
+    title: "NHẬN BÁO GIÁ",
+    desc: "Chuyên viên Tiximax sẽ gửi báo giá chi tiết, minh bạch và tối ưu nhất qua email/tin nhắn. Báo giá bao gồm mọi chi phí trọn gói, không phát sinh, đảm bảo bạn nắm rõ thông tin trước khi quyết định.",
   },
   {
     icon: <Users2 className="w-6 h-6" />,
-    title: "Hỗ trợ 24/7",
-    desc: "Đội ngũ tư vấn đa ngôn ngữ, hỗ trợ mọi lúc.",
+    title: "XÁC NHẬN & THANH TOÁN",
+    desc: "Sau khi đồng ý với báo giá, khách hàng tiến hành xác nhận đơn hàng và thanh toán. Hệ thống Tiximax bắt đầu thực hiện các bước mua hàng và logistics ngay lập tức, đảm bảo tiến độ.",
   },
   {
     icon: <ChartNoAxesCombined className="w-6 h-6" />,
-    title: "Minh bạch Chi phí",
-    desc: "Báo giá realtime, không phí ẩn, hóa đơn điện tử.",
-  },
-  {
-    icon: <Handshake className="w-6 h-6" />,
-    title: "Đối tác Toàn cầu",
-    desc: "Mạng lưới hãng bay, kho bãi, đại lý HQ đáng tin cậy.",
-  },
-  {
-    icon: <Rocket className="w-6 h-6" />,
-    title: "Tùy chỉnh Giải pháp",
-    desc: "Cá nhân hóa theo ngành hàng: điện tử, thời trang, thực phẩm.",
+    title: "NHẬN HÀNG TẬN TAY.",
+    desc: "Khách có thể theo dõi đơn hàng qua hệ thống tracking hoặc qua sự hỗ trợ của nhân viên Tiximax. Chúng tôi sẽ giao hàng tận nơi, đảm bảo đúng, đủ và chính xác.",
   },
 ];
 
