@@ -501,15 +501,13 @@ const MergedPaymentShipConfigModal = ({
               Phí ship nội địa (VNĐ) <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <DollarSign className="h-5 w-5 text-gray-400" />
-              </div>
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"></div>
               <input
                 type="text"
                 value={priceShipDos}
                 onChange={handlePriceShipDosChange}
                 disabled={isCreating}
-                placeholder="Ví dụ: 50000 hoặc 50000.50"
+                placeholder="000.000"
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
             </div>

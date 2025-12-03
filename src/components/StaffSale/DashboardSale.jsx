@@ -89,27 +89,24 @@ const DashboardSale = () => {
   const [openPicker, setOpenPicker] = useState(false);
   const [perf, setPerf] = useState({ loading: false, error: "", row: null });
 
-  const { startDateClamped, endDateClamped, rangeLabel, startYMD, endYMD } =
-    useMemo(() => {
-      let s = selectionRange.startDate
-        ? startOfDay(selectionRange.startDate)
-        : minDate;
-      let e = selectionRange.endDate
-        ? endOfDay(selectionRange.endDate)
-        : maxDate;
+  const { rangeLabel, startYMD, endYMD } = useMemo(() => {
+    let s = selectionRange.startDate
+      ? startOfDay(selectionRange.startDate)
+      : minDate;
+    let e = selectionRange.endDate ? endOfDay(selectionRange.endDate) : maxDate;
 
-      if (isBefore(s, minDate)) s = minDate;
-      if (isAfter(e, maxDate)) e = maxDate;
-      if (isAfter(s, e)) s = e;
+    if (isBefore(s, minDate)) s = minDate;
+    if (isAfter(e, maxDate)) e = maxDate;
+    if (isAfter(s, e)) s = e;
 
-      return {
-        startDateClamped: s,
-        endDateClamped: e,
-        startYMD: toYMD(s),
-        endYMD: toYMD(e),
-        rangeLabel: `${fmtVN(s)} - ${fmtVN(e)}`,
-      };
-    }, [selectionRange, minDate, maxDate]);
+    return {
+      startDateClamped: s,
+      endDateClamped: e,
+      startYMD: toYMD(s),
+      endYMD: toYMD(e),
+      rangeLabel: `${fmtVN(s)} - ${fmtVN(e)}`,
+    };
+  }, [selectionRange, minDate, maxDate]);
 
   useEffect(() => {
     let ignore = false;
