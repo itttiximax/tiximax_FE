@@ -232,21 +232,16 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
 
                   <div className="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-100">
                     <div className="text-xs font-medium text-gray-500">
-                      Weight (Gross)
+                      Weight
                     </div>
                     <div className="mt-1 text-sm font-semibold text-gray-900">
                       {detail.weight != null ? `${detail.weight} kg` : "-"}
                     </div>
                   </div>
-
                   <div className="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-100">
-                    <div className="text-xs font-medium text-gray-500">
-                      Weight (Net)
-                    </div>
+                    <div className="text-xs font-medium text-gray-500">Dim</div>
                     <div className="mt-1 text-sm font-semibold text-gray-900">
-                      {detail.netWeight != null
-                        ? `${detail.netWeight} kg`
-                        : "-"}
+                      {detail.dim != null ? `${detail.dim} kg` : "-"}
                     </div>
                   </div>
                 </div>
@@ -282,19 +277,17 @@ const DetailWarehouse = ({ open, warehouseId, onClose }) => {
                 </div>
 
                 {/* Volume */}
-                <div className="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-100">
-                  <div className="text-xs font-medium text-gray-500">
-                    Volume (CBM)
-                  </div>
-                  <div className="mt-1 text-sm font-semibold text-gray-900">
-                    {detail.dim != null ? `${detail.dim} m³` : "-"}
+                <div className="rounded-xl bg-green-200 p-3.5 shadow-sm ring-1 ring-gray-100 text-center">
+                  <div className="text-xl  text-black">NetWeight </div>
+                  <div className="mt-1 text-xl font-bold text-gray-900">
+                    {detail.netWeight != null ? `${detail.netWeight} kg` : "-"}
                   </div>
                 </div>
 
                 {/* Notes */}
-                <div className="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-100">
+                <div className="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-100 text-center">
                   <div className="flex items-center justify-between">
-                    <div className="text-xs font-medium text-gray-500">
+                    <div className="text-xs font-medium text-black-500">
                       Notes
                     </div>
                   </div>

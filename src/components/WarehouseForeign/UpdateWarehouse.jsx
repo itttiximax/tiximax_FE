@@ -207,13 +207,12 @@ const UpdateWarehouse = ({ isOpen, onClose, warehouseData, onSuccess }) => {
                   Length (cm) <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   name="length"
                   value={formData.length}
                   onChange={handleInputChange}
                   step="0.01"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter length"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                   disabled={loading}
                 />
               </div>
@@ -222,12 +221,12 @@ const UpdateWarehouse = ({ isOpen, onClose, warehouseData, onSuccess }) => {
                   Width (cm) <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   name="width"
                   value={formData.width}
                   onChange={handleInputChange}
                   step="0.01"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                   placeholder="Enter width"
                   disabled={loading}
                 />
@@ -237,12 +236,12 @@ const UpdateWarehouse = ({ isOpen, onClose, warehouseData, onSuccess }) => {
                   Height (cm) <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   name="height"
                   value={formData.height}
                   onChange={handleInputChange}
                   step="0.01"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                   placeholder="Enter height"
                   disabled={loading}
                 />
@@ -252,12 +251,12 @@ const UpdateWarehouse = ({ isOpen, onClose, warehouseData, onSuccess }) => {
                   Weight (kg) <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   name="weight"
                   value={formData.weight}
                   onChange={handleInputChange}
                   step="0.01"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                   placeholder="Enter weight"
                   disabled={loading}
                 />

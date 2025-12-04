@@ -20,7 +20,7 @@ const WarehouseList = () => {
   const [warehouses, setWarehouses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(50);
   const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
