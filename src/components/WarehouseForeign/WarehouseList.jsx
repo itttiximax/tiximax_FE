@@ -280,6 +280,9 @@ const WarehouseList = () => {
                     <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Image
                     </th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Destination
+                    </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Shipment Code
                     </th>
@@ -327,6 +330,9 @@ const WarehouseList = () => {
                             </div>
                           )}
                         </div>
+                      </td>
+                       <td className="px-4 py-3 text-gray-900 font-medium">
+                        {item.destination || "-"}
                       </td>
                       <td className="px-4 py-3 text-gray-900 font-medium">
                         {item.trackingCode}
