@@ -126,6 +126,7 @@ import ExportOrder from "../components/WarehouseDomestic/ExportOrder";
 import UpdateShipmentCodeAuctionList from "../components/StaffPurchaser/UpdateShipmentCodeAuctionList";
 import DashboardManager from "../components/Manager/DashboardManager";
 import ExportPacking from "../components/Packing/ExportPacking";
+import CreatePackingJapan from "../components/WarehouseForeign/CreatePackingJapan";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -377,7 +378,7 @@ const Router = createBrowserRouter([
       { path: "stock/location", element: <RemoveShipmentList /> },
       { path: "audit/check", element: <ImportProduct /> },
       { path: "audit/reconcile", element: <NotFound /> },
-      { path: "reports/dashboard", element: <NotFound /> },
+      { path: "reports/dashboard", element: <CreatePackingJapan /> },
       { path: "reports/performance", element: <NotFound /> },
       { path: "export", element: <NotFound /> },
     ],
