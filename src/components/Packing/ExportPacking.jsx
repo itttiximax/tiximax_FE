@@ -1,349 +1,316 @@
 import React, { useState } from "react";
-import { FileDown, Printer, CheckSquare, Square, Loader2 } from "lucide-react";
-import packingService from "../../Services/Warehouse/packingsService";
+import packingsService from "../../Services/Warehouse/packingsService";
+import toast from "react-hot-toast";
+import { Download } from "lucide-react";
+import * as XLSX from "xlsx";
 
-const ExportPacking = ({ packings = [], onExportSuccess }) => {
-  const [selectedIds, setSelectedIds] = useState([]);
-  const [isExporting, setIsExporting] = useState(false);
-  const [exportedData, setExportedData] = useState(null);
+const ExportPacking = () => {
+  const [packingIds, setPackingIds] = useState([""]);
+  const [packingsData, setPackingsData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Toggle select single item
-  const toggleSelect = (id) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+  const handleAddInput = () => {
+    setPackingIds([...packingIds, ""]);
   };
 
-  // Toggle select all
-  const toggleSelectAll = () => {
-    if (selectedIds.length === packings.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(packings.map((p) => p.id));
-    }
+  const handleRemoveInput = (index) => {
+    const newIds = packingIds.filter((_, i) => i !== index);
+    setPackingIds(newIds);
   };
 
-  // Export selected packings
+  const handleInputChange = (index, value) => {
+    const newIds = [...packingIds];
+    newIds[index] = value;
+    setPackingIds(newIds);
+  };
+
   const handleExport = async () => {
-    if (selectedIds.length === 0) {
-      alert("Vui lòng chọn ít nhất một kiện hàng để xuất!");
+    const validIds = packingIds
+      .filter((id) => id.trim() !== "")
+      .map((id) => parseInt(id));
+
+    if (validIds.length === 0) {
+      toast.error("Vui lòng nhập ít nhất một Packing ID!");
       return;
     }
 
-    setIsExporting(true);
+    setLoading(true);
     try {
-      const data = await packingService.exportPackings(selectedIds);
-      setExportedData(data);
-
-      // Call success callback if provided
-      if (onExportSuccess) {
-        onExportSuccess(data);
-      }
-
-      // Optional: Auto print after export
-      // handlePrint(data);
+      const data = await packingsService.exportPackings(validIds);
+      setPackingsData(data);
+      toast.success(`Export thành công ${data.length} kiện hàng!`);
     } catch (error) {
-      console.error("Export error:", error);
-      alert("Có lỗi xảy ra khi xuất dữ liệu. Vui lòng thử lại!");
+      toast.error(error.message || "Export thất bại!");
+      setPackingsData([]);
     } finally {
-      setIsExporting(false);
+      setLoading(false);
     }
   };
 
-  // Print labels
-  const handlePrint = (data = exportedData) => {
-    if (!data || data.length === 0) {
-      alert("Không có dữ liệu để in!");
+  const handleExportExcel = () => {
+    if (packingsData.length === 0) {
+      toast.error("Không có dữ liệu để xuất");
       return;
     }
 
-    const printWindow = window.open("", "_blank");
-    const printContent = generatePrintHTML(data);
+    // Tạo data cho Excel
+    const excelData = [
+      // Header row
+      [
+        "STT",
+        "Mã kiện hàng",
+        "Mã đơn hàng",
+        "Mã tracking",
+        "Chiều cao (cm)",
+        "Chiều dài (cm)",
+        "Chiều rộng (cm)",
+        "Thể tích (m³)",
+        "Trọng lượng (kg)",
+        "Mã khách hàng",
+        "Tên khách hàng",
+        "Điểm đến",
+        "Nhân viên",
+      ],
+      // Data rows
+      ...packingsData.map((packing, index) => [
+        index + 1,
+        packing.packingCode || "",
+        packing.orderCode || "",
+        packing.trackingCode || "",
+        packing.height || "",
+        packing.length || "",
+        packing.width || "",
+        packing.dim ? packing.dim.toFixed(4) : "",
+        packing.netWeight ? packing.netWeight.toFixed(2) : "",
+        packing.customerCode || "",
+        packing.customerName || "",
+        packing.destination || "",
+        packing.staffName || "",
+      ]),
+    ];
 
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-    printWindow.focus();
+    // Tạo worksheet
+    const ws = XLSX.utils.aoa_to_sheet(excelData);
 
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 250);
+    // Set column widths
+    ws["!cols"] = [
+      { wch: 5 }, // STT
+      { wch: 18 }, // Mã kiện hàng
+      { wch: 15 }, // Mã đơn hàng
+      { wch: 15 }, // Mã tracking
+      { wch: 15 }, // Chiều cao
+      { wch: 15 }, // Chiều dài
+      { wch: 15 }, // Chiều rộng
+      { wch: 15 }, // Thể tích
+      { wch: 18 }, // Trọng lượng
+      { wch: 15 }, // Mã KH
+      { wch: 20 }, // Tên KH
+      { wch: 15 }, // Điểm đến
+      { wch: 20 }, // Nhân viên
+    ];
+
+    // Style cho header (row đầu tiên)
+    const range = XLSX.utils.decode_range(ws["!ref"]);
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+      if (!ws[cellAddress]) continue;
+
+      ws[cellAddress].s = {
+        fill: {
+          fgColor: { rgb: "2563EB" }, // Blue-600 color
+        },
+        font: {
+          color: { rgb: "FFFFFF" }, // White text
+          bold: true,
+          sz: 12,
+        },
+        alignment: {
+          horizontal: "center",
+          vertical: "center",
+        },
+        border: {
+          top: { style: "thin", color: { rgb: "000000" } },
+          bottom: { style: "thin", color: { rgb: "000000" } },
+          left: { style: "thin", color: { rgb: "000000" } },
+          right: { style: "thin", color: { rgb: "000000" } },
+        },
+      };
+    }
+
+    // Tạo workbook và thêm worksheet
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Packings");
+
+    // Xuất file
+    XLSX.writeFile(
+      wb,
+      `packings_export_${new Date().toISOString().split("T")[0]}.xlsx`
+    );
+
+    toast.success("Xuất file Excel thành công!");
   };
 
-  // Generate HTML for printing
-  const generatePrintHTML = (data) => {
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Packing Labels</title>
-        <style>
-          @page {
-            size: A4;
-            margin: 10mm;
-          }
-          body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-          }
-          .label {
-            page-break-inside: avoid;
-            border: 2px solid #000;
-            padding: 15px;
-            margin-bottom: 20px;
-            background: white;
-          }
-          .label-header {
-            text-align: center;
-            border-bottom: 2px solid #000;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-          }
-          .label-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 5px;
-          }
-          .label-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 8px 0;
-            font-size: 14px;
-          }
-          .label-field {
-            font-weight: bold;
-          }
-          .label-dimensions {
-            background: #f5f5f5;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-          }
-          @media print {
-            .label {
-              page-break-after: always;
-            }
-            .label:last-child {
-              page-break-after: auto;
-            }
-          }
-        </style>
-      </head>
-      <body>
-        ${data
-          .map(
-            (item) => `
-          <div class="label">
-            <div class="label-header">
-              <div class="label-title">${item.packingCode}</div>
-              <div>Tracking: ${item.trackingCode || "N/A"}</div>
-            </div>
-            
-            <div class="label-row">
-              <span><span class="label-field">Mã đơn:</span> ${
-                item.orderCode
-              }</span>
-              <span><span class="label-field">Nhân viên:</span> ${
-                item.staffName
-              }</span>
-            </div>
-            
-            <div class="label-row">
-              <span><span class="label-field">Khách hàng:</span> ${
-                item.customerName
-              }</span>
-            </div>
-            
-            <div class="label-row">
-              <span><span class="label-field">Mã KH:</span> ${
-                item.customerCode
-              }</span>
-              <span><span class="label-field">SĐT:</span> ${
-                item.customerPhone
-              }</span>
-            </div>
-            
-            <div class="label-row">
-              <span><span class="label-field">Địa chỉ:</span> ${
-                item.address
-              }</span>
-            </div>
-            
-            <div class="label-dimensions">
-              <div class="label-row">
-                <span><span class="label-field">Kích thước (DxRxC):</span> ${
-                  item.length
-                } x ${item.width} x ${item.height} cm</span>
-              </div>
-              <div class="label-row">
-                <span><span class="label-field">Trọng lượng:</span> ${
-                  item.netWeight
-                } kg</span>
-                <span><span class="label-field">DIM:</span> ${item.dim}</span>
-              </div>
-            </div>
-          </div>
-        `
-          )
-          .join("")}
-      </body>
-      </html>
-    `;
+  const handleClear = () => {
+    setPackingIds([""]);
+    setPackingsData([]);
   };
 
   return (
-    <div className="space-y-4">
-      {/* Header Actions */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={toggleSelectAll}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg border border-gray-300 transition-colors"
-          >
-            {selectedIds.length === packings.length ? (
-              <CheckSquare className="w-4 h-4" />
-            ) : (
-              <Square className="w-4 h-4" />
-            )}
-            {selectedIds.length === packings.length
-              ? "Bỏ chọn tất cả"
-              : "Chọn tất cả"}
-          </button>
+    <div className="p-6 max-w-7xl mx-auto">
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-2xl font-bold mb-6 text-blue-600">
+          Export Packing
+        </h2>
 
-          <span className="text-sm text-gray-600">
-            Đã chọn: <span className="font-semibold">{selectedIds.length}</span>{" "}
-            / {packings.length}
-          </span>
+        {/* Input Section */}
+        <div className="mb-6">
+          <label className="block text-sm font-semibold mb-3">
+            Packing IDs <span className="text-red-500">*</span>
+          </label>
+
+          {packingIds.map((id, index) => (
+            <div key={index} className="flex gap-2 mb-2">
+              <input
+                type="number"
+                value={id}
+                onChange={(e) => handleInputChange(index, e.target.value)}
+                placeholder="Nhập Packing ID"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                onClick={() => handleRemoveInput(index)}
+                disabled={packingIds.length === 1}
+                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                -
+              </button>
+            </div>
+          ))}
+
+          <button
+            onClick={handleAddInput}
+            className="mt-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+          >
+            + Thêm Packing ID
+          </button>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Action Buttons */}
+        <div className="flex gap-4 mb-6">
           <button
             onClick={handleExport}
-            disabled={selectedIds.length === 0 || isExporting}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            disabled={loading}
+            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 font-semibold"
           >
-            {isExporting ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <FileDown className="w-4 h-4" />
-            )}
-            {isExporting ? "Đang xuất..." : "Xuất dữ liệu"}
+            {loading ? "Đang xử lý..." : "Execute"}
           </button>
-
-          {exportedData && (
-            <button
-              onClick={() => handlePrint()}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              <Printer className="w-4 h-4" />
-              In nhãn
-            </button>
-          )}
+          <button
+            onClick={handleExportExcel}
+            disabled={packingsData.length === 0}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 font-semibold"
+          >
+            <Download className="w-4 h-4" />
+            Xuất Excel
+          </button>
+          <button
+            onClick={handleClear}
+            className="flex-1 px-6 py-3 bg-gray-500 text-white rounded-md hover:bg-gray-600 font-semibold"
+          >
+            Clear
+          </button>
         </div>
-      </div>
 
-      {/* Packing List */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-4 py-3 text-left">
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedIds.length === packings.length &&
-                      packings.length > 0
-                    }
-                    onChange={toggleSelectAll}
-                    className="rounded border-gray-300"
-                  />
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                  Mã kiện
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                  Mã đơn
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                  Tracking
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                  Khách hàng
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                  Kích thước
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                  Trọng lượng
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {packings.map((packing) => (
-                <tr
-                  key={packing.id}
-                  className={`hover:bg-gray-50 transition-colors ${
-                    selectedIds.includes(packing.id) ? "bg-blue-50" : ""
-                  }`}
-                >
-                  <td className="px-4 py-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.includes(packing.id)}
-                      onChange={() => toggleSelect(packing.id)}
-                      className="rounded border-gray-300"
-                    />
-                  </td>
-                  <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                    {packing.packingCode || packing.code}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {packing.orderCode}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {packing.trackingCode || "-"}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {packing.customerName}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {packing.length}x{packing.width}x{packing.height}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {packing.netWeight} kg
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Exported Data Preview */}
-      {exportedData && exportedData.length > 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-semibold text-green-800">
-                Xuất dữ liệu thành công!
+        {/* Results Table */}
+        {packingsData.length > 0 && (
+          <div className="overflow-x-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-700">
+                Kết quả: {packingsData.length} kiện hàng
               </h3>
-              <p className="text-sm text-green-600 mt-1">
-                Đã xuất {exportedData.length} kiện hàng
-              </p>
             </div>
-            <button
-              onClick={() => handlePrint()}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
-            >
-              <Printer className="w-4 h-4" />
-              In nhãn ngay
-            </button>
+            <table className="min-w-full bg-white border border-gray-300">
+              <thead className="bg-blue-600 text-white">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    STT
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Packing Code
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Order Code
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Tracking Code
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Height (cm)
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Length (cm)
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Width (cm)
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    DIM (m³)
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Trọng lượng (kg)
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Khách hàng
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Điểm đến
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Nhân viên
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {packingsData.map((packing, index) => (
+                  <tr key={index} className="border-b hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm">{index + 1}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-blue-600">
+                      {packing.packingCode}
+                    </td>
+                    <td className="px-4 py-3 text-sm">{packing.orderCode}</td>
+                    <td className="px-4 py-3 text-sm">
+                      {packing.trackingCode}
+                    </td>
+                    <td className="px-4 py-3 text-sm">{packing.height}</td>
+                    <td className="px-4 py-3 text-sm">{packing.length}</td>
+                    <td className="px-4 py-3 text-sm">{packing.width}</td>
+                    <td className="px-4 py-3 text-sm">
+                      {packing.dim.toFixed(4)}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      {packing.netWeight.toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      <div>{packing.customerName}</div>
+                      <div className="text-xs text-gray-500">
+                        {packing.customerCode}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-sm">{packing.destination}</td>
+                    <td className="px-4 py-3 text-sm">{packing.staffName}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Empty State */}
+        {!loading && packingsData.length === 0 && (
+          <div className="text-center py-12 text-gray-500">
+            <p>Chưa có dữ liệu. Vui lòng nhập Packing IDs và nhấn Execute.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

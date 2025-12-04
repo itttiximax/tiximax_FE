@@ -162,16 +162,24 @@ class PackingsService {
     return response.data;
   }
 
-  async exportPackings(ids = []) {
-    try {
-      const response = await api.post("/packings/export", ids, {
-        responseType: "blob",
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error exporting packings:", error);
-      throw error;
+  async exportPackings(packingIds) {
+    if (!Array.isArray(packingIds) || packingIds.length === 0) {
+      throw new Error("packingIds không được để trống");
     }
+
+    const queryString = packingIds.map((id) => `packingIds=${id}`).join("&");
+    const { data } = await api.get(`/packings/export?${queryString}`);
+    return data;
+  }
+  async getPackingWarehouses(packingId) {
+    if (!packingId) {
+      throw new Error("packingId không được để trống");
+    }
+
+    const { data } = await api.get(
+      `/packings/${encodeURIComponent(packingId)}/warehouses`
+    );
+    return data;
   }
 }
 

@@ -9,15 +9,10 @@ import {
   ChevronRight,
   Calendar,
   RefreshCw,
-  Download,
-  Eye,
 } from "lucide-react";
 import packingsService from "../../Services/Warehouse/packingsService";
-import * as XLSX from "xlsx";
-import toast from "react-hot-toast";
-import DetailPacking from "./DetailPacking";
 
-const PackingAwaitList = () => {
+const TestExport = () => {
   const [orders, setOrders] = useState([]);
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(20);
@@ -31,11 +26,6 @@ const PackingAwaitList = () => {
   const [assignSuccess, setAssignSuccess] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState("");
-  const [exportLoading, setExportLoading] = useState(false);
-
-  // Detail modal states
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [selectedPackingId, setSelectedPackingId] = useState(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -134,122 +124,12 @@ const PackingAwaitList = () => {
     }
   };
 
-  const handleExportSelected = async () => {
-    if (selectedPackings.length === 0) {
-      toast.error("Vui lòng chọn ít nhất một kiện hàng để xuất!");
-      return;
-    }
-
-    setExportLoading(true);
-    try {
-      const data = await packingsService.exportPackings(selectedPackings);
-
-      if (data && data.length > 0) {
-        const excelData = [
-          [
-            "STT",
-            "Mã kiện hàng",
-            "Mã đơn hàng",
-            "Mã tracking",
-            "Chiều cao (cm)",
-            "Chiều dài (cm)",
-            "Chiều rộng (cm)",
-            "Thể tích (m³)",
-            "Trọng lượng (kg)",
-            "Mã khách hàng",
-            "Tên khách hàng",
-            "Điểm đến",
-            "Nhân viên",
-          ],
-          ...data.map((packing, index) => [
-            index + 1,
-            packing.packingCode || "",
-            packing.orderCode || "",
-            packing.trackingCode || "",
-            packing.height || "",
-            packing.length || "",
-            packing.width || "",
-            packing.dim ? packing.dim.toFixed(4) : "",
-            packing.netWeight ? packing.netWeight.toFixed(2) : "",
-            packing.customerCode || "",
-            packing.customerName || "",
-            packing.destination || "",
-            packing.staffName || "",
-          ]),
-        ];
-
-        const ws = XLSX.utils.aoa_to_sheet(excelData);
-
-        ws["!cols"] = [
-          { wch: 5 },
-          { wch: 18 },
-          { wch: 15 },
-          { wch: 15 },
-          { wch: 15 },
-          { wch: 15 },
-          { wch: 15 },
-          { wch: 15 },
-          { wch: 18 },
-          { wch: 15 },
-          { wch: 20 },
-          { wch: 15 },
-          { wch: 20 },
-        ];
-
-        const range = XLSX.utils.decode_range(ws["!ref"]);
-        for (let col = range.s.c; col <= range.e.c; col++) {
-          const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-          if (!ws[cellAddress]) continue;
-
-          ws[cellAddress].s = {
-            fill: {
-              fgColor: { rgb: "2563EB" },
-            },
-            font: {
-              color: { rgb: "FFFFFF" },
-              bold: true,
-              sz: 12,
-            },
-            alignment: {
-              horizontal: "center",
-              vertical: "center",
-            },
-            border: {
-              top: { style: "thin", color: { rgb: "000000" } },
-              bottom: { style: "thin", color: { rgb: "000000" } },
-              left: { style: "thin", color: { rgb: "000000" } },
-              right: { style: "thin", color: { rgb: "000000" } },
-            },
-          };
-        }
-
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Packings");
-        XLSX.writeFile(
-          wb,
-          `packings_export_${new Date().toISOString().split("T")[0]}.xlsx`
-        );
-
-        toast.success(`Xuất thành công ${data.length} kiện hàng!`);
-      }
-    } catch (error) {
-      toast.error(error.message || "Export thất bại!");
-    } finally {
-      setExportLoading(false);
-    }
-  };
-
-  const handleViewDetail = (packingId) => {
-    setSelectedPackingId(packingId);
-    setShowDetailModal(true);
-  };
-
   const filteredOrders = orders.filter((order) => {
     const term = searchTerm.toLowerCase();
 
     const matchesSearch =
       order.packingCode.toLowerCase().includes(term) ||
-      order.packingId.toLowerCase?.().includes(term);
+      order.packingId.toLowerCase?.().includes(term); // assume string from API
 
     const matchesDate =
       !filterDate ||
@@ -337,45 +217,19 @@ const PackingAwaitList = () => {
               </select>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              {/* Export Button */}
-              <button
-                onClick={handleExportSelected}
-                disabled={selectedPackings.length === 0 || exportLoading}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  selectedPackings.length === 0 || exportLoading
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-green-600 text-white hover:bg-green-700 hover:shadow-md"
-                }`}
-              >
-                {exportLoading ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    Exporting...
-                  </>
-                ) : (
-                  <>
-                    <Download className="w-4 h-4" />
-                    Export ({selectedPackings.length})
-                  </>
-                )}
-              </button>
-
-              {/* Assign Flight Button */}
-              <button
-                onClick={() => setShowModal(true)}
-                disabled={selectedPackings.length === 0}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  selectedPackings.length === 0
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md"
-                }`}
-              >
-                <Plane className="w-4 h-4" />
-                Assign Flight ({selectedPackings.length})
-              </button>
-            </div>
+            {/* Assign Flight Button */}
+            <button
+              onClick={() => setShowModal(true)}
+              disabled={selectedPackings.length === 0}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                selectedPackings.length === 0
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md"
+              }`}
+            >
+              <Plane className="w-4 h-4" />
+              Assign Flight ({selectedPackings.length})
+            </button>
           </div>
         </div>
 
@@ -467,9 +321,6 @@ const PackingAwaitList = () => {
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -546,17 +397,6 @@ const PackingAwaitList = () => {
                             Waiting for flight
                           </span>
                         )}
-                      </td>
-
-                      {/* Actions */}
-                      <td className="px-3 py-2.5 whitespace-nowrap text-center">
-                        <button
-                          onClick={() => handleViewDetail(order.packingId)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs font-medium"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          View
-                        </button>
                       </td>
                     </tr>
                   ))}
@@ -681,20 +521,9 @@ const PackingAwaitList = () => {
             </div>
           </div>
         )}
-
-        {/* Detail Modal */}
-        {showDetailModal && selectedPackingId && (
-          <DetailPacking
-            packingId={selectedPackingId}
-            onClose={() => {
-              setShowDetailModal(false);
-              setSelectedPackingId(null);
-            }}
-          />
-        )}
       </div>
     </div>
   );
 };
 
-export default PackingAwaitList;
+export default TestExport;
