@@ -103,22 +103,50 @@ const managerOrderService = {
 
   // Status configuration - Updated with new statuses
   getAvailableStatuses: () => [
-    { key: "CHO_XAC_NHAN", label: "Chờ xác nhận", color: "yellow" },
-    { key: "DA_XAC_NHAN", label: "Đã xác nhận", color: "green" },
-    { key: "CHO_THANH_TOAN", label: "Chờ thanh toán", color: "orange" },
+    // { key: "CHO_XAC_NHAN", label: "Chờ xác nhận", color: "yellow" },
+    // { key: "DA_XAC_NHAN", label: "Đã xác nhận", color: "green" },
+    // {
+    //   key: "CHO_THANH_TOAN",
+    //   label: "Chờ thanh toán tiền hàng",
+    //   color: "orange",
+    // },
+    // {
+    //   key: "CHO_THANH_TOAN_DAU_GIA",
+    //   label: "Chờ thanh toán đấu giá",
+    //   color: "pink",
+    // },
+    // { key: "CHO_THANH_TOAN_SHIP", label: "Chờ thanh toán ship", color: "teal" },
+    // { key: "CHO_MUA", label: "Chờ mua", color: "blue" },
+    // { key: "CHO_NHAP_KHO_NN", label: "Chờ nhập kho NN", color: "cyan" },
+    // { key: "CHO_DONG_GOI", label: "Chờ đóng gói", color: "purple" },
+    // { key: "DANG_XU_LY", label: "Đang xử lý", color: "indigo" },
+    // { key: "DA_GIAO", label: "Đã giao", color: "emerald" },
+    // { key: "DA_HOAN_THANH", label: "Đã hoàn thành", color: "emerald" },
+    // { key: "DA_HUY", label: "Đã hủy", color: "red" },
+
+    {
+      key: "CHO_THANH_TOAN",
+      label: "Chờ thanh toán tiền hàng",
+      color: "orange",
+    },
     {
       key: "CHO_THANH_TOAN_DAU_GIA",
       label: "Chờ thanh toán đấu giá",
       color: "pink",
     },
-    { key: "CHO_THANH_TOAN_SHIP", label: "Chờ thanh toán ship", color: "teal" },
     { key: "CHO_MUA", label: "Chờ mua", color: "blue" },
-    { key: "CHO_NHAP_KHO_NN", label: "Chờ nhập kho NN", color: "cyan" },
-    { key: "CHO_DONG_GOI", label: "Chờ đóng gói", color: "purple" },
-    { key: "DANG_XU_LY", label: "Đang xử lý", color: "indigo" },
-    { key: "DA_GIAO", label: "Đã giao", color: "emerald" },
-    { key: "DA_HOAN_THANH", label: "Đã hoàn thành", color: "emerald" },
+    { key: "CHO_NHAP_KHO_NN", label: "Đang về kho NN", color: "cyan" },
+    { key: "CHO_DONG_GOI", label: "Đã về kho NN", color: "purple" },
+    { key: "DA_DU_HANG ", label: "Đang về khi VN", color: "lime" },
+    { key: "CHO_THANH_TOAN_SHIP", label: "Chờ thanh toán ship", color: "teal" },
+    { key: "CHO_GIAO", label: "Chờ giao hàng", color: "amber" },
+    { key: "DA_GIAO", label: "Hoàn thành đơn hàng", color: "amber" },
     { key: "DA_HUY", label: "Đã hủy", color: "red" },
+
+    // { key: "DANG_XU_LY", label: "Đang xử lý", color: "indigo" },
+    // { key: "DA_GIAO", label: "Đã giao", color: "emerald" },
+    // { key: "DA_HOAN_THANH", label: "Đã hoàn thành", color: "emerald" },
+    // { key: "DA_HUY", label: "Đã hủy", color: "red" },
   ],
 };
 
