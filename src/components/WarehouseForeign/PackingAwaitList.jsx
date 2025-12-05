@@ -338,7 +338,8 @@ const PackingAwaitList = () => {
                 <option value={30}>30 / page</option>
                 <option value={50}>50 / page</option>
                 <option value={100}>100 / page</option>
-                <option value={100}>200 / page</option>
+                {/* <option value={200}>200 / page</option> */}
+                <option value={200}>200 / page</option>
               </select>
             </div>
 
