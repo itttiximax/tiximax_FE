@@ -24,6 +24,7 @@ const createPaymentShipService = {
     isUseBalance,
     bankId,
     customerVoucherId,
+    priceShipDos,
     selectedShipmentCodes
   ) {
     if (
@@ -36,7 +37,7 @@ const createPaymentShipService = {
 
     const flag = !!isUseBalance;
     // Nếu không có voucher, backend nhận giá trị "null" (string)
-    const url = `/partial-shipment/partial-shipment/${flag}/${bankId}/${
+    const url = `/partial-shipment/partial-shipment/${flag}/${bankId}/${priceShipDos}/${
       customerVoucherId ?? "null"
     }`;
     const body = { selectedShipmentCodes };

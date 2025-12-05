@@ -112,39 +112,6 @@ const guides = [
   },
 ];
 
-const tips = [
-  {
-    icon: <ShieldCheck className="w-6 h-6" />,
-    title: "An toàn Hàng hóa",
-    desc: "Luôn mua bảo hiểm cho lô hàng giá trị cao.",
-  },
-  {
-    icon: <Clock className="w-6 h-6" />,
-    title: "Tiết kiệm Thời gian",
-    desc: "Sử dụng dashboard để theo dõi mọi thứ ở một nơi.",
-  },
-  {
-    icon: <Users2 className="w-6 h-6" />,
-    title: "Hỗ trợ Khách hàng",
-    desc: "Liên hệ hotline 24/7 nếu cần trợ giúp.",
-  },
-  {
-    icon: <ChartNoAxesCombined className="w-6 h-6" />,
-    title: "Tối ưu Chi phí",
-    desc: "Gom hàng để giảm cước vận chuyển.",
-  },
-  {
-    icon: <Handshake className="w-6 h-6" />,
-    title: "Đối tác Tin cậy",
-    desc: "Chọn tuyến vận chuyển từ đối tác uy tín.",
-  },
-  {
-    icon: <Rocket className="w-6 h-6" />,
-    title: "Cập nhật Liên tục",
-    desc: "Kiểm tra app thường xuyên để cập nhật trạng thái.",
-  },
-];
-
 const GuideList = () => {
   return (
     <main className="min-h-screen bg-gradient-to-b from-white to-amber-50/30">
@@ -211,43 +178,6 @@ const GuideList = () => {
           </div>
         </div>
       </section>
-
-      {/* Tips */}
-      <section className="py-10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="mb-8">
-            <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900">
-              Mẹo Sử dụng Hiệu quả
-            </h2>
-            <p className="mt-2 text-gray-600">
-              Các mẹo nhỏ giúp bạn tối ưu hóa trải nghiệm với Tiximax.
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tips.map((t) => (
-              <motion.div
-                key={t.title}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45 }}
-                className="rounded-2xl bg-white border border-gray-100 p-5 shadow-sm"
-              >
-                <div className="flex items-start gap-3">
-                  <span className="p-2 rounded-xl bg-amber-50 text-amber-700">
-                    {t.icon}
-                  </span>
-                  <div>
-                    <p className="font-semibold text-gray-900">{t.title}</p>
-                    <p className="text-gray-600 text-sm">{t.desc}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">

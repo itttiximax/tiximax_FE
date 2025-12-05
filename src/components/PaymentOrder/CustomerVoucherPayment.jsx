@@ -5,21 +5,32 @@ import managerPromotionService from "../../Services/Manager/managerPromotionServ
 const CustomerVoucherPayment = ({
   accountId,
   disabled = false,
-  value = null, // Default là null thay vì undefined
+  value = null,
   onChange,
   className = "",
   label = "Chọn voucher (không bắt buộc)",
   onLoadingChange,
   onVouchersChange,
+  cachedVouchers, // ✅ THÊM
+  initialLoading, // ✅ THÊM
 }) => {
-  const [loading, setLoading] = useState(false);
-  const [vouchers, setVouchers] = useState([]);
+  const [loading, setLoading] = useState(initialLoading || false);
+  const [vouchers, setVouchers] = useState(cachedVouchers || []);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let mounted = true;
 
     const fetchVouchers = async () => {
+      // ✅ Nếu có cached vouchers, sử dụng luôn
+      if (cachedVouchers && cachedVouchers.length > 0) {
+        setVouchers(cachedVouchers);
+        onVouchersChange?.(cachedVouchers);
+        setLoading(false);
+        onLoadingChange?.(false);
+        return;
+      }
+
       if (!accountId) {
         setVouchers([]);
         setError("");
@@ -65,14 +76,15 @@ const CustomerVoucherPayment = ({
     return () => {
       mounted = false;
     };
-  }, [accountId]);
+  }, [accountId, cachedVouchers]); // ✅ Thêm cachedVouchers vào dependencies
 
   const handleSelect = (e) => {
     const raw = e.target.value;
-    // Chuyển về null nếu không chọn, hoặc convert sang Number
     const selected = raw === "" ? null : Number(raw);
     onChange?.(selected);
   };
+
+  const hasVouchers = vouchers.length > 0;
 
   return (
     <div className={className}>
@@ -81,21 +93,26 @@ const CustomerVoucherPayment = ({
       </label>
 
       {!accountId ? (
-        <div className="text-sm text-gray-500 italic">
-          Chưa có thông tin tài khoản. Có thể tiếp tục thanh toán mà không sử
+        <div className="text-sm text-gray-500 italic bg-gray-50 p-3 rounded-lg border border-gray-200">
+          💡 Chưa có thông tin tài khoản. Có thể tiếp tục thanh toán mà không sử
           dụng voucher.
         </div>
       ) : error ? (
-        <div className="text-sm text-red-600 bg-red-50 p-2 rounded border border-red-200">
+        <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
           ⚠️ {error}
         </div>
-      ) : vouchers.length === 0 && !loading ? (
-        <div className="text-sm text-gray-500 italic">
-          Tài khoản này không có voucher khả dụng
+      ) : !loading && !hasVouchers ? (
+        <div>
+          <select
+            disabled={true}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed text-gray-500"
+          >
+            <option>Không có voucher khả dụng</option>
+          </select>
         </div>
       ) : (
         <select
-          value={value ?? ""} // Hiển thị "" nếu value là null/undefined
+          value={value ?? ""}
           onChange={handleSelect}
           disabled={disabled || loading}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"

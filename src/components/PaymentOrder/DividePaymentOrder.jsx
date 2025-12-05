@@ -4,11 +4,10 @@ import toast from "react-hot-toast";
 import AccountSearch from "../Order/AccountSearch";
 import orderCustomerService from "../../Services/Order/orderCustomerService";
 import managerBankAccountService from "../../Services/Manager/managerBankAccountService";
+import managerPromotionService from "../../Services/Manager/managerPromotionService";
 import {
   Search,
   User,
-  Calendar,
-  CreditCard,
   Package,
   CheckSquare,
   Square,
@@ -40,6 +39,20 @@ const getErrorMessage = (error) => {
   return error?.message || "Đã xảy ra lỗi không xác định";
 };
 
+// Helper: format status
+const formatStatus = (status) => {
+  const statusMap = {
+    DA_NHAP_KHO_VN: "Đã nhập kho Việt Nam",
+    DANG_VAN_CHUYEN: "Đang vận chuyển",
+    CHO_THANH_TOAN: "Chờ thanh toán",
+    DA_THANH_TOAN: "Đã thanh toán",
+    DA_GIAO: "Đã giao",
+    HUY: "Hủy",
+  };
+
+  return statusMap[status] || status;
+};
+
 const DividePaymentOrder = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [items, setItems] = useState([]);
@@ -50,6 +63,10 @@ const DividePaymentOrder = () => {
   // State để cache bank accounts
   const [cachedBankAccounts, setCachedBankAccounts] = useState([]);
   const [bankAccountsLoading, setBankAccountsLoading] = useState(false);
+
+  // State để cache vouchers
+  const [cachedVouchers, setCachedVouchers] = useState([]);
+  const [vouchersLoading, setVouchersLoading] = useState(false);
 
   // Prefetch bank accounts khi component mount
   useEffect(() => {
@@ -68,6 +85,40 @@ const DividePaymentOrder = () => {
     prefetchBankAccounts();
   }, []);
 
+  // Prefetch vouchers khi có selectedCustomer
+  useEffect(() => {
+    const prefetchVouchers = async () => {
+      if (!selectedCustomer?.accountId && !selectedCustomer?.id) {
+        setCachedVouchers([]);
+        return;
+      }
+
+      const accountId = selectedCustomer.accountId || selectedCustomer.id;
+
+      try {
+        setVouchersLoading(true);
+        const data = await managerPromotionService.getVouchersByCustomer(
+          accountId
+        );
+        setCachedVouchers(Array.isArray(data) ? data : []);
+
+        // Thông báo số lượng voucher
+        if (data && data.length > 0) {
+          toast.success(
+            `Tìm thấy ${data.length} voucher khả dụng cho khách hàng`
+          );
+        }
+      } catch (error) {
+        console.error("Failed to prefetch vouchers:", error);
+        setCachedVouchers([]);
+      } finally {
+        setVouchersLoading(false);
+      }
+    };
+
+    prefetchVouchers();
+  }, [selectedCustomer]);
+
   const formatCurrency = (amount) => {
     if (!amount) return "0 ₫";
     return new Intl.NumberFormat("vi-VN", {
@@ -76,14 +127,14 @@ const DividePaymentOrder = () => {
     }).format(amount);
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-  };
+  // const formatDate = (dateString) => {
+  //   if (!dateString) return "N/A";
+  //   return new Date(dateString).toLocaleDateString("vi-VN", {
+  //     year: "numeric",
+  //     month: "2-digit",
+  //     day: "2-digit",
+  //   });
+  // };
 
   const selectedTotal = useMemo(() => {
     return items
@@ -104,7 +155,6 @@ const DividePaymentOrder = () => {
     try {
       const token = localStorage.getItem("jwt");
       if (!token) {
-        toast.error("Không tìm thấy token xác thực");
         return;
       }
       const data = await orderCustomerService.getPartialOrdersByCustomer(
@@ -114,40 +164,19 @@ const DividePaymentOrder = () => {
       setItems(Array.isArray(data) ? data : []);
       setHasSearched(true);
       setSelectedItems([]);
-
-      if (!data?.length) {
-        toast(
-          `Không tìm thấy sản phẩm nào cho khách hàng ${customer.customerCode}`,
-          {
-            duration: 4000,
-            style: {
-              background: "#3bf64bff",
-              color: "#fff",
-            },
-          }
-        );
-      } else {
-        toast.success(
-          `Tìm thấy ${data.length} sản phẩm cho khách hàng ${customer.customerCode}`
-        );
-      }
     } catch (e) {
       console.error(e);
-      const errorMessage = getErrorMessage(e);
-      toast.error(`Không thể tải danh sách sản phẩm: ${errorMessage}`, {
-        duration: 5000,
-      });
       setItems([]);
     } finally {
       setLoading(false);
     }
   };
-
   const handleSelectCustomer = async (customer) => {
     setSelectedCustomer(customer);
     setItems([]);
     setSelectedItems([]);
     setHasSearched(false);
+    setCachedVouchers([]);
     await fetchPartialOrders(customer);
   };
 
@@ -156,6 +185,7 @@ const DividePaymentOrder = () => {
     setItems([]);
     setSelectedItems([]);
     setHasSearched(false);
+    setCachedVouchers([]);
   };
 
   const toggleSelectItem = (linkId) => {
@@ -176,13 +206,6 @@ const DividePaymentOrder = () => {
 
   return (
     <div className="p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Thanh toán tách đơn
-        </h1>
-      </div>
-
       {/* Customer Search */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div className="flex items-center mb-4">
@@ -236,6 +259,13 @@ const DividePaymentOrder = () => {
                         selectedCustomer.balance
                       )}{" "}
                       VND
+                    </div>
+                  )}
+                  {/* Hiển thị trạng thái vouchers */}
+
+                  {!vouchersLoading && cachedVouchers.length > 0 && (
+                    <div className="inline-flex items-center gap-1 bg-green-50 border border-green-200 rounded-md px-2 py-1 text-xs font-medium text-green-700">
+                      ✓ {cachedVouchers.length} voucher khả dụng
                     </div>
                   )}
                 </div>
@@ -293,7 +323,7 @@ const DividePaymentOrder = () => {
                         Tổng: {formatCurrency(selectedTotal)}
                       </span>
 
-                      {/* Use CreateDividePaymentShip Component */}
+                      {/* Truyền cached vouchers */}
                       <CreateDividePaymentShip
                         selectedShipmentCodes={selectedShipmentCodes}
                         totalAmount={selectedTotal}
@@ -305,6 +335,8 @@ const DividePaymentOrder = () => {
                         }
                         cachedBankAccounts={cachedBankAccounts}
                         bankAccountsLoading={bankAccountsLoading}
+                        cachedVouchers={cachedVouchers}
+                        vouchersLoading={vouchersLoading}
                         onSuccess={async (result) => {
                           toast.success(
                             `Tạo thanh toán tách đơn thành công! Mã thanh toán: ${
@@ -385,12 +417,10 @@ const DividePaymentOrder = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
                           <div className="flex items-center">
-                            <Package className="w-4 h-4 mr-2" />
                             <span>Website: {item.website || "N/A"}</span>
                           </div>
                           {item.trackingCode && (
                             <div className="flex items-center">
-                              <CreditCard className="w-4 h-4 mr-2" />
                               <span>Mã tracking: {item.trackingCode}</span>
                             </div>
                           )}
@@ -418,6 +448,14 @@ const DividePaymentOrder = () => {
                           <div className="text-gray-600">
                             <span className="font-medium">Phụ phí:</span>{" "}
                             {formatCurrency(item.extraCharge)}
+                          </div>
+                          <div className="text-gray-600">
+                            <span className="font-medium">Cân nặng:</span>{" "}
+                            {item.dim} kg
+                          </div>
+                          <div className="text-gray-600">
+                            <span className="font-medium">Phí vận chuyển:</span>{" "}
+                            {formatCurrency(item.finalPriceShip)}
                           </div>
                         </div>
 
@@ -447,7 +485,7 @@ const DividePaymentOrder = () => {
                         {item.status && (
                           <div className="mt-2">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                              {item.status}
+                              {formatStatus(item.status)}
                             </span>
                           </div>
                         )}

@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from "react";
+import servicepic1 from "../assets/servicepic1.jpg";
+import servicepic2 from "../assets/servicepic2.jpg";
 
 const ReasonPage = () => {
   const [currentImage, setCurrentImage] = useState(0);
 
-  const images = [
-    "https://thumbs.dreamstime.com/b/cargo-plane-container-ship-truck-showcase-global-logistics-transport-efficiency-across-air-sea-land-routes-cargo-plane-386301051.jpg",
-    "https://i.pinimg.com/736x/a4/53/3b/a4533b7997a15d5d4fdce945866e5783.jpg",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxrueUbzUqMY34uTP2D37PhGUKLosgkX0CYC1aQ39av-BloWJoHzdU7lHmyXaBm46MRq4&usqp=CAU",
-    "https://media.istockphoto.com/id/868920610/photo/loading-to-the-aircraft.jpg?s=612x612&w=0&k=20&c=R9WlAFf5KWWWIovzqKJtQXZtGaWepojHtT9hUiEDpMY=",
-  ];
+  const images = [servicepic1, servicepic2];
 
   // Auto slide every 4 seconds
   useEffect(() => {
@@ -23,7 +20,7 @@ const ReasonPage = () => {
       id: 1,
       title: "99% KHÁCH HÀNG HÀI LÒNG",
       description:
-        "Với tỷ lệ hài lòng cao nhất trong ngành, chúng tôi cam kết mang đến trải nghiệm dịch vụ logistics tốt nhất cho khách hàng.",
+        "Những phản hồi tích cực của hàng trăm ngàn khách hàng là động lực để Tiximax tiếp tục hoàn thiện và nâng cấp dịch vụ.",
       icon: (
         <svg
           className="w-8 h-8"
@@ -65,7 +62,7 @@ const ReasonPage = () => {
       id: 3,
       title: "HỆ THỐNG KHO QUỐC TẾ",
       description:
-        "Mạng lưới kho bãi hiện đại trải dài khắp Việt Nam và các nước, đảm bảo hàng hóa được lưu trữ an toàn và chuyên nghiệp.",
+        "Tiximax có hệ thống kho tại nhiều quốc gia: Mỹ, Hàn, Nhật, Indonesia. Đây là lợi thế lớn giúp ",
       icon: (
         <svg
           className="w-8 h-8"
@@ -125,9 +122,10 @@ const ReasonPage = () => {
           </div>
 
           <p className="text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Với hơn 10 năm kinh nghiệm trong lĩnh vực logistics, TixiLogistics
-            tự hào là đối tác tin cậy của hàng nghìn doanh nghiệp trên toàn
-            quốc, mang đến giải pháp vận chuyển và kho bãi toàn diện.
+            Với kinh nghiệm lâu năm trong logistics và thương mại quốc tế,
+            Tiximax cam kết mang lại giải pháp Mua hộ - Vận chuyển xuyên biên
+            giới tử tế và minh bạch. Chúng tôi giúp khách hàng tiếp cận thế giới
+            dễ dàng, nhanh chóng và an tâm tuyệt đối.
           </p>
         </div>
 
@@ -228,7 +226,7 @@ const ReasonPage = () => {
           {/* Stats Section */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20">
             {[
-              { number: "10+", label: "Năm kinh nghiệm" },
+              { number: "3+", label: "Năm kinh nghiệm" },
               { number: "5000+", label: "Khách hàng tin dùng" },
               { number: "63/63", label: "Tỉnh thành phủ sóng" },
               { number: "24/7", label: "Hỗ trợ khách hàng" },

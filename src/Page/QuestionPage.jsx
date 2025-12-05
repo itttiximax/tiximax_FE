@@ -38,16 +38,9 @@ const QuestionPage = () => {
     },
   ];
 
-  const cities = [
-    "Hà Nội",
-    "TP. Hồ Chí Minh",
-    "Đà Nẵng",
-    "Hải Phòng",
-    "Cần Thơ",
-    "Nha Trang",
-    "Vũng Tàu",
-    "Đà Lạt",
-  ];
+  const cities = ["Indonesia", "Hàn Quốc", "Mỹ", "Nhật Bản", "Việt Nam"];
+
+  const destination = ["Indonesia", "Việt Nam"];
 
   const handleChange = (e) => {
     setFormData({
@@ -169,9 +162,9 @@ const QuestionPage = () => {
                       className="w-full px-4 py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white text-gray-800 font-medium appearance-none cursor-pointer"
                     >
                       <option value="">ĐẾN</option>
-                      {cities.map((city) => (
-                        <option key={city} value={city}>
-                          {city}
+                      {destination.map((destination) => (
+                        <option key={destination} value={destination}>
+                          {destination}
                         </option>
                       ))}
                     </select>

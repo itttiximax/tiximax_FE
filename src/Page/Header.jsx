@@ -12,23 +12,9 @@ import {
   Settings,
   Search,
 } from "lucide-react";
+import toast from "react-hot-toast";
 import Logo1 from "../assets/Logo1.png";
-// Mock hooks for demo - Toggle để test UI
-const MockAuthProvider = () => {
-  const [isAuth, setIsAuth] = React.useState(true);
-  return {
-    user: isAuth
-      ? { username: "TIXIMAX", email: "user@tiximax.com", role: "CUSTOMER" }
-      : null,
-    isAuthenticated: isAuth,
-    logout: async () => {
-      await new Promise((r) => setTimeout(r, 500));
-      setIsAuth(false);
-    },
-  };
-};
-
-const useAuth = MockAuthProvider;
+import { useAuth } from "../contexts/AuthContext";
 
 const ROLES = {
   ADMIN: "ADMIN",
@@ -55,7 +41,7 @@ const Header = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated, logout: authLogout } = useAuth();
+  const { user, isAuthenticated, logout: authLogout, loading } = useAuth();
 
   const getDashboardPath = () => {
     const role = user?.role;
@@ -133,14 +119,16 @@ const Header = () => {
   }, []);
 
   const handleLogout = async () => {
+    if (!window.confirm("Bạn có chắc chắn muốn đăng xuất?")) return;
+
     setIsLoggingOut(true);
     try {
       await authLogout();
       setIsProfileDropdownOpen(false);
-      alert("Đăng xuất thành công!");
+      toast.success("Đăng xuất thành công!");
       navigate("/", { replace: true });
-    } catch {
-      alert("Đăng xuất thất bại!");
+    } catch (error) {
+      toast.error(error.message || "Đăng xuất thất bại!");
     } finally {
       setIsLoggingOut(false);
     }
@@ -156,7 +144,9 @@ const Header = () => {
   const guardPublicClick = (to) => (e) => {
     if (isInternal) {
       e.preventDefault();
-      alert("Bạn đang đăng nhập tài khoản nội bộ — chuyển về khu làm việc.");
+      toast.info(
+        "Bạn đang đăng nhập tài khoản nội bộ — chuyển về khu làm việc."
+      );
       navigate(dashboardPath, { replace: true });
       closeAllMenus();
     } else {
@@ -175,19 +165,33 @@ const Header = () => {
       ? "text-orange-600 font-semibold"
       : "text-gray-700";
 
+  // Loading state
+  if (loading) {
+    return (
+      <header className="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-[1600px] mx-auto px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            <div className="flex-shrink-0">
+              <img
+                src={Logo1}
+                alt="TIXIMAX Logo"
+                className="h-12 sm:h-14 w-auto object-contain"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header className="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-[1600px] mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* LEFT: LOGO - dời sát lề trái */}
-          {/* <div className="flex-shrink-0">
-            <Link
-              to={isInternal ? dashboardPath : "/"}
-              className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 bg-clip-text text-transparent hover:from-amber-500 hover:via-yellow-500 hover:to-amber-600 transition-all"
-            >
-              TIXIMAX
-            </Link>
-          </div> */}
+          {/* LEFT: LOGO */}
           <div className="flex-shrink-0">
             <Link
               to={isInternal ? dashboardPath : "/"}
@@ -375,7 +379,7 @@ const Header = () => {
             </nav>
           )}
 
-          {/* RIGHT: ACTIONS - dời sát lề phải */}
+          {/* RIGHT: ACTIONS */}
           <div className="flex items-center gap-3 flex-shrink-0">
             {/* User Profile / Auth desktop */}
             {isAuthenticated && user ? (
@@ -386,6 +390,7 @@ const Header = () => {
                   }
                   className="flex items-center space-x-3 text-gray-700 hover:text-amber-600 px-3 py-2 rounded-xl hover:bg-amber-50 transition"
                   aria-expanded={isProfileDropdownOpen}
+                  aria-label="Menu tài khoản người dùng"
                 >
                   <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-500 rounded-full flex items-center justify-center shadow-md">
                     <User size={18} className="text-white" />
@@ -414,18 +419,21 @@ const Header = () => {
                     <div className="py-2">
                       <Link
                         to="/profile"
+                        onClick={() => setIsProfileDropdownOpen(false)}
                         className="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-amber-50 hover:text-amber-600 transition"
                       >
                         <UserCircle size={18} className="mr-3" /> Hồ sơ cá nhân
                       </Link>
                       <Link
                         to="/order-history"
+                        onClick={() => setIsProfileDropdownOpen(false)}
                         className="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-amber-50 hover:text-amber-600 transition"
                       >
                         <History size={18} className="mr-3" /> Lịch sử đơn hàng
                       </Link>
                       <Link
                         to="/settings"
+                        onClick={() => setIsProfileDropdownOpen(false)}
                         className="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-amber-50 hover:text-amber-600 transition"
                       >
                         <Settings size={18} className="mr-3" /> Cài đặt
@@ -461,7 +469,7 @@ const Header = () => {
               </div>
             )}
 
-            {/* Tracking Button - CỐ ĐỊNH Ở VỊ TRÍ PHẢI NHẤT */}
+            {/* Tracking Button */}
             <button
               onClick={handleTrackingClick}
               className="hidden md:flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all whitespace-nowrap"
@@ -489,7 +497,7 @@ const Header = () => {
           className="lg:hidden bg-white border-t border-gray-200 animate-in slide-in-from-top-4 duration-300"
         >
           <div className="max-w-7xl mx-auto px-4 py-4">
-            {/* Tracking Button - Mobile (Top priority) */}
+            {/* Tracking Button - Mobile */}
             <button
               onClick={handleTrackingClick}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl font-bold shadow-md mb-4 transition-all"
@@ -497,7 +505,6 @@ const Header = () => {
               <Search size={20} />
               <span>Theo dõi đơn hàng</span>
             </button>
-
             {/* User Info Mobile */}
             {isAuthenticated && user && (
               <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl mb-4">
@@ -514,7 +521,6 @@ const Header = () => {
                 </div>
               </div>
             )}
-
             {/* Mobile Navigation */}
             {!isInternal && (
               <nav className="space-y-1">
@@ -536,8 +542,7 @@ const Header = () => {
                 >
                   Về Tiximax
                 </Link>
-
-                {/* Services Mobile - Split */}
+                {/* Services Mobile */}
                 <div>
                   <div className="flex items-center">
                     <Link
@@ -554,6 +559,7 @@ const Header = () => {
                     <button
                       onClick={() => setIsServicesOpen(!isServicesOpen)}
                       className="p-3 hover:bg-orange-50 rounded-xl transition"
+                      aria-label="Toggle services menu"
                     >
                       <ChevronDown
                         size={18}
@@ -567,44 +573,58 @@ const Header = () => {
                     <div className="ml-4 mt-1 space-y-1">
                       <Link
                         to="/services/auction"
-                        onClick={() => setIsServicesOpen(false)}
+                        onClick={() => {
+                          setIsServicesOpen(false);
+                          closeAllMenus();
+                        }}
                         className="block px-4 py-2 text-base text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition"
                       >
                         Dịch vụ đấu giá
                       </Link>
                       <Link
                         to="/services/storage"
-                        onClick={() => setIsServicesOpen(false)}
+                        onClick={() => {
+                          setIsServicesOpen(false);
+                          closeAllMenus();
+                        }}
                         className="block px-4 py-2 text-base text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition"
                       >
                         Dịch vụ ký gửi kho
                       </Link>
                       <Link
                         to="/services/purchase"
-                        onClick={() => setIsServicesOpen(false)}
+                        onClick={() => {
+                          setIsServicesOpen(false);
+                          closeAllMenus();
+                        }}
                         className="block px-4 py-2 text-base text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition"
                       >
                         Dịch vụ mua hộ
                       </Link>
                       <Link
                         to="/services/customs"
-                        onClick={() => setIsServicesOpen(false)}
+                        onClick={() => {
+                          setIsServicesOpen(false);
+                          closeAllMenus();
+                        }}
                         className="block px-4 py-2 text-base text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition"
                       >
                         Dịch vụ thông quan hộ
                       </Link>
                       <Link
                         to="/services/shipping"
-                        onClick={() => setIsServicesOpen(false)}
+                        onClick={() => {
+                          setIsServicesOpen(false);
+                          closeAllMenus();
+                        }}
                         className="block px-4 py-2 text-base text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition"
                       >
                         Dịch vụ vận chuyển
                       </Link>
                     </div>
                   )}
-                </div>
-
-                {/* Guide Mobile - Split */}
+                </div>{" "}
+                {/* Guide Mobile */}
                 <div>
                   <div className="flex items-center">
                     <Link
@@ -621,6 +641,7 @@ const Header = () => {
                     <button
                       onClick={() => setIsGuideOpen(!isGuideOpen)}
                       className="p-3 hover:bg-orange-50 rounded-xl transition"
+                      aria-label="Toggle guide menu"
                     >
                       <ChevronDown
                         size={18}
@@ -634,22 +655,27 @@ const Header = () => {
                     <div className="ml-4 mt-1 space-y-1">
                       <Link
                         to="/guide/order"
-                        onClick={() => setIsGuideOpen(false)}
+                        onClick={() => {
+                          setIsGuideOpen(false);
+                          closeAllMenus();
+                        }}
                         className="block px-4 py-2 text-base text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition"
                       >
                         Hướng dẫn đặt hàng
                       </Link>
                       <Link
                         to="/guide/tracking"
-                        onClick={() => setIsGuideOpen(false)}
+                        onClick={() => {
+                          setIsGuideOpen(false);
+                          closeAllMenus();
+                        }}
                         className="block px-4 py-2 text-base text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition"
                       >
                         Hướng dẫn tra cứu đơn
                       </Link>
                     </div>
                   )}
-                </div>
-
+                </div>{" "}
                 <Link
                   to="/news"
                   onClick={guardPublicClick("/news")}
@@ -669,25 +695,27 @@ const Header = () => {
                   Liên hệ
                 </Link>
               </nav>
-            )}
-
+            )}{" "}
             {/* Mobile User Actions */}
             {isAuthenticated && user ? (
               <div className="mt-4 pt-4 border-t border-gray-200 space-y-1">
                 <Link
                   to="/profile"
+                  onClick={closeAllMenus}
                   className="flex items-center px-4 py-3 text-base font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-xl transition"
                 >
                   <UserCircle size={20} className="mr-3" /> Hồ sơ cá nhân
                 </Link>
                 <Link
                   to="/order-history"
+                  onClick={closeAllMenus}
                   className="flex items-center px-4 py-3 text-base font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-xl transition"
                 >
                   <Package size={20} className="mr-3" /> Đơn hàng của tôi
                 </Link>
                 <Link
                   to="/settings"
+                  onClick={closeAllMenus}
                   className="flex items-center px-4 py-3 text-base font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-xl transition"
                 >
                   <Settings size={20} className="mr-3" /> Cài đặt
@@ -705,12 +733,14 @@ const Header = () => {
               <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
                 <Link
                   to="/signin"
+                  onClick={closeAllMenus}
                   className="block text-center bg-gray-100 text-gray-700 px-5 py-3 rounded-xl text-base font-bold hover:bg-gray-200 transition"
                 >
                   Đăng nhập
                 </Link>
                 <Link
                   to="/signup"
+                  onClick={closeAllMenus}
                   className="block text-center bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-white px-5 py-3 rounded-xl text-base font-bold hover:from-amber-500 hover:via-yellow-500 hover:to-amber-600 shadow-md transition"
                 >
                   Đăng ký ngay
@@ -723,5 +753,4 @@ const Header = () => {
     </header>
   );
 };
-
 export default Header;

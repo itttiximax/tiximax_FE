@@ -38,17 +38,23 @@ const DividePaymentShipConfigModal = ({
   formatCurrency,
   isCreating,
   accountId,
-  cachedBankAccounts = [], // ✅ THÊM prop
-  bankAccountsLoading = false, // ✅ THÊM prop
+  cachedBankAccounts = [],
+  bankAccountsLoading = false,
+  cachedVouchers = [], // ✅ THÊM
+  vouchersLoading = false, // ✅ THÊM
 }) => {
   const [customerVoucherId, setCustomerVoucherId] = useState(null);
   const [isUseBalance, setIsUseBalance] = useState(true);
   const [voucherLoading, setVoucherLoading] = useState(false);
+  const [availableVouchers, setAvailableVouchers] = useState([]);
 
   const [bankId, setBankId] = useState(null);
   const [bankLoading, setBankLoading] = useState(false);
 
-  // ✅ THÊM: Auto-set bank đầu tiên khi có cached data
+  const [priceShipDos, setPriceShipDos] = useState("");
+  const [priceError, setPriceError] = useState("");
+
+  // Auto-set bank đầu tiên khi có cached data
   useEffect(() => {
     if (
       cachedBankAccounts &&
@@ -60,20 +66,60 @@ const DividePaymentShipConfigModal = ({
     }
   }, [cachedBankAccounts, isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ✅ Voucher KHÔNG bắt buộc nữa
+  const handlePriceChange = (e) => {
+    let value = e.target.value;
+
+    if (value !== "" && !/^\d*\.?\d*$/.test(value)) {
+      return;
+    }
+
+    setPriceShipDos(value);
+
+    if (value === "") {
+      setPriceError("Giá ship là bắt buộc");
+      return;
+    }
+
+    if (value === ".") {
+      setPriceError("Vui lòng nhập số hợp lệ");
+      return;
+    }
+
+    const num = parseFloat(value);
+    if (isNaN(num)) {
+      setPriceError("Vui lòng nhập số hợp lệ");
+    } else if (num < 0) {
+      setPriceError("Giá không được âm");
+    } else if (num === 0) {
+      setPriceError("Giá phải lớn hơn 0");
+    } else {
+      setPriceError("");
+    }
+  };
+
+  const handleVouchersChange = (vouchers) => {
+    setAvailableVouchers(vouchers || []);
+  };
+
   const confirmDisabled =
     isCreating ||
     (Boolean(accountId) && voucherLoading) ||
     bankLoading ||
-    !bankId;
+    !bankId ||
+    !priceShipDos ||
+    priceError !== "" ||
+    isNaN(parseFloat(priceShipDos)) ||
+    parseFloat(priceShipDos) <= 0;
+
+  const hasVouchers = availableVouchers.length > 0;
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">
               Tạo thanh toán vận chuyển (tách đơn)
@@ -93,50 +139,74 @@ const DividePaymentShipConfigModal = ({
         <div className="px-6 py-4">
           {/* Info */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <div className="flex items-start">
-              <Info className="w-5 h-5 text-blue-600 mt-0.5 mr-2 flex-shrink-0" />
-              <div className="text-sm text-blue-800">
-                <p className="font-semibold mb-1">
-                  Bạn đã chọn {selectedCount} kiện/hành trình tách
+            <div className="text-sm text-blue-800">
+              <div className="flex items-center mb-2">
+                <p className="font-semibold">
+                  Bạn đã chọn {selectedCount} đơn hàng
                 </p>
-                <p>Tổng phí ước tính: {formatCurrency(totalAmount)}</p>
               </div>
+              <p className="flex items-center">
+                Tổng phí ước tính: {formatCurrency(totalAmount)}
+              </p>
             </div>
           </div>
 
-          {/* Voucher (không bắt buộc) */}
-          <CustomerVoucherPayment
-            accountId={accountId}
-            disabled={isCreating}
-            value={customerVoucherId}
-            onChange={setCustomerVoucherId}
-            className="mb-4"
-            onLoadingChange={setVoucherLoading}
-          />
-          {Boolean(accountId) && voucherLoading && (
-            <div className="text-xs text-gray-500 -mt-2 mb-2">
-              Đang tải voucher...
-            </div>
-          )}
+          {/* Input Giá ship DOS */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Giá vận chuyển nội địa <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={priceShipDos}
+              onChange={handlePriceChange}
+              disabled={isCreating}
+              placeholder="0000"
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                priceError
+                  ? "border-red-300 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              }`}
+            />
+            {priceError && (
+              <p className="text-xs text-red-600 mt-1">{priceError}</p>
+            )}
+          </div>
 
+          {/* Voucher */}
+          {Boolean(accountId) && (
+            <>
+              <CustomerVoucherPayment
+                accountId={accountId}
+                disabled={isCreating || !hasVouchers}
+                value={customerVoucherId}
+                onChange={setCustomerVoucherId}
+                className="mb-4"
+                onLoadingChange={setVoucherLoading}
+                onVouchersChange={handleVouchersChange}
+                cachedVouchers={cachedVouchers} // ✅ THÊM
+                initialLoading={vouchersLoading} // ✅ THÊM
+              />
+              {voucherLoading && (
+                <div className="text-xs text-gray-500 -mt-2 mb-2">
+                  Đang tảivoucher...
+                </div>
+              )}
+            </>
+          )}
           {/* Bank */}
           <BankShipList
             disabled={isCreating}
             value={bankId}
             onChange={setBankId}
             className="mb-4"
-            label="Chọn tài khoản nhận cước (bắt buộc)"
+            label="Chọn tài khoản nhận cước "
             onLoadingChange={setBankLoading}
             onAccountsChange={() => {}}
-            autoSelectFirst={true} // ✅ THÊM
-            cachedAccounts={cachedBankAccounts} // ✅ THÊM
-            initialLoading={bankAccountsLoading} // ✅ THÊM
+            autoSelectFirst={true}
+            cachedAccounts={cachedBankAccounts}
+            initialLoading={bankAccountsLoading}
           />
-          {!bankId && (
-            <div className="text-xs text-amber-600 -mt-3 mb-3">
-              Vui lòng chọn tài khoản nhận cước để tiếp tục.
-            </div>
-          )}
 
           {/* Checkbox dùng số dư */}
           <div className="mb-4">
@@ -152,9 +222,6 @@ const DividePaymentShipConfigModal = ({
                 <span className="text-sm font-medium text-gray-700">
                   Sử dụng số dư tài khoản
                 </span>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Ưu tiên trừ vào số dư khả dụng
-                </p>
               </div>
             </label>
           </div>
@@ -166,8 +233,12 @@ const DividePaymentShipConfigModal = ({
             </h4>
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">Số kiện/chặng tách:</span>
-                <span className="font-medium">{selectedCount}</span>
+                <span className="text-gray-600">Giá vận chuyển nội địa:</span>
+                <span className="font-medium">
+                  {priceShipDos && !isNaN(parseFloat(priceShipDos))
+                    ? formatCurrency(parseFloat(priceShipDos))
+                    : "Chưa nhập"}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Tổng phí ước tính:</span>
@@ -181,12 +252,7 @@ const DividePaymentShipConfigModal = ({
                   {customerVoucherId ? "Có" : "Không"}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Tài khoản nhận cước:</span>
-                <span className="font-medium">
-                  {bankId ? "Đã chọn" : "Chưa chọn"}
-                </span>
-              </div>
+
               <div className="flex justify-between">
                 <span className="text-gray-600">Sử dụng số dư:</span>
                 <span className="font-medium">
@@ -198,7 +264,7 @@ const DividePaymentShipConfigModal = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+        <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 sticky bottom-0 bg-white">
           <button
             onClick={onClose}
             disabled={isCreating}
@@ -210,18 +276,25 @@ const DividePaymentShipConfigModal = ({
             onClick={() =>
               !confirmDisabled &&
               onConfirm({
-                customerVoucherId: customerVoucherId ?? null, // cho phép null
+                customerVoucherId: customerVoucherId ?? null,
                 isUseBalance,
                 bankId,
+                priceShipDos: parseFloat(priceShipDos),
               })
             }
             disabled={confirmDisabled}
             className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
             title={
               confirmDisabled
-                ? bankLoading
+                ? !priceShipDos
+                  ? "Vui lòng nhập giá ship DOS"
+                  : priceError
+                  ? priceError
+                  : bankLoading
                   ? "Đang tải tài khoản ngân hàng…"
-                  : "Vui lòng chọn tài khoản nhận cước"
+                  : !bankId
+                  ? "Vui lòng chọn tài khoản nhận cước"
+                  : "Vui lòng điền đầy đủ thông tin"
                 : "Xác nhận tạo thanh toán tách đơn"
             }
           >
@@ -232,7 +305,6 @@ const DividePaymentShipConfigModal = ({
     </div>
   );
 };
-
 // ========== Main Button Component ==========
 const CreateDividePaymentShip = ({
   selectedShipmentCodes,
@@ -242,12 +314,13 @@ const CreateDividePaymentShip = ({
   onError,
   disabled = false,
   accountId,
-  cachedBankAccounts = [], // ✅ THÊM prop
-  bankAccountsLoading = false, // ✅ THÊM prop
+  cachedBankAccounts = [],
+  bankAccountsLoading = false,
+  cachedVouchers = [], // ✅ THÊM
+  vouchersLoading = false, // ✅ THÊM
 }) => {
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-
   const openModal = () => {
     if (!selectedShipmentCodes || selectedShipmentCodes.length < 1) {
       toast.error("Vui lòng chọn ít nhất 1 tracking để tách đơn");
@@ -255,24 +328,23 @@ const CreateDividePaymentShip = ({
     }
     setShowConfigModal(true);
   };
-
   const closeModal = () => {
     if (!isCreating) setShowConfigModal(false);
   };
-
   const handleConfirmDividePayment = async ({
     customerVoucherId,
     isUseBalance,
     bankId,
+    priceShipDos,
   }) => {
     setShowConfigModal(false);
     try {
       setIsCreating(true);
-
       const result = await createPaymentShipService.createPartialShipment(
         isUseBalance,
         bankId,
         customerVoucherId ?? null,
+        priceShipDos,
         selectedShipmentCodes
       );
 
@@ -292,13 +364,11 @@ const CreateDividePaymentShip = ({
       setIsCreating(false);
     }
   };
-
   const buttonDisabled =
     disabled ||
     isCreating ||
     !selectedShipmentCodes ||
     selectedShipmentCodes.length < 1;
-
   return (
     <>
       <button
@@ -317,10 +387,12 @@ const CreateDividePaymentShip = ({
             Đang tạo...
           </>
         ) : (
-          <>Tạo thanh toán tách đơn</>
+          <>
+            <Scissors className="w-4 h-4 mr-2" />
+            Tạo thanh toán tách đơn
+          </>
         )}
       </button>
-
       <DividePaymentShipConfigModal
         isOpen={showConfigModal}
         onClose={closeModal}
@@ -330,11 +402,12 @@ const CreateDividePaymentShip = ({
         formatCurrency={formatCurrency || ((v) => v)}
         isCreating={isCreating}
         accountId={accountId}
-        cachedBankAccounts={cachedBankAccounts} // ✅ THÊM
-        bankAccountsLoading={bankAccountsLoading} // ✅ THÊM
+        cachedBankAccounts={cachedBankAccounts}
+        bankAccountsLoading={bankAccountsLoading}
+        cachedVouchers={cachedVouchers} // ✅ THÊM
+        vouchersLoading={vouchersLoading} // ✅ THÊM
       />
     </>
   );
 };
-
 export default CreateDividePaymentShip;
