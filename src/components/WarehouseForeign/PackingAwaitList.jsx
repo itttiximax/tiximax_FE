@@ -134,6 +134,120 @@ const PackingAwaitList = () => {
     }
   };
 
+  // const handleExportSelected = async () => {
+  //   if (selectedPackings.length === 0) {
+  //     toast.error("Vui lòng chọn ít nhất một kiện hàng để xuất!");
+  //     return;
+  //   }
+
+  //   setExportLoading(true);
+  //   try {
+  //     const data = await packingsService.exportPackings(selectedPackings);
+
+  //     if (data && data.length > 0) {
+  //       const excelData = [
+  //         [
+  //           "STT",
+  //           "Mã kiện hàng",
+  //           "Mã chuyến bay",
+  //           "Mã đơn hàng",
+  //           "Mã tracking",
+  //           "Tên sản phẩm",
+  //           "Giá tiền",
+  //           "Link sản phẩm",
+  //           "Phân loại",
+  //           "Chiều cao (cm)",
+  //           "Chiều dài (cm)",
+  //           "Chiều rộng (cm)",
+  //           "Thể tích (m³)",
+  //           "Trọng lượng (kg)",
+  //           "Mã khách hàng",
+  //           "Tên khách hàng",
+  //           "Điểm đến",
+  //           "Nhân viên",
+  //         ],
+  //         ...data.map((packing, index) => [
+  //           index + 1,
+  //           packing.packingCode || "",
+  //           packing.flightCode || "",
+  //           packing.orderCode || "",
+  //           packing.trackingCode || "",
+  //           packing.productNames || "",
+  //           packing.price || "",
+  //           packing.productLink || "",
+  //           packing.classify || "",
+  //           packing.height || "",
+  //           packing.length || "",
+  //           packing.width || "",
+  //           packing.dim ? packing.dim.toFixed(4) : "",
+  //           packing.netWeight ? packing.netWeight.toFixed(2) : "",
+  //           packing.customerCode || "",
+  //           packing.customerName || "",
+  //           packing.destination || "",
+  //           packing.staffName || "",
+  //         ]),
+  //       ];
+
+  //       const ws = XLSX.utils.aoa_to_sheet(excelData);
+
+  //       ws["!cols"] = [
+  //         { wch: 5 },
+  //         { wch: 18 },
+  //         { wch: 15 },
+  //         { wch: 15 },
+  //         { wch: 15 },
+  //         { wch: 15 },
+  //         { wch: 15 },
+  //         { wch: 15 },
+  //         { wch: 18 },
+  //         { wch: 15 },
+  //         { wch: 20 },
+  //         { wch: 15 },
+  //         { wch: 20 },
+  //       ];
+
+  //       const range = XLSX.utils.decode_range(ws["!ref"]);
+  //       for (let col = range.s.c; col <= range.e.c; col++) {
+  //         const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+  //         if (!ws[cellAddress]) continue;
+
+  //         ws[cellAddress].s = {
+  //           fill: {
+  //             fgColor: { rgb: "2563EB" },
+  //           },
+  //           font: {
+  //             color: { rgb: "FFFFFF" },
+  //             bold: true,
+  //             sz: 12,
+  //           },
+  //           alignment: {
+  //             horizontal: "center",
+  //             vertical: "center",
+  //           },
+  //           border: {
+  //             top: { style: "thin", color: { rgb: "000000" } },
+  //             bottom: { style: "thin", color: { rgb: "000000" } },
+  //             left: { style: "thin", color: { rgb: "000000" } },
+  //             right: { style: "thin", color: { rgb: "000000" } },
+  //           },
+  //         };
+  //       }
+
+  //       const wb = XLSX.utils.book_new();
+  //       XLSX.utils.book_append_sheet(wb, ws, "Packings");
+  //       XLSX.writeFile(
+  //         wb,
+  //         `packings_export_${new Date().toISOString().split("T")[0]}.xlsx`
+  //       );
+
+  //       toast.success(`Xuất thành công ${data.length} kiện hàng!`);
+  //     }
+  //   } catch (error) {
+  //     toast.error(error.message || "Export thất bại!");
+  //   } finally {
+  //     setExportLoading(false);
+  //   }
+  // };
   const handleExportSelected = async () => {
     if (selectedPackings.length === 0) {
       toast.error("Vui lòng chọn ít nhất một kiện hàng để xuất!");
@@ -145,6 +259,7 @@ const PackingAwaitList = () => {
       const data = await packingsService.exportPackings(selectedPackings);
 
       if (data && data.length > 0) {
+        // Tạo header
         const excelData = [
           [
             "STT",
@@ -152,6 +267,9 @@ const PackingAwaitList = () => {
             "Mã chuyến bay",
             "Mã đơn hàng",
             "Mã tracking",
+            "Tên sản phẩm",
+            "Giá tiền",
+            "Link sản phẩm",
             "Phân loại",
             "Chiều cao (cm)",
             "Chiều dài (cm)",
@@ -163,43 +281,90 @@ const PackingAwaitList = () => {
             "Điểm đến",
             "Nhân viên",
           ],
-          ...data.map((packing, index) => [
-            index + 1,
-            packing.packingCode || "",
-            packing.flightCode || "",
-            packing.orderCode || "",
-            packing.trackingCode || "",
-            packing.classify || "",
-            packing.height || "",
-            packing.length || "",
-            packing.width || "",
-            packing.dim ? packing.dim.toFixed(4) : "",
-            packing.netWeight ? packing.netWeight.toFixed(2) : "",
-            packing.customerCode || "",
-            packing.customerName || "",
-            packing.destination || "",
-            packing.staffName || "",
-          ]),
         ];
 
+        let stt = 1;
+
+        // Duyệt qua từng kiện hàng
+        data.forEach((packing) => {
+          // Chuyển đổi sang mảng nếu không phải mảng
+          const productNames = Array.isArray(packing.productNames)
+            ? packing.productNames
+            : packing.productNames
+            ? [packing.productNames]
+            : [""];
+
+          const productLinks = Array.isArray(packing.productLink)
+            ? packing.productLink
+            : packing.productLink
+            ? [packing.productLink]
+            : [""];
+
+          const prices = Array.isArray(packing.price)
+            ? packing.price
+            : packing.price
+            ? [packing.price]
+            : [""];
+
+          // Tìm độ dài tối đa
+          const maxLength = Math.max(
+            productNames.length,
+            productLinks.length,
+            prices.length
+          );
+
+          // Tạo một dòng cho mỗi sản phẩm
+          for (let i = 0; i < maxLength; i++) {
+            excelData.push([
+              stt,
+              packing.packingCode || "",
+              packing.flightCode || "",
+              packing.orderCode || "",
+              packing.trackingCode || "",
+              productNames[i] || "",
+              prices[i] || "",
+              productLinks[i] || "",
+              packing.classify || "",
+              packing.height || "",
+              packing.length || "",
+              packing.width || "",
+              packing.dim ? packing.dim.toFixed(4) : "",
+              packing.netWeight ? packing.netWeight.toFixed(2) : "",
+              packing.customerCode || "",
+              packing.customerName || "",
+              packing.destination || "",
+              packing.staffName || "",
+            ]);
+            stt++;
+          }
+        });
+
+        // Tạo worksheet
         const ws = XLSX.utils.aoa_to_sheet(excelData);
 
+        // Định dạng độ rộng cột
         ws["!cols"] = [
-          { wch: 5 },
-          { wch: 18 },
-          { wch: 15 },
-          { wch: 15 },
-          { wch: 15 },
-          { wch: 15 },
-          { wch: 15 },
-          { wch: 15 },
-          { wch: 18 },
-          { wch: 15 },
-          { wch: 20 },
-          { wch: 15 },
-          { wch: 20 },
+          { wch: 5 }, // STT
+          { wch: 18 }, // Mã kiện hàng
+          { wch: 15 }, // Mã chuyến bay
+          { wch: 15 }, // Mã đơn hàng
+          { wch: 15 }, // Mã tracking
+          { wch: 30 }, // Tên sản phẩm
+          { wch: 12 }, // Giá tiền
+          { wch: 50 }, // Link sản phẩm
+          { wch: 18 }, // Phân loại
+          { wch: 12 }, // Chiều cao
+          { wch: 12 }, // Chiều dài
+          { wch: 12 }, // Chiều rộng
+          { wch: 12 }, // Thể tích
+          { wch: 15 }, // Trọng lượng
+          { wch: 15 }, // Mã khách hàng
+          { wch: 20 }, // Tên khách hàng
+          { wch: 15 }, // Điểm đến
+          { wch: 20 }, // Nhân viên
         ];
 
+        // Style cho header row
         const range = XLSX.utils.decode_range(ws["!ref"]);
         for (let col = range.s.c; col <= range.e.c; col++) {
           const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
@@ -227,6 +392,7 @@ const PackingAwaitList = () => {
           };
         }
 
+        // Tạo workbook và xuất file
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Packings");
         XLSX.writeFile(
@@ -234,7 +400,9 @@ const PackingAwaitList = () => {
           `packings_export_${new Date().toISOString().split("T")[0]}.xlsx`
         );
 
-        toast.success(`Xuất thành công ${data.length} kiện hàng!`);
+        toast.success(
+          `Xuất thành công ${data.length} kiện hàng (${stt - 1} dòng chi tiết)!`
+        );
       }
     } catch (error) {
       toast.error(error.message || "Export thất bại!");
