@@ -149,8 +149,10 @@ const PackingAwaitList = () => {
           [
             "STT",
             "Mã kiện hàng",
+            "Mã chuyến bay",
             "Mã đơn hàng",
             "Mã tracking",
+            "Phân loại",
             "Chiều cao (cm)",
             "Chiều dài (cm)",
             "Chiều rộng (cm)",
@@ -164,8 +166,10 @@ const PackingAwaitList = () => {
           ...data.map((packing, index) => [
             index + 1,
             packing.packingCode || "",
+            packing.flightCode || "",
             packing.orderCode || "",
             packing.trackingCode || "",
+            packing.classify || "",
             packing.height || "",
             packing.length || "",
             packing.width || "",
