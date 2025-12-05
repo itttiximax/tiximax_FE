@@ -20,7 +20,7 @@ import DetailPacking from "./DetailPacking";
 const PackingAwaitList = () => {
   const [orders, setOrders] = useState([]);
   const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(20);
+  const [limit, setLimit] = useState(100);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedPackings, setSelectedPackings] = useState([]);
@@ -338,6 +338,7 @@ const PackingAwaitList = () => {
                 <option value={30}>30 / page</option>
                 <option value={50}>50 / page</option>
                 <option value={100}>100 / page</option>
+                <option value={100}>200 / page</option>
               </select>
             </div>
 

@@ -40,7 +40,7 @@ class PackingsService {
   }
 
   // Get awaiting-flight orders with pagination
-  async getAwaitingFlightOrders(page = 0, limit = 10) {
+  async getAwaitingFlightOrders(page = 0, limit = 100) {
     try {
       const response = await api.get(
         `/packings/awaiting-flight/${page}/${limit}`
@@ -56,7 +56,7 @@ class PackingsService {
   }
 
   // Get all awaiting-flight orders (fetch all pages)
-  async getAllAwaitingFlightOrders(limit = 10) {
+  async getAllAwaitingFlightOrders(limit = 100) {
     const allOrders = [];
     let currentPage = 0;
     let hasMoreData = true;
@@ -116,7 +116,7 @@ class PackingsService {
   }
 
   // Get all flying-away orders (fetch all pages)
-  async getAllFlyingAwayOrders(limit = 10) {
+  async getAllFlyingAwayOrders(limit = 100) {
     const allOrders = [];
     let currentPage = 0;
     let hasMoreData = true;

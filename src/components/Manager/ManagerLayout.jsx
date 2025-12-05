@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Search, Bell, ChevronDown, User, LogOut, Menu, X } from "lucide-react";
 import { useManagerLayout } from "../../hooks/useManagerLayout";
 
-// ✅ Import trực tiếp thay vì lazy load
+// Import trực tiếp thay vì lazy load
 import ManagerSidebar from "./ManagerSidebar";
 
 // SearchBar - Inline component
