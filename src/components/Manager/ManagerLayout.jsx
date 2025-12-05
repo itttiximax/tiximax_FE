@@ -1,12 +1,12 @@
-// ManagerLayout.jsx - FIXED SCROLL ISSUE
-import React, { useRef, useEffect, lazy, Suspense } from "react";
+// ManagerLayout.jsx - FIXED LAZY LOADING
+import React, { useRef, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Search, Bell, ChevronDown, User, LogOut, Menu, X } from "lucide-react";
 import { useManagerLayout } from "../../hooks/useManagerLayout";
 
-// Lazy load sidebar
-const ManagerSidebar = lazy(() => import("./ManagerSidebar"));
+// ✅ Import trực tiếp thay vì lazy load
+import ManagerSidebar from "./ManagerSidebar";
 
 // SearchBar - Inline component
 const SearchBar = ({
@@ -279,22 +279,14 @@ const ManagerLayout = () => {
 
       {/* Container cho Sidebar và Main Content */}
       <div className="flex flex-1 min-h-0">
-        {/* Sidebar */}
+        {/* Sidebar - ✅ Không còn Suspense */}
         <div
           className={`fixed md:static inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-800 shadow-sm transform ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           } md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col`}
         >
           <div className="flex-1 overflow-y-auto hide-scrollbar">
-            <Suspense
-              fallback={
-                <div className="flex justify-center items-center h-32">
-                  <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              }
-            >
-              <ManagerSidebar />
-            </Suspense>
+            <ManagerSidebar />
           </div>
         </div>
 
@@ -306,7 +298,7 @@ const ManagerLayout = () => {
           ></div>
         )}
 
-        {/* Main Content Area - Key changes here */}
+        {/* Main Content Area */}
         <main className="flex-1 min-w-0 overflow-hidden">
           <div className="h-full overflow-y-auto hide-scrollbar ">
             <div className="min-h-full bg-white dark:bg-gray-800 shadow-sm border border-gray-300/60 dark:border-gray-700/60">
