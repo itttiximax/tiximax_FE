@@ -137,9 +137,10 @@ const managerOrderService = {
     { key: "CHO_MUA", label: "Chờ mua", color: "blue" },
     { key: "CHO_NHAP_KHO_NN", label: "Đang về kho NN", color: "cyan" },
     { key: "CHO_DONG_GOI", label: "Đã về kho NN", color: "purple" },
-    { key: "DA_DU_HANG ", label: "Đang về khi VN", color: "lime" },
+    { key: "DANG_XU_LY", label: "Đang về kho VN", color: "indigo" },
+    { key: "DA_DU_HANG ", label: "Đã về kho VN", color: "lime" },
     { key: "CHO_THANH_TOAN_SHIP", label: "Chờ thanh toán ship", color: "teal" },
-    { key: "CHO_GIAO", label: "Chờ giao hàng", color: "amber" },
+    { key: "CHO_GIAO", label: "Đang giao hàng", color: "amber" },
     { key: "DA_GIAO", label: "Hoàn thành đơn hàng", color: "amber" },
     { key: "DA_HUY", label: "Đã hủy", color: "red" },
 
