@@ -301,24 +301,24 @@ const PackingAwaitList = () => {
             ? [packing.quantities]
             : [""];
 
-          const productLinks = Array.isArray(packing.productLink)
-            ? packing.productLink
-            : packing.productLink
-            ? [packing.productLink]
-            : [""];
-
           const prices = Array.isArray(packing.price)
             ? packing.price
             : packing.price
             ? [packing.price]
             : [""];
 
+          const productLinks = Array.isArray(packing.productLink)
+            ? packing.productLink
+            : packing.productLink
+            ? [packing.productLink]
+            : [""];
+
           // Tìm độ dài tối đa
           const maxLength = Math.max(
             productNames.length,
-            productLinks.length,
             quantities.length,
-            prices.length
+            prices.length,
+            productLinks.length
           );
 
           // Tạo một dòng cho mỗi sản phẩm
