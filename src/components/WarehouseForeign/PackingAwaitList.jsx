@@ -301,6 +301,12 @@ const PackingAwaitList = () => {
             ? [packing.productLink]
             : [""];
 
+          const quantities = Array.isArray(packing.quantities)
+            ? packing.quantities
+            : packing.quantities
+            ? [packing.quantities]
+            : [""];
+
           const prices = Array.isArray(packing.price)
             ? packing.price
             : packing.price
@@ -322,8 +328,8 @@ const PackingAwaitList = () => {
               packing.flightCode || "",
               packing.orderCode || "",
               packing.trackingCode || "",
-              packing.quantities || "",
               productNames[i] || "",
+              quantities[i] || "",
               prices[i] || "",
               productLinks[i] || "",
               packing.classify || "",
