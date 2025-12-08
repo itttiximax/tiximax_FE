@@ -295,16 +295,16 @@ const PackingAwaitList = () => {
             ? [packing.productNames]
             : [""];
 
-          const productLinks = Array.isArray(packing.productLink)
-            ? packing.productLink
-            : packing.productLink
-            ? [packing.productLink]
-            : [""];
-
           const quantities = Array.isArray(packing.quantities)
             ? packing.quantities
             : packing.quantities
             ? [packing.quantities]
+            : [""];
+
+          const productLinks = Array.isArray(packing.productLink)
+            ? packing.productLink
+            : packing.productLink
+            ? [packing.productLink]
             : [""];
 
           const prices = Array.isArray(packing.price)
@@ -317,6 +317,7 @@ const PackingAwaitList = () => {
           const maxLength = Math.max(
             productNames.length,
             productLinks.length,
+            quantities.length,
             prices.length
           );
 
@@ -357,8 +358,8 @@ const PackingAwaitList = () => {
           { wch: 15 }, // Mã chuyến bay
           { wch: 15 }, // Mã đơn hàng
           { wch: 15 }, // Mã tracking
-          { wch: 10 }, // Số lượng
           { wch: 30 }, // Tên sản phẩm
+          { wch: 10 }, // Số lượng
           { wch: 12 }, // Giá tiền
           { wch: 50 }, // Link sản phẩm
           { wch: 18 }, // Phân loại
