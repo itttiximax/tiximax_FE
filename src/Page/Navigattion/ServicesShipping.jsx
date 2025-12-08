@@ -1,284 +1,465 @@
 import React from "react";
-import { motion } from "framer-motion";
 import {
-  Ship,
-  Clock,
   Globe2,
-  Package,
-  Calculator,
+  Truck,
+  PackageSearch,
+  ClipboardList,
   ShieldCheck,
-  ArrowRight,
-  PlaneTakeoff,
+  AlertCircle,
+  DollarSign,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
-/**
- * ServicesShipping.jsx — Tiximax Logistics
- * Tone: vàng - trắng - đen, thêm hình ảnh minh hoạ.
- */
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.55 } },
-};
-
-const features = [
-  {
-    icon: Globe2,
-    title: "Đa quốc gia",
-    desc: "Mạng lưới vận chuyển tại Nhật, Hàn, Mỹ, Indo và Việt Nam.",
-    img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1600&auto=format&fit=crop",
-  },
-  {
-    icon: Package,
-    title: "Kiểm soát kiện hàng",
-    desc: "Theo dõi realtime, minh bạch từng giai đoạn.",
-    img: "https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=1600&auto=format&fit=crop",
-  },
-  {
-    icon: Clock,
-    title: "Tối ưu lead time",
-    desc: "Chuyến bay cố định mỗi tuần — cam kết đúng lịch.",
-    img: "https://i.pinimg.com/736x/4d/21/20/4d2120a8a7c9832061058400ff8b2171.jpg",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Bảo hiểm hàng hóa",
-    desc: "Bồi thường theo giá trị khai báo trong invoice.",
-    img: "https://images.unsplash.com/photo-1521790361543-f645cf042ec4?q=80&w=1600&auto=format&fit=crop",
-  },
-];
-
-const routes = [
-  {
-    name: "Nhật → Việt",
-    code: "JP → VN",
-    img: "https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=1600&auto=format&fit=crop", // Tokyo
-    lead: "3–5 ngày",
-  },
-  {
-    name: "Hàn → Việt",
-    code: "KR → VN",
-    img: "https://images.unsplash.com/photo-1544989164-31dc3c645987?q=80&w=1600&auto=format&fit=crop", // Seoul
-    lead: "3–5 ngày",
-  },
-  {
-    name: "Mỹ → Việt",
-    code: "US → VN",
-    img: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?q=80&w=1600&auto=format&fit=crop", // LA
-    lead: "5–8 ngày",
-  },
-  {
-    name: "Indo → Việt",
-    code: "ID → VN",
-    img: "https://images.unsplash.com/photo-1543248939-a6bcf2c4a2aa?q=80&w=1600&auto=format&fit=crop", // Jakarta
-    lead: "3–6 ngày",
-  },
-];
+const Section = ({ title, children }) => (
+  <section className="py-10 border-t border-gray-200 bg-white">
+    <div className="max-w-5xl mx-auto px-4">
+      <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center">
+        {title}
+      </h2>
+      <div className="mt-4 mb-6 h-px w-20 mx-auto bg-gray-300" />
+      <div className="text-base sm:text-lg leading-relaxed text-gray-700 space-y-3">
+        {children}
+      </div>
+    </div>
+  </section>
+);
 
 const ServicesShipping = () => {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white to-yellow-50/40 text-gray-900">
-      {/* HERO with image */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <img
-            src="https://images.unsplash.com/photo-1529078155058-5d716f45d604?q=80&w=2000&auto=format&fit=crop"
-            alt="Cargo aircraft loading"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-white/70" />
-        </div>
-        <div className="absolute inset-0 -z-10 opacity-60 bg-gradient-to-br from-yellow-100 via-yellow-200 to-transparent" />
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-14 pb-10 lg:pt-24 lg:pb-16">
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            className="max-w-3xl"
-          >
-            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full">
-              <Ship className="w-3.5 h-3.5" /> Vận chuyển quốc tế
-            </span>
-            <h1 className="mt-5 text-4xl lg:text-5xl font-black text-gray-900 leading-tight">
-              Dịch vụ vận chuyển quốc tế — nhanh, an toàn, tối ưu chi phí.
-            </h1>
-            <p className="mt-4 text-gray-700 text-lg leading-8">
-              Tiximax cung cấp giải pháp vận chuyển từ Nhật, Hàn, Mỹ, Indonesia
-              về Việt Nam với thời gian tối ưu và chi phí cạnh tranh.
-            </p>
-          </motion.div>
-
-          {/* Feature tiles with image */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
-            {features.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: i * 0.03 }}
-                className="rounded-2xl border border-yellow-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition"
-              >
-                <div className="relative h-28">
-                  <img
-                    src={f.img}
-                    alt={f.title}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
-                  <div className="absolute bottom-2 left-2 inline-flex items-center gap-2 text-xs font-semibold text-white">
-                    <span className="p-1.5 rounded-lg bg-white/20 text-white">
-                      <f.icon className="w-4 h-4" />
-                    </span>
-                    {f.title}
-                  </div>
-                </div>
-                <div className="p-5">
-                  <p className="text-sm text-gray-700">{f.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CALCULATOR DEMO */}
-      <section className="py-10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <Calculator className="w-5 h-5 text-yellow-600" />
-              <h2 className="text-lg font-bold text-gray-900">
-                Ước tính chi phí vận chuyển
-              </h2>
+    <main className="min-h-screen bg-gray-50">
+      {/* HERO */}
+      <section className="bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-10 sm:py-14">
+          <div className="flex justify-center">
+            <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-wide text-amber-700 mb-4">
+              <Globe2 className="w-5 h-5" />
+              <span>Tiximax vận chuyển hàng quốc tế</span>
             </div>
-            <div className="grid md:grid-cols-4 gap-4">
-              <input
-                placeholder="Khối lượng (kg)"
-                className="rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-yellow-500 focus:ring-yellow-500"
-              />
-              <input
-                placeholder="Kích thước (cm³)"
-                className="rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-yellow-500 focus:ring-yellow-500"
-              />
-              <select className="rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-yellow-500 focus:ring-yellow-500">
-                <option>Tuyến Nhật – Việt</option>
-                <option>Hàn – Việt</option>
-                <option>Mỹ – Việt</option>
-                <option>Indo – Việt</option>
-              </select>
-              <button className="rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-semibold px-5 py-2.5 hover:from-yellow-600 hover:to-yellow-700">
-                Tính ngay
-              </button>
-            </div>
-            <p className="mt-3 text-xs text-gray-500">
-              *Kết quả chỉ mang tính tham khảo, Tiximax sẽ báo giá chính xác sau
-              khi xác nhận thông tin kiện hàng.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ROUTES with image cards */}
-      <section className="py-10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="mb-6 flex items-center gap-2">
-            <PlaneTakeoff className="w-5 h-5 text-yellow-600" />
-            <h2 className="text-2xl font-extrabold text-gray-900">
-              Tuyến vận chuyển nổi bật
-            </h2>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {routes.map((r, i) => (
-              <motion.div
-                key={r.code}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: i * 0.03 }}
-                className="rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm"
-              >
-                <div className="relative h-40">
-                  <img
-                    src={r.img}
-                    alt={r.name}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute bottom-3 left-3 text-white">
-                    <div className="text-xs font-bold opacity-90">{r.code}</div>
-                    <div className="text-sm font-semibold">{r.name}</div>
-                  </div>
-                  <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-500 text-white shadow">
-                    Lead time: {r.lead}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* PROCESS */}
-      <section className="py-10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <h2 className="text-2xl font-extrabold text-gray-900 mb-6">
-            Quy trình vận chuyển
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              "Tiếp nhận & kiểm tra kiện hàng",
-              "Đóng gói & cân đo chính xác",
-              "Khai báo HQ & gán flight",
-              "Vận chuyển quốc tế & tracking",
-              "Thông quan VN & giao kho",
-              "Khách hàng nhận hàng & đối soát invoice",
-            ].map((step, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
-                className="rounded-2xl border border-yellow-200 bg-white p-5 shadow-sm hover:shadow-md transition"
-              >
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-yellow-100 text-yellow-700 font-bold mb-3">
-                  {i + 1}
-                </div>
-                <p className="font-semibold text-gray-900">{step}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 leading-snug text-center">
+            Tiximax vận chuyển hàng quốc tế: Giải pháp chuyên biệt cho SME và cá
+            nhân
+          </h1>
 
-      {/* CTA with image */}
-      <section className="relative py-16 overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <img
-            src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=2000&auto=format&fit=crop"
-            alt="Air cargo at sunset"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-br from-yellow-600/90 to-yellow-700/90" />
-        </div>
+          <div className="mt-5 mb-6 h-px w-24 mx-auto bg-gray-300" />
 
-        <div className="max-w-3xl mx-auto px-6 text-center text-white">
-          <h2 className="text-3xl font-extrabold mb-3">
-            Bắt đầu vận chuyển với Tiximax
-          </h2>
-          <p className="text-yellow-50">
-            Nhập thông tin kiện hàng hoặc liên hệ đội ngũ Tiximax để được báo
-            giá nhanh chóng và chính xác nhất.
+          <p className="text-base sm:text-lg text-gray-700 leading-relaxed text-center">
+            Bạn là SME nhập hàng hoặc cá nhân cần gửi hàng quốc tế nhưng ngại
+            chi phí cao, thủ tục rườm rà và rủi ro hỏng hóc?{" "}
+            <strong>Tiximax vận chuyển hàng quốc tế</strong> sẽ giúp bạn với
+            giải pháp tuyến chuyên biệt, tối ưu chi phí. Trước khi bắt đầu dịch
+            vụ, mời bạn đọc qua bài viết này để hiểu rõ hơn Tiximax là ai, các
+            tuyến vận chuyển, quy trình gửi hàng cũng như chính sách và lưu ý
+            quan trọng khi gửi hàng từ Indonesia, Hàn Quốc, Nhật hay Mỹ về Việt
+            Nam.
           </p>
-          <button className="mt-6 inline-flex items-center gap-2 bg-white text-gray-900 font-bold px-6 py-3 rounded-xl hover:bg-yellow-50 transition">
-            Liên hệ ngay <ArrowRight className="w-5 h-5 text-yellow-600" />
-          </button>
+
+          <div className="mt-6 flex flex-wrap gap-4 justify-center">
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700"
+            >
+              Liên hệ tư vấn tuyến vận chuyển
+            </Link>
+            <Link
+              to="/tracking"
+              className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
+            >
+              Tracking đơn hàng
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* TỔNG QUAN */}
+      <Section title="Tổng quan về dịch vụ Tiximax vận chuyển quốc tế">
+        <>
+          <p>
+            Tiximax là nhà cung cấp dịch vụ logistics chuyên tuyến, phục vụ
+            khách hàng cá nhân và SME cần vận chuyển giữa Việt Nam và các thị
+            trường chính: Indonesia, Nhật Bản, Hàn Quốc và Mỹ. Điểm khác biệt
+            của dịch vụ <strong>Tiximax vận chuyển hàng quốc tế</strong> là chọn{" "}
+            <em>niche</em> nơi các hãng lớn ít tập trung — ví dụ như các chặng
+            gom lẻ.
+          </p>
+          <div className="mt-2 space-y-1">
+            <p className="font-semibold">Ưu điểm cốt lõi:</p>
+            <ul className="list-disc pl-6 space-y-1.5">
+              <li>Chi phí thấp cho đơn hàng nhỏ hoặc gom lẻ.</li>
+              <li>
+                Quy trình thông quan đơn giản cho hàng phi mậu dịch (quà biếu,
+                hàng cá nhân).
+              </li>
+              <li>Minh bạch giá và hỗ trợ thủ tục trọn gói.</li>
+            </ul>
+          </div>
+          <p>
+            Nếu bạn cần gửi hàng Indonesia - Việt Nam hai chiều, hoặc các tuyến
+            khác về Việt Nam thì hãy cân nhắc lựa chọn Tiximax để tận dụng tuyến
+            chuyên biệt và chi phí cạnh tranh.
+          </p>
+        </>
+      </Section>
+
+      {/* TIXIMAX LÀ AI & TUYẾN */}
+      <Section title="Tiximax là ai và chuyên về tuyến nào?">
+        <>
+          <p>
+            Tiximax là công ty logistics có kinh nghiệm, hoạt động các tuyến Hàn
+            - Việt, Indonesia - Việt, Nhật - Việt và Mỹ - Việt. Chúng tôi tập
+            trung vào:
+          </p>
+          <ul className="list-disc pl-6 space-y-1.5">
+            <li>Tuyến đường bộ/biển nơi chi phí thấp hơn đường hàng không.</li>
+            <li>Tuyến gom lẻ giữa nhiều nhà bán lẻ và kho tập trung.</li>
+            <li>
+              Tuyến 2 chiều đặc thù như{" "}
+              <strong>Tiximax vận chuyển hàng Indo Việt</strong> với dịch vụ
+              nhận hàng tại kho Indonesia và giao tận tay ở Việt Nam.
+            </li>
+          </ul>
+          <p>
+            Tiximax cam kết: thông báo tiến độ, báo giá tách bạch và hỗ trợ khai
+            báo hải quan. Nếu bạn là SME nhập số lượng vừa và nhỏ, chọn tuyến
+            niche của Tiximax thường tiết kiệm hơn so với hãng lớn.
+          </p>
+        </>
+      </Section>
+
+      {/* KHI NÀO NÊN CHỌN */}
+      <Section title="Khi nào nên chọn Tiximax vận chuyển hàng quốc tế?">
+        <>
+          <p>Bạn nên chọn dịch vụ gửi hàng quốc tế Tiximax khi:</p>
+          <ul className="list-disc pl-6 space-y-1.5">
+            <li>
+              Gửi hàng thương mại điện tử nhiều đơn nhỏ, muốn gom để giảm cước.
+            </li>
+            <li>Gửi hàng cá nhân, quà biếu cần thủ tục thông quan đơn giản.</li>
+            <li>
+              Muốn chi phí vận chuyển thấp hơn so với các hãng quốc tế lớn.
+            </li>
+          </ul>
+          <p>
+            Lý do thực tế: Các hãng lớn thường tối ưu cho container lớn và giá
+            cao cho lô lẻ. Trong khi đó, Tiximax tối ưu cho lô gom, tiết kiệm
+            chi phí và xử lý thủ tục cho hàng phi mậu dịch. Nếu bạn cần{" "}
+            <strong>Tiximax gửi hàng Nhật Việt</strong> hoặc{" "}
+            <strong>Tiximax gửi hàng Hàn Việt</strong> theo lô nhỏ, quy trình và
+            giá sẽ phù hợp hơn.
+          </p>
+        </>
+      </Section>
+
+      {/* QUY TRÌNH 3 BƯỚC */}
+      <Section title="Quy trình vận chuyển hàng tối ưu của Tiximax">
+        <>
+          <p>
+            Tiximax áp dụng quy trình 3 bước để giảm phức tạp cho khách hàng:{" "}
+            <strong>
+              Nêu yêu cầu cụ thể với nhân viên Tiximax → Cung cấp thông tin cần
+              thiết về hàng hóa → Theo dõi & nhận hàng.
+            </strong>
+          </p>
+          <p>
+            Mỗi bước đều có hướng dẫn chi tiết nhằm giúp bạn hoàn thành thao tác
+            nhanh, giảm lỗi khai báo và tránh rủi ro hải quan.
+          </p>
+        </>
+      </Section>
+
+      {/* 3 BƯỚC CHI TIẾT */}
+      <Section title="Khám phá 3 bước dịch vụ Tiximax vận chuyển hàng quốc tế">
+        <>
+          <div className="space-y-4">
+            <div className="border border-gray-200 rounded-2xl p-5 bg-white">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
+                Bước 1 – Nêu yêu cầu cụ thể với nhân viên Tiximax
+              </h3>
+              <div className="mt-3 h-px w-16 mx-auto bg-gray-200" />
+              <p className="mt-3">
+                Bạn có thể liên hệ và nhận tư vấn từ nhân viên Tiximax theo 3
+                cách sau:
+              </p>
+              <ul className="list-disc pl-6 space-y-1.5 mt-1">
+                <li>Điền form liên hệ có trên website.</li>
+                <li>Nhắn tin qua Fanpage Tiximax Logistics.</li>
+                <li>Gọi hotline Tiximax 090 183 42 83.</li>
+              </ul>
+            </div>
+
+            <div className="border border-gray-200 rounded-2xl p-5 bg-white">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
+                Bước 2 – Cung cấp thông tin cần thiết về hàng hóa theo hướng dẫn
+              </h3>
+              <div className="mt-3 h-px w-16 mx-auto bg-gray-200" />
+              <p className="mt-3">
+                Để tạo đơn hàng vận chuyển quốc tế, thông tin về hàng hóa và
+                giao nhận là không thể thiếu. Tùy vào loại hàng hóa bạn muốn
+                gửi, Tiximax sẽ yêu cầu các thông tin cụ thể để có thể tiến hành
+                lên đơn hàng. Bạn chỉ cần cung cấp thông tin theo hướng dẫn từ
+                nhân viên để tạo đơn vận chuyển hàng hóa quốc tế.
+              </p>
+            </div>
+
+            <div className="border border-gray-200 rounded-2xl p-5 bg-white">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
+                Bước 3 – Theo dõi & Nhận hàng
+              </h3>
+              <div className="mt-3 h-px w-16 mx-auto bg-gray-200" />
+              <p className="mt-3">
+                Ngoài việc theo dõi đơn hàng qua thông tin từ nhân viên Tiximax,
+                bạn còn có thể tự thực hiện qua tiện ích Tracking đơn hàng trên
+                website. Mỗi đơn hàng sẽ có một mã vận đơn riêng biệt. Chỉ cần
+                chọn mục <strong>“Tracking đơn hàng”</strong> trên thanh menu và
+                nhập mã này, bạn sẽ cập nhật được thông tin về đơn hàng của
+                mình.
+              </p>
+            </div>
+          </div>
+        </>
+      </Section>
+
+      {/* CASE LOGISTICS ĐẶC BIỆT */}
+      <Section title="Tiximax xử lý các case Logistics đặc biệt như thế nào?">
+        <>
+          <p>
+            Tiximax gom nhiều đơn nhỏ từ nhiều nhà cung cấp thành một lô duy
+            nhất (consolidation) để tiết kiệm cước. Quy trình gom đơn hàng của
+            chúng tôi bao gồm:
+          </p>
+          <p>
+            <strong>
+              Nhận hàng tại kho nước ngoài → Kiểm hàng, chụp ảnh → Gộp theo kiện
+              tối ưu khối lượng/thể tích → Đóng gói lại (nếu cần) → Xuất lô.
+            </strong>
+          </p>
+          <p>
+            Lợi ích: giảm chi phí theo kg, giảm phí xử lý hải quan và ít rủi ro
+            hơn so với gửi từng kiện nhỏ. Để quá trình vận đơn diễn ra suôn sẻ,
+            tránh thất lạc hàng, bạn hãy ghi chú thông tin rõ ràng trước khi
+            giao cho đơn vị vận chuyển.
+          </p>
+        </>
+      </Section>
+
+      {/* ƯU ĐIỂM & BẢNG GIÁ */}
+      <Section title="Những ưu điểm Tiximax vận chuyển hàng quốc tế">
+        <>
+          <p>
+            Ưu điểm lớn nhất của Tiximax chính là sự minh bạch trong chi phí.
+            Chúng tôi có bảng giá theo tuyến, cùng nhiều chính sách và lưu ý rõ
+            ràng. Khi bạn muốn sử dụng dịch vụ vận chuyển hàng quốc tế Tiximax,
+            tùy vào tuyến mà nhân viên của chúng tôi sẽ hỗ trợ báo giá cụ thể
+            cho bạn.
+          </p>
+
+          <div className="mt-6 border border-gray-200 rounded-2xl p-5 bg-white">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <DollarSign className="w-5 h-5 text-amber-600" />
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
+                Bảng giá cước tổng quan dịch vụ gửi hàng quốc tế Tiximax
+              </h3>
+            </div>
+            <p className="text-sm sm:text-base text-gray-700 mb-4 text-center">
+              Bạn có thể tham khảo giá cước các tuyến của Tiximax theo bảng sau.
+              Đây là giá tham khảo, để được tư vấn cụ thể vui lòng để lại thông
+              tin để nhân viên Tiximax hỗ trợ bạn.
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm sm:text-base text-gray-800 border border-gray-200">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="px-3 py-2 border-b border-gray-200 text-left">
+                      Tuyến vận chuyển
+                    </th>
+                    <th className="px-3 py-2 border-b border-gray-200 text-left">
+                      Đơn vị
+                    </th>
+                    <th className="px-3 py-2 border-b border-gray-200 text-left">
+                      Đơn giá (từ)
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="px-3 py-2 border-t border-gray-200">
+                      Indonesia - Việt Nam
+                    </td>
+                    <td className="px-3 py-2 border-t border-gray-200">
+                      Kg (kilogram)
+                    </td>
+                    <td className="px-3 py-2 border-t border-gray-200">
+                      Từ 180.000 VNĐ
+                    </td>
+                  </tr>
+                  <tr className="bg-gray-50">
+                    <td className="px-3 py-2 border-t border-gray-200">
+                      Nhật Bản - Việt Nam
+                    </td>
+                    <td className="px-3 py-2 border-t border-gray-200">
+                      Kg (kilogram)
+                    </td>
+                    <td className="px-3 py-2 border-t border-gray-200">
+                      Từ 145.000 VNĐ
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-3 py-2 border-t border-gray-200">
+                      Hàn Quốc - Việt Nam
+                    </td>
+                    <td className="px-3 py-2 border-t border-gray-200">
+                      Kg (kilogram)
+                    </td>
+                    <td className="px-3 py-2 border-t border-gray-200">
+                      Từ 135.000 VNĐ (Miền Bắc) – Từ 145.000 VNĐ (Miền Nam)
+                    </td>
+                  </tr>
+                  <tr className="bg-gray-50">
+                    <td className="px-3 py-2 border-t border-gray-200">
+                      Mỹ - Việt Nam
+                    </td>
+                    <td className="px-3 py-2 border-t border-gray-200">
+                      Kg (kilogram)
+                    </td>
+                    <td className="px-3 py-2 border-t border-gray-200">
+                      Từ 230.000 VNĐ (Miền Bắc) – Từ 240.000 VNĐ (Miền Nam)
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      </Section>
+
+      {/* THUẾ & HẢI QUAN */}
+      <Section title="Minh bạch quy trình chính sách thuế và hải quan">
+        <>
+          <p>
+            Khi lựa chọn dịch vụ{" "}
+            <strong>Tiximax vận chuyển hàng quốc tế</strong>, bạn được cung cấp
+            đầy đủ thông tin về thuế và hải quan cần thiết. Chúng tôi sẽ giúp
+            hoàn thiện chứng từ kiểm tra chuyên ngành khi cần (thực phẩm chức
+            năng, mỹ phẩm...). Tiximax cam kết hỗ trợ trọn gói: nộp hồ sơ, nộp
+            thuế, nhận kết quả thông quan.
+          </p>
+          <p>
+            <strong>Lưu ý thực tế:</strong> nếu khai báo sai mục đích (bán vs cá
+            nhân) sẽ phát sinh thuế và xử phạt. Để tránh phát sinh chi phí phụ,
+            hãy cung cấp thông tin chính xác từ đầu.
+          </p>
+        </>
+      </Section>
+
+      {/* BẢO HIỂM & BỒI THƯỜNG */}
+      <Section title="Tiximax có chính sách bảo hiểm và bồi thường cụ thể">
+        <>
+          <p>
+            Tiximax cung cấp gói bảo hiểm tùy chọn với mức bồi thường tối đa có
+            thể tới <strong>100% giá trị hàng hóa</strong> theo hóa đơn hợp lệ
+            (điều kiện áp dụng nêu rõ trong hợp đồng). Về quy trình khiếu nại,
+            bạn cần thông báo trong <strong>48 giờ</strong> kể từ khi nhận hàng,
+            nộp ảnh/video và biên nhận. Tiximax sẽ xử lý khiếu nại trong{" "}
+            <strong>15 - 30 ngày</strong> tùy mức độ.
+          </p>
+          <p>
+            Với các hàng hóa có giá trị cao và dễ vỡ, chúng tôi khuyến nghị bạn
+            nên mua gói bảo hiểm để được đảm bảo quyền lợi tốt nhất.
+          </p>
+        </>
+      </Section>
+
+      {/* HÀNG CẤM & HÀNG ĐẶC BIỆT */}
+      <Section title="Lưu ý về hàng hóa cấm, hàng hóa đặc biệt khi gửi hàng quốc tế Tiximax">
+        <>
+          <p>
+            Tiximax tuân thủ pháp luật Việt Nam và không vận chuyển hàng cấm.
+            Đồng thời, với hàng đặc biệt như thực phẩm chức năng, pin lithium,
+            có yêu cầu giấy tờ và đóng gói riêng. Để được tư vấn và hỗ trợ cụ
+            thể về thủ tục đối với những hàng hóa đặc biệt, hãy liên hệ với nhân
+            viên của Tiximax qua hotline hoặc Fanpage Tiximax Logistics.
+          </p>
+          <p className="font-semibold mt-2">
+            Các mặt hàng Tiximax từ chối vận chuyển:
+          </p>
+          <ul className="list-disc pl-6 space-y-1.5">
+            <li>Vũ khí, đạn dược, chất nổ, chất độc.</li>
+            <li>Động vật hoang dã bị cấm, sản phẩm từ động vật bị cấm.</li>
+            <li>
+              Một số loại thuốc/hóa chất bị quản lý, hàng vi phạm pháp luật.
+            </li>
+          </ul>
+          <p>
+            Nếu sản phẩm có nghi vấn, hãy hỏi Tiximax trước khi gửi để tránh rủi
+            ro bị hủy/tiêu huỷ.
+          </p>
+        </>
+      </Section>
+
+      {/* HƯỚNG DẪN HÀNG ĐẶC BIỆT */}
+      <Section title="Tiximax hướng dẫn vận chuyển hàng đặc biệt">
+        <>
+          <ul className="list-disc pl-6 space-y-2">
+            <li>
+              <strong>Thực phẩm chức năng & mỹ phẩm:</strong> cung cấp giấy tờ
+              xuất xứ, thành phần, hạn dùng; có thể cần giấy phép kiểm nghiệm
+              chuyên ngành.
+            </li>
+            <li>
+              <strong>Hàng điện tử có pin (lithium):</strong> tuân thủ quy định
+              vận chuyển hàng không; cần đóng gói chống chập, đánh dấu nguy
+              hiểm, đôi khi chuyển bằng đường biển để tiết kiệm chi phí.
+            </li>
+            <li>
+              <strong>Hàng cồng kềnh/nội thất:</strong> đo kích thước thực tế để
+              tính cước thể tích; khuyên dùng đóng kiện gỗ hoặc chống sốc.
+            </li>
+          </ul>
+          <p>
+            Tiximax sẽ hỗ trợ tư vấn chi tiết cho từng loại mặt hàng trước khi
+            bạn gửi cho đơn vị vận chuyển.
+          </p>
+        </>
+      </Section>
+
+      {/* KẾT LUẬN + CTA */}
+      <section className="py-10 border-t border-gray-200 bg-white">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4">
+            <div className="flex flex-col items-center text-center gap-2">
+              <Truck className="w-6 h-6 text-amber-600" />
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Kết luận – Tiximax vận chuyển hàng quốc tế
+              </h2>
+              <div className="h-px w-20 bg-gray-300" />
+            </div>
+
+            <p className="text-base sm:text-lg text-gray-700 leading-relaxed text-center">
+              Tiximax là giải pháp cân bằng giữa chi phí thấp, quy trình linh
+              hoạt và độ tin cậy cao cho SME và cá nhân muốn gửi hàng quốc tế.
+              Minh bạch về phí, hỗ trợ thủ tục trọn gói, hãy lựa chọn{" "}
+              <strong>dịch vụ Tiximax vận chuyển hàng quốc tế</strong> để được
+              hỗ trợ tốt nhất. Trước khi gửi, đừng quên yêu cầu báo giá chi
+              tiết, chính sách bảo hiểm và checklist đóng gói để bảo vệ quyền
+              lợi.
+            </p>
+
+            <div className="flex flex-wrap gap-4 justify-center mt-2">
+              <Link
+                to="/contact"
+                className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700"
+              >
+                Nhận tư vấn & báo giá tuyến
+              </Link>
+              <Link
+                to="/tracking"
+                className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
+              >
+                Tra cứu & tracking đơn hàng
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </main>

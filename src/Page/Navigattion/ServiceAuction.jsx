@@ -1,548 +1,402 @@
-import React, { useMemo, useState } from "react";
-import { motion } from "framer-motion";
-import {
-  Gavel,
-  ShieldCheck,
-  CreditCard,
-  FileText,
-  PlaneTakeoff,
-  PackageSearch,
-  DollarSign,
-  Calculator,
-  CheckCircle2,
-  Clock,
-  MessageSquare,
-  CircleHelp,
-  ClipboardCheck,
-  TrendingUp,
-  Globe2,
-} from "lucide-react";
+import React from "react";
+import { Gavel, Globe2, PackageSearch, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 
 /**
  * ServiceAuction.jsx — Tiximax
- * Trang dịch vụ Đấu giá Nhật (Yahoo! Auctions / Mercari / Rakuma ...)
- * - Hero + USP
- * - Bảng phí minh bạch + Calculator ước tính nhanh
- * - Quy trình 6 bước (S-Curve bid rule ready)
- * - Điều kiện & chính sách (KYC / thanh toán JPY / hạn mục cấm)
- * - FAQ
- * - CTA liên hệ/đăng nhập
- * Tailwind + Framer Motion — single file, production-ready.
+ * Landing page: Dịch vụ đấu giá Tiximax
+ * - Text to, dễ đọc
+ * - Title căn giữa
+ * - Line phân tách giữa các phần
  */
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-};
+const Section = ({ title, children }) => (
+  <section className="py-10 border-t border-gray-200 bg-white">
+    <div className="max-w-5xl mx-auto px-4">
+      {/* Title */}
+      <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center">
+        {title}
+      </h2>
+      {/* Line dưới title */}
+      <div className="mt-4 mb-6 h-px w-20 mx-auto bg-gray-300"></div>
 
-const usps = [
-  {
-    icon: <ShieldCheck className="w-6 h-6" />,
-    title: "Minh bạch & bảo vệ người mua",
-    desc: "Đối soát ảnh chụp – mô tả – phụ phí rõ ràng, lưu vết giao dịch đầy đủ.",
-  },
-  {
-    icon: <TrendingUp className="w-6 h-6" />,
-    title: "Chiến lược đặt giá S‑Curve",
-    desc: "Đặt mức an toàn sớm + nhảy bước ở 10’/3’/30s cuối, hạn chế bị outbid sớm.",
-  },
-  {
-    icon: <PlaneTakeoff className="w-6 h-6" />,
-    title: "Tối ưu tuyến bay",
-    desc: "Gom lô tại Chiba, chọn linehaul phù hợp deadline & chi phí.",
-  },
-  {
-    icon: <PackageSearch className="w-6 h-6" />,
-    title: "Kiểm hàng – đóng gói chuẩn",
-    desc: "Cân đo, chụp ảnh, xác minh mã/JAN, đóng kiện theo yêu cầu.",
-  },
-];
-
-const feeTiers = [
-  {
-    name: "Cơ bản",
-    badge: "Phổ biến",
-    items: [
-      "Phí dịch vụ 5% (min 150k)",
-      "Thanh toán JPY hộ",
-      "Kiểm ảnh cơ bản",
-      "Gom lô định kỳ",
-    ],
-    monthly: false,
-  },
-  {
-    name: "Chuyên sâu",
-    badge: "Khuyên dùng",
-    items: [
-      "Phí dịch vụ 4% (min 250k)",
-      "Chiến lược S‑Curve + theo dõi sát",
-      "Ưu tiên đóng gói & linehaul",
-      "CSKH 1‑1 giờ hành chính",
-    ],
-    monthly: false,
-  },
-  {
-    name: "Doanh nghiệp",
-    badge: "SLA riêng",
-    items: [
-      "Phí dịch vụ 3% (min 500k)",
-      "Hạn mức tín dụng nội bộ",
-      "Khoang bay ưu tiên theo thoả thuận",
-      "KPI đóng gói/khai HQ tùy chỉnh",
-    ],
-    monthly: false,
-  },
-];
-
-const faqs = [
-  {
-    q: "Tôi cần đặt cọc bao nhiêu?",
-    a: "Thông thường 20% giá trần (MaxBid) đã chốt. Nếu thua phiên sẽ hoàn cọc trong 24h (trừ phí nền tảng nếu có).",
-  },
-  {
-    q: "Phí nền tảng và vận chuyển nội địa Nhật tính thế nào?",
-    a: "Phí bán hàng/nền tảng theo điều khoản từng sàn. Ship nội địa Nhật tính theo bảng cước của hãng chuyển phát trong nước, sẽ xuất hóa đơn chi tiết.",
-  },
-  {
-    q: "Thanh toán bằng VND hay JPY?",
-    a: "Tiximax có tài khoản JPY tại Nhật. Bạn có thể chuyển JPY trực tiếp, hoặc quy đổi theo tỷ giá niêm yết ngày thanh toán nếu chọn VND.",
-  },
-  {
-    q: "Mặt hàng nào bị hạn chế?",
-    a: "Hàng cấm/nhạy cảm theo quy định hải quan VN & JP (pin rời dung lượng lớn, chất dễ cháy, thực phẩm tươi sống, vũ khí, v.v.). Liên hệ để được tư vấn chi tiết.",
-  },
-];
-
-// Bộ ước tính chi phí
-const useAuctionEstimate = ({
-  priceJPY,
-  domesticJPY,
-  servicePct,
-  intlShipVND,
-  fxRate,
-  platformJPY,
-}) => {
-  return useMemo(() => {
-    const p = Number(priceJPY) || 0;
-    const dom = Number(domesticJPY) || 0;
-    const plat = Number(platformJPY) || 0;
-    const rate = Number(fxRate) || 170; // fallback tỉ giá demo
-    const svcPct = Number(servicePct) / 100 || 0.05; // 5% mặc định
-    const intl = Number(intlShipVND) || 0;
-
-    const subtotalJPY = p + dom + plat;
-    const serviceFeeVND = Math.max(150000, subtotalJPY * rate * svcPct);
-    const goodsVND = subtotalJPY * rate;
-    const estimated = goodsVND + serviceFeeVND + intl;
-
-    return {
-      subtotalJPY,
-      goodsVND,
-      serviceFeeVND,
-      estimated,
-    };
-  }, [priceJPY, domesticJPY, platformJPY, servicePct, intlShipVND, fxRate]);
-};
-
-const Row = ({ label, value, hint }) => (
-  <div className="flex items-start justify-between py-2">
-    <div className="text-sm text-gray-600">{label}</div>
-    <div className="text-right">
-      <div className="text-sm font-semibold text-gray-900">{value}</div>
-      {hint && <div className="text-xs text-gray-500">{hint}</div>}
+      {/* Nội dung */}
+      <div className="text-base sm:text-lg leading-relaxed text-gray-700 space-y-3">
+        {children}
+      </div>
     </div>
-  </div>
-);
-
-const SectionTitle = ({ icon: Icon, title, desc }) => (
-  <div className="mb-8">
-    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
-      {Icon ? <Icon className="w-3.5 h-3.5" /> : null}
-      <span> {title} </span>
-    </div>
-    {desc ? <p className="mt-3 text-gray-600">{desc}</p> : null}
-  </div>
+  </section>
 );
 
 const ServiceAuction = () => {
-  const [inputs, setInputs] = useState({
-    priceJPY: "25000",
-    domesticJPY: "1200",
-    platformJPY: "0",
-    servicePct: "5",
-    intlShipVND: "350000",
-    fxRate: "175",
-  });
-
-  const est = useAuctionEstimate({
-    priceJPY: inputs.priceJPY,
-    domesticJPY: inputs.domesticJPY,
-    servicePct: inputs.servicePct,
-    intlShipVND: inputs.intlShipVND,
-    fxRate: inputs.fxRate,
-    platformJPY: inputs.platformJPY,
-  });
-
-  const handle = (k) => (e) =>
-    setInputs((s) => ({ ...s, [k]: e.target.value.replace(/[^0-9.]/g, "") }));
-
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white to-amber-50/30">
+    <main className="min-h-screen bg-gray-50">
       {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 opacity-20 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-300 via-yellow-200 to-transparent" />
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-14 pb-10 lg:pt-24 lg:pb-16">
-          <motion.div
-            initial="hidden"
-            animate="show"
-            variants={fadeUp}
-            className="max-w-3xl"
-          >
-            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider bg-amber-100 text-amber-700 px-3 py-1 rounded-full">
-              <Gavel className="w-3.5 h-3.5" /> Auction Service
-            </span>
-            <h1 className="mt-5 text-3xl sm:text-4xl lg:text-5xl font-black leading-tight text-gray-900">
-              Đấu giá Nhật cùng Tiximax — an tâm đặt giá, minh bạch chi phí,
-              giao về Việt Nam đúng hẹn.
-            </h1>
-            <p className="mt-5 text-gray-600 text-lg leading-8">
-              Hỗ trợ trọn gói Yahoo! Auctions / Mercari / Rakuma…: đặt giá hộ,
-              thanh toán JPY, gom hàng tại kho Chiba, đóng gói và vận chuyển về
-              VN.
+      <section className="bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-10 sm:py-14">
+          <div className="flex justify-center">
+            <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-wide text-amber-700 mb-4">
+              <Gavel className="w-5 h-5" />
+              <span>Dịch vụ đấu giá Tiximax</span>
+            </div>
+          </div>
+
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 leading-snug text-center">
+            Dịch vụ đấu giá Tiximax – Dịch vụ đấu giá hàng quốc tế uy tín, đấu
+            giá hàng ngoại ship về Việt Nam
+          </h1>
+
+          {/* Line dưới H1 */}
+          <div className="mt-5 mb-6 h-px w-24 mx-auto bg-gray-300"></div>
+
+          <p className="mt-2 text-base sm:text-lg text-gray-700 leading-relaxed text-center">
+            Dịch vụ đấu giá Tiximax hỗ trợ người dùng Việt tham gia đấu giá trên
+            các sàn thương mại điện tử lớn như <strong>Yahoo Auction</strong> và{" "}
+            <strong>eBay</strong> – hai nền tảng nổi tiếng với lượng sản phẩm
+            khổng lồ được cập nhật mỗi ngày và mức độ cạnh tranh đa dạng. Với
+            quy trình minh bạch, đội ngũ giàu kinh nghiệm cùng khả năng xử lý
+            các tuyến vận chuyển từ Nhật, Mỹ, Hàn và Indonesia về Việt Nam,
+            Tiximax mang đến cơ hội sở hữu nhiều mặt hàng chất lượng: từ đồ điện
+            tử, đồng hồ, máy ảnh, đồ hiệu cho đến các sản phẩm sưu tầm đặc
+            trưng.
+          </p>
+
+          <p className="mt-3 text-base sm:text-lg text-gray-700 leading-relaxed text-center">
+            Dịch vụ được thiết kế trọn gói từ việc tìm sản phẩm, tư vấn mức giá
+            hợp lý, đặt bid theo yêu cầu đến kiểm hàng và vận chuyển về Việt
+            Nam. Kể cả khi khách chưa từng đấu giá hàng Nhật, Mỹ, không biết
+            ngoại ngữ hay không có tài khoản nội địa,{" "}
+            <strong>Dịch Vụ Đấu Giá Tiximax</strong> vẫn hỗ trợ đầy đủ và đảm
+            bảo giao dịch an toàn.
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-4 justify-center">
+            <Link
+              to="/signin"
+              className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700"
+            >
+              Đăng nhập để đấu giá
+            </Link>
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
+            >
+              Liên hệ tư vấn nhanh
+            </Link>
+          </div>
+
+          {/* Nhóm keyword phụ */}
+          <div className="mt-6 text-xs sm:text-sm text-gray-500 space-y-2 text-center">
+            <p>
+              <strong>Key chính:</strong> Dịch vụ đấu giá Tiximax
             </p>
-            <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
-              {usps.map((u) => (
-                <div
-                  key={u.title}
-                  className="rounded-xl border border-amber-100 bg-white p-4 shadow-sm"
-                >
-                  <div className="text-amber-700">{u.icon}</div>
-                  <p className="mt-2 text-sm font-semibold text-gray-900">
-                    {u.title}
-                  </p>
-                  <p className="text-xs text-gray-600">{u.desc}</p>
-                </div>
-              ))}
+            <div className="flex flex-wrap gap-2 justify-center">
+              <span className="inline-block bg-gray-100 px-3 py-1 rounded-full">
+                Đấu giá hộ Yahoo Auction
+              </span>
+              <span className="inline-block bg-gray-100 px-3 py-1 rounded-full">
+                Đấu giá hộ hàng eBay quốc tế
+              </span>
+              <span className="inline-block bg-gray-100 px-3 py-1 rounded-full">
+                Dịch vụ đấu giá hàng quốc tế uy tín
+              </span>
+              <span className="inline-block bg-gray-100 px-3 py-1 rounded-full">
+                Đấu giá hàng ngoại ship về Việt Nam
+              </span>
             </div>
-            <div className="mt-6 flex flex-col sm:flex-row gap-3">
-              <Link
-                to="/signin"
-                className="inline-flex items-center justify-center rounded-xl px-5 py-3 font-semibold text-white bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 shadow"
-              >
-                Đăng nhập để đấu giá
-              </Link>
-              <a
-                href="/contact"
-                className="inline-flex items-center justify-center rounded-xl px-5 py-3 font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
-              >
-                Liên hệ tư vấn nhanh
-              </a>
-            </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* CALCULATOR + PRICING */}
-      <section className="py-10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="grid lg:grid-cols-5 gap-6 items-start">
-            {/* Calculator */}
-            <div className="lg:col-span-3 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-              <SectionTitle
-                icon={Calculator}
-                title="Ước tính chi phí nhanh"
-                desc="Nhập các thông số cơ bản để tham khảo tổng chi phí. Con số chỉ mang tính ước lượng; báo giá cuối cùng dựa trên thực tế phiên và chứng từ."
-              />
+      {/* GIỚI THIỆU DỊCH VỤ */}
+      <Section title="Giới thiệu dịch vụ đấu giá Tiximax">
+        <>
+          <p>
+            Tiximax là đơn vị hỗ trợ đấu giá hộ trên Yahoo Auction và eBay, đồng
+            thời vận hành hệ thống vận chuyển quốc tế chuyên 4 tuyến chính: Nhật
+            – Việt, Mỹ – Việt, Hàn – Việt và Indonesia – Việt. Với kinh nghiệm
+            nhiều năm theo dõi thị trường quốc tế và hiểu cách vận hành của từng
+            sàn, Dịch vụ đấu giá Tiximax giúp khách hàng tham gia đấu giá dễ
+            dàng hơn, hạn chế rủi ro khi giao dịch xuyên biên giới và tối ưu
+            được chi phí khi mua hàng quốc tế.
+          </p>
+          <p>
+            Điểm mạnh của Tiximax nằm ở khả năng phân tích phiên đấu giá, đánh
+            giá uy tín người bán, xử lý thanh toán nội địa và hỗ trợ kiểm hàng
+            trước khi vận chuyển. Tất cả thông tin, chi phí và quá trình làm
+            việc đều được cập nhật rõ ràng để khách hàng nắm được toàn bộ tình
+            trạng đơn hàng từ lúc gửi yêu cầu đến khi nhận sản phẩm tại Việt
+            Nam.
+          </p>
+        </>
+      </Section>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm text-gray-600">
-                    Giá thắng phiên (JPY)
-                  </label>
-                  <input
-                    value={inputs.priceJPY}
-                    onChange={handle("priceJPY")}
-                    className="mt-1 w-full rounded-xl border-gray-200 focus:border-amber-500 focus:ring-amber-500"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-gray-600">
-                    Ship nội địa Nhật (JPY)
-                  </label>
-                  <input
-                    value={inputs.domesticJPY}
-                    onChange={handle("domesticJPY")}
-                    className="mt-1 w-full rounded-xl border-gray-200 focus:border-amber-500 focus:ring-amber-500"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-gray-600">
-                    Phí nền tảng/khác (JPY)
-                  </label>
-                  <input
-                    value={inputs.platformJPY}
-                    onChange={handle("platformJPY")}
-                    className="mt-1 w-full rounded-xl border-gray-200 focus:border-amber-500 focus:ring-amber-500"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-gray-600">
-                    Phí dịch vụ (%)
-                  </label>
-                  <input
-                    value={inputs.servicePct}
-                    onChange={handle("servicePct")}
-                    className="mt-1 w-full rounded-xl border-gray-200 focus:border-amber-500 focus:ring-amber-500"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-gray-600">
-                    Cước quốc tế về VN (VND)
-                  </label>
-                  <input
-                    value={inputs.intlShipVND}
-                    onChange={handle("intlShipVND")}
-                    className="mt-1 w-full rounded-xl border-gray-200 focus:border-amber-500 focus:ring-amber-500"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-gray-600">
-                    Tỷ giá (VND/JPY)
-                  </label>
-                  <input
-                    value={inputs.fxRate}
-                    onChange={handle("fxRate")}
-                    className="mt-1 w-full rounded-xl border-gray-200 focus:border-amber-500 focus:ring-amber-500"
-                  />
-                </div>
-              </div>
+      {/* ĐỘI NGŨ */}
+      <Section title="Giới thiệu về đội ngũ Tiximax">
+        <>
+          <p>
+            Tiximax sở hữu đội ngũ nhân sự tại Nhật và Mỹ phụ trách đặt bid,
+            thanh toán nội địa và kiểm hàng trước khi xuất kho. Bộ phận
+            logistics hỗ trợ đóng gói, gom hàng và xử lý các thủ tục vận chuyển
+            về Việt Nam.
+          </p>
+          <p>
+            Sau khi thắng đấu giá, mỗi sản phẩm đều được kiểm tra kỹ lưỡng và
+            chụp ảnh/video theo yêu cầu để khách xác nhận tình trạng hàng hóa.
+            Với những khách cần đấu giá hàng ngoại ship về Việt Nam hoặc muốn
+            mua các sản phẩm có độ rủi ro cao, Tiximax đặc biệt chú trọng minh
+            bạch thông tin nhằm đảm bảo quyền lợi tối đa.
+          </p>
+        </>
+      </Section>
 
-              <div className="mt-5 rounded-xl bg-amber-50 p-4">
-                <Row
-                  label="Tạm tính (JPY)"
-                  value={`${est.subtotalJPY.toLocaleString()} JPY`}
-                />
-                <Row
-                  label="Giá trị hàng (VND)"
-                  value={`${est.goodsVND.toLocaleString()} VND`}
-                  hint="Quy đổi theo tỷ giá nhập ở trên"
-                />
-                <Row
-                  label="Phí dịch vụ (VND)"
-                  value={`${est.serviceFeeVND.toLocaleString()} VND`}
-                  hint=">= 150,000 VND"
-                />
-                <Row
-                  label="Cước quốc tế (VND)"
-                  value={`${Number(
-                    inputs.intlShipVND || 0
-                  ).toLocaleString()} VND`}
-                />
-                <div className="mt-2 pt-3 border-t border-amber-200 flex items-center justify-between">
-                  <div className="text-sm font-semibold text-gray-900">
-                    ƯỚC TÍNH TỔNG
-                  </div>
-                  <div className="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-yellow-600">
-                    {est.estimated.toLocaleString()} VND
-                  </div>
-                </div>
-              </div>
+      {/* TẠI SAO ĐƯỢC YÊU THÍCH */}
+      <Section title="Tại sao dịch vụ đấu giá Tiximax được yêu thích?">
+        <>
+          <p>Dịch vụ của Tiximax phù hợp cho những khách hàng muốn:</p>
+          <ul className="list-disc pl-6 space-y-2">
+            <li>Săn hàng nội địa với giá tốt.</li>
+            <li>Tìm kiếm đồ hiếm, đồ cổ, đồ second-hand chất lượng cao.</li>
+            <li>
+              Giảm rủi ro khi tự đấu giá hoặc tự xử lý thanh toán quốc tế.
+            </li>
+            <li>Mua các sản phẩm không bán ở Việt Nam.</li>
+            <li>Nhận hỗ trợ kiểm hàng – đóng gói – vận chuyển an toàn.</li>
+          </ul>
+          <p>
+            Tiximax giúp khách hàng tối ưu chi phí và tăng tỉ lệ thắng, đặc biệt
+            ở các phiên đấu giá cạnh tranh hoặc các đợt giảm giá lớn của từng
+            quốc gia. Đội ngũ sẽ canh phiên sát thời điểm chốt để tăng tỉ lệ
+            thắng.
+          </p>
+        </>
+      </Section>
 
-              <p className="mt-3 text-xs text-gray-500">
-                *Số liệu demo. Báo giá chính thức sẽ thể hiện trong hợp
-                đồng/biên nhận của Tiximax.
+      {/* CÁC DỊCH VỤ CHÍNH */}
+      <Section title="Các dịch vụ đấu giá Tiximax cung cấp">
+        <>
+          <div className="space-y-6">
+            {/* Yahoo Auction */}
+            <div className="border border-gray-200 rounded-2xl p-5 bg-white">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
+                Đấu giá Yahoo Auction (Đấu giá hộ Yahoo Auction)
+              </h3>
+              <div className="mt-3 h-px w-16 mx-auto bg-gray-200"></div>
+              <p className="mt-3">
+                Yahoo Auction là nền tảng đấu giá lớn và phổ biến, tập trung
+                nhiều sản phẩm nội địa chất lượng: đồ điện tử, máy ảnh, đồng hồ,
+                linh kiện, hàng hiệu second-hand, figure anime, đồ cổ và hàng
+                sưu tầm hiếm.
+              </p>
+              <p className="mt-2">Tiximax hỗ trợ:</p>
+              <ul className="list-disc pl-6 space-y-1.5">
+                <li>Đặt bid theo yêu cầu.</li>
+                <li>Tư vấn mức giá tối ưu.</li>
+                <li>Đánh giá độ uy tín seller.</li>
+                <li>Theo dõi thời gian thực.</li>
+                <li>Thanh toán nội địa và gom hàng tại kho.</li>
+              </ul>
+              <p className="mt-2">
+                Phù hợp cho khách muốn đấu giá hộ Yahoo Auction hoặc tìm những
+                mặt hàng nội địa khó mua tại Việt Nam.
               </p>
             </div>
 
-            {/* Pricing */}
-            <div className="lg:col-span-2 grid gap-4">
-              <SectionTitle icon={DollarSign} title="Bảng phí dịch vụ" />
-              {feeTiers.map((t) => (
-                <div
-                  key={t.name}
-                  className="rounded-2xl border border-amber-100 bg-white p-5 shadow-sm"
-                >
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-bold text-gray-900">
-                      {t.name}
-                    </h3>
-                    <span className="text-xs font-semibold bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full">
-                      {t.badge}
-                    </span>
-                  </div>
-                  <ul className="mt-3 space-y-2 text-sm text-gray-700">
-                    {t.items.map((i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 mt-0.5 text-amber-600" />{" "}
-                        {i}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-              <p className="text-xs text-gray-500">
-                *Phí có thể thay đổi theo mùa cao điểm/loại hàng. Liên hệ để
-                nhận bảng phí cập nhật.
+            {/* eBay quốc tế */}
+            <div className="border border-gray-200 rounded-2xl p-5 bg-white">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
+                Đấu giá eBay quốc tế (Đấu giá hộ hàng eBay quốc tế)
+              </h3>
+              <div className="mt-3 h-px w-16 mx-auto bg-gray-200"></div>
+              <p className="mt-3">
+                eBay là sàn đấu giá lớn toàn cầu với nhiều sản phẩm từ Mỹ, Anh,
+                Đức, Úc… Bao gồm hàng brand-new, second-hand, đồ sưu tầm
+                vintage, linh kiện hiếm và nhiều sản phẩm ngoại nhập khó tìm.
+              </p>
+              <p className="mt-2">Ưu điểm khi đấu giá eBay qua Tiximax:</p>
+              <ul className="list-disc pl-6 space-y-1.5">
+                <li>Hỗ trợ phân tích lịch sử giá.</li>
+                <li>Đánh giá uy tín seller quốc tế.</li>
+                <li>Tối ưu thời điểm đặt bid.</li>
+                <li>Gom hàng đa quốc gia.</li>
+                <li>Vận chuyển về Việt Nam qua tuyến Mỹ – Việt.</li>
+              </ul>
+              <p className="mt-2">
+                Phù hợp cho khách muốn đấu giá hộ eBay quốc tế hoặc săn deal
+                hàng Mỹ – Âu chính hãng.
+              </p>
+            </div>
+
+            {/* Đấu giá hàng ngoại ship về Việt Nam */}
+            <div className="border border-gray-200 rounded-2xl p-5 bg-white">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
+                Đấu giá hàng ngoại ship về Việt Nam
+              </h3>
+              <div className="mt-3 h-px w-16 mx-auto bg-gray-200"></div>
+              <p className="mt-3">
+                Tiximax hỗ trợ vận chuyển từ 4 tuyến chính: Nhật, Mỹ, Indonesia
+                và Hàn Quốc về Việt Nam, với hai hình thức:
+              </p>
+              <ul className="list-disc pl-6 space-y-1.5">
+                <li>Tuyến nhanh: khoảng 3 – 7 ngày.</li>
+                <li>
+                  Tuyến tiết kiệm: phù hợp đơn hàng số lượng lớn hoặc ít gấp.
+                </li>
+              </ul>
+              <p className="mt-2">
+                Tất cả hàng hóa đều được kiểm tra tình trạng tại kho trước khi
+                đóng gói, đảm bảo hạn chế tối đa hư hỏng trong quá trình vận
+                chuyển quốc tế.
               </p>
             </div>
           </div>
-        </div>
-      </section>
+        </>
+      </Section>
 
-      {/* PROCESS */}
-      <section className="py-10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <SectionTitle
-            icon={ClipboardCheck}
-            title="Quy trình 6 bước"
-            desc="Chuẩn hoá từng bước để đảm bảo tỉ lệ thắng và thời gian về hàng."
-          />
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                icon: FileText,
-                title: "B1 – Chốt yêu cầu & MaxBid",
-                desc: "Chọn link sản phẩm, xác minh tình trạng, chốt giá trần và điều kiện trả giá.",
-              },
-              {
-                icon: Gavel,
-                title: "B2 – Đặt cọc & tạo phiên",
-                desc: "Nhận cọc (thường 20%), khởi tạo phiên theo lịch, kích hoạt rule S‑Curve.",
-              },
-              {
-                icon: Clock,
-                title: "B3 – Theo dõi phiên",
-                desc: "Theo dõi 24/7, nhảy bước ở 10’/3’/30s cuối; log giá/đối thủ theo mốc thời gian.",
-              },
-              {
-                icon: CreditCard,
-                title: "B4 – Thanh toán & nhận hàng nội địa",
-                desc: "Nếu Win: thanh toán JPY hộ; nhận hàng về kho Chiba (đối soát ảnh/cân).",
-              },
-              {
-                icon: PlaneTakeoff,
-                title: "B5 – Gom lô & bay về VN",
-                desc: "Đóng gói, dán nhãn; gán chuyến bay phù hợp (ưu tiên tuyến thẳng/kết nối nhanh).",
-              },
-              {
-                icon: Globe2,
-                title: "B6 – Thông quan & giao nhận",
-                desc: "Khép chứng từ, thông quan; giao nội địa VN theo yêu cầu khách.",
-              },
-            ].map((s, idx) => (
-              <motion.div
-                key={s.title}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: idx * 0.05 }}
-                className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
-              >
-                <s.icon className="w-6 h-6 text-amber-700" />
-                <p className="mt-3 font-semibold text-gray-900">{s.title}</p>
-                <p className="text-sm text-gray-600">{s.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* POLICY */}
-      <section className="py-10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <SectionTitle icon={ShieldCheck} title="Điều kiện & chính sách" />
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-              <h4 className="font-bold text-gray-900">KYC & Thanh toán</h4>
-              <ul className="mt-3 space-y-2 text-sm text-gray-700">
-                <li>• Xác minh danh tính & thông tin liên hệ.</li>
-                <li>• Đặt cọc 20% MaxBid; hoàn cọc 24h nếu thua phiên.</li>
-                <li>• Thanh toán JPY qua tài khoản Nhật hoặc VND quy đổi.</li>
-              </ul>
-            </div>
-            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-              <h4 className="font-bold text-gray-900">Hạn mục & tuân thủ</h4>
-              <ul className="mt-3 space-y-2 text-sm text-gray-700">
-                <li>
-                  • Tuân thủ quy định hải quan JP/VN, hàng cấm sẽ bị từ chối.
-                </li>
-                <li>• Hàng có pin/hoá chất cần tư vấn trước khi tạo phiên.</li>
-                <li>
-                  • Hoá đơn/packing list minh bạch, lưu trữ chứng từ đầy đủ.
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* QUY TRÌNH */}
+      <Section title="Quy trình đấu giá hộ tại Tiximax">
+        <>
+          <ol className="list-decimal pl-6 space-y-3">
+            <li>
+              <strong>Bước 1: Gửi link sản phẩm hoặc mô tả chi tiết</strong> –
+              Chỉ cần cung cấp link hoặc mô tả ngắn về sản phẩm bạn cần đấu giá,
+              Tiximax sẽ nhanh chóng tìm đúng phiên đấu giá uy tín và phù hợp
+              nhất. Bạn không cần hiểu cách vận hành của từng sàn – Tiximax hỗ
+              trợ toàn bộ.
+            </li>
+            <li>
+              <strong>Bước 2: Nhận báo giá chi tiết</strong> – Tiximax gửi bảng
+              báo giá đầy đủ gồm giá dự kiến để thắng phiên, phí dịch vụ, phí
+              nội địa và phí vận chuyển quốc tế. Tất cả được phân tách rõ ràng
+              để bạn dễ dàng kiểm soát chi phí trước khi quyết định tham gia.
+            </li>
+            <li>
+              <strong>Bước 3: Đấu giá – đàm phán giá tốt</strong> – Tiximax thay
+              bạn đặt bid theo mức giá mong muốn, theo dõi phiên theo thời gian
+              thực và tối ưu chiến lược đặt giá để tăng khả năng thắng đấu giá
+              trong những giây cuối cùng.
+            </li>
+            <li>
+              <strong>Bước 4: Chốt đơn – thanh toán</strong> – Khi phiên đấu giá
+              kết thúc và bạn thắng giá, Tiximax tiến hành thanh toán nội địa và
+              cập nhật chi tiết tình trạng đơn hàng. Mọi thông tin đều được báo
+              lại rõ ràng để bạn dễ theo dõi.
+            </li>
+            <li>
+              <strong>Bước 5: Vận chuyển về Việt Nam</strong> – Sản phẩm được
+              vận chuyển về Việt Nam bằng tuyến nhanh hoặc tiết kiệm tùy nhu
+              cầu. Tiximax hỗ trợ khai báo hải quan, cập nhật hành trình liên
+              tục và giao tận tay khách hàng. Bạn có thể theo dõi đơn hàng dễ
+              dàng từ lúc xuất kho nước ngoài cho đến khi nhận tại nhà.
+            </li>
+          </ol>
+        </>
+      </Section>
 
       {/* FAQ */}
-      <section className="py-10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <SectionTitle icon={CircleHelp} title="Câu hỏi thường gặp" />
-          <div className="grid md:grid-cols-2 gap-6">
-            {faqs.map((f) => (
-              <details
-                key={f.q}
-                className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm group open:shadow-md"
-              >
-                <summary className="flex items-center justify-between cursor-pointer list-none">
-                  <span className="font-semibold text-gray-900">{f.q}</span>
-                  <span className="text-amber-700 group-open:rotate-180 transition">
-                    <MessageSquare className="w-5 h-5" />
-                  </span>
-                </summary>
-                <p className="mt-3 text-sm text-gray-600">{f.a}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
+      <Section title="Các câu hỏi thường gặp">
+        <>
+          <div className="space-y-4">
+            <details className="bg-white border border-gray-200 rounded-xl p-4">
+              <summary className="flex items-center justify-between cursor-pointer text-base font-semibold text-gray-900">
+                <span>Nếu đấu giá không thành công thì sao?</span>
+                <MessageSquare className="w-5 h-5 text-amber-600" />
+              </summary>
+              <p className="mt-2 text-base text-gray-700">
+                Bạn sẽ được hoàn 100% số tiền đã đặt cọc hoặc chuyển sang phiên
+                đấu giá tiếp theo nếu có nhu cầu.
+              </p>
+            </details>
 
-      {/* CTA */}
-      <section className="py-12 lg:py-16">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="grid lg:grid-cols-2 gap-8 items-center">
-            <div className="rounded-3xl bg-gradient-to-br from-amber-500 to-yellow-500 p-1">
-              <div className="rounded-3xl p-6 bg-white/90 backdrop-blur">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="w-6 h-6 text-amber-600" />
-                  <h3 className="text-lg font-bold text-gray-900">
-                    Sẵn sàng tham gia phiên đấu giá?
-                  </h3>
-                </div>
-                <p className="mt-2 text-gray-700">
-                  Đăng nhập để tạo yêu cầu, nạp cọc và chốt MaxBid cho phiên
-                  tiếp theo.
-                </p>
-                <div className="mt-4 flex flex-col sm:flex-row gap-3">
-                  <Link
-                    to="/signin"
-                    className="inline-flex items-center justify-center rounded-xl px-5 py-3 font-semibold text-white bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 shadow"
-                  >
-                    Đăng nhập ngay
-                  </Link>
-                  <a
-                    href="/contact"
-                    className="inline-flex items-center justify-center rounded-xl px-5 py-3 font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
-                  >
-                    Hỏi nhanh trên Zalo/Hotline
-                  </a>
-                </div>
-              </div>
+            <details className="bg-white border border-gray-200 rounded-xl p-4">
+              <summary className="flex items-center justify-between cursor-pointer text-base font-semibold text-gray-900">
+                <span>Chi phí vận chuyển và thuế được tính thế nào?</span>
+                <MessageSquare className="w-5 h-5 text-amber-600" />
+              </summary>
+              <p className="mt-2 text-base text-gray-700">
+                Tổng chi phí gồm: giá hàng trúng đấu giá + phí dịch vụ đấu giá
+                hộ + phí nội địa + phí vận chuyển về Việt Nam + thuế nhập khẩu
+                (nếu áp dụng theo mặt hàng). Tất cả được báo rõ ràng trước khi
+                đặt cọc.
+              </p>
+            </details>
+
+            <details className="bg-white border border-gray-200 rounded-xl p-4">
+              <summary className="flex items-center justify-between cursor-pointer text-base font-semibold text-gray-900">
+                <span>Có được kiểm tra hàng khi nhận không?</span>
+                <MessageSquare className="w-5 h-5 text-amber-600" />
+              </summary>
+              <p className="mt-2 text-base text-gray-700">
+                Có. Bạn được kiểm tra ngoại quan trước khi nhận. Nếu phát hiện
+                hàng sai mô tả hoặc không đúng đơn hàng, Tiximax sẽ hỗ trợ khiếu
+                nại hoặc xử lý đổi trả (nếu shop cho phép).
+              </p>
+            </details>
+
+            <details className="bg-white border border-gray-200 rounded-xl p-4">
+              <summary className="flex items-center justify-between cursor-pointer text-base font-semibold text-gray-900">
+                <span>Hàng về Việt Nam mất bao lâu?</span>
+                <MessageSquare className="w-5 h-5 text-amber-600" />
+              </summary>
+              <p className="mt-2 text-base text-gray-700">
+                Khoảng 10 – 18 ngày làm việc tùy từng mặt hàng và phương thức
+                vận chuyển được chọn. Tiximax cung cấp mã theo dõi để khách kiểm
+                tra hành trình đơn hàng.
+              </p>
+            </details>
+
+            <details className="bg-white border border-gray-200 rounded-xl p-4">
+              <summary className="flex items-center justify-between cursor-pointer text-base font-semibold text-gray-900">
+                <span>Có hợp đồng hay cam kết nào không?</span>
+                <MessageSquare className="w-5 h-5 text-amber-600" />
+              </summary>
+              <p className="mt-2 text-base text-gray-700">
+                Tiximax gửi biên nhận giao dịch và hợp đồng dịch vụ qua
+                email/Zalo trước khi tiến hành thanh toán hoặc đặt cọc.
+              </p>
+            </details>
+          </div>
+        </>
+      </Section>
+
+      {/* KẾT LUẬN + CTA */}
+      <section className="py-10 border-t border-gray-200 bg-white">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4">
+            <div className="flex flex-col items-center text-center gap-2">
+              <Globe2 className="w-6 h-6 text-amber-600" />
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Kết luận – Dịch vụ đấu giá Tiximax
+              </h2>
+              <div className="h-px w-20 bg-gray-300"></div>
             </div>
 
-            <div className="rounded-3xl border border-amber-100 bg-white p-8 shadow-sm">
-              <h3 className="text-2xl font-extrabold text-gray-900">
-                Thông tin liên hệ
-              </h3>
-              <ul className="mt-3 text-sm text-gray-700 space-y-2">
-                <li>• Hotline: 0707 267 001</li>
-                <li>• Email: support@tiximax.vn</li>
-                <li>• Địa chỉ: Tiximax — Đà Nẵng, Việt Nam</li>
-                <li>• Giờ làm việc: 09:00 – 18:00 (T2–T7)</li>
-              </ul>
+            <p className="text-base sm:text-lg text-gray-700 leading-relaxed text-center">
+              Dịch vụ đấu giá Tiximax là lựa chọn đáng tin cậy cho khách hàng
+              muốn sở hữu hàng ngoại chất lượng với mức giá hợp lý và quy trình
+              minh bạch. Nhờ khả năng hỗ trợ đa quốc gia, kiểm hàng kỹ lưỡng và
+              vận chuyển linh hoạt, <strong>Dịch Vụ Đấu Giá Tiximax</strong>{" "}
+              giúp khách hàng tiếp cận kho hàng quốc tế dễ dàng và an toàn hơn.
+              Nếu bạn đang quan tâm <strong>đấu giá hộ Yahoo Auction</strong>,{" "}
+              <strong>đấu giá hộ eBay quốc tế</strong>,{" "}
+              <strong>dịch vụ đấu giá hàng quốc tế uy tín</strong> hoặc{" "}
+              <strong>đấu giá hàng ngoại ship về Việt Nam</strong>, hãy liên hệ
+              Tiximax để được tư vấn và báo giá chi tiết.
+            </p>
+
+            <div className="flex flex-wrap gap-4 justify-center mt-2">
+              <Link
+                to="/signin"
+                className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700"
+              >
+                Đăng nhập để bắt đầu đấu giá
+              </Link>
+              <Link
+                to="/contact"
+                className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
+              >
+                Nhận tư vấn & báo giá
+              </Link>
             </div>
           </div>
         </div>

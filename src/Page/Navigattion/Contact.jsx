@@ -9,7 +9,7 @@ import {
   Instagram,
   Linkedin,
 } from "lucide-react";
-
+import contact from "../../assets/contact.png";
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
@@ -193,7 +193,7 @@ const Contact = () => {
             className="bg-white rounded-2xl shadow-sm border border-amber-100 overflow-hidden min-h-[500px] flex items-center justify-center"
           >
             <img
-              src="https://i.pinimg.com/736x/ee/4b/81/ee4b81d3a96a4e002225a7db7fadc147.jpg"
+              src={contact}
               alt="Banner Tiximax"
               className="w-full h-full object-cover"
             />

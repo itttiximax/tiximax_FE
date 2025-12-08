@@ -1,431 +1,383 @@
-import React, { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import React from "react";
 import {
   FileText,
+  PlaneTakeoff,
   ShieldCheck,
   ClipboardList,
-  Stamp,
-  PackageSearch,
-  CheckCircle2,
-  Calculator,
-  AlertTriangle,
+  HelpCircle,
   Truck,
-  PlaneTakeoff,
-  Building2,
-  ArrowRight,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
-/**
- * ServicesCustoms.jsx — Tiximax
- * Dịch vụ: Thông quan hộ / Khai báo hải quan
- * Tone màu: vàng – trắng – đen (đồng bộ với Shipping & Purchase)
- * Bố cục: Hero → USP → Duty/Tax Estimator (demo) → Checklist hồ sơ → Quy trình → Hạn mục & Lưu ý → FAQ → CTA
- * TailwindCSS + Framer Motion + Lucide icons. Không phụ thuộc ảnh ngoài.
- */
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.55 } },
-};
-
-const usps = [
-  {
-    icon: ShieldCheck,
-    title: "Tuân thủ & Minh bạch",
-    desc: "Khai báo chính xác HS code, theo dõi hồ sơ realtime.",
-  },
-  {
-    icon: Stamp,
-    title: "Xử lý nhanh",
-    desc: "Ưu tiên tuyến hồ sơ, hạn chế phát sinh lưu kho/lưu bãi.",
-  },
-  {
-    icon: PackageSearch,
-    title: "Đối soát chứng từ",
-    desc: "Đầy đủ invoice, packing list, hình ảnh và biên bản kiểm.",
-  },
-  {
-    icon: FileText,
-    title: "Tư vấn HS & chính sách",
-    desc: "Gợi ý phân loại hàng hoá & mức thuế áp dụng tham khảo.",
-  },
-];
-
-// Ước tính thuế/phí đơn giản (demo): Thuế NK + VAT tính trên CIF
-const useTaxEstimate = ({
-  goodsValue,
-  freight,
-  insurance,
-  dutyRate,
-  vatRate,
-}) => {
-  return useMemo(() => {
-    const v = Number(goodsValue) || 0;
-    const f = Number(freight) || 0;
-    const i = Number(insurance) || 0;
-    const duty = Number(dutyRate) || 0; // %
-    const vat = Number(vatRate) || 0; // %
-
-    const cif = v + f + i;
-    const importDuty = (cif * duty) / 100;
-    const vatTax = ((cif + importDuty) * vat) / 100;
-    const totalTax = Math.max(0, Math.round(importDuty + vatTax));
-
-    return { cif, importDuty, vatTax, totalTax };
-  }, [goodsValue, freight, insurance, dutyRate, vatRate]);
-};
-
-const Row = ({ label, value, hint }) => (
-  <div className="flex items-start justify-between py-2">
-    <div className="text-sm text-gray-600">{label}</div>
-    <div className="text-right">
-      <div className="text-sm font-semibold text-gray-900">{value}</div>
-      {hint && <div className="text-xs text-gray-500">{hint}</div>}
+const Section = ({ title, children }) => (
+  <section className="py-10 border-t border-gray-200 bg-white">
+    <div className="max-w-5xl mx-auto px-4">
+      <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center">
+        {title}
+      </h2>
+      <div className="mt-4 mb-6 h-px w-20 mx-auto bg-gray-300" />
+      <div className="text-base sm:text-lg leading-relaxed text-gray-700 space-y-3">
+        {children}
+      </div>
     </div>
-  </div>
+  </section>
 );
 
 const ServicesCustoms = () => {
-  const [inputs, setInputs] = useState({
-    goodsValue: "50000000", // VND
-    freight: "2000000", // VND
-    insurance: "0", // VND
-    dutyRate: "10", // %
-    vatRate: "8", // %
-  });
-
-  const est = useTaxEstimate(inputs);
-  const handle = (k) => (e) =>
-    setInputs((s) => ({ ...s, [k]: e.target.value.replace(/[^0-9.]/g, "") }));
-
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white to-yellow-50/40 text-gray-900">
+    <main className="min-h-screen bg-gray-50">
       {/* HERO */}
-      <section className="relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-yellow-100 via-yellow-200 to-transparent opacity-70 -z-10" />
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-14 pb-10 lg:pt-24 lg:pb-16">
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            className="max-w-3xl"
-          >
-            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full">
-              <ClipboardList className="w-3.5 h-3.5" /> Thông quan hộ / Khai báo
-              hải quan
-            </span>
-            <h1 className="mt-5 text-4xl lg:text-5xl font-black text-gray-900 leading-tight">
-              Thông quan nhanh, đúng chuẩn — hồ sơ minh bạch, tối ưu thuế phí.
-            </h1>
-            <p className="mt-4 text-gray-700 text-lg leading-8">
-              Tiximax hỗ trợ phân loại HS code, chuẩn bị chứng từ, nộp tờ khai
-              và xử lý phát sinh để hàng hóa thông quan đúng hẹn.
-            </p>
-          </motion.div>
+      <section className="bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-10 sm:py-14">
+          <div className="flex justify-center">
+            <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-wide text-amber-700 mb-4">
+              <FileText className="w-5 h-5" />
+              <span>Tiximax Thông Quan Hộ</span>
+            </div>
+          </div>
 
-          {/* USP */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
-            {usps.map((u, i) => (
-              <motion.div
-                key={u.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: i * 0.03 }}
-                className="rounded-2xl border border-yellow-200 bg-white p-5 shadow-sm hover:shadow-md"
-              >
-                <u.icon className="w-6 h-6 text-yellow-600" />
-                <p className="mt-2 font-semibold text-gray-900">{u.title}</p>
-                <p className="text-sm text-gray-600">{u.desc}</p>
-              </motion.div>
-            ))}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 leading-snug text-center">
+            Tiximax Thông Quan Hộ – Giải Pháp Xử Lý Hải Quan Nhanh, Chính Xác
+            &amp; Minh Bạch
+          </h1>
+
+          <div className="mt-5 mb-6 h-px w-24 mx-auto bg-gray-300" />
+
+          <p className="text-base sm:text-lg text-gray-700 leading-relaxed text-center">
+            Trong bối cảnh vận chuyển hàng quốc tế ngày càng phổ biến, thủ tục
+            hải quan tại sân bay lại trở thành “nút thắt” lớn khiến nhiều khách
+            hàng lo lắng. Chỉ cần sai 1 mã HS, thiếu 1 chữ trong hóa đơn hoặc
+            đánh giá nhầm thuế suất, hàng có thể bị giữ lại, kiểm hóa kéo dài
+            hoặc phát sinh phí lưu kho cao. Đó là lý do{" "}
+            <strong>Tiximax thông quan hộ</strong> ra đời — nhằm giúp khách xử
+            lý toàn bộ thủ tục một cách nhanh – chuẩn – minh bạch, đảm bảo hàng
+            được giải phóng sớm và hạn chế tối đa phát sinh.
+          </p>
+
+          <p className="mt-3 text-base sm:text-lg text-gray-700 leading-relaxed text-center">
+            Tiximax có kinh nghiệm thực tế tại nhiều kho hàng lớn, am hiểu quy
+            định từng nhóm hàng: hàng cá nhân, hàng thương mại, đồ điện tử, mỹ
+            phẩm, thực phẩm khô, hàng mẫu, hàng giá trị cao hoặc hàng cần chứng
+            từ chuyên ngành. Nhờ quy trình chuẩn hóa và kiểm tra kỹ từ đầu,
+            Tiximax giúp mọi hồ sơ “đi mượt”, ít khi bị yêu cầu bổ sung hoặc
+            kiểm hóa lại. Dịch vụ phù hợp cho khách nhập hàng từ Mỹ, Nhật, Hàn
+            Quốc, Indonesia cũng như các shop kinh doanh cần thông quan nhanh
+            trong ngày để kịp giao đơn cho khách.
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-4 justify-center">
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700"
+            >
+              Liên hệ tư vấn thông quan hộ
+            </Link>
+            <Link
+              to="/tracking"
+              className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
+            >
+              Tra cứu tình trạng lô hàng
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* TAX CALCULATOR */}
-      <section className="py-10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <Calculator className="w-5 h-5 text-yellow-600" />
-              <h2 className="text-lg font-bold text-gray-900">
-                Ước tính thuế & VAT (tham khảo)
-              </h2>
-            </div>
-            <div className="grid md:grid-cols-5 gap-4">
-              <input
-                value={inputs.goodsValue}
-                onChange={handle("goodsValue")}
-                placeholder="Giá trị hàng (VND)"
-                className="rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-yellow-500 focus:ring-yellow-500"
-              />
-              <input
-                value={inputs.freight}
-                onChange={handle("freight")}
-                placeholder="Cước vận chuyển (VND)"
-                className="rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-yellow-500 focus:ring-yellow-500"
-              />
-              <input
-                value={inputs.insurance}
-                onChange={handle("insurance")}
-                placeholder="Bảo hiểm (VND)"
-                className="rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-yellow-500 focus:ring-yellow-500"
-              />
-              <input
-                value={inputs.dutyRate}
-                onChange={handle("dutyRate")}
-                placeholder="Thuế NK (%)"
-                className="rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-yellow-500 focus:ring-yellow-500"
-              />
-              <input
-                value={inputs.vatRate}
-                onChange={handle("vatRate")}
-                placeholder="VAT (%)"
-                className="rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-yellow-500 focus:ring-yellow-500"
-              />
-            </div>
-            <div className="mt-5 rounded-xl bg-yellow-50 p-4">
-              <Row
-                label="Giá CIF (VND)"
-                value={`${Math.round(est.cif).toLocaleString()} VND`}
-                hint="CIF = Giá trị hàng + Cước + Bảo hiểm"
-              />
-              <Row
-                label="Thuế nhập khẩu (VND)"
-                value={`${Math.round(est.importDuty).toLocaleString()} VND`}
-              />
-              <Row
-                label="VAT (VND)"
-                value={`${Math.round(est.vatTax).toLocaleString()} VND`}
-                hint="Tính trên (CIF + Thuế NK)"
-              />
-              <div className="mt-2 pt-3 border-t border-yellow-200 flex items-center justify-between">
-                <div className="text-sm font-semibold text-gray-900">
-                  TỔNG THUẾ DỰ KIẾN
-                </div>
-                <div className="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-yellow-600 to-yellow-700">
-                  {est.totalTax.toLocaleString()} VND
-                </div>
-              </div>
-              <p className="mt-2 text-xs text-gray-500">
-                *Chỉ là ước tính tham khảo. Mức thực tế phụ thuộc HS code/chính
-                sách/biểu thuế áp dụng tại thời điểm thông quan.
+      {/* GIỚI THIỆU DỊCH VỤ */}
+      <Section title="Giới thiệu về dịch vụ Tiximax thông quan hộ">
+        <>
+          <p>
+            Dịch vụ thông quan hộ Tiximax được thiết kế đúng tiêu chuẩn hải
+            quan, giúp xử lý trọn vẹn mọi yêu cầu từ cơ bản đến phức tạp. Không
+            chỉ hỗ trợ khai báo, Tiximax còn tư vấn rõ các rủi ro có thể xảy ra,
+            hướng dẫn cách chuẩn bị chứng từ đúng và đảm bảo hồ sơ hoàn chỉnh
+            ngay từ bước đầu.
+          </p>
+          <p>Tiximax hỗ trợ đầy đủ các nghiệp vụ cần thiết:</p>
+          <ul className="list-disc pl-6 space-y-1.5">
+            <li>Kiểm tra chứng từ &amp; xác định mã HS chính xác.</li>
+            <li>Tư vấn thuế nhập khẩu – VAT theo từng mặt hàng.</li>
+            <li>Khai báo tờ khai trên hệ thống hải quan điện tử.</li>
+            <li>Đại diện làm việc với cán bộ hải quan tại sân bay.</li>
+            <li>Hỗ trợ kiểm hóa, mở kiện khi được yêu cầu.</li>
+            <li>Giải phóng hàng nhanh, hỗ trợ nhận hàng tận nơi.</li>
+          </ul>
+        </>
+      </Section>
+
+      {/* CÁC DỊCH VỤ THÔNG QUAN */}
+      <Section title="Các dịch vụ thông quan quốc tế của Tiximax">
+        <>
+          <p>
+            Thời gian xử lý hồ sơ trung bình dao động từ 1–2 ngày, tùy thuộc vào
+            loại hàng, mức độ phức tạp và yêu cầu kiểm hóa của từng lô hàng. Với
+            những lô hàng đơn giản, Tiximax có thể xử lý trong ngày để hạn chế
+            tối đa chi phí lưu kho cho khách.
+          </p>
+        </>
+      </Section>
+
+      {/* THÔNG QUAN ĐƯỜNG BAY */}
+      <Section title="Tiximax thông quan đường bay – Xử lý nhanh cho hàng quốc tế">
+        <>
+          <p>
+            Dịch vụ hải quan đường bay được thiết kế cho hàng hóa nhập khẩu hoặc
+            xuất khẩu theo đường hàng không. Tiximax làm việc trực tiếp với hãng
+            bay, kho sân bay và bộ phận nghiệp vụ nhằm đảm bảo hàng được tiếp
+            nhận – kiểm tra – khai báo – giải phóng nhanh chóng.
+          </p>
+          <p className="font-semibold mt-2">Phù hợp với:</p>
+          <ul className="list-disc pl-6 space-y-1.5">
+            <li>Hàng nhập khẩu từ Mỹ, Nhật, Hàn Quốc, Indonesia…</li>
+            <li>Hàng số lượng lớn từ shop kinh doanh online.</li>
+            <li>Hàng gấp trong ngày, yêu cầu tốc độ cao.</li>
+            <li>Hàng điện tử, mỹ phẩm, phụ kiện công nghệ, thời trang.</li>
+          </ul>
+          <p className="font-semibold mt-2">Ưu điểm tuyến đường bay:</p>
+          <ul className="list-disc pl-6 space-y-1.5">
+            <li>Giải phóng hàng nhanh, tránh lưu kho kéo dài.</li>
+            <li>Báo giá trước – không phát sinh chi phí mập mờ.</li>
+            <li>Quá trình xử lý được cập nhật theo từng bước.</li>
+            <li>Phù hợp với các shop nhập hàng liên tục theo lô.</li>
+          </ul>
+        </>
+      </Section>
+
+      {/* THÔNG QUAN TẠI SÂN BAY */}
+      <Section title="Tiximax thông quan tại sân bay – Hỗ trợ trọn gói từ hồ sơ đến nhận hàng">
+        <>
+          <p>
+            Dịch vụ hải quan tại sân bay của Tiximax dành cho khách cần xử lý
+            nhanh nhưng không muốn tốn thời gian chờ đợi hay tiếp xúc trực tiếp
+            với nhiều bộ phận hải quan. Tiximax thay mặt khách chuẩn bị toàn bộ
+            hồ sơ, nộp thuế, làm tờ khai, xử lý các yêu cầu phát sinh và nhận
+            hàng trực tiếp trong ngày.
+          </p>
+          <p className="font-semibold mt-2">Phù hợp với:</p>
+          <ul className="list-disc pl-6 space-y-1.5">
+            <li>Hàng cá nhân, người lần đầu nhập khẩu.</li>
+            <li>Hàng thương mại yêu cầu chứng từ chuyên nghiệp.</li>
+            <li>Hàng dễ bị yêu cầu kiểm tra chuyên ngành.</li>
+            <li>Hàng hiệu, hàng công nghệ, hàng giá trị cao.</li>
+          </ul>
+          <p className="font-semibold mt-2">Ưu điểm:</p>
+          <ul className="list-disc pl-6 space-y-1.5">
+            <li>Xử lý hồ sơ đồng bộ, đúng quy định.</li>
+            <li>Hạn chế rủi ro sai sót giấy tờ.</li>
+            <li>Theo dõi tình trạng xử lý liên tục.</li>
+            <li>Hỗ trợ giao hàng tận nơi sau khi thông quan.</li>
+          </ul>
+        </>
+      </Section>
+
+      {/* HỖ TRỢ THỦ TỤC HẢI QUAN */}
+      <Section title="Tiximax hỗ trợ đầy đủ thủ tục hải quan tại sân bay">
+        <>
+          <p>
+            Thủ tục hải quan tại sân bay thường gây khó khăn cho khách lần đầu
+            làm việc vì lượng giấy tờ nhiều, kiểm tra gắt gao và yêu cầu thông
+            tin chính xác. Tiximax hỗ trợ hướng dẫn từng bước rõ ràng để khách
+            chuẩn bị đúng ngay từ đầu.
+          </p>
+          <p className="font-semibold mt-2">Khách được hướng dẫn cụ thể về:</p>
+          <ul className="list-disc pl-6 space-y-1.5">
+            <li>Bộ chứng từ bắt buộc phải có.</li>
+            <li>Danh mục hàng hạn chế – hàng cấm – hàng kiểm tra đặc biệt.</li>
+            <li>Thuế nhập khẩu, thuế VAT và cách tính.</li>
+            <li>Quy trình kiểm hóa, mở kiện khi được yêu cầu.</li>
+            <li>Cách xử lý khi hồ sơ bị yêu cầu bổ sung.</li>
+          </ul>
+          <p>
+            Nhờ đó, khách tiết kiệm đáng kể thời gian và tránh rủi ro hàng bị
+            giữ lại quá lâu.
+          </p>
+        </>
+      </Section>
+
+      {/* LÝ DO ĐƯỢC CHỌN */}
+      <Section title="Lý do dịch vụ thông quan hộ của Tiximax được lựa chọn nhiều">
+        <>
+          <p>Khách hàng tin tưởng Tiximax bởi những ưu điểm nổi bật:</p>
+          <ul className="list-disc pl-6 space-y-1.5">
+            <li>Xử lý hồ sơ nhanh, chính xác và đúng chuẩn.</li>
+            <li>Báo giá rõ ràng, không phát sinh chi phí ẩn.</li>
+            <li>Kinh nghiệm thực tế tại sân bay nhiều năm.</li>
+            <li>Đại diện khách làm việc trực tiếp với cán bộ hải quan.</li>
+            <li>Hỗ trợ nhiều loại hàng khác nhau, kể cả hàng đặc thù.</li>
+            <li>Theo dõi toàn bộ quá trình và cập nhật liên tục cho khách.</li>
+          </ul>
+        </>
+      </Section>
+
+      {/* QUY TRÌNH */}
+      <Section title="Quy trình Tiximax thông quan hộ">
+        <>
+          <div className="space-y-4">
+            <div className="border border-gray-200 rounded-2xl p-5 bg-white">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
+                Bước 1: Tiếp nhận thông tin hàng hóa &amp; tư vấn hồ sơ ban đầu
+              </h3>
+              <div className="mt-3 h-px w-16 mx-auto bg-gray-200" />
+              <p className="mt-3">
+                Tiximax nhận thông tin về loại hàng, số lượng, chứng từ… và tư
+                vấn ngay các yêu cầu cần chuẩn bị, rủi ro có thể gặp và hướng xử
+                lý phù hợp.
               </p>
             </div>
-          </motion.div>
-        </div>
-      </section>
 
-      {/* CHECKLIST DOCUMENTS */}
-      <section className="py-10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="mb-6">
-            <h2 className="text-2xl font-extrabold text-gray-900">
-              Bộ hồ sơ cần thiết
-            </h2>
-            <p className="text-gray-600">
-              Chuẩn bị đầy đủ giúp hồ sơ thông quan nhanh hơn.
+            <div className="border border-gray-200 rounded-2xl p-5 bg-white">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
+                Bước 2: Kiểm tra chứng từ – báo giá – thống nhất phương án xử lý
+              </h3>
+              <div className="mt-3 h-px w-16 mx-auto bg-gray-200" />
+              <p className="mt-3">
+                Đội ngũ kiểm tra invoice, packing list, mã HS và thuế suất. Sau
+                đó gửi bảng giá chi tiết để khách chốt phương án trước khi tiến
+                hành khai báo.
+              </p>
+            </div>
+
+            <div className="border border-gray-200 rounded-2xl p-5 bg-white">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
+                Bước 3: Chuẩn bị giấy tờ &amp; khai báo trên hệ thống một cửa
+              </h3>
+              <div className="mt-3 h-px w-16 mx-auto bg-gray-200" />
+              <p className="mt-3">
+                Tiximax soạn tờ khai điện tử, nhập dữ liệu lên VNACCS, rà soát
+                lại toàn bộ để đảm bảo hồ sơ chính xác, hạn chế bị yêu cầu bổ
+                sung.
+              </p>
+            </div>
+
+            <div className="border border-gray-200 rounded-2xl p-5 bg-white">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
+                Bước 4: Làm việc với hải quan – hỗ trợ kiểm hóa (nếu có)
+              </h3>
+              <div className="mt-3 h-px w-16 mx-auto bg-gray-200" />
+              <p className="mt-3">
+                Đại diện khách nộp tờ khai, trao đổi với cán bộ hải quan và trực
+                tiếp hỗ trợ kiểm hóa nếu lô hàng được phân luồng đỏ hoặc yêu cầu
+                mở kiện.
+              </p>
+            </div>
+
+            <div className="border border-gray-200 rounded-2xl p-5 bg-white">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
+                Bước 5: Giải phóng hàng – giao hàng tận nơi hoặc cho khách tự
+                nhận
+              </h3>
+              <div className="mt-3 h-px w-16 mx-auto bg-gray-200" />
+              <p className="mt-3">
+                Sau khi thông quan, Tiximax nhận hàng tại kho, kiểm tra nhanh và
+                bàn giao theo yêu cầu: giao tận nơi hoặc để khách tự nhận tại
+                sân bay.
+              </p>
+            </div>
+          </div>
+        </>
+      </Section>
+
+      {/* FAQ */}
+      <Section title="Các câu hỏi thường gặp">
+        <>
+          <div className="space-y-4">
+            <details className="bg-white border border-gray-200 rounded-xl p-4">
+              <summary className="flex items-center justify-between cursor-pointer text-base font-semibold text-gray-900">
+                <span>Thông quan hộ có cần chủ hàng đi cùng không?</span>
+                <HelpCircle className="w-5 h-5 text-amber-600" />
+              </summary>
+              <p className="mt-2 text-base text-gray-700">
+                Không. Khách không cần đến sân bay. Tiximax đại diện ủy quyền xử
+                lý toàn bộ thủ tục, từ nộp tờ khai đến nhận hàng.
+              </p>
+            </details>
+
+            <details className="bg-white border border-gray-200 rounded-xl p-4">
+              <summary className="flex items-center justify-between cursor-pointer text-base font-semibold text-gray-900">
+                <span>Dịch vụ áp dụng cho hàng cá nhân hay thương mại?</span>
+                <HelpCircle className="w-5 h-5 text-amber-600" />
+              </summary>
+              <p className="mt-2 text-base text-gray-700">
+                Tiximax hỗ trợ cả hai, từ hàng nhỏ lẻ đến lô hàng lớn.
+              </p>
+            </details>
+
+            <details className="bg-white border border-gray-200 rounded-xl p-4">
+              <summary className="flex items-center justify-between cursor-pointer text-base font-semibold text-gray-900">
+                <span>Chi phí thông quan được tính thế nào?</span>
+              </summary>
+              <p className="mt-2 text-base text-gray-700">
+                Chi phí dựa theo loại hàng, mã HS, thuế suất, độ phức tạp của hồ
+                sơ và việc hàng có kiểm hóa hay không. Tiximax cam kết báo giá
+                rõ ràng trước khi tiến hành.
+              </p>
+            </details>
+
+            <details className="bg-white border border-gray-200 rounded-xl p-4">
+              <summary className="flex items-center justify-between cursor-pointer text-base font-semibold text-gray-900">
+                <span>Tiximax có hỗ trợ hàng dễ vỡ không?</span>
+                <AlertCircle className="w-5 h-5 text-amber-600" />
+              </summary>
+              <p className="mt-2 text-base text-gray-700">
+                Có, nhưng khách cần thông báo trước để Tiximax tăng cường lớp
+                bảo vệ, đóng gói chống sốc và ghi chú đặc biệt khi khai báo.
+              </p>
+            </details>
+
+            <details className="bg-white border border-gray-200 rounded-xl p-4">
+              <summary className="flex items-center justify-between cursor-pointer text-base font-semibold text-gray-900">
+                <span>Nếu hồ sơ thiếu hoặc sai thì xử lý thế nào?</span>
+                <ShieldCheck className="w-5 h-5 text-amber-600" />
+              </summary>
+              <p className="mt-2 text-base text-gray-700">
+                Tiximax hỗ trợ bổ sung và cập nhật hồ sơ ngay để tờ khai được
+                duyệt nhanh nhất.
+              </p>
+            </details>
+          </div>
+        </>
+      </Section>
+
+      {/* KẾT LUẬN + CTA */}
+      <section className="py-10 border-t border-gray-200 bg-white">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4">
+            <div className="flex flex-col items-center text-center gap-2">
+              <CheckCircle2 className="w-6 h-6 text-amber-600" />
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Kết luận – Dịch vụ Tiximax thông quan hộ
+              </h2>
+              <div className="h-px w-20 bg-gray-300" />
+            </div>
+
+            <p className="text-base sm:text-lg text-gray-700 leading-relaxed text-center">
+              Nếu bạn đang cần hỗ trợ <strong>Tiximax thông quan hộ</strong>{" "}
+              hoặc muốn sử dụng các dịch vụ như{" "}
+              <strong>Dịch vụ thông quan hộ Tiximax</strong>,{" "}
+              <strong>Thông quan hộ Tiximax</strong>,{" "}
+              <strong>Dịch vụ hải quan đường bay</strong>,{" "}
+              <strong>Dịch vụ hải quan tại sân bay</strong> hay tư vấn chuyên
+              sâu về <strong>Thủ tục hải quan tại sân bay</strong>, Tiximax
+              chính là lựa chọn đáng tin cậy. Với quy trình rõ ràng, chi phí
+              minh bạch, nghiệp vụ chuyên sâu và khả năng xử lý nhanh – chính
+              xác – an toàn, Tiximax cam kết mang đến giải pháp thông quan hiệu
+              quả nhất cho mọi loại hàng hóa của bạn.
             </p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                title: "Commercial Invoice",
-                items: [
-                  "Tên/địa chỉ người bán – người mua",
-                  "Mô tả hàng hoá/Model/JAN",
-                  "Đơn giá – trị giá – điều kiện Incoterms",
-                ],
-              },
-              {
-                title: "Packing List",
-                items: [
-                  "Số kiện – trọng lượng – kích thước",
-                  "Số PO/Đơn đặt hàng",
-                  "Cách đóng gói/Pallet/Carton",
-                ],
-              },
-              {
-                title: "Vận đơn & khác",
-                items: [
-                  "MAWB/HAWB/BL",
-                  "CO/COO nếu cần",
-                  "MSDS/Chứng nhận chất lượng (nếu áp dụng)",
-                ],
-              },
-            ].map((b, i) => (
-              <motion.div
-                key={b.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: i * 0.05 }}
-                className="rounded-2xl border border-yellow-200 bg-white p-5 shadow-sm"
+
+            <div className="flex flex-wrap gap-4 justify-center mt-2">
+              <Link
+                to="/contact"
+                className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700"
               >
-                <div className="flex items-center gap-2 text-yellow-700 font-semibold">
-                  <CheckCircle2 className="w-5 h-5" /> {b.title}
-                </div>
-                <ul className="mt-3 space-y-2 text-sm text-gray-700">
-                  {b.items.map((it) => (
-                    <li key={it}>• {it}</li>
-                  ))}
-                </ul>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PROCESS */}
-      <section className="py-10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <h2 className="text-2xl font-extrabold text-gray-900 mb-6">
-            Quy trình xử lý hồ sơ
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              "Tiếp nhận hồ sơ & tư vấn HS code",
-              "Chuẩn hoá invoice/packing list",
-              "Lập tờ khai & nộp phí",
-              "Kiểm tra hồ sơ — phản hồi yêu cầu bổ sung",
-              "Thông quan & lấy hàng",
-              "Giao hàng nội địa & bàn giao chứng từ",
-            ].map((s, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
-                className="rounded-2xl border border-yellow-200 bg-white p-5 shadow-sm hover:shadow-md"
+                Nhận tư vấn &amp; báo giá thông quan
+              </Link>
+              <Link
+                to="/tracking"
+                className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
               >
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-yellow-100 text-yellow-700 font-bold mb-3">
-                  {i + 1}
-                </div>
-                <p className="font-semibold text-gray-900">{s}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* RESTRICTIONS */}
-      <section className="py-10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="rounded-2xl border border-yellow-200 bg-white p-6 shadow-sm">
-            <div className="flex items-center gap-2 text-yellow-700 font-semibold">
-              <AlertTriangle className="w-5 h-5" /> Hạn mục & lưu ý
-            </div>
-            <ul className="mt-3 grid sm:grid-cols-2 gap-2 text-sm text-gray-700">
-              <li>
-                • Hàng cấm/nguy hiểm theo quy định HQ VN: chất dễ cháy nổ, ma
-                tuý, vũ khí, văn hoá phẩm cấm...
-              </li>
-              <li>
-                • Hàng có pin/hoá chất cần MSDS và tư vấn tuyến bay phù hợp.
-              </li>
-              <li>• Thuế/phí thay đổi theo thời điểm và biểu thuế cập nhật.</li>
-              <li>
-                • Hồ sơ thiếu sẽ kéo dài thời gian thông quan và phát sinh lưu
-                bãi.
-              </li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ + CTA */}
-      <section className="py-12 lg:py-16">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="grid lg:grid-cols-2 gap-8 items-start">
-            <div className="rounded-3xl border border-yellow-200 bg-white p-8 shadow-sm">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-semibold">
-                <Building2 className="w-3.5 h-3.5" /> Câu hỏi thường gặp
-              </div>
-              <div className="mt-4 space-y-3 text-sm text-gray-700">
-                <details className="rounded-xl border border-gray-100 p-4">
-                  <summary className="font-semibold cursor-pointer">
-                    Bao lâu có thể thông quan?
-                  </summary>
-                  <p className="mt-2">
-                    Trong điều kiện hồ sơ đầy đủ và tuyến bay thông suốt, thường
-                    1–2 ngày làm việc kể từ khi hàng đến cửa khẩu.
-                  </p>
-                </details>
-                <details className="rounded-xl border border-gray-100 p-4">
-                  <summary className="font-semibold cursor-pointer">
-                    Tiximax có hỗ trợ xin giấy phép chuyên ngành?
-                  </summary>
-                  <p className="mt-2">
-                    Có, chúng tôi phối hợp với đối tác chuyên trách để xử lý hồ
-                    sơ chuyên ngành khi cần thiết (phát sinh phí).
-                  </p>
-                </details>
-                <details className="rounded-xl border border-gray-100 p-4">
-                  <summary className="font-semibold cursor-pointer">
-                    Có thể xem trạng thái hồ sơ ở đâu?
-                  </summary>
-                  <p className="mt-2">
-                    Trên cổng khách hàng của Tiximax: trạng thái tờ khai,
-                    thuế/phí, thời gian dự kiến và chứng từ số hoá.
-                  </p>
-                </details>
-              </div>
-            </div>
-
-            <div className="rounded-3xl bg-gradient-to-br from-yellow-500 to-yellow-700 p-1">
-              <div className="rounded-3xl p-6 bg-white/90 backdrop-blur">
-                <div className="flex items-center gap-3">
-                  <ShieldCheck className="w-6 h-6 text-yellow-700" />
-                  <h3 className="text-lg font-bold text-gray-900">
-                    Cần tư vấn HS code & mức thuế?
-                  </h3>
-                </div>
-                <p className="mt-2 text-gray-700">
-                  Gửi mô tả hàng hoá, hình ảnh và invoice để Tiximax tham khảo,
-                  tư vấn lộ trình và chi phí dự kiến.
-                </p>
-                <div className="mt-4 flex flex-col sm:flex-row gap-3">
-                  <a
-                    href="/contact"
-                    className="inline-flex items-center justify-center rounded-xl px-5 py-3 font-semibold text-white bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800"
-                  >
-                    Liên hệ tư vấn
-                  </a>
-                  <a
-                    href="/services/shipping"
-                    className="inline-flex items-center justify-center rounded-xl px-5 py-3 font-semibold text-yellow-700 bg-yellow-50 hover:bg-yellow-100"
-                  >
-                    Xem vận chuyển quốc tế
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FOOTER BADGE */}
-      <section className="pb-14">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="rounded-2xl border border-gray-100 bg-white p-5 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3 text-gray-700">
-              <PlaneTakeoff className="w-5 h-5 text-yellow-600" />
-              <span className="text-sm">
-                Kết nối tuyến bay ổn định — hạn chế chậm trễ
-              </span>
-            </div>
-            <div className="flex items-center gap-3 text-gray-700">
-              <Truck className="w-5 h-5 text-yellow-600" />
-              <span className="text-sm">
-                Giao hàng nội địa linh hoạt theo yêu cầu
-              </span>
+                Theo dõi tình trạng lô hàng
+              </Link>
             </div>
           </div>
         </div>

@@ -26,7 +26,8 @@ function Layout() {
         </>
       )}
 
-      <main className="min-h-screen">
+      {/* {/* <main className="min-h-screen"> */}
+      <main className="min-h-screen pb-64">
         <Outlet />
       </main>
 

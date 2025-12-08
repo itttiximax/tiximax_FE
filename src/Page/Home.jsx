@@ -11,6 +11,7 @@ import Service from "./Service";
 import PartnerPage from "./PartnerPage";
 import PromotionPage from "./PromotionPage";
 import ChatBoxList from "./ChatBoxList";
+import Vision from "./Navigattion/Vision";
 const Home = () => {
   return (
     <div className="bg-white relative overflow-x-hidden">
@@ -19,6 +20,10 @@ const Home = () => {
 
       {/* About section */}
       <About />
+
+      {/* About section */}
+      <Vision />
+
       {/* Service Page section - Dịch vụ quốc tế */}
       <ServicePage />
 
