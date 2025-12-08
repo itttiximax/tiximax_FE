@@ -267,8 +267,8 @@ const PackingAwaitList = () => {
             "Mã chuyến bay",
             "Mã đơn hàng",
             "Mã tracking",
-            "Tên sản phẩm",
             "Số lượng",
+            "Tên sản phẩm",
             "Giá tiền",
             "Link sản phẩm",
             "Phân loại",
@@ -322,8 +322,8 @@ const PackingAwaitList = () => {
               packing.flightCode || "",
               packing.orderCode || "",
               packing.trackingCode || "",
-              productNames[i] || "",
               packing.quantity || "",
+              productNames[i] || "",
               prices[i] || "",
               productLinks[i] || "",
               packing.classify || "",
@@ -351,6 +351,7 @@ const PackingAwaitList = () => {
           { wch: 15 }, // Mã chuyến bay
           { wch: 15 }, // Mã đơn hàng
           { wch: 15 }, // Mã tracking
+          { wch: 10 }, // Số lượng
           { wch: 30 }, // Tên sản phẩm
           { wch: 12 }, // Giá tiền
           { wch: 50 }, // Link sản phẩm
