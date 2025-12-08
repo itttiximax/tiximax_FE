@@ -322,7 +322,7 @@ const PackingAwaitList = () => {
               packing.flightCode || "",
               packing.orderCode || "",
               packing.trackingCode || "",
-              packing.quantity || "",
+              packing.quantities || "",
               productNames[i] || "",
               prices[i] || "",
               productLinks[i] || "",
