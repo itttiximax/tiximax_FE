@@ -21,11 +21,6 @@ import {
   Plane,
 } from "lucide-react";
 
-/**
- * GuideList.jsx — Tiximax (Danh sách hướng dẫn sử dụng dịch vụ)
- * Sử dụng bảng màu amber / white / black, animation fade-up, và grid responsive.
- */
-
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
   show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
@@ -118,20 +113,23 @@ const GuideList = () => {
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 opacity-20 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-300 via-yellow-200 to-transparent" />
+
         <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-14 pb-10 lg:pt-24 lg:pb-16">
           <motion.div
             initial="hidden"
             animate="show"
             variants={fadeUp}
-            className="max-w-3xl"
+            className="max-w-3xl mx-auto text-center"
           >
-            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider bg-amber-100 text-amber-700 px-3 py-1 rounded-full">
+            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider bg-amber-100 text-amber-700 px-3 py-1 rounded-full mx-auto">
               <HelpCircle className="w-3.5 h-3.5" /> Hướng dẫn Sử dụng
             </span>
-            <h1 className="mt-5 text-3xl sm:text-4xl lg:text-5xl font-black leading-tight text-gray-900">
+
+            <h1 className="mt-5 text-3xl sm:text-4xl lg:text-5xl font-black leading-tight text-gray-900 text-center">
               Hướng dẫn Tiximax – Bắt đầu Dễ dàng với Dịch vụ của Chúng tôi
             </h1>
-            <p className="mt-5 text-gray-600 text-lg leading-8">
+
+            <p className="mt-5 text-gray-600 text-lg leading-8 text-center">
               Các hướng dẫn chi tiết giúp bạn sử dụng dịch vụ mua hộ, vận chuyển
               và logistics một cách hiệu quả nhất.
             </p>
@@ -178,6 +176,7 @@ const GuideList = () => {
           </div>
         </div>
       </section>
+
       {/* CTA */}
       <section className="py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">

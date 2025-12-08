@@ -104,24 +104,6 @@ const leaders = [
   },
 ];
 
-const missionPillars = [
-  {
-    icon: <Globe2 className="w-8 h-8" />,
-    title: "Tiếp cận thế giới dễ dàng hơn",
-    desc: "Xóa bỏ rào cản thanh toán và logistics, giúp việc mua bán xuyên biên giới trở nên Đơn giản, Nhanh chóng và Tiết kiệm cho mọi khách hàng.",
-  },
-  {
-    icon: <Users2 className="w-8 h-8" />,
-    title: "Xây dựng nơi làm việc tử tế và hạnh phúc",
-    desc: "Tạo môi trường để nhân viên được trân trọng, rèn luyện, phát triển và làm việc trong sự tử tế, trách nhiệm.",
-  },
-  {
-    icon: <Heart className="w-8 h-8" />,
-    title: "Đóng góp giá trị cho xã hội",
-    desc: "Sử dụng lợi nhuận để tái đầu tư vào con người, công nghệ và các hoạt động phụng sự cộng đồng.",
-  },
-];
-
 const customerCommitments = [
   {
     icon: <ShieldCheck className="w-6 h-6" />,
@@ -204,180 +186,328 @@ const AboutUs = () => {
         </div>
       </section>
 
-      {/* Vision */}
+      {/* Vision - List Style */}
       <section className="py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <div className="rounded-3xl overflow-hidden bg-gradient-to-br from-amber-500 to-yellow-500 shadow-2xl">
-              <div className="grid lg:grid-cols-2 gap-0">
-                <div className="relative h-80 lg:h-auto">
-                  <img
-                    src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1600&auto=format&fit=crop"
-                    alt="Tầm nhìn toàn cầu"
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-br from-amber-900/40 to-yellow-900/40" />
-                </div>
-                <div className="p-8 lg:p-12 text-white">
-                  <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-                    <Globe2 className="w-5 h-5" />
-                    <span className="font-semibold text-sm uppercase tracking-wider">
-                      Tầm Nhìn
-                    </span>
-                  </div>
-                  <h2 className="text-3xl md:text-4xl font-black mb-6">
-                    Mạng lưới toàn cầu lớn mạnh
+          <div className="bg-white shadow-lg hover:shadow-xl transition-shadow rounded-2xl p-6 lg:p-12">
+            {/* Title Section */}
+            <div className="-mx-6 lg:-mx-12 mb-8 lg:mb-12">
+              <div className="bg-gradient-to-r from-amber-400 to-yellow-300 rounded-xl p-6 lg:p-8">
+                <div className="flex items-center justify-center gap-3">
+                  <Globe2 className="w-8 h-8 text-gray-900" />
+                  <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 text-center">
+                    TẦM NHÌN TIXIMAX
                   </h2>
-                  <div className="space-y-4 text-white/95">
-                    <p className="leading-relaxed">
-                      Tầm nhìn của Tiximax là trở thành một{" "}
-                      <strong>Mạng lưới Toàn cầu</strong> lớn mạnh trong 5-10
-                      năm tới, với sự hiện diện tại hơn 20 quốc gia, đóng vai
-                      trò cầu nối thương mại cho hàng triệu cá nhân và doanh
-                      nghiệp nhỏ trên khắp thế giới.
-                    </p>
-                    <p className="leading-relaxed">
-                      Tiximax cam kết là một{" "}
-                      <strong>Công ty Công nghệ Logistics</strong> tiên phong,
-                      nơi khách hàng có thể mua hàng, thanh toán và vận chuyển
-                      xuyên quốc gia chỉ với vài thao tác, với khả năng theo dõi
-                      đơn hàng toàn cầu dễ dàng, minh bạch.
-                    </p>
-                    <p className="leading-relaxed">
-                      Cuối cùng, Tiximax hướng đến là một{" "}
-                      <strong>Doanh nghiệp Tử tế và Hạnh phúc</strong> – là nơi
-                      nhân viên tự hào, là đối tác đáng tin cậy của khách hàng,
-                      và mang tinh thần trách nhiệm, chính trực của Việt Nam
-                      vươn ra thế giới.
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
-          </motion.div>
+
+            {/* Intro */}
+            <div className="mb-8 lg:mb-12">
+              <p className="text-lg text-gray-700 leading-relaxed">
+                Tầm nhìn của Tiximax là trở thành một{" "}
+                <span className="bg-amber-100 px-2 py-1 font-semibold rounded">
+                  Mạng lưới Toàn cầu
+                </span>{" "}
+                lớn mạnh trong 5-10 năm tới, với sự hiện diện tại hơn 20 quốc
+                gia, đóng vai trò cầu nối thương mại cho hàng triệu cá nhân và
+                doanh nghiệp nhỏ trên khắp thế giới.
+              </p>
+            </div>
+
+            {/* Vision Points */}
+            <div className="space-y-6 lg:space-y-8">
+              <div className="border-l-4 border-amber-500 pl-6 py-3">
+                <h3 className="font-bold text-xl lg:text-2xl text-gray-900 mb-3 flex items-center gap-3">
+                  <Globe2 className="w-6 h-6 text-amber-600" />
+                  Mạng lưới Toàn cầu
+                </h3>
+                <p className="text-base lg:text-lg text-gray-700 leading-relaxed">
+                  Tiximax sẽ hiện diện tại hơn{" "}
+                  <span className="bg-amber-100 px-2 py-1 font-semibold rounded">
+                    20 quốc gia
+                  </span>
+                  , đóng vai trò cầu nối thương mại cho hàng triệu cá nhân và
+                  doanh nghiệp nhỏ trên khắp thế giới.
+                </p>
+              </div>
+
+              <div className="border-l-4 border-yellow-500 pl-6 py-3">
+                <h3 className="font-bold text-xl lg:text-2xl text-gray-900 mb-3 flex items-center gap-3">
+                  <Rocket className="w-6 h-6 text-yellow-600" />
+                  Công ty Công nghệ Logistics
+                </h3>
+                <p className="text-base lg:text-lg text-gray-700 leading-relaxed">
+                  Tiximax cam kết là một công ty công nghệ logistics tiên phong,
+                  nơi khách hàng có thể{" "}
+                  <span className="bg-yellow-100 px-2 py-1 font-semibold rounded">
+                    mua hàng, thanh toán và vận chuyển xuyên quốc gia
+                  </span>{" "}
+                  chỉ với vài thao tác, với khả năng theo dõi đơn hàng toàn cầu
+                  dễ dàng, minh bạch.
+                </p>
+              </div>
+
+              <div className="border-l-4 border-orange-500 pl-6 py-3">
+                <h3 className="font-bold text-xl lg:text-2xl text-gray-900 mb-3 flex items-center gap-3">
+                  <Heart className="w-6 h-6 text-orange-600" />
+                  Doanh nghiệp Tử tế và Hạnh phúc
+                </h3>
+                <p className="text-base lg:text-lg text-gray-700 leading-relaxed">
+                  Tiximax hướng đến là một doanh nghiệp tử tế và hạnh phúc – là
+                  nơi{" "}
+                  <span className="bg-orange-100 px-2 py-1 font-semibold rounded">
+                    nhân viên tự hào
+                  </span>
+                  , là{" "}
+                  <span className="bg-orange-100 px-2 py-1 font-semibold rounded">
+                    đối tác đáng tin cậy
+                  </span>{" "}
+                  của khách hàng, và mang tinh thần trách nhiệm, chính trực của
+                  Việt Nam vươn ra thế giới.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Mission */}
+      {/* Mission - List Style */}
       <section className="py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-700 px-4 py-2 rounded-full mb-4">
-                <Rocket className="w-5 h-5" />
-                <span className="font-semibold text-sm uppercase tracking-wider">
-                  Sứ Mệnh
-                </span>
+          <div className="bg-white shadow-lg hover:shadow-xl transition-shadow rounded-2xl p-6 lg:p-12">
+            {/* Title Section */}
+            <div className="-mx-6 lg:-mx-12 mb-8 lg:mb-12">
+              <div className="bg-gradient-to-r from-amber-400 to-yellow-300 rounded-xl p-6 lg:p-8">
+                <div className="flex items-center justify-center gap-3">
+                  <Rocket className="w-8 h-8 text-gray-900" />
+                  <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 text-center">
+                    SỨ MỆNH TIXIMAX
+                  </h2>
+                </div>
               </div>
-              <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">
-                Giúp con người kết nối với thế giới
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            </div>
+
+            {/* Intro */}
+            <div className="mb-8 lg:mb-12">
+              <p className="text-lg lg:text-xl text-gray-700 leading-relaxed text-center font-semibold">
                 "Giúp con người, đặc biệt là người Việt Nam, dễ dàng kết nối với
                 thế giới"
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
-              {missionPillars.map((pillar, idx) => (
-                <motion.div
-                  key={pillar.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  className="rounded-2xl bg-white border border-gray-100 p-8 shadow-lg hover:shadow-xl transition-shadow"
-                >
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center text-white mb-6">
-                    {pillar.icon}
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">
-                    {pillar.title}
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">{pillar.desc}</p>
-                </motion.div>
-              ))}
+            {/* Mission Pillars Header */}
+            <div className="mb-8">
+              <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-6 pb-3 border-b-4 border-amber-400">
+                BA TRỤ CỘT SỨ MỆNH
+              </h3>
             </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="mt-8 rounded-2xl bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 p-6 text-center"
-            >
-              <p className="text-lg font-bold text-gray-900">
+            {/* Pillar 1 */}
+            <div className="mb-8 lg:mb-10">
+              <div className="bg-amber-100 border-l-4 border-amber-500 p-6 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center text-white flex-shrink-0">
+                    <Globe2 className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-xl lg:text-2xl font-bold text-gray-900">
+                    Tiếp cận thế giới dễ dàng hơn
+                  </h4>
+                </div>
+              </div>
+              <div className="pl-6 lg:pl-8">
+                <p className="text-base lg:text-lg text-gray-700 leading-relaxed mb-4">
+                  Xóa bỏ rào cản thanh toán và logistics, giúp việc mua bán
+                  xuyên biên giới trở nên:
+                </p>
+                <ul className="list-disc pl-8 space-y-2 text-base lg:text-lg text-gray-700">
+                  <li>
+                    <span className="bg-amber-100 px-2 py-1 font-semibold rounded">
+                      Đơn giản
+                    </span>{" "}
+                    - Quy trình rõ ràng, dễ hiểu
+                  </li>
+                  <li>
+                    <span className="bg-amber-100 px-2 py-1 font-semibold rounded">
+                      Nhanh chóng
+                    </span>{" "}
+                    - Thời gian vận chuyển tối ưu
+                  </li>
+                  <li>
+                    <span className="bg-amber-100 px-2 py-1 font-semibold rounded">
+                      Tiết kiệm
+                    </span>{" "}
+                    - Chi phí hợp lý cho mọi khách hàng
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Pillar 2 */}
+            <div className="mb-8 lg:mb-10">
+              <div className="bg-amber-100 border-l-4 border-amber-500 p-6 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center text-white flex-shrink-0">
+                    <Users2 className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-xl lg:text-2xl font-bold text-gray-900">
+                    Xây dựng nơi làm việc tử tế và hạnh phúc
+                  </h4>
+                </div>
+              </div>
+              <div className="pl-6 lg:pl-8">
+                <p className="text-base lg:text-lg text-gray-700 leading-relaxed mb-4">
+                  Tạo môi trường để nhân viên được:
+                </p>
+                <ul className="list-disc pl-8 space-y-2 text-base lg:text-lg text-gray-700">
+                  <li>
+                    <span className="bg-amber-100 px-2 py-1 font-semibold rounded">
+                      Trân trọng
+                    </span>{" "}
+                    - Được tôn trọng và đánh giá đúng
+                  </li>
+                  <li>
+                    <span className="bg-amber-100 px-2 py-1 font-semibold rounded">
+                      Rèn luyện
+                    </span>{" "}
+                    - Cơ hội học hỏi và phát triển
+                  </li>
+                  <li>
+                    <span className="bg-amber-100 px-2 py-1 font-semibold rounded">
+                      Phát triển
+                    </span>{" "}
+                    - Môi trường tử tế, trách nhiệm
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Pillar 3 */}
+            <div className="mb-8 lg:mb-10">
+              <div className="bg-amber-100 border-l-4 border-amber-500 p-6 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center text-white flex-shrink-0">
+                    <Heart className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-xl lg:text-2xl font-bold text-gray-900">
+                    Đóng góp giá trị cho xã hội
+                  </h4>
+                </div>
+              </div>
+              <div className="pl-6 lg:pl-8">
+                <p className="text-base lg:text-lg text-gray-700 leading-relaxed mb-4">
+                  Sử dụng lợi nhuận để tái đầu tư vào:
+                </p>
+                <ul className="list-disc pl-8 space-y-2 text-base lg:text-lg text-gray-700">
+                  <li>
+                    <span className="bg-amber-100 px-2 py-1 font-semibold rounded">
+                      Con người
+                    </span>{" "}
+                    - Đào tạo và phát triển nhân sự
+                  </li>
+                  <li>
+                    <span className="bg-amber-100 px-2 py-1 font-semibold rounded">
+                      Công nghệ
+                    </span>{" "}
+                    - Nâng cao chất lượng dịch vụ
+                  </li>
+                  <li>
+                    <span className="bg-amber-100 px-2 py-1 font-semibold rounded">
+                      Cộng đồng
+                    </span>{" "}
+                    - Các hoạt động phụng sự xã hội
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Motto */}
+            <div className="mt-8 rounded-2xl bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 p-6 text-center">
+              <p className="text-xl lg:text-2xl font-bold text-gray-900">
                 <span className="text-amber-600">Kết nối</span> –{" "}
                 <span className="text-yellow-600">Phát triển</span> –{" "}
                 <span className="text-orange-600">Phụng sự</span>
               </p>
-              <p className="text-gray-600 mt-2">với sự tử tế là nền tảng</p>
-            </motion.div>
-          </motion.div>
+              <p className="text-base lg:text-lg text-gray-600 mt-2 font-medium">
+                với sự tử tế là nền tảng
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Core Values */}
+      {/* Core Values - List Style */}
       <section className="py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-700 px-4 py-2 rounded-full mb-4">
-                <ShieldCheck className="w-5 h-5" />
-                <span className="font-semibold text-sm uppercase tracking-wider">
-                  Giá Trị Cốt Lõi
-                </span>
+          <div className="bg-white shadow-lg hover:shadow-xl transition-shadow rounded-2xl p-6 lg:p-12">
+            {/* Title Section */}
+            <div className="-mx-6 lg:-mx-12 mb-8 lg:mb-12">
+              <div className="bg-gradient-to-r from-amber-400 to-yellow-300 rounded-xl p-6 lg:p-8">
+                <div className="flex items-center justify-center gap-3">
+                  <ShieldCheck className="w-8 h-8 text-gray-900" />
+                  <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 text-center">
+                    GIÁ TRỊ CỐT LÕI
+                  </h2>
+                </div>
               </div>
-              <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">
-                Tử Tế Là Nền Tảng
-              </h2>
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                Giá trị cốt lõi của Tiximax xoay quanh nguyên tắc Tử Tế Là Nền
-                Tảng, giúp xây dựng niềm tin và sự trung thực trong ngành
-                logistics.
+            </div>
+
+            {/* Intro */}
+            <div className="mb-8 lg:mb-12">
+              <p className="text-lg text-gray-700 leading-relaxed">
+                Giá trị cốt lõi của Tiximax xoay quanh nguyên tắc{" "}
+                <span className="bg-amber-100 px-2 py-1 font-semibold rounded">
+                  Tử Tế Là Nền Tảng
+                </span>
+                , giúp xây dựng niềm tin và sự trung thực trong ngành logistics.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Core Values Header */}
+            <div className="mb-8">
+              <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-6 pb-3 border-b-4 border-amber-400">
+                SÁU GIÁ TRỊ CỐT LÕI CỦA TIXIMAX
+              </h3>
+            </div>
+
+            {/* Values List */}
+            <div className="space-y-6">
               {coreValues.map((value, idx) => (
                 <motion.div
                   key={value.title}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: idx * 0.08 }}
-                  className="rounded-2xl bg-white border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all group"
+                  transition={{ duration: 0.5, delay: idx * 0.05 }}
+                  className="border-l-4 border-amber-500 pl-6 py-3 hover:bg-amber-50/50 transition-colors rounded-r-lg"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 mb-4 group-hover:bg-amber-500 group-hover:text-white transition-colors">
-                    {value.icon}
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0 mt-1">
+                      {value.icon}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xl text-gray-900 mb-2">
+                        {idx + 1}. {value.title}
+                      </h4>
+                      <p className="text-base lg:text-lg text-gray-700 leading-relaxed">
+                        {value.desc}
+                      </p>
+                    </div>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">
-                    {value.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    {value.desc}
-                  </p>
                 </motion.div>
               ))}
             </div>
-          </motion.div>
+
+            {/* Bottom Note */}
+            <div className="mt-8 lg:mt-12 p-6 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg">
+              <p className="text-base lg:text-lg text-gray-700 leading-relaxed">
+                <span className="font-semibold text-amber-700">Lưu ý:</span> Giá
+                trị cốt lõi không phải là những khẩu hiệu để treo trên tường, mà
+                là kim chỉ nam cho mọi hành động, là cách chúng ta ứng xử với
+                khách hàng, đồng nghiệp và xã hội.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
