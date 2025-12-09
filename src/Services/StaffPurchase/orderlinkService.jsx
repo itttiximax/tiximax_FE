@@ -1,14 +1,22 @@
 import api from "../../config/api.js";
 
 const orderlinkService = {
+  // getOrdersWithLinks: async (page = 0, size = 15, orderType = null) => {
+  //   let url = `/orders/with-links/${page}/${size}`;
+  //   if (orderType) url += `?orderType=${orderType}`;
+
+  //   const res = await api.get(url);
+  //   return res.data;
+  // },
   getOrdersWithLinks: async (page = 0, size = 15, orderType = null) => {
     let url = `/orders/with-links/${page}/${size}`;
     if (orderType) url += `?orderType=${orderType}`;
 
-    const res = await api.get(url);
+    const res = await api.get(url, {
+      timeout: 120000, // Timeout riêng cho API này: 90 giây
+    });
     return res.data;
   },
-
   getOrderWithLinksById: async (orderId) => {
     const res = await api.get(`/orders/with-links/${orderId}`);
     return res.data;

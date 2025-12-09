@@ -1,12 +1,12 @@
 import axios from "axios";
 
-const API_BASE_URL = 
-//import.meta.env.VITE_API_BASE_URL || "https://t-6cn5.onrender.com/api";
-import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+const API_BASE_URL =
+  //import.meta.env.VITE_API_BASE_URL || "https://t-6cn5.onrender.com/api";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { "Content-Type": "application/json" },
-  timeout: 30000,
+  timeout: 90000,
 });
 
 // Tự động thêm token vào header

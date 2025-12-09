@@ -258,163 +258,180 @@ const PackingAwaitList = () => {
     try {
       const data = await packingsService.exportPackings(selectedPackings);
 
-      if (data && data.length > 0) {
-        // Tạo header
-        const excelData = [
-          [
-            "STT",
-            "Mã kiện hàng",
-            "Mã chuyến bay",
-            "Mã đơn hàng",
-            "Mã tracking",
-            "Tên sản phẩm",
-            "Số lượng",
-            "Giá tiền",
-            "Link sản phẩm",
-            "Phân loại",
-            "Chiều cao (cm)",
-            "Chiều dài (cm)",
-            "Chiều rộng (cm)",
-            "Thể tích (m³)",
-            "Trọng lượng (kg)",
-            "Mã khách hàng",
-            "Tên khách hàng",
-            "Điểm đến",
-            "Nhân viên",
-          ],
-        ];
+      if (!data || data.length === 0) {
+        toast.error("Không có dữ liệu để xuất!");
+        return;
+      }
 
-        let stt = 1;
+      // Helper function to ensure array
+      const ensureArray = (value) => {
+        if (Array.isArray(value)) return value;
+        if (value === null || value === undefined || value === "") return [];
+        return [value];
+      };
 
-        // Duyệt qua từng kiện hàng
-        data.forEach((packing) => {
-          // Chuyển đổi sang mảng nếu không phải mảng
-          const productNames = Array.isArray(packing.productNames)
-            ? packing.productNames
-            : packing.productNames
-            ? [packing.productNames]
-            : [""];
+      // Create header
+      const excelData = [
+        [
+          "STT",
+          "Mã kiện hàng",
+          "Mã chuyến bay",
+          "Mã đơn hàng",
+          "Mã tracking",
+          "Tên sản phẩm",
+          "Số lượng",
+          "Giá tiền",
+          "Link sản phẩm",
+          "Phân loại",
+          "Chiều cao (cm)",
+          "Chiều dài (cm)",
+          "Chiều rộng (cm)",
+          "Thể tích (m³)",
+          "Trọng lượng (kg)",
+          "Mã khách hàng",
+          "Tên khách hàng",
+          "Điểm đến",
+          "Nhân viên",
+        ],
+      ];
 
-          const quantities = Array.isArray(packing.quantities)
-            ? packing.quantities
-            : packing.quantities
-            ? [packing.quantities]
-            : [""];
+      let stt = 1;
 
-          const prices = Array.isArray(packing.price)
-            ? packing.price
-            : packing.price
-            ? [packing.price]
-            : [""];
+      // Process each packing
+      data.forEach((packing) => {
+        // Convert to arrays
+        const productNames = ensureArray(packing.productNames);
+        const quantities = ensureArray(packing.quantities);
+        const productLinks = ensureArray(packing.productLink);
 
-          const productLinks = Array.isArray(packing.productLink)
-            ? packing.productLink
-            : packing.productLink
-            ? [packing.productLink]
-            : [""];
-
-          // Tìm độ dài tối đa
-          const maxLength = Math.max(
-            productNames.length,
-            quantities.length,
-            prices.length,
-            productLinks.length
-          );
-
-          // Tạo một dòng cho mỗi sản phẩm
-          for (let i = 0; i < maxLength; i++) {
-            excelData.push([
-              stt,
-              packing.packingCode || "",
-              packing.flightCode || "",
-              packing.orderCode || "",
-              packing.trackingCode || "",
-              productNames[i] || "",
-              quantities[i] || "",
-              prices[i] || "",
-              productLinks[i] || "",
-              packing.classify || "",
-              packing.height || "",
-              packing.length || "",
-              packing.width || "",
-              packing.dim ? packing.dim.toFixed(4) : "",
-              packing.netWeight ? packing.netWeight.toFixed(2) : "",
-              packing.customerCode || "",
-              packing.customerName || "",
-              packing.destination || "",
-              packing.staffName || "",
-            ]);
-            stt++;
-          }
-        });
-
-        // Tạo worksheet
-        const ws = XLSX.utils.aoa_to_sheet(excelData);
-
-        // Định dạng độ rộng cột
-        ws["!cols"] = [
-          { wch: 5 }, // STT
-          { wch: 18 }, // Mã kiện hàng
-          { wch: 15 }, // Mã chuyến bay
-          { wch: 15 }, // Mã đơn hàng
-          { wch: 15 }, // Mã tracking
-          { wch: 30 }, // Tên sản phẩm
-          { wch: 10 }, // Số lượng
-          { wch: 12 }, // Giá tiền
-          { wch: 50 }, // Link sản phẩm
-          { wch: 18 }, // Phân loại
-          { wch: 12 }, // Chiều cao
-          { wch: 12 }, // Chiều dài
-          { wch: 12 }, // Chiều rộng
-          { wch: 12 }, // Thể tích
-          { wch: 15 }, // Trọng lượng
-          { wch: 15 }, // Mã khách hàng
-          { wch: 20 }, // Tên khách hàng
-          { wch: 15 }, // Điểm đến
-          { wch: 20 }, // Nhân viên
-        ];
-
-        // Style cho header row
-        const range = XLSX.utils.decode_range(ws["!ref"]);
-        for (let col = range.s.c; col <= range.e.c; col++) {
-          const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-          if (!ws[cellAddress]) continue;
-
-          ws[cellAddress].s = {
-            fill: {
-              fgColor: { rgb: "2563EB" },
-            },
-            font: {
-              color: { rgb: "FFFFFF" },
-              bold: true,
-              sz: 12,
-            },
-            alignment: {
-              horizontal: "center",
-              vertical: "center",
-            },
-            border: {
-              top: { style: "thin", color: { rgb: "000000" } },
-              bottom: { style: "thin", color: { rgb: "000000" } },
-              left: { style: "thin", color: { rgb: "000000" } },
-              right: { style: "thin", color: { rgb: "000000" } },
-            },
-          };
+        // Handle price - có thể là number hoặc array
+        let prices = [];
+        if (Array.isArray(packing.price)) {
+          prices = packing.price;
+        } else if (
+          typeof packing.price === "number" ||
+          typeof packing.price === "string"
+        ) {
+          // Nếu price là number hoặc string, tạo array với cùng số lượng items
+          const priceValue = packing.price;
+          const itemCount = Math.max(productNames.length, quantities.length, 1);
+          prices = Array(itemCount).fill(priceValue);
+        } else {
+          prices = [];
         }
 
-        // Tạo workbook và xuất file
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Packings");
-        XLSX.writeFile(
-          wb,
-          `packings_export_${new Date().toISOString().split("T")[0]}.xlsx`
+        // Find max length
+        const maxLength = Math.max(
+          productNames.length,
+          quantities.length,
+          prices.length,
+          productLinks.length,
+          1 // At least 1 row per packing
         );
 
-        toast.success(
-          `Xuất thành công ${data.length} kiện hàng (${stt - 1} dòng chi tiết)!`
-        );
+        // Create a row for each product
+        for (let i = 0; i < maxLength; i++) {
+          excelData.push([
+            stt,
+            packing.packingCode || "",
+            packing.flightCode || "",
+            packing.orderCode || "",
+            packing.trackingCode || "",
+            productNames[i] || "",
+            quantities[i] || "",
+            prices[i] !== undefined && prices[i] !== null ? prices[i] : "",
+            productLinks[i] || "",
+            packing.classify || "",
+            packing.height || "",
+            packing.length || "",
+            packing.width || "",
+            packing.dim ? Number(packing.dim).toFixed(4) : "",
+            packing.netWeight ? Number(packing.netWeight).toFixed(2) : "",
+            packing.customerCode || "",
+            packing.customerName || "",
+            packing.destination || "",
+            packing.staffName || "",
+          ]);
+          stt++;
+        }
+      });
+
+      // Create worksheet
+      const ws = XLSX.utils.aoa_to_sheet(excelData);
+
+      // Column widths
+      ws["!cols"] = [
+        { wch: 5 }, // STT
+        { wch: 18 }, // Mã kiện hàng
+        { wch: 15 }, // Mã chuyến bay
+        { wch: 15 }, // Mã đơn hàng
+        { wch: 15 }, // Mã tracking
+        { wch: 30 }, // Tên sản phẩm
+        { wch: 10 }, // Số lượng
+        { wch: 15 }, // Giá tiền (tăng width để hiển thị số lớn)
+        { wch: 50 }, // Link sản phẩm
+        { wch: 18 }, // Phân loại
+        { wch: 12 }, // Chiều cao
+        { wch: 12 }, // Chiều dài
+        { wch: 12 }, // Chiều rộng
+        { wch: 12 }, // Thể tích
+        { wch: 15 }, // Trọng lượng
+        { wch: 15 }, // Mã khách hàng
+        { wch: 20 }, // Tên khách hàng
+        { wch: 15 }, // Điểm đến
+        { wch: 20 }, // Nhân viên
+      ];
+
+      // Style header row
+      const range = XLSX.utils.decode_range(ws["!ref"]);
+      for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+        if (!ws[cellAddress]) continue;
+
+        ws[cellAddress].s = {
+          fill: {
+            fgColor: { rgb: "2563EB" },
+          },
+          font: {
+            color: { rgb: "FFFFFF" },
+            bold: true,
+            sz: 12,
+          },
+          alignment: {
+            horizontal: "center",
+            vertical: "center",
+          },
+          border: {
+            top: { style: "thin", color: { rgb: "000000" } },
+            bottom: { style: "thin", color: { rgb: "000000" } },
+            left: { style: "thin", color: { rgb: "000000" } },
+            right: { style: "thin", color: { rgb: "000000" } },
+          },
+        };
       }
+
+      // Format price columns as number with thousand separator
+      for (let row = 1; row < excelData.length; row++) {
+        const priceCell = XLSX.utils.encode_cell({ r: row, c: 7 }); // Column H (Giá tiền)
+        if (ws[priceCell] && typeof ws[priceCell].v === "number") {
+          ws[priceCell].z = "#,##0"; // Format số với dấu phẩy
+        }
+      }
+
+      // Create workbook and export
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Packings");
+
+      const fileName = `packings_export_${
+        new Date().toISOString().split("T")[0]
+      }.xlsx`;
+      XLSX.writeFile(wb, fileName);
+
+      toast.success(
+        `Xuất thành công ${data.length} kiện hàng (${stt - 1} dòng chi tiết)!`
+      );
     } catch (error) {
+      console.error("Export error:", error);
       toast.error(error.message || "Export thất bại!");
     } finally {
       setExportLoading(false);

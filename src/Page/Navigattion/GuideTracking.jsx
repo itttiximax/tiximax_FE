@@ -14,6 +14,7 @@ import {
   RefreshCcw,
   ShieldCheck,
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 const DEMO_DATA = {
   TXM123456: {
@@ -176,38 +177,38 @@ const GuideTracking = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-white">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-yellow-400 to-yellow-300 py-16 px-6">
+      <section className="bg-gradient-to-r from-yellow-400 to-yellow-300 py-24 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-5xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-10">
+            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-5 leading-tight">
               TRA CỨU TÌNH TRẠNG ĐƠN HÀNG
             </h1>
-            <p className="text-xl text-gray-800">
+            <p className="text-xl md:text-2xl text-gray-800">
               Nhập mã kiện/mã vận đơn TIXIMAX để xem trạng thái chi tiết
             </p>
           </div>
 
           {/* Search Box */}
           <form onSubmit={onSearch} className="max-w-3xl mx-auto">
-            <div className="bg-white rounded-xl shadow-lg p-3 flex gap-3">
+            <div className="bg-white rounded-2xl shadow-xl p-4 flex gap-4">
               <div className="flex-1 flex items-center gap-3 px-3">
-                <Barcode className="w-6 h-6 text-yellow-600" />
+                <Barcode className="w-7 h-7 text-yellow-600" />
                 <input
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  placeholder="Nhập mã: TXM123456 hoặc TXM987654"
-                  className="w-full text-lg outline-none"
+                  placeholder="Nhập mã: TXM123456"
+                  className="w-full text-lg md:text-xl outline-none placeholder:text-gray-400"
                 />
               </div>
               <button
                 type="submit"
-                className="px-8 py-4 rounded-lg text-white font-bold bg-gray-900 hover:bg-gray-800 transition-colors"
+                className="px-8 py-4 rounded-xl text-white font-bold text-lg bg-gray-900 hover:bg-gray-800 transition-colors"
               >
                 Tra cứu
               </button>
             </div>
             {error && (
-              <div className="mt-3 text-base text-red-700 flex items-center gap-2 justify-center">
+              <div className="mt-4 text-base md:text-lg text-red-700 flex items-center gap-2 justify-center">
                 <CircleAlert className="w-5 h-5" /> {error}
               </div>
             )}
@@ -216,32 +217,20 @@ const GuideTracking = () => {
       </section>
 
       {/* Result Section */}
-      <section className="py-12">
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-6">
           {!result ? (
-            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-8 text-center">
-              <p className="text-lg text-gray-700">
-                💡 <span className="font-semibold">Mẹo:</span> Thử nhập mã{" "}
-                <span className="bg-yellow-200 px-3 py-1 rounded font-bold">
-                  TXM123456
-                </span>{" "}
-                hoặc{" "}
-                <span className="bg-yellow-200 px-3 py-1 rounded font-bold">
-                  TXM987654
-                </span>{" "}
-                để xem ví dụ
-              </p>
-            </div>
+            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-10 text-center min-h-[100px]" />
           ) : result.notFound ? (
-            <div className="bg-white rounded-xl shadow-lg p-8 border-4 border-yellow-400">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <CircleAlert className="w-8 h-8 text-yellow-600" />
+            <div className="bg-white rounded-2xl shadow-xl p-10 border-4 border-yellow-400">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div className="flex items-start gap-4">
+                  <CircleAlert className="w-8 h-8 text-yellow-600 flex-shrink-0" />
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">
+                    <h3 className="text-xl md:text-2xl font-bold text-gray-900">
                       Không tìm thấy thông tin
                     </h3>
-                    <p className="text-gray-700 mt-1">
+                    <p className="text-gray-700 mt-2 text-lg">
                       Mã <strong>{result.trackingNo}</strong> không có trong hệ
                       thống. Vui lòng kiểm tra lại hoặc liên hệ CSKH.
                     </p>
@@ -253,44 +242,44 @@ const GuideTracking = () => {
                     setResult(null);
                     setError("");
                   }}
-                  className="px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold rounded-lg flex items-center gap-2"
+                  className="px-7 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold rounded-xl flex items-center gap-2 text-base md:text-lg"
                 >
                   <RefreshCcw className="w-5 h-5" /> Tra cứu lại
                 </button>
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-xl shadow-lg p-12">
+            <div className="bg-white rounded-2xl shadow-xl p-16">
               {/* Header Info */}
-              <div className="mb-12 pb-8 border-b-4 border-yellow-400">
-                <div className="grid md:grid-cols-3 gap-6">
+              <div className="mb-14 pb-10 border-b-4 border-yellow-400">
+                <div className="grid md:grid-cols-3 gap-8">
                   <div>
                     <p className="text-gray-600 text-base mb-2">Mã theo dõi</p>
-                    <p className="text-3xl font-black text-gray-900">
+                    <p className="text-3xl md:text-4xl font-black text-gray-900 break-all">
                       {result.trackingNo}
                     </p>
                   </div>
                   <div>
                     <p className="text-gray-600 text-base mb-2">Tuyến đường</p>
-                    <p className="text-xl font-bold text-gray-900">
+                    <p className="text-xl md:text-2xl font-bold text-gray-900">
                       {result.route}
                     </p>
                   </div>
                   <div>
                     <p className="text-gray-600 text-base mb-2">ETA dự kiến</p>
-                    <p className="text-xl font-bold text-gray-900">
+                    <p className="text-xl md:text-2xl font-bold text-gray-900">
                       {result.eta}
                     </p>
                   </div>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="mt-8">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-lg font-bold text-gray-900">
+                <div className="mt-10">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-lg md:text-xl font-bold text-gray-900">
                       Tiến độ vận chuyển
                     </span>
-                    <span className="text-2xl font-black text-yellow-600">
+                    <span className="text-2xl md:text-3xl font-black text-yellow-600">
                       {progress}%
                     </span>
                   </div>
@@ -300,7 +289,7 @@ const GuideTracking = () => {
                       style={{ width: `${progress}%` }}
                     />
                   </div>
-                  <div className="mt-3 flex items-center gap-2">
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
                     <span
                       className={`inline-block w-4 h-4 rounded-full ${
                         STATUS_META[result.status]?.color
@@ -309,7 +298,7 @@ const GuideTracking = () => {
                     <span className="text-lg font-bold text-gray-900">
                       {STATUS_META[result.status]?.label}
                     </span>
-                    <span className="text-gray-600">
+                    <span className="text-gray-600 text-base">
                       - {STATUS_META[result.status]?.desc}
                     </span>
                   </div>
@@ -317,17 +306,17 @@ const GuideTracking = () => {
               </div>
 
               {/* Timeline */}
-              <div className="mb-12">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                  <ClipboardList className="w-6 h-6 text-yellow-600" />
+              <div className="mb-14">
+                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 flex items-center gap-3">
+                  <ClipboardList className="w-7 h-7 text-yellow-600" />
                   Dòng thời gian chi tiết
                 </h3>
-                <ul className="space-y-6 pl-8">
+                <ul className="space-y-10 pl-8">
                   {result.checkpoints.map((cp, idx) => {
                     const Icon = cp.icon || PackageSearch;
                     return (
                       <li key={cp.ts + cp.code} className="relative">
-                        <div className="flex items-start gap-4">
+                        <div className="flex items-start gap-5">
                           <div className="relative">
                             <span
                               className={`inline-flex items-center justify-center w-12 h-12 rounded-full text-white ${
@@ -337,14 +326,14 @@ const GuideTracking = () => {
                               <Icon className="w-6 h-6" />
                             </span>
                             {idx < result.checkpoints.length - 1 && (
-                              <span className="absolute left-1/2 -translate-x-1/2 top-12 w-1 h-8 bg-gray-300"></span>
+                              <span className="absolute left-1/2 -translate-x-1/2 top-16 w-1 h-12 bg-gray-300"></span>
                             )}
                           </div>
-                          <div className="flex-1 pt-2">
-                            <div className="text-xl font-bold text-gray-900 mb-1">
+                          <div className="flex-1 pt-1.5">
+                            <div className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
                               {cp.name}
                             </div>
-                            <div className="text-base text-gray-600 flex items-center gap-2">
+                            <div className="text-base md:text-lg text-gray-600 flex items-center gap-2">
                               <Clock className="w-4 h-4" /> {cp.ts}
                             </div>
                           </div>
@@ -356,16 +345,16 @@ const GuideTracking = () => {
               </div>
 
               {/* Status Legend */}
-              <div className="mb-12">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6 pb-3 border-b-4 border-yellow-400 flex items-center gap-2">
-                  <PackageSearch className="w-6 h-6 text-yellow-600" />Ý nghĩa
+              <div className="mb-14">
+                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-7 pb-3 border-b-4 border-yellow-400 flex items-center gap-3">
+                  <PackageSearch className="w-7 h-7 text-yellow-600" />Ý nghĩa
                   các trạng thái
                 </h3>
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid md:grid-cols-2 gap-8">
                   {STATUS_ORDER.map((code) => (
                     <div
                       key={code}
-                      className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg"
+                      className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl"
                     >
                       <span
                         className={`inline-block w-4 h-4 rounded-full ${STATUS_META[code].color}`}
@@ -374,7 +363,7 @@ const GuideTracking = () => {
                         <p className="font-bold text-gray-900 text-lg">
                           {STATUS_META[code].label}
                         </p>
-                        <p className="text-gray-600">
+                        <p className="text-gray-600 text-base">
                           {STATUS_META[code].desc}
                         </p>
                       </div>
@@ -384,8 +373,8 @@ const GuideTracking = () => {
               </div>
 
               {/* Tips */}
-              <div className="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-lg">
-                <h4 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <div className="bg-yellow-50 border-l-4 border-yellow-500 p-7 rounded-xl">
+                <h4 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-yellow-600" />
                   Mẹo tra cứu hiệu quả
                 </h4>
@@ -415,7 +404,7 @@ const GuideTracking = () => {
               </div>
 
               {/* Note */}
-              <div className="mt-6 text-center text-sm text-gray-500 flex items-center justify-center gap-2">
+              <div className="mt-7 text-center text-sm text-gray-500 flex items-center justify-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-yellow-600" />
                 Thông tin demo chỉ mang tính minh họa
               </div>
@@ -425,53 +414,85 @@ const GuideTracking = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-12 bg-gray-50">
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="bg-white rounded-xl shadow-lg p-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 pb-3 border-b-4 border-yellow-400 flex items-center gap-2">
+          <div className="bg-white rounded-2xl shadow-xl p-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-10 pb-4 border-b-4 border-yellow-400 flex items-center gap-3">
               <Truck className="w-7 h-7 text-yellow-600" />
               Câu hỏi thường gặp
             </h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="border-l-4 border-yellow-500 pl-6 py-3">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
+
+            <div className="grid md:grid-cols-2 gap-10">
+              {/* FAQ Item 1 */}
+              <motion.div
+                className="border-l-4 border-yellow-500 pl-7 py-4"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: 0.0 }}
+              >
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
                   Bao lâu tiến độ được cập nhật?
                 </h3>
                 <p className="text-lg text-gray-700 leading-relaxed">
-                  Thông thường mỗi mốc xử lý sẽ cập nhật trong vòng 1–3 giờ làm
-                  việc; mốc bay/đến sân bay phụ thuộc hãng.
+                  Thông thường mỗi mốc xử lý sẽ được cập nhật trong vòng 1–3 giờ
+                  làm việc; các mốc bay/đến sân bay phụ thuộc lịch của hãng vận
+                  chuyển.
                 </p>
-              </div>
+              </motion.div>
 
-              <div className="border-l-4 border-yellow-500 pl-6 py-3">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
+              {/* FAQ Item 2 */}
+              <motion.div
+                className="border-l-4 border-yellow-500 pl-7 py-4"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
                   Tôi có thể lấy số AWB/MAWB không?
                 </h3>
                 <p className="text-lg text-gray-700 leading-relaxed">
-                  Có, sau khi gán chuyến bay, bạn có thể yêu cầu cung cấp số
-                  HAWB/MAWB để đối chiếu.
+                  Có. Sau khi đơn được gán chuyến bay, bạn có thể yêu cầu cung
+                  cấp số HAWB/MAWB để đối chiếu hoặc làm chứng từ.
                 </p>
-              </div>
+              </motion.div>
 
-              <div className="border-l-4 border-yellow-500 pl-6 py-3">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
+              {/* FAQ Item 3 */}
+              <motion.div
+                className="border-l-4 border-yellow-500 pl-7 py-4"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
                   ETA có thể thay đổi không?
                 </h3>
                 <p className="text-lg text-gray-700 leading-relaxed">
-                  Có. ETA phụ thuộc lịch bay thực tế và tình trạng thông quan;
-                  sẽ được cập nhật ngay khi có thay đổi.
+                  Có. ETA phụ thuộc lịch bay thực tế và tình trạng thông quan.
+                  Nếu có thay đổi, hệ thống sẽ cập nhật lại thời gian dự kiến
+                  sớm nhất có thể.
                 </p>
-              </div>
+              </motion.div>
 
-              <div className="border-l-4 border-yellow-500 pl-6 py-3">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
+              {/* FAQ Item 4 */}
+              <motion.div
+                className="border-l-4 border-yellow-500 pl-7 py-4"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
                   Hàng tôi tới VN nhưng lâu giao?
                 </h3>
                 <p className="text-lg text-gray-700 leading-relaxed">
-                  Khả năng chờ thông quan hoặc hàng đang gom tuyến nội địa. Liên
-                  hệ CSKH để được ưu tiên phát hàng.
+                  Có thể đơn đang chờ thông quan hoặc chờ gom tuyến giao nội
+                  địa. Bạn có thể liên hệ CSKH để được kiểm tra và ưu tiên phát
+                  hàng nếu cần gấp.
                 </p>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>
