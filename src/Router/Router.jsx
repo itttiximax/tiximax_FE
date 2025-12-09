@@ -127,6 +127,10 @@ import UpdateShipmentCodeAuctionList from "../components/StaffPurchaser/UpdateSh
 import DashboardManager from "../components/Manager/DashboardManager";
 import ExportPacking from "../components/Packing/ExportPacking";
 import CreatePackingJapan from "../components/WarehouseForeign/CreatePackingJapan";
+import PolicyPage from "../Page/Navigattion/PolicyPage";
+import SecurityPage from "../Page/Navigattion/SecurityPage";
+import CareerPage from "../Page/Navigattion/CareerPage";
+import Question from "../Page/Navigattion/Question";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -170,6 +174,10 @@ const Router = createBrowserRouter([
       { path: "order-history", element: <OrderHistory /> },
       { path: "/reset-password", element: <ResetPassword /> },
       { path: "/auth/callback", element: <AuthCallback /> },
+      { path: "/policies", element: <PolicyPage /> },
+      { path: "/security", element: <SecurityPage /> },
+      { path: "/qa", element: <Question /> },
+      { path: "/careers", element: <CareerPage /> },
     ],
   },
   {

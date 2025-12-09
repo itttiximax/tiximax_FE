@@ -76,7 +76,7 @@ const Footer = () => {
               <ul className="space-y-3 text-sm mt-1">
                 <li>
                   <a
-                    href="#"
+                    href="/about"
                     className="hover:text-yellow-400 transition-colors"
                   >
                     Giới thiệu Tiximax
@@ -84,7 +84,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <a
-                    href="#"
+                    href="/policies"
                     className="hover:text-yellow-400 transition-colors"
                   >
                     Quy định chung
@@ -92,7 +92,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <a
-                    href="#"
+                    href="/security"
                     className="hover:text-yellow-400 transition-colors"
                   >
                     Chính sách bảo mật
@@ -100,7 +100,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <a
-                    href="#"
+                    href="/careers"
                     className="hover:text-yellow-400 transition-colors"
                   >
                     Tuyển dụng
@@ -108,7 +108,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <a
-                    href="#"
+                    href="/qa"
                     className="hover:text-yellow-400 transition-colors"
                   >
                     Câu hỏi thường gặp
