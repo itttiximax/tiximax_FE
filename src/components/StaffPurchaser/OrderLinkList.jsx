@@ -38,7 +38,7 @@ const OrderLinkList = () => {
   const [expandedOrders, setExpandedOrders] = useState({});
   const [pagination, setPagination] = useState({
     pageNumber: 0,
-    pageSize: 15,
+    pageSize: 10,
     totalPages: 0,
     totalElements: 0,
     first: true,
