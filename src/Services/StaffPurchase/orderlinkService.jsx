@@ -13,7 +13,7 @@ const orderlinkService = {
     if (orderType) url += `?orderType=${orderType}`;
 
     const res = await api.get(url, {
-      timeout: 120000, // Timeout riêng cho API này: 90 giây
+      timeout: 300000, // Timeout riêng cho API này: 90 giây
     });
     return res.data;
   },

@@ -6,7 +6,7 @@ const API_BASE_URL =
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { "Content-Type": "application/json" },
-  timeout: 120000,
+  timeout: 300000,
 });
 
 // Tự động thêm token vào header
