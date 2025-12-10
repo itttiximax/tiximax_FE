@@ -64,13 +64,16 @@ const userService = {
   },
 
   // Get my customers (assigned to current staff)
-  getMyCustomers: async (page = 0, size = 10) => {
+  getMyCustomers: async (page = 0, size = 10, search = "") => {
     validatePagination(page, size);
     try {
-      const response = await api.get(`/accounts/my-customers/${page}/${size}`);
+      const response = await api.get(`/accounts/my-customers/${page}/${size}`, {
+        params: { search }, // ⬅️ Query param
+      });
       return response.data;
     } catch (error) {
       handleApiError(error, "Failed to fetch my customers");
+      return null;
     }
   },
 
