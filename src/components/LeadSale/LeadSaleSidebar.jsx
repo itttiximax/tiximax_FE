@@ -222,7 +222,7 @@ const LeadSaleSideBar = () => {
             {
               to: "/lead-sale/shipping/domestic",
               icon: Truck,
-              label: "Đơn thanh toán hộ",
+              label: "Thêm mã vận đơn",
             },
             {
               to: "/lead-sale/shipping/international",

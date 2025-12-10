@@ -85,8 +85,8 @@ const RelateOrder = () => {
         style: "bg-blue-50 text-blue-700 border-blue-200",
         dot: "bg-blue-500",
       },
-      DA_NHAN: {
-        label: "Đã nhận",
+      DA_MUA: {
+        label: "Đã mua",
         style: "bg-green-50 text-green-700 border-green-200",
         dot: "bg-green-500",
       },
