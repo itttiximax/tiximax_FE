@@ -131,6 +131,7 @@ import PolicyPage from "../Page/Navigattion/PolicyPage";
 import SecurityPage from "../Page/Navigattion/SecurityPage";
 import CareerPage from "../Page/Navigattion/CareerPage";
 import Question from "../Page/Navigattion/Question";
+import RelateOrder from "../components/Order/RelateOrder";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -279,7 +280,7 @@ const Router = createBrowserRouter([
       { path: "team-performance", element: <NotFound /> },
       { path: "customers", element: <CustomerStaffList /> },
       { path: "orders", element: <OrderList /> },
-      { path: "/lead-sale/shipping/domestic", element: <NotFound /> },
+      { path: "/lead-sale/shipping/domestic", element: <RelateOrder /> },
       { path: "/lead-sale/shipping/international", element: <NotFound /> },
       { path: "tracking", element: <NotFound /> },
       { path: "orders/tracking", element: <ManagerOrder /> },
@@ -329,7 +330,7 @@ const Router = createBrowserRouter([
       { path: "prospects", element: <NotFound /> },
       { path: "orders", element: <OrderList /> },
       { path: "orders/pending", element: <NotFound /> }, // Chưa triển khai
-      { path: "shipping/domestic", element: <NotFound /> }, // Chưa triển khai
+      { path: "shipping/domestic", element: <RelateOrder /> }, // Chưa triển khai
       { path: "shipping/international", element: <NotFound /> }, // Chưa triển khai
       { path: "tracking", element: <Tracking /> }, // Chưa triển khai
       { path: "warehouses", element: <Tracking /> }, // Chưa triển khai

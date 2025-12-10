@@ -59,6 +59,19 @@ const orderlinkService = {
     });
     return res.data;
   },
+  getOrdersWithoutShipment: async (page = 0, size = 10) => {
+    const res = await api.get(`/orders/without-shipment/${page}/${size}`);
+    return res.data;
+  },
+  updateOrderLinkShipmentCode: async (orderId, linkId, shipmentCode) => {
+    // encode phòng trường hợp shipmentCode có kí tự đặc biệt
+    const encodedShipmentCode = encodeURIComponent(shipmentCode);
+
+    const res = await api.patch(
+      `/orders/shipmentCode/${orderId}/${linkId}/${encodedShipmentCode}`
+    );
+    return res.data;
+  },
 };
 
 export default orderlinkService;

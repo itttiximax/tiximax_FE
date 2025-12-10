@@ -197,7 +197,7 @@ const StaffSaleSidebar = () => {
             {
               to: "/staff-sale/shipping/domestic",
               icon: Truck,
-              label: "Tra cứu đơn hàng",
+              label: "Đơn thanh toán hộ",
             },
             {
               to: "/staff-sale/shipping/international",
