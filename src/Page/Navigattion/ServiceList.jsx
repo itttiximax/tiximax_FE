@@ -136,14 +136,8 @@ const ServiceList = () => {
         </div>
       </section>
 
-      {/* TOP SERVICES – BG XÁM, CARD VÀNG + TEXT TO HƠN */}
-      <motion.section
-        className="bg-gray-50 py-16 lg:py-20"
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.3 }}
-        variants={fadeUp}
-      >
+      {/* TOP SERVICES – KHÔNG HIỆU ỨNG */}
+      <section className="bg-gray-50 py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="text-center mb-12">
             <p className="text-xs md:text-sm font-semibold tracking-[0.25em] text-amber-600 uppercase">
@@ -156,13 +150,9 @@ const ServiceList = () => {
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
-            {topServices.map((s, i) => (
-              <motion.div
+            {topServices.map((s) => (
+              <div
                 key={s.title}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.4 }}
-                transition={{ duration: 0.5, delay: i * 0.06 }}
                 className="bg-amber-100 rounded-2xl shadow-sm border border-amber-200 px-8 py-9 text-center hover:shadow-md hover:-translate-y-1 transition-all duration-200"
               >
                 <div className="flex justify-center mb-4">{s.icon}</div>
@@ -172,13 +162,13 @@ const ServiceList = () => {
                 <p className="mt-4 text-base text-gray-700 leading-relaxed">
                   {s.desc}
                 </p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
-      </motion.section>
+      </section>
 
-      {/* Services List – BG TRẮNG, CARD VÀNG + TEXT TO HƠN */}
+      {/* Services List – BG TRẮNG, vẫn có hiệu ứng */}
       <motion.section
         className="py-16 lg:py-20 bg-white"
         initial="hidden"
@@ -241,7 +231,7 @@ const ServiceList = () => {
         </div>
       </motion.section>
 
-      {/* Quy trình đơn hàng – BG XÁM, CARD VÀNG + TEXT TO HƠN */}
+      {/* Quy trình đơn hàng – vẫn hiệu ứng */}
       <motion.section
         className="py-16 lg:py-20 bg-gray-50"
         initial="hidden"

@@ -8,21 +8,47 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
-const Section = ({ title, bg = "white", children }) => (
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+};
+
+// Thêm noMotion để tắt hiệu ứng cho section cần
+const Section = ({ title, bg = "white", children, noMotion = false }) => (
   <section
     className={`py-16 border-t border-amber-100 ${
       bg === "gray" ? "bg-gray-50" : "bg-white"
     }`}
   >
-    <div className="max-w-5xl mx-auto px-4">
-      <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 text-center">
-        {title}
-      </h2>
-      <div className="mt-4 mb-10 h-[3px] w-20 mx-auto bg-amber-500 rounded-full" />
-      <div className="text-base sm:text-lg md:text-xl leading-relaxed text-gray-700 space-y-4">
-        {children}
-      </div>
+    <div className="max-w-7xl mx-auto px-6 lg:px-10">
+      {noMotion ? (
+        <div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 text-center">
+            {title}
+          </h2>
+          <div className="mt-4 mb-10 h-[3px] w-20 mx-auto bg-amber-500 rounded-full" />
+          <div className="text-base sm:text-lg md:text-xl leading-relaxed text-gray-700 space-y-4">
+            {children}
+          </div>
+        </div>
+      ) : (
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.25 }}
+          variants={fadeUp}
+        >
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 text-center">
+            {title}
+          </h2>
+          <div className="mt-4 mb-10 h-[3px] w-20 mx-auto bg-amber-500 rounded-full" />
+          <div className="text-base sm:text-lg md:text-xl leading-relaxed text-gray-700 space-y-4">
+            {children}
+          </div>
+        </motion.div>
+      )}
     </div>
   </section>
 );
@@ -30,49 +56,57 @@ const Section = ({ title, bg = "white", children }) => (
 const ServicesPurchase = () => {
   return (
     <main className="min-h-screen bg-gradient-to-b from-white to-amber-50/40">
-      {/* HERO – đồng bộ style với ServicesStorage */}
+      {/* HERO – đồng bộ style với AboutUs / ServicesStorage */}
       <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-b border-amber-900/30">
+        {/* overlay glow */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500/30 via-transparent to-transparent" />
-        <div className="max-w-5xl mx-auto px-6 py-16 sm:py-20 lg:py-24 relative">
-          <div className="flex justify-center">
-            <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-amber-300 mb-4">
-              <ShoppingBag className="w-5 h-5" />
-              <span>Dịch vụ mua hộ Tiximax</span>
+
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-16 sm:py-20 lg:py-24 relative">
+          <motion.div
+            initial="hidden"
+            animate="show"
+            variants={fadeUp}
+            className="space-y-8 text-white"
+          >
+            <div className="flex justify-center">
+              <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-amber-300 mb-2">
+                <span>Dịch vụ mua hộ Tiximax</span>
+              </div>
             </div>
-          </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-snug text-center">
-            Tiximax Mua Hộ – Dịch vụ mua hộ hàng quốc tế minh bạch, an toàn, tối
-            ưu cho bạn
-          </h1>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight text-center">
+              Tiximax Mua Hộ – Dịch vụ mua hộ hàng quốc tế minh bạch, an toàn,
+              tối ưu cho bạn
+            </h1>
 
-          <div className="mt-6 mb-4 h-[3px] w-24 mx-auto bg-amber-500 rounded-full" />
+            <div className="mt-2 mb-2 h-[3px] w-24 mx-auto bg-amber-500 rounded-full" />
 
-          <p className="max-w-3xl mx-auto text-sm sm:text-base md:text-lg text-gray-200 leading-relaxed text-center">
-            Dịch vụ <strong>Tiximax mua hộ</strong> hỗ trợ người dùng Việt mua
-            hàng quốc tế về nhanh, an toàn và minh bạch với đa dạng tuyến, quy
-            trình rõ ràng và nhiều ưu điểm vượt trội.
-          </p>
+            <p className="max-w-3xl mx-auto text-sm sm:text-base md:text-lg text-gray-200 leading-relaxed text-center">
+              Dịch vụ <strong>Tiximax mua hộ</strong> hỗ trợ người dùng Việt mua
+              hàng quốc tế về nhanh, an toàn và minh bạch với đa dạng tuyến, quy
+              trình rõ ràng và nhiều ưu điểm vượt trội.
+            </p>
 
-          <div className="mt-8 flex flex-wrap gap-4 justify-center">
-            <Link
-              to="/contact"
-              className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700"
-            >
-              Liên hệ tư vấn mua hộ
-            </Link>
-            <Link
-              to="/tracking"
-              className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
-            >
-              Tra cứu đơn hàng
-            </Link>
-          </div>
+            <div className="mt-4 flex flex-wrap gap-4 justify-center">
+              <Link
+                to="/contact"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700"
+              >
+                Liên hệ tư vấn mua hộ
+              </Link>
+              <Link
+                to="/tracking"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
+              >
+                Tra cứu đơn hàng
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* GIỚI THIỆU DỊCH VỤ – trắng */}
-      <Section title="Giới thiệu dịch vụ mua hộ Tiximax" bg="white">
+      {/* GIỚI THIỆU DỊCH VỤ – trắng, KHÔNG hiệu ứng */}
+      <Section title="Giới thiệu dịch vụ mua hộ Tiximax" bg="white" noMotion>
         <>
           <p>
             Tiximax là đơn vị cung cấp dịch vụ mua hộ chuyên tuyến giữa Việt Nam
@@ -476,18 +510,20 @@ const ServicesPurchase = () => {
 
       {/* KẾT LUẬN + CTA – trắng, card vàng nhạt */}
       <section className="py-16 border-t border-amber-100 bg-white">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 sm:p-8 flex flex-col gap-4 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10">
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={fadeUp}
+            className="bg-amber-50 border border-amber-200 rounded-2xl p-6 sm:p-8 flex flex-col gap-4 shadow-sm"
+          >
             <div className="flex flex-col items-center text-center gap-3">
-              <CheckCircle2 className="w-6 h-6 text-amber-600" />
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Kết luận – Tiximax mua hộ
-              </h2>
               <div className="h-[3px] w-20 bg-amber-500 rounded-full" />
             </div>
 
             <p className="text-base sm:text-lg md:text-xl text-gray-700 leading-relaxed text-center">
-              <strong>tiximax mua hộ</strong> là lựa chọn tốt nếu bạn muốn mua
+              <strong>TIXIMAX mua hộ</strong> là lựa chọn tốt nếu bạn muốn mua
               hàng quốc tế mà không phải xử lý rào cản kỹ thuật và thủ tục. Điểm
               mạnh nằm ở kinh nghiệm chuyên tuyến, minh bạch báo giá và hậu mãi.
               Trước khi đặt cọc, hãy yêu cầu báo giá chi tiết, hợp đồng dịch vụ
@@ -510,7 +546,7 @@ const ServicesPurchase = () => {
                 Theo dõi đơn mua hộ
               </Link>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
     </main>
