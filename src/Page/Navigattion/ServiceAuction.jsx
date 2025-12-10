@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
  * - Text to, dễ đọc
  * - Title căn giữa
  * - Line phân tách giữa các phần
+ * - UI đồng bộ với ServiceList (hero tối, section xám/trắng, card vàng)
  */
 
 const fadeUp = {
@@ -16,9 +17,11 @@ const fadeUp = {
   show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
 
-const Section = ({ title, children }) => (
+const Section = ({ title, bg = "white", children }) => (
   <motion.section
-    className="py-12 border-t border-amber-100 bg-white"
+    className={`py-16 border-t border-amber-100 ${
+      bg === "gray" ? "bg-gray-50" : "bg-white"
+    }`}
     initial="hidden"
     whileInView="show"
     viewport={{ once: true, amount: 0.25 }}
@@ -26,14 +29,14 @@ const Section = ({ title, children }) => (
   >
     <div className="max-w-5xl mx-auto px-4">
       {/* Title */}
-      <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center">
+      <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 text-center">
         {title}
       </h2>
       {/* Line dưới title */}
-      <div className="mt-4 mb-8 h-[2px] w-20 mx-auto bg-amber-500 rounded-full" />
+      <div className="mt-4 mb-10 h-[3px] w-20 mx-auto bg-amber-500 rounded-full" />
 
       {/* Nội dung */}
-      <div className="text-base sm:text-lg leading-relaxed text-gray-700 space-y-4">
+      <div className="text-base sm:text-lg md:text-xl leading-relaxed text-gray-700 space-y-5">
         {children}
       </div>
     </div>
@@ -43,31 +46,54 @@ const Section = ({ title, children }) => (
 const ServiceAuction = () => {
   return (
     <main className="min-h-screen bg-gradient-to-b from-white to-amber-50/40">
-      {/* HERO */}
+      {/* HERO – chỉ badge + H1 + CTA, không để chung nội dung dài */}
       <motion.section
-        className="bg-white border-b border-amber-100"
+        className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
         initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.4 }}
+        animate="show"
         variants={fadeUp}
       >
-        <div className="max-w-5xl mx-auto px-4 py-12 sm:py-16 md:py-20">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500/30 via-transparent to-transparent" />
+        <div className="max-w-5xl mx-auto px-6 py-16 sm:py-20 lg:py-24 relative">
           <div className="flex justify-center">
-            <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-amber-700 mb-4">
+            <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-amber-300 mb-4">
               <Gavel className="w-5 h-5" />
               <span>Dịch vụ đấu giá Tiximax</span>
             </div>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 leading-snug text-center">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-snug text-center">
             Dịch vụ đấu giá Tiximax – Dịch vụ đấu giá hàng quốc tế uy tín, đấu
             giá hàng ngoại ship về Việt Nam
           </h1>
 
           {/* Line dưới H1 */}
-          <div className="mt-6 mb-6 h-[2px] w-24 mx-auto bg-amber-500 rounded-full" />
+          <div className="mt-6 mb-6 h-[3px] w-24 mx-auto bg-amber-500 rounded-full" />
 
-          <p className="mt-2 text-base sm:text-lg text-gray-700 leading-relaxed text-center">
+          <div className="mt-8 flex flex-wrap gap-4 justify-center">
+            <Link
+              to="/signin"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700 transition-colors"
+            >
+              Đăng nhập để đấu giá
+            </Link>
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors"
+            >
+              Liên hệ tư vấn nhanh
+            </Link>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* ĐƯA NỘI DUNG H1 XUỐNG DƯỚI HEADER */}
+      <Section
+        title="Dịch vụ đấu giá Tiximax – Dịch vụ đấu giá hàng quốc tế uy tín, đấu giá hàng ngoại ship về Việt Nam"
+        bg="white"
+      >
+        <>
+          <p>
             Dịch vụ đấu giá Tiximax hỗ trợ người dùng Việt tham gia đấu giá trên
             các sàn thương mại điện tử lớn như <strong>Yahoo Auction</strong> và{" "}
             <strong>eBay</strong> – hai nền tảng nổi tiếng với lượng sản phẩm
@@ -79,7 +105,7 @@ const ServiceAuction = () => {
             trưng.
           </p>
 
-          <p className="mt-4 text-base sm:text-lg text-gray-700 leading-relaxed text-center">
+          <p>
             Dịch vụ được thiết kế trọn gói từ việc tìm sản phẩm, tư vấn mức giá
             hợp lý, đặt bid theo yêu cầu đến kiểm hàng và vận chuyển về Việt
             Nam. Kể cả khi khách chưa từng đấu giá hàng Nhật, Mỹ, không biết
@@ -87,47 +113,11 @@ const ServiceAuction = () => {
             <strong>Dịch Vụ Đấu Giá Tiximax</strong> vẫn hỗ trợ đầy đủ và đảm
             bảo giao dịch an toàn.
           </p>
+        </>
+      </Section>
 
-          <div className="mt-8 flex flex-wrap gap-4 justify-center">
-            <Link
-              to="/signin"
-              className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700 transition-colors"
-            >
-              Đăng nhập để đấu giá
-            </Link>
-            <Link
-              to="/contact"
-              className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors"
-            >
-              Liên hệ tư vấn nhanh
-            </Link>
-          </div>
-
-          {/* Nhóm keyword phụ */}
-          <div className="mt-8 text-xs sm:text-sm text-gray-500 space-y-2 text-center">
-            <p>
-              <strong>Key chính:</strong> Dịch vụ đấu giá Tiximax
-            </p>
-            <div className="flex flex-wrap gap-2 justify-center">
-              <span className="inline-block bg-amber-50 text-amber-800 border border-amber-100 px-3 py-1 rounded-full">
-                Đấu giá hộ Yahoo Auction
-              </span>
-              <span className="inline-block bg-amber-50 text-amber-800 border border-amber-100 px-3 py-1 rounded-full">
-                Đấu giá hộ hàng eBay quốc tế
-              </span>
-              <span className="inline-block bg-amber-50 text-amber-800 border border-amber-100 px-3 py-1 rounded-full">
-                Dịch vụ đấu giá hàng quốc tế uy tín
-              </span>
-              <span className="inline-block bg-amber-50 text-amber-800 border border-amber-100 px-3 py-1 rounded-full">
-                Đấu giá hàng ngoại ship về Việt Nam
-              </span>
-            </div>
-          </div>
-        </div>
-      </motion.section>
-
-      {/* GIỚI THIỆU DỊCH VỤ */}
-      <Section title="Giới thiệu dịch vụ đấu giá Tiximax">
+      {/* GIỚI THIỆU DỊCH VỤ – bg trắng */}
+      <Section title="Giới thiệu dịch vụ đấu giá Tiximax" bg="white">
         <>
           <p>
             Tiximax là đơn vị hỗ trợ đấu giá hộ trên Yahoo Auction và eBay, đồng
@@ -149,8 +139,8 @@ const ServiceAuction = () => {
         </>
       </Section>
 
-      {/* ĐỘI NGŨ */}
-      <Section title="Giới thiệu về đội ngũ Tiximax">
+      {/* ĐỘI NGŨ – bg xám */}
+      <Section title="Giới thiệu về đội ngũ Tiximax" bg="gray">
         <>
           <p>
             Tiximax sở hữu đội ngũ nhân sự tại Nhật và Mỹ phụ trách đặt bid,
@@ -168,8 +158,11 @@ const ServiceAuction = () => {
         </>
       </Section>
 
-      {/* TẠI SAO ĐƯỢC YÊU THÍCH */}
-      <Section title="Tại sao dịch vụ đấu giá Tiximax được yêu thích?">
+      {/* TẠI SAO ĐƯỢC YÊU THÍCH – bg trắng */}
+      <Section
+        title="Tại sao dịch vụ đấu giá Tiximax được yêu thích?"
+        bg="white"
+      >
         <>
           <p>Dịch vụ của Tiximax phù hợp cho những khách hàng muốn:</p>
           <ul className="list-disc pl-6 space-y-2">
@@ -190,12 +183,12 @@ const ServiceAuction = () => {
         </>
       </Section>
 
-      {/* CÁC DỊCH VỤ CHÍNH */}
-      <Section title="Các dịch vụ đấu giá Tiximax cung cấp">
+      {/* CÁC DỊCH VỤ CHÍNH – bg xám, card vàng */}
+      <Section title="Các dịch vụ đấu giá Tiximax cung cấp" bg="gray">
         <>
           <div className="space-y-6">
             {/* Yahoo Auction */}
-            <div className="border border-amber-100 rounded-2xl p-5 bg-white shadow-sm">
+            <div className="border border-amber-200 rounded-2xl p-6 bg-amber-100 shadow-sm">
               <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
                 Đấu giá Yahoo Auction (Đấu giá hộ Yahoo Auction)
               </h3>
@@ -221,7 +214,7 @@ const ServiceAuction = () => {
             </div>
 
             {/* eBay quốc tế */}
-            <div className="border border-amber-100 rounded-2xl p-5 bg-white shadow-sm">
+            <div className="border border-amber-200 rounded-2xl p-6 bg-amber-100 shadow-sm">
               <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
                 Đấu giá eBay quốc tế (Đấu giá hộ hàng eBay quốc tế)
               </h3>
@@ -246,7 +239,7 @@ const ServiceAuction = () => {
             </div>
 
             {/* Đấu giá hàng ngoại ship về Việt Nam */}
-            <div className="border border-amber-100 rounded-2xl p-5 bg-white shadow-sm">
+            <div className="border border-amber-200 rounded-2xl p-6 bg-amber-100 shadow-sm">
               <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
                 Đấu giá hàng ngoại ship về Việt Nam
               </h3>
@@ -271,8 +264,8 @@ const ServiceAuction = () => {
         </>
       </Section>
 
-      {/* QUY TRÌNH */}
-      <Section title="Quy trình đấu giá hộ tại Tiximax">
+      {/* QUY TRÌNH – bg trắng */}
+      <Section title="Quy trình đấu giá hộ tại Tiximax" bg="white">
         <>
           <ol className="list-decimal pl-6 space-y-3">
             <li>
@@ -311,27 +304,27 @@ const ServiceAuction = () => {
         </>
       </Section>
 
-      {/* FAQ */}
-      <Section title="Các câu hỏi thường gặp">
+      {/* FAQ – bg xám */}
+      <Section title="Các câu hỏi thường gặp" bg="gray">
         <>
           <div className="space-y-4">
-            <details className="bg-white border border-amber-100 rounded-xl p-4 shadow-sm">
-              <summary className="flex items-center justify-between cursor-pointer text-base font-semibold text-gray-900">
+            <details className="bg-white border border-amber-200 rounded-xl p-4 shadow-sm">
+              <summary className="flex items-center justify-between cursor-pointer text-base sm:text-lg font-semibold text-gray-900">
                 <span>Nếu đấu giá không thành công thì sao?</span>
                 <MessageSquare className="w-5 h-5 text-amber-600" />
               </summary>
-              <p className="mt-2 text-base text-gray-700">
+              <p className="mt-2 text-base sm:text-lg text-gray-700">
                 Bạn sẽ được hoàn 100% số tiền đã đặt cọc hoặc chuyển sang phiên
                 đấu giá tiếp theo nếu có nhu cầu.
               </p>
             </details>
 
-            <details className="bg-white border border-amber-100 rounded-xl p-4 shadow-sm">
-              <summary className="flex items-center justify-between cursor-pointer text-base font-semibold text-gray-900">
+            <details className="bg-white border border-amber-200 rounded-xl p-4 shadow-sm">
+              <summary className="flex items-center justify-between cursor-pointer text-base sm:text-lg font-semibold text-gray-900">
                 <span>Chi phí vận chuyển và thuế được tính thế nào?</span>
                 <MessageSquare className="w-5 h-5 text-amber-600" />
               </summary>
-              <p className="mt-2 text-base text-gray-700">
+              <p className="mt-2 text-base sm:text-lg text-gray-700">
                 Tổng chi phí gồm: giá hàng trúng đấu giá + phí dịch vụ đấu giá
                 hộ + phí nội địa + phí vận chuyển về Việt Nam + thuế nhập khẩu
                 (nếu áp dụng theo mặt hàng). Tất cả được báo rõ ràng trước khi
@@ -339,36 +332,36 @@ const ServiceAuction = () => {
               </p>
             </details>
 
-            <details className="bg-white border border-amber-100 rounded-xl p-4 shadow-sm">
-              <summary className="flex items-center justify-between cursor-pointer text-base font-semibold text-gray-900">
+            <details className="bg-white border border-amber-200 rounded-xl p-4 shadow-sm">
+              <summary className="flex items-center justify-between cursor-pointer text-base sm:text-lg font-semibold text-gray-900">
                 <span>Có được kiểm tra hàng khi nhận không?</span>
                 <MessageSquare className="w-5 h-5 text-amber-600" />
               </summary>
-              <p className="mt-2 text-base text-gray-700">
+              <p className="mt-2 text-base sm:text-lg text-gray-700">
                 Có. Bạn được kiểm tra ngoại quan trước khi nhận. Nếu phát hiện
                 hàng sai mô tả hoặc không đúng đơn hàng, Tiximax sẽ hỗ trợ khiếu
                 nại hoặc xử lý đổi trả (nếu shop cho phép).
               </p>
             </details>
 
-            <details className="bg-white border border-amber-100 rounded-xl p-4 shadow-sm">
-              <summary className="flex items-center justify-between cursor-pointer text-base font-semibold text-gray-900">
+            <details className="bg-white border border-amber-200 rounded-xl p-4 shadow-sm">
+              <summary className="flex items-center justify-between cursor-pointer text-base sm:text-lg font-semibold text-gray-900">
                 <span>Hàng về Việt Nam mất bao lâu?</span>
                 <MessageSquare className="w-5 h-5 text-amber-600" />
               </summary>
-              <p className="mt-2 text-base text-gray-700">
+              <p className="mt-2 text-base sm:text-lg text-gray-700">
                 Khoảng 10 – 18 ngày làm việc tùy từng mặt hàng và phương thức
                 vận chuyển được chọn. Tiximax cung cấp mã theo dõi để khách kiểm
                 tra hành trình đơn hàng.
               </p>
             </details>
 
-            <details className="bg-white border border-amber-100 rounded-xl p-4 shadow-sm">
-              <summary className="flex items-center justify-between cursor-pointer text-base font-semibold text-gray-900">
+            <details className="bg-white border border-amber-200 rounded-xl p-4 shadow-sm">
+              <summary className="flex items-center justify-between cursor-pointer text-base sm:text-lg font-semibold text-gray-900">
                 <span>Có hợp đồng hay cam kết nào không?</span>
                 <MessageSquare className="w-5 h-5 text-amber-600" />
               </summary>
-              <p className="mt-2 text-base text-gray-700">
+              <p className="mt-2 text-base sm:text-lg text-gray-700">
                 Tiximax gửi biên nhận giao dịch và hợp đồng dịch vụ qua
                 email/Zalo trước khi tiến hành thanh toán hoặc đặt cọc.
               </p>
@@ -377,25 +370,25 @@ const ServiceAuction = () => {
         </>
       </Section>
 
-      {/* KẾT LUẬN + CTA */}
+      {/* KẾT LUẬN + CTA – bg trắng */}
       <motion.section
-        className="py-12 border-t border-amber-100 bg-white"
+        className="py-16 border-t border-amber-100 bg-white"
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.3 }}
         variants={fadeUp}
       >
         <div className="max-w-5xl mx-auto px-4">
-          <div className="bg-white border border-amber-100 rounded-2xl p-6 sm:p-8 flex flex-col gap-5 shadow-sm">
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 sm:p-8 flex flex-col gap-5 shadow-sm">
             <div className="flex flex-col items-center text-center gap-3">
               <Globe2 className="w-6 h-6 text-amber-600" />
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 Kết luận – Dịch vụ đấu giá Tiximax
               </h2>
-              <div className="h-[2px] w-20 bg-amber-500 rounded-full" />
+              <div className="h-[3px] w-20 bg-amber-500 rounded-full" />
             </div>
 
-            <p className="text-base sm:text-lg text-gray-700 leading-relaxed text-center">
+            <p className="text-base sm:text-lg md:text-xl text-gray-700 leading-relaxed text-center">
               Dịch vụ đấu giá Tiximax là lựa chọn đáng tin cậy cho khách hàng
               muốn sở hữu hàng ngoại chất lượng với mức giá hợp lý và quy trình
               minh bạch. Nhờ khả năng hỗ trợ đa quốc gia, kiểm hàng kỹ lưỡng và
@@ -411,13 +404,13 @@ const ServiceAuction = () => {
             <div className="flex flex-wrap gap-4 justify-center mt-2">
               <Link
                 to="/signin"
-                className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700 transition-colors"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700 transition-colors"
               >
                 Đăng nhập để bắt đầu đấu giá
               </Link>
               <Link
                 to="/contact"
-                className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors"
               >
                 Nhận tư vấn & báo giá
               </Link>

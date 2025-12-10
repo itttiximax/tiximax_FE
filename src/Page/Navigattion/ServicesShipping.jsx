@@ -1,23 +1,19 @@
 import React from "react";
-import {
-  Globe2,
-  Truck,
-  PackageSearch,
-  ClipboardList,
-  ShieldCheck,
-  AlertCircle,
-  DollarSign,
-} from "lucide-react";
+import { Globe2, Truck, DollarSign, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const Section = ({ title, children }) => (
-  <section className="py-10 border-t border-gray-200 bg-white">
+const Section = ({ title, bg = "white", children }) => (
+  <section
+    className={`py-16 border-t border-amber-100 ${
+      bg === "gray" ? "bg-gray-50" : "bg-white"
+    }`}
+  >
     <div className="max-w-5xl mx-auto px-4">
-      <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center">
+      <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 text-center">
         {title}
       </h2>
-      <div className="mt-4 mb-6 h-px w-20 mx-auto bg-gray-300" />
-      <div className="text-base sm:text-lg leading-relaxed text-gray-700 space-y-3">
+      <div className="mt-4 mb-10 h-[3px] w-20 mx-auto bg-amber-500 rounded-full" />
+      <div className="text-base sm:text-lg md:text-xl leading-relaxed text-gray-700 space-y-4">
         {children}
       </div>
     </div>
@@ -26,25 +22,49 @@ const Section = ({ title, children }) => (
 
 const ServicesShipping = () => {
   return (
-    <main className="min-h-screen bg-gray-50">
-      {/* HERO */}
-      <section className="bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-10 sm:py-14">
+    <main className="min-h-screen bg-gradient-to-b from-white to-amber-50/40">
+      {/* HERO: chỉ badge + H1 + CTA, không để chung nội dung dài */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-b border-amber-900/30">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500/30 via-transparent to-transparent" />
+        <div className="max-w-5xl mx-auto px-6 py-16 sm:py-20 lg:py-24 relative">
           <div className="flex justify-center">
-            <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-wide text-amber-700 mb-4">
+            <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-amber-300 mb-4">
               <Globe2 className="w-5 h-5" />
               <span>Tiximax vận chuyển hàng quốc tế</span>
             </div>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 leading-snug text-center">
-            Tiximax vận chuyển hàng quốc tế: Giải pháp chuyên biệt cho SME và cá
-            nhân
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-snug text-center">
+            Tiximax vận chuyển hàng quốc tế – Giải pháp chuyên biệt cho SME và
+            cá nhân
           </h1>
 
-          <div className="mt-5 mb-6 h-px w-24 mx-auto bg-gray-300" />
+          <div className="mt-6 mb-6 h-[3px] w-24 mx-auto bg-amber-500 rounded-full" />
 
-          <p className="text-base sm:text-lg text-gray-700 leading-relaxed text-center">
+          <div className="mt-4 flex flex-wrap gap-4 justify-center">
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700"
+            >
+              Liên hệ tư vấn tuyến vận chuyển
+            </Link>
+            <Link
+              to="/tracking"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
+            >
+              Tracking đơn hàng
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ĐƯA NỘI DUNG H1 XUỐNG DƯỚI HEADER */}
+      <Section
+        title="Tiximax vận chuyển hàng quốc tế – Giải pháp chuyên biệt cho SME và cá nhân"
+        bg="white"
+      >
+        <>
+          <p>
             Bạn là SME nhập hàng hoặc cá nhân cần gửi hàng quốc tế nhưng ngại
             chi phí cao, thủ tục rườm rà và rủi ro hỏng hóc?{" "}
             <strong>Tiximax vận chuyển hàng quốc tế</strong> sẽ giúp bạn với
@@ -54,26 +74,14 @@ const ServicesShipping = () => {
             quan trọng khi gửi hàng từ Indonesia, Hàn Quốc, Nhật hay Mỹ về Việt
             Nam.
           </p>
+        </>
+      </Section>
 
-          <div className="mt-6 flex flex-wrap gap-4 justify-center">
-            <Link
-              to="/contact"
-              className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700"
-            >
-              Liên hệ tư vấn tuyến vận chuyển
-            </Link>
-            <Link
-              to="/tracking"
-              className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
-            >
-              Tracking đơn hàng
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* TỔNG QUAN */}
-      <Section title="Tổng quan về dịch vụ Tiximax vận chuyển quốc tế">
+      {/* TỔNG QUAN – trắng */}
+      <Section
+        title="Tổng quan về dịch vụ Tiximax vận chuyển quốc tế"
+        bg="white"
+      >
         <>
           <p>
             Tiximax là nhà cung cấp dịch vụ logistics chuyên tuyến, phục vụ
@@ -83,7 +91,7 @@ const ServicesShipping = () => {
             <em>niche</em> nơi các hãng lớn ít tập trung — ví dụ như các chặng
             gom lẻ.
           </p>
-          <div className="mt-2 space-y-1">
+          <div className="mt-2 space-y-2">
             <p className="font-semibold">Ưu điểm cốt lõi:</p>
             <ul className="list-disc pl-6 space-y-1.5">
               <li>Chi phí thấp cho đơn hàng nhỏ hoặc gom lẻ.</li>
@@ -102,8 +110,8 @@ const ServicesShipping = () => {
         </>
       </Section>
 
-      {/* TIXIMAX LÀ AI & TUYẾN */}
-      <Section title="Tiximax là ai và chuyên về tuyến nào?">
+      {/* TIXIMAX LÀ AI & TUYẾN – xám */}
+      <Section title="Tiximax là ai và chuyên về tuyến nào?" bg="gray">
         <>
           <p>
             Tiximax là công ty logistics có kinh nghiệm, hoạt động các tuyến Hàn
@@ -127,8 +135,11 @@ const ServicesShipping = () => {
         </>
       </Section>
 
-      {/* KHI NÀO NÊN CHỌN */}
-      <Section title="Khi nào nên chọn Tiximax vận chuyển hàng quốc tế?">
+      {/* KHI NÀO NÊN CHỌN – trắng */}
+      <Section
+        title="Khi nào nên chọn Tiximax vận chuyển hàng quốc tế?"
+        bg="white"
+      >
         <>
           <p>Bạn nên chọn dịch vụ gửi hàng quốc tế Tiximax khi:</p>
           <ul className="list-disc pl-6 space-y-1.5">
@@ -151,14 +162,14 @@ const ServicesShipping = () => {
         </>
       </Section>
 
-      {/* QUY TRÌNH 3 BƯỚC */}
-      <Section title="Quy trình vận chuyển hàng tối ưu của Tiximax">
+      {/* QUY TRÌNH 3 BƯỚC – xám */}
+      <Section title="Quy trình vận chuyển hàng tối ưu của Tiximax" bg="gray">
         <>
           <p>
             Tiximax áp dụng quy trình 3 bước để giảm phức tạp cho khách hàng:{" "}
             <strong>
               Nêu yêu cầu cụ thể với nhân viên Tiximax → Cung cấp thông tin cần
-              thiết về hàng hóa → Theo dõi & nhận hàng.
+              thiết về hàng hóa → Theo dõi &amp; nhận hàng.
             </strong>
           </p>
           <p>
@@ -168,15 +179,18 @@ const ServicesShipping = () => {
         </>
       </Section>
 
-      {/* 3 BƯỚC CHI TIẾT */}
-      <Section title="Khám phá 3 bước dịch vụ Tiximax vận chuyển hàng quốc tế">
+      {/* 3 BƯỚC CHI TIẾT – card vàng đậm */}
+      <Section
+        title="Khám phá 3 bước dịch vụ Tiximax vận chuyển hàng quốc tế"
+        bg="white"
+      >
         <>
-          <div className="space-y-4">
-            <div className="border border-gray-200 rounded-2xl p-5 bg-white">
+          <div className="space-y-6">
+            <div className="border border-amber-200 rounded-2xl p-6 bg-amber-100 shadow-sm">
               <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
                 Bước 1 – Nêu yêu cầu cụ thể với nhân viên Tiximax
               </h3>
-              <div className="mt-3 h-px w-16 mx-auto bg-gray-200" />
+              <div className="mt-3 h-[2px] w-16 mx-auto bg-amber-500 rounded-full" />
               <p className="mt-3">
                 Bạn có thể liên hệ và nhận tư vấn từ nhân viên Tiximax theo 3
                 cách sau:
@@ -188,11 +202,11 @@ const ServicesShipping = () => {
               </ul>
             </div>
 
-            <div className="border border-gray-200 rounded-2xl p-5 bg-white">
+            <div className="border border-amber-200 rounded-2xl p-6 bg-amber-100 shadow-sm">
               <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
                 Bước 2 – Cung cấp thông tin cần thiết về hàng hóa theo hướng dẫn
               </h3>
-              <div className="mt-3 h-px w-16 mx-auto bg-gray-200" />
+              <div className="mt-3 h-[2px] w-16 mx-auto bg-amber-500 rounded-full" />
               <p className="mt-3">
                 Để tạo đơn hàng vận chuyển quốc tế, thông tin về hàng hóa và
                 giao nhận là không thể thiếu. Tùy vào loại hàng hóa bạn muốn
@@ -202,11 +216,11 @@ const ServicesShipping = () => {
               </p>
             </div>
 
-            <div className="border border-gray-200 rounded-2xl p-5 bg-white">
+            <div className="border border-amber-200 rounded-2xl p-6 bg-amber-100 shadow-sm">
               <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
-                Bước 3 – Theo dõi & Nhận hàng
+                Bước 3 – Theo dõi &amp; Nhận hàng
               </h3>
-              <div className="mt-3 h-px w-16 mx-auto bg-gray-200" />
+              <div className="mt-3 h-[2px] w-16 mx-auto bg-amber-500 rounded-full" />
               <p className="mt-3">
                 Ngoài việc theo dõi đơn hàng qua thông tin từ nhân viên Tiximax,
                 bạn còn có thể tự thực hiện qua tiện ích Tracking đơn hàng trên
@@ -220,8 +234,11 @@ const ServicesShipping = () => {
         </>
       </Section>
 
-      {/* CASE LOGISTICS ĐẶC BIỆT */}
-      <Section title="Tiximax xử lý các case Logistics đặc biệt như thế nào?">
+      {/* CASE LOGISTICS ĐẶC BIỆT – xám */}
+      <Section
+        title="Tiximax xử lý các case Logistics đặc biệt như thế nào?"
+        bg="gray"
+      >
         <>
           <p>
             Tiximax gom nhiều đơn nhỏ từ nhiều nhà cung cấp thành một lô duy
@@ -243,8 +260,8 @@ const ServicesShipping = () => {
         </>
       </Section>
 
-      {/* ƯU ĐIỂM & BẢNG GIÁ */}
-      <Section title="Những ưu điểm Tiximax vận chuyển hàng quốc tế">
+      {/* ƯU ĐIỂM & BẢNG GIÁ – trắng */}
+      <Section title="Những ưu điểm Tiximax vận chuyển hàng quốc tế" bg="white">
         <>
           <p>
             Ưu điểm lớn nhất của Tiximax chính là sự minh bạch trong chi phí.
@@ -254,75 +271,75 @@ const ServicesShipping = () => {
             cho bạn.
           </p>
 
-          <div className="mt-6 border border-gray-200 rounded-2xl p-5 bg-white">
+          <div className="mt-6 border border-amber-200 rounded-2xl p-6 bg-amber-50 shadow-sm">
             <div className="flex items-center justify-center gap-2 mb-3">
               <DollarSign className="w-5 h-5 text-amber-600" />
               <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center">
                 Bảng giá cước tổng quan dịch vụ gửi hàng quốc tế Tiximax
               </h3>
             </div>
-            <p className="text-sm sm:text-base text-gray-700 mb-4 text-center">
+            <p className="text-sm sm:text-base md:text-lg text-gray-700 mb-4 text-center">
               Bạn có thể tham khảo giá cước các tuyến của Tiximax theo bảng sau.
               Đây là giá tham khảo, để được tư vấn cụ thể vui lòng để lại thông
               tin để nhân viên Tiximax hỗ trợ bạn.
             </p>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm sm:text-base text-gray-800 border border-gray-200">
-                <thead className="bg-gray-100">
+              <table className="w-full text-sm sm:text-base md:text-lg text-gray-800 border border-amber-200">
+                <thead className="bg-amber-100">
                   <tr>
-                    <th className="px-3 py-2 border-b border-gray-200 text-left">
+                    <th className="px-3 py-2 border-b border-amber-200 text-left">
                       Tuyến vận chuyển
                     </th>
-                    <th className="px-3 py-2 border-b border-gray-200 text-left">
+                    <th className="px-3 py-2 border-b border-amber-200 text-left">
                       Đơn vị
                     </th>
-                    <th className="px-3 py-2 border-b border-gray-200 text-left">
+                    <th className="px-3 py-2 border-b border-amber-200 text-left">
                       Đơn giá (từ)
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="px-3 py-2 border-t border-gray-200">
+                    <td className="px-3 py-2 border-t border-amber-200">
                       Indonesia - Việt Nam
                     </td>
-                    <td className="px-3 py-2 border-t border-gray-200">
+                    <td className="px-3 py-2 border-t border-amber-200">
                       Kg (kilogram)
                     </td>
-                    <td className="px-3 py-2 border-t border-gray-200">
+                    <td className="px-3 py-2 border-t border-amber-200">
                       Từ 180.000 VNĐ
                     </td>
                   </tr>
-                  <tr className="bg-gray-50">
-                    <td className="px-3 py-2 border-t border-gray-200">
+                  <tr className="bg-amber-50">
+                    <td className="px-3 py-2 border-t border-amber-200">
                       Nhật Bản - Việt Nam
                     </td>
-                    <td className="px-3 py-2 border-t border-gray-200">
+                    <td className="px-3 py-2 border-t border-amber-200">
                       Kg (kilogram)
                     </td>
-                    <td className="px-3 py-2 border-t border-gray-200">
+                    <td className="px-3 py-2 border-t border-amber-200">
                       Từ 145.000 VNĐ
                     </td>
                   </tr>
                   <tr>
-                    <td className="px-3 py-2 border-t border-gray-200">
+                    <td className="px-3 py-2 border-t border-amber-200">
                       Hàn Quốc - Việt Nam
                     </td>
-                    <td className="px-3 py-2 border-t border-gray-200">
+                    <td className="px-3 py-2 border-t border-amber-200">
                       Kg (kilogram)
                     </td>
-                    <td className="px-3 py-2 border-t border-gray-200">
+                    <td className="px-3 py-2 border-t border-amber-200">
                       Từ 135.000 VNĐ (Miền Bắc) – Từ 145.000 VNĐ (Miền Nam)
                     </td>
                   </tr>
-                  <tr className="bg-gray-50">
-                    <td className="px-3 py-2 border-t border-gray-200">
+                  <tr className="bg-amber-50">
+                    <td className="px-3 py-2 border-t border-amber-200">
                       Mỹ - Việt Nam
                     </td>
-                    <td className="px-3 py-2 border-t border-gray-200">
+                    <td className="px-3 py-2 border-t border-amber-200">
                       Kg (kilogram)
                     </td>
-                    <td className="px-3 py-2 border-t border-gray-200">
+                    <td className="px-3 py-2 border-t border-amber-200">
                       Từ 230.000 VNĐ (Miền Bắc) – Từ 240.000 VNĐ (Miền Nam)
                     </td>
                   </tr>
@@ -333,8 +350,11 @@ const ServicesShipping = () => {
         </>
       </Section>
 
-      {/* THUẾ & HẢI QUAN */}
-      <Section title="Minh bạch quy trình chính sách thuế và hải quan">
+      {/* THUẾ & HẢI QUAN – xám */}
+      <Section
+        title="Minh bạch quy trình chính sách thuế và hải quan"
+        bg="gray"
+      >
         <>
           <p>
             Khi lựa chọn dịch vụ{" "}
@@ -352,8 +372,11 @@ const ServicesShipping = () => {
         </>
       </Section>
 
-      {/* BẢO HIỂM & BỒI THƯỜNG */}
-      <Section title="Tiximax có chính sách bảo hiểm và bồi thường cụ thể">
+      {/* BẢO HIỂM & BỒI THƯỜNG – trắng */}
+      <Section
+        title="Tiximax có chính sách bảo hiểm và bồi thường cụ thể"
+        bg="white"
+      >
         <>
           <p>
             Tiximax cung cấp gói bảo hiểm tùy chọn với mức bồi thường tối đa có
@@ -370,8 +393,11 @@ const ServicesShipping = () => {
         </>
       </Section>
 
-      {/* HÀNG CẤM & HÀNG ĐẶC BIỆT */}
-      <Section title="Lưu ý về hàng hóa cấm, hàng hóa đặc biệt khi gửi hàng quốc tế Tiximax">
+      {/* HÀNG CẤM & HÀNG ĐẶC BIỆT – xám */}
+      <Section
+        title="Lưu ý về hàng hóa cấm, hàng hóa đặc biệt khi gửi hàng quốc tế Tiximax"
+        bg="gray"
+      >
         <>
           <p>
             Tiximax tuân thủ pháp luật Việt Nam và không vận chuyển hàng cấm.
@@ -397,13 +423,13 @@ const ServicesShipping = () => {
         </>
       </Section>
 
-      {/* HƯỚNG DẪN HÀNG ĐẶC BIỆT */}
-      <Section title="Tiximax hướng dẫn vận chuyển hàng đặc biệt">
+      {/* HƯỚNG DẪN HÀNG ĐẶC BIỆT – trắng */}
+      <Section title="Tiximax hướng dẫn vận chuyển hàng đặc biệt" bg="white">
         <>
           <ul className="list-disc pl-6 space-y-2">
             <li>
-              <strong>Thực phẩm chức năng & mỹ phẩm:</strong> cung cấp giấy tờ
-              xuất xứ, thành phần, hạn dùng; có thể cần giấy phép kiểm nghiệm
+              <strong>Thực phẩm chức năng &amp; mỹ phẩm:</strong> cung cấp giấy
+              tờ xuất xứ, thành phần, hạn dùng; có thể cần giấy phép kiểm nghiệm
               chuyên ngành.
             </li>
             <li>
@@ -423,19 +449,19 @@ const ServicesShipping = () => {
         </>
       </Section>
 
-      {/* KẾT LUẬN + CTA */}
-      <section className="py-10 border-t border-gray-200 bg-white">
+      {/* KẾT LUẬN + CTA – card vàng nhạt */}
+      <section className="py-16 border-t border-amber-100 bg-white">
         <div className="max-w-5xl mx-auto px-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4">
-            <div className="flex flex-col items-center text-center gap-2">
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 sm:p-8 flex flex-col gap-4 shadow-sm">
+            <div className="flex flex-col items-center text-center gap-3">
               <Truck className="w-6 h-6 text-amber-600" />
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 Kết luận – Tiximax vận chuyển hàng quốc tế
               </h2>
-              <div className="h-px w-20 bg-gray-300" />
+              <div className="h-[3px] w-20 bg-amber-500 rounded-full" />
             </div>
 
-            <p className="text-base sm:text-lg text-gray-700 leading-relaxed text-center">
+            <p className="text-base sm:text-lg md:text-xl text-gray-700 leading-relaxed text-center">
               Tiximax là giải pháp cân bằng giữa chi phí thấp, quy trình linh
               hoạt và độ tin cậy cao cho SME và cá nhân muốn gửi hàng quốc tế.
               Minh bạch về phí, hỗ trợ thủ tục trọn gói, hãy lựa chọn{" "}
@@ -448,15 +474,15 @@ const ServicesShipping = () => {
             <div className="flex flex-wrap gap-4 justify-center mt-2">
               <Link
                 to="/contact"
-                className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700"
               >
-                Nhận tư vấn & báo giá tuyến
+                Nhận tư vấn &amp; báo giá tuyến
               </Link>
               <Link
                 to="/tracking"
-                className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
               >
-                Tra cứu & tracking đơn hàng
+                Tra cứu &amp; tracking đơn hàng
               </Link>
             </div>
           </div>
