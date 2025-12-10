@@ -8,7 +8,7 @@ const orderlinkService = {
   //   const res = await api.get(url);
   //   return res.data;
   // },
-  getOrdersWithLinks: async (page = 0, size = 15, orderType = null) => {
+  getOrdersWithLinks: async (page = 0, size = 10, orderType = null) => {
     let url = `/orders/with-links/${page}/${size}`;
     if (orderType) url += `?orderType=${orderType}`;
 

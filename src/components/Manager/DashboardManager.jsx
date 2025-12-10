@@ -244,7 +244,7 @@ const DashboardManager = () => {
                       <p className="text-xs font-medium uppercase tracking-wide text-gray-900">
                         Tổng doanh thu
                       </p>
-                      <p className="mt-2 text-3xl font-bold text-gray-900">
+                      <p className="mt-2 text-xl font-bold text-gray-900">
                         {formatNumber(stats.totalRevenue)} đ
                       </p>
                     </div>
@@ -261,7 +261,7 @@ const DashboardManager = () => {
                       <p className="text-xs font-medium uppercase tracking-wide text-gray-900">
                         Tổng tiền nhập
                       </p>
-                      <p className="mt-2 text-3xl font-bold text-gray-900">
+                      <p className="mt-2 text-xl font-bold text-gray-900">
                         {formatNumber(stats.totalPurchase)} đ
                       </p>
                     </div>
@@ -278,7 +278,7 @@ const DashboardManager = () => {
                       <p className="text-xs font-medium uppercase tracking-wide text-gray-900">
                         Tổng phí ship
                       </p>
-                      <p className="mt-2 text-3xl font-bold text-gray-900">
+                      <p className="mt-2 text-xl font-bold text-gray-900">
                         {formatNumber(stats.totalShip)} đ
                       </p>
                     </div>
