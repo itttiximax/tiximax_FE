@@ -1,13 +1,17 @@
-// src/components/Refund/ConfirmRefundOrder.jsx
 import React, { useEffect, useCallback, useState } from "react";
 import { X, AlertTriangle, Loader2, CheckCircle2, Ban } from "lucide-react";
 import orderService from "../../Services/LeadSale/orderService";
 import toast from "react-hot-toast";
 
+// Component upload ảnh dùng chung
+import UploadImg from "../../common/UploadImg";
+
 const ConfirmRefundOrder = ({ open, order, onClose, onSuccess }) => {
   const [refundToCustomer, setRefundToCustomer] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
 
+  // Đóng bằng phím ESC
   const handleKeyDown = useCallback(
     (e) => {
       if (!open) return;
@@ -21,24 +25,39 @@ const ConfirmRefundOrder = ({ open, order, onClose, onSuccess }) => {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
+  // Reset state mỗi lần mở modal hoặc đổi order
   useEffect(() => {
-    // reset state khi mở modal mới
     if (open) {
       setRefundToCustomer(true);
       setSubmitting(false);
+      setImageUrl("");
     }
   }, [open, order?.orderId]);
 
   const submit = async () => {
     if (!order?.orderId) return;
+
+    // Bắt buộc phải có ảnh
+    if (!imageUrl) {
+      toast.error("Vui lòng upload ảnh xác nhận hoàn tiền!");
+      return;
+    }
+
     try {
       setSubmitting(true);
-      await orderService.confirmRefundOrder(order.orderId, refundToCustomer);
+
+      await orderService.confirmRefundOrder(
+        order.orderId,
+        refundToCustomer,
+        imageUrl // URL ảnh từ UploadImg
+      );
+
       toast.success(
         refundToCustomer
           ? "Đã xác nhận hoàn tiền về khách."
           : "Đã xác nhận hoàn tiền (không hoàn về khách)."
       );
+
       onClose?.();
       onSuccess?.();
     } catch (err) {
@@ -61,8 +80,10 @@ const ConfirmRefundOrder = ({ open, order, onClose, onSuccess }) => {
         className="absolute inset-0 bg-black/40"
         onClick={() => !submitting && onClose?.()}
       />
+
       {/* Dialog */}
       <div className="relative w-full max-w-lg bg-white rounded-xl shadow-xl overflow-hidden">
+        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-amber-500" />
@@ -77,16 +98,27 @@ const ConfirmRefundOrder = ({ open, order, onClose, onSuccess }) => {
           </button>
         </div>
 
+        {/* Body */}
         <div className="px-5 py-4 space-y-4">
           <div className="text-sm text-gray-600">
             Bạn đang xử lý hoàn tiền cho đơn{" "}
             <span className="font-semibold text-gray-900">
-              {order?.orderCode || `#${order?.orderId}`}
+              {order?.orderCode}
             </span>
             .
           </div>
 
-          {/* Switch / Radio chọn hình thức hoàn */}
+          {/* Upload ảnh */}
+          <UploadImg
+            label="Ảnh xác nhận hoàn tiền"
+            required
+            imageUrl={imageUrl}
+            onImageUpload={(url) => setImageUrl(url)}
+            onImageRemove={() => setImageUrl("")}
+            className="mt-2"
+          />
+
+          {/* Chọn hình thức hoàn tiền */}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <p className="text-sm font-medium text-gray-800 mb-3">
               Chọn hình thức xử lý:
@@ -96,8 +128,7 @@ const ConfirmRefundOrder = ({ open, order, onClose, onSuccess }) => {
               <button
                 type="button"
                 onClick={() => setRefundToCustomer(true)}
-                className={`w-full flex items-center gap-2 rounded-lg border px-3 py-2 text-left transition
-                ${
+                className={`w-full flex items-center gap-2 rounded-lg border px-3 py-2 text-left transition ${
                   refundToCustomer
                     ? "border-green-500 bg-green-50"
                     : "border-gray-200 bg-white hover:bg-gray-50"
@@ -110,7 +141,7 @@ const ConfirmRefundOrder = ({ open, order, onClose, onSuccess }) => {
                     Hoàn tiền về khách
                   </div>
                   <div className="text-xs text-gray-500">
-                    Xác nhận và hoàn tiền trực tiếp cho khách hàng.
+                    Chuyển tiền trực tiếp cho khách.
                   </div>
                 </div>
               </button>
@@ -118,8 +149,7 @@ const ConfirmRefundOrder = ({ open, order, onClose, onSuccess }) => {
               <button
                 type="button"
                 onClick={() => setRefundToCustomer(false)}
-                className={`w-full flex items-center gap-2 rounded-lg border px-3 py-2 text-left transition
-                ${
+                className={`w-full flex items-center gap-2 rounded-lg border px-3 py-2 text-left transition ${
                   !refundToCustomer
                     ? "border-amber-500 bg-amber-50"
                     : "border-gray-200 bg-white hover:bg-gray-50"
@@ -132,20 +162,19 @@ const ConfirmRefundOrder = ({ open, order, onClose, onSuccess }) => {
                     Không hoàn về khách
                   </div>
                   <div className="text-xs text-gray-500">
-                    Chỉ ghi nhận xử lý hoàn, không chuyển tiền cho khách.
+                    Chỉ ghi nhận xử lý hoàn.
                   </div>
                 </div>
               </button>
             </div>
           </div>
 
-          {/* Lưu ý */}
           <div className="text-xs text-gray-500">
-            Thao tác này không thể hoàn tác. Vui lòng xác nhận chính xác hình
-            thức xử lý.
+            Thao tác không thể hoàn tác. Vui lòng kiểm tra kỹ.
           </div>
         </div>
 
+        {/* Footer */}
         <div className="px-5 py-4 border-t flex items-center justify-end gap-2">
           <button
             onClick={onClose}
@@ -154,6 +183,7 @@ const ConfirmRefundOrder = ({ open, order, onClose, onSuccess }) => {
           >
             Hủy
           </button>
+
           <button
             onClick={submit}
             disabled={submitting}
