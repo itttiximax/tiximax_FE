@@ -2,23 +2,30 @@ import React from "react";
 
 const GuideOrder = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-10 to-white py-12 px-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header - Centered */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-10 to-white py-0 px-6">
+      {/* HEADER HERO MÀU VÀNG */}
+      <section className="relative overflow-hidden mb-12">
+        {/* Nền gradient vàng */}
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-300 via-amber-400 to-amber-500" />
+        {/* Overlay sáng nhẹ */}
+        <div className="absolute inset-0 bg-white/10 mix-blend-overlay" />
+
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 text-center">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 uppercase tracking-wide drop-shadow">
             HƯỚNG DẪN SỬ DỤNG DỊCH VỤ
           </h1>
-          <p className="text-2xl text-gray-700">
-            TIXIMAX LOGISTICS - Dịch vụ logistics trọn gói
+          <p className="mt-4 text-lg sm:text-2xl text-gray-800 font-medium">
+            TIXIMAX LOGISTICS – Dịch vụ logistics trọn gói, minh bạch và tối ưu
+            cho khách hàng.
           </p>
         </div>
+      </section>
 
+      <div className="max-w-7xl mx-auto pb-12">
         {/* Content - Đặt Hàng */}
-        <div className="bg-white  rounded-2xl p-12 mb-12">
+        <div className="bg-white rounded-2xl p-12 mb-12">
           {/* Title Section */}
           <div className="-mx-32 mb-12">
-            {" "}
             {/* Negative margin để vượt ra ngoài padding */}
             <div className="bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-xl p-8">
               <h2 className="text-4xl font-bold text-gray-900 text-center">
@@ -298,10 +305,9 @@ const GuideOrder = () => {
         </div>
 
         {/* Content - Tra Cứu */}
-        <div className="bg-white rounded-2xl  p-12">
+        <div className="bg-white rounded-2xl p-12">
           {/* Title Section */}
           <div className="-mx-32 mb-12">
-            {" "}
             {/* Negative margin để vượt ra ngoài padding */}
             <div className="bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-xl p-8">
               <h2 className="text-4xl font-bold text-gray-900 text-center">
@@ -565,7 +571,7 @@ const GuideOrder = () => {
             </p>
           </div>
 
-          {/* Lưu ý */}
+          {/* Lưu ý thêm */}
           <div className="mb-0">
             <h3 className="text-3xl font-bold text-gray-900 mb-8 pb-3 border-b-4 border-yellow-400">
               MỘT SỐ LƯU Ý ĐỂ TRA CỨU ĐƠN TIỆN HƠN
@@ -592,4 +598,5 @@ const GuideOrder = () => {
     </div>
   );
 };
+
 export default GuideOrder;

@@ -1,20 +1,27 @@
 import React, { useEffect, useRef, useState } from "react";
-import { HelpCircle, Search, PackageSearch, ArrowRight } from "lucide-react";
+import { Search, PackageSearch, ArrowRight } from "lucide-react";
 import PHONE1 from "../../assets/PHONE1.jpg";
 import PHONE2 from "../../assets/PHONE2.jpg";
 
-const GuideList = () => {
-  const [visibleSections, setVisibleSections] = useState(new Set());
-  const observerRef = useRef(null);
+const AnimatedSection = ({ children, delay = 0 }) => {
+  const ref = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    observerRef.current = new IntersectionObserver(
+    if (!ref.current) return;
+
+    // Nếu browser không có IntersectionObserver thì show luôn
+    if (typeof window === "undefined" || !("IntersectionObserver" in window)) {
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setVisibleSections(
-              (prev) => new Set([...prev, entry.target.dataset.section])
-            );
+            setIsVisible(true);
+            observer.unobserve(entry.target); // chỉ animate 1 lần
           }
         });
       },
@@ -24,33 +31,25 @@ const GuideList = () => {
       }
     );
 
-    const sections = document.querySelectorAll("[data-section]");
-    sections.forEach((section) => {
-      observerRef.current.observe(section);
-    });
+    observer.observe(ref.current);
 
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
+    return () => observer.disconnect();
   }, []);
 
-  const AnimatedSection = ({ children, sectionId, delay = 0 }) => {
-    const isVisible = visibleSections.has(sectionId);
-    return (
-      <div
-        data-section={sectionId}
-        className={`transition-all duration-700 ease-out ${
-          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
-        }`}
-        style={{ transitionDelay: `${delay}ms` }}
-      >
-        {children}
-      </div>
-    );
-  };
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ease-out ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+      }`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+};
 
+const GuideList = () => {
   const guides = [
     {
       icon: <PackageSearch className="w-6 h-6" />,
@@ -81,14 +80,35 @@ const GuideList = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-10 to-white py-16 px-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <AnimatedSection sectionId="header">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-10 to-white">
+      {/* ===================== HEADER MÀU VÀNG ===================== */}
+      <section className="relative overflow-hidden mb-20">
+        {/* Nền gradient vàng */}
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-300 via-amber-400 to-amber-500"></div>
+
+        {/* Overlay sáng nhẹ */}
+        <div className="absolute inset-0 bg-white/10 mix-blend-overlay"></div>
+
+        <div className="relative max-w-5xl mx-auto px-6 py-20 lg:py-28 text-center">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 uppercase drop-shadow">
+            Hướng dẫn sử dụng Tiximax
+          </h1>
+
+          <p className="mt-5 text-lg sm:text-xl text-gray-800 max-w-3xl mx-auto leading-relaxed font-medium">
+            Tất cả những gì bạn cần để bắt đầu: cách đặt hàng, theo dõi đơn, và
+            sử dụng các tính năng của TIXIMAX LOGISTICS.
+          </p>
+        </div>
+      </section>
+      {/* ============================================================ */}
+
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Header intro (animated) */}
+        <AnimatedSection>
           <div className="text-center mb-24">
-            <h1 className="text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl font-bold text-gray-900 mb-6">
               HƯỚNG DẪN CƠ BẢN – BẮT ĐẦU VỚI TIXIMAX
-            </h1>
+            </h2>
 
             <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
               Hai hướng dẫn quan trọng nhất giúp bạn đặt hàng và theo dõi đơn
@@ -100,11 +120,7 @@ const GuideList = () => {
         {/* Guides Grid */}
         <div className="grid lg:grid-cols-2 gap-16">
           {guides.map((guide, index) => (
-            <AnimatedSection
-              key={guide.title}
-              sectionId={`guide-${index}`}
-              delay={index * 100}
-            >
+            <AnimatedSection key={guide.title} delay={index * 100}>
               <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300">
                 {/* Image Section */}
                 <div className="relative h-80 overflow-hidden">
@@ -113,16 +129,15 @@ const GuideList = () => {
                     alt={guide.title}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />
+
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
-                  {/* Icon Badge */}
                   <div className="absolute top-6 left-6">
                     <div className="bg-yellow-400 text-gray-900 p-3.5 rounded-xl shadow-lg">
                       {guide.icon}
                     </div>
                   </div>
 
-                  {/* Title Overlay */}
                   <div className="absolute bottom-0 left-0 right-0 p-8">
                     <h2 className="text-3xl font-bold text-white">
                       {guide.title}
@@ -130,7 +145,7 @@ const GuideList = () => {
                   </div>
                 </div>
 
-                {/* Content Section */}
+                {/* Text Section */}
                 <div className="p-10">
                   <p className="text-lg text-gray-700 leading-relaxed mb-10">
                     {guide.desc}
@@ -141,6 +156,7 @@ const GuideList = () => {
                     <h3 className="text-lg font-bold text-gray-900 mb-6 pb-3 border-b-2 border-yellow-400">
                       Các bước thực hiện:
                     </h3>
+
                     <ol className="space-y-5">
                       {guide.steps.map((step, stepIndex) => (
                         <li key={stepIndex} className="flex gap-4">
@@ -155,7 +171,6 @@ const GuideList = () => {
                     </ol>
                   </div>
 
-                  {/* CTA Button */}
                   <a
                     href={guide.link}
                     className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-300 hover:from-yellow-500 hover:to-yellow-400 text-gray-900 font-semibold text-base px-8 py-4 rounded-xl transition-all duration-300 group"
@@ -168,37 +183,6 @@ const GuideList = () => {
             </AnimatedSection>
           ))}
         </div>
-
-        {/* Bottom Info */}
-        <AnimatedSection sectionId="bottom-info">
-          <div className="mt-24 bg-white rounded-2xl p-12 shadow-sm">
-            <div className="text-center max-w-3xl mx-auto">
-              <h3 className="text-3xl font-bold text-gray-900 mb-6">
-                Cần hỗ trợ thêm?
-              </h3>
-              <p className="text-lg text-gray-700 leading-relaxed mb-10">
-                Đội ngũ TIXIMAX luôn sẵn sàng hỗ trợ bạn 24/7 qua các kênh:
-                Hotline, Messenger, Zalo hoặc Email. Đừng ngần ngại liên hệ khi
-                cần tư vấn!
-              </p>
-
-              <div className="flex flex-wrap justify-center gap-5">
-                <a
-                  href="/contact"
-                  className="inline-flex items-center gap-2 border-2 border-yellow-400 hover:bg-yellow-50 text-gray-900 font-semibold text-base px-8 py-4 rounded-xl transition-all duration-300"
-                >
-                  Liên hệ hỗ trợ
-                </a>
-                <a
-                  href="/faq"
-                  className="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold text-base px-8 py-4 rounded-xl transition-all duration-300"
-                >
-                  Câu hỏi thường gặp
-                </a>
-              </div>
-            </div>
-          </div>
-        </AnimatedSection>
       </div>
     </div>
   );

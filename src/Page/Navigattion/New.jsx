@@ -14,13 +14,11 @@ import { Link } from "react-router-dom";
 
 /**
  * New.jsx — Tiximax
- * News/Blog page in a **magazine** layout, distinct from prior pages:
- * - Hero Featured with big image overlay
- * - Curated "Top Stories" horizontal scroll
- * - Masonry-like image grid (2 heights) for freshness
- * - Sidebar: Trending, Tags, Newsletter
- * - Category filter tabs (no external API)
- * Tailwind + Framer Motion. You can replace image URLs with your CDN.
+ * News/Blog page in a **magazine** layout:
+ * - Header vàng đồng bộ với các trang khác
+ * - Hero Featured với big image overlay
+ * - "Top Stories" horizontal scroll
+ * - Masonry-like grid
  */
 
 const CATEGORIES = [
@@ -142,9 +140,27 @@ const New = () => {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white to-amber-50/30">
+      {/* ===================== HEADER VÀNG ===================== */}
+      <section className="relative overflow-hidden mb-12 lg:mb-16">
+        {/* Nền gradient vàng */}
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-300 via-amber-400 to-amber-500" />
+        {/* Overlay nhẹ cho dịu mắt */}
+        <div className="absolute inset-0 bg-white/10 mix-blend-overlay" />
+        <div className="relative max-w-5xl mx-auto px-6 py-16 lg:py-20 text-center">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 uppercase drop-shadow">
+            Tin tức & Bản tin Tiximax
+          </h1>
+          <p className="mt-5 text-lg sm:text-xl text-gray-800 max-w-3xl mx-auto leading-relaxed font-medium">
+            Cập nhật lịch bay, case thực tế và insight logistics đa quốc gia
+            giúp bạn tối ưu dòng hàng & chi phí.
+          </p>
+        </div>
+      </section>
+      {/* ===================================================== */}
+
       {/* HERO FEATURED (big image with overlay) */}
       <section className="relative">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-10 lg:pt-16">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 pb-10 lg:pb-16">
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Featured */}
             <motion.article
@@ -163,9 +179,9 @@ const New = () => {
                 <span className="inline-flex items-center gap-2 text-xs font-semibold bg-amber-500/90 rounded-full px-3 py-1">
                   <Newspaper className="w-3.5 h-3.5" /> {featured.category}
                 </span>
-                <h1 className="mt-3 text-2xl md:text-3xl font-extrabold leading-tight">
+                <h2 className="mt-3 text-2xl md:text-3xl font-extrabold leading-tight">
                   {featured.title}
-                </h1>
+                </h2>
                 <p className="mt-2 text-sm md:text-base text-white/90 max-w-3xl">
                   {featured.excerpt}
                 </p>
@@ -254,7 +270,7 @@ const New = () => {
       </section>
 
       {/* FILTER TABS + TOP STORIES (horizontal cards) */}
-      <section className="py-8">
+      <section className="pt-6 lg:pt-8 pb-8">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="flex flex-wrap items-center gap-2">
             {CATEGORIES.map((c) => (
@@ -281,8 +297,8 @@ const New = () => {
             </button>
           </div>
 
-          <div className="mt-5 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex gap-4 min-w-max">
+          <div className="mt-8 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex gap-5 min-w-max">
               {topStories.map((p) => (
                 <article
                   key={p.id}
@@ -293,7 +309,7 @@ const New = () => {
                     alt={p.title}
                     className="w-full h-40 object-cover"
                   />
-                  <div className="p-4">
+                  <div className="p-5">
                     <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
                       <Tag className="w-3 h-3" /> {p.category}
                     </span>
@@ -326,7 +342,7 @@ const New = () => {
       {/* MASONRY GRID (two heights) */}
       <section className="pb-14">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filtered.map((p, idx) => (
               <motion.article
                 key={p.id}
