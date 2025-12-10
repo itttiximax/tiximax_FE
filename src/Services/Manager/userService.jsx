@@ -68,7 +68,7 @@ const userService = {
     validatePagination(page, size);
     try {
       const response = await api.get(`/accounts/my-customers/${page}/${size}`, {
-        params: { search }, // ⬅️ Query param
+        params: { search },
       });
       return response.data;
     } catch (error) {

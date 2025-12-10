@@ -6,10 +6,6 @@ import {
   Eye,
   Search,
   Filter,
-  MapPin,
-  Phone,
-  Mail,
-  Tag,
   Users,
 } from "lucide-react";
 import userService from "../../Services/Manager/userService";
@@ -34,11 +30,11 @@ const CustomerStaffList = () => {
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
-  const pageSizeOptions = [10, 20, 30, 50];
+  const pageSizeOptions = [20, 30, 50, 100, 200];
 
   // Giá trị đặc biệt cho KH không có source
   const EMPTY_SOURCE_VALUE = "__EMPTY__";
@@ -63,13 +59,12 @@ const CustomerStaffList = () => {
     return value;
   };
 
-  // Fetch my customers (assigned to current staff) - ĐÃ THÊM searchTerm VÀO API
+  // Fetch my customers (assigned to current staff) - có searchTerm
   const fetchMyCustomers = useCallback(
     async (page = 0, size = pageSize) => {
       setError(null);
       setLoading(true);
       try {
-        // 👇 Pass searchTerm xuống backend
         const response = await userService.getMyCustomers(
           page,
           size,
@@ -91,7 +86,6 @@ const CustomerStaffList = () => {
   );
 
   useEffect(() => {
-    // mỗi khi pageSize hoặc searchTerm đổi → load lại từ page 0
     fetchMyCustomers(0, pageSize);
   }, [fetchMyCustomers, pageSize]);
 
@@ -99,7 +93,7 @@ const CustomerStaffList = () => {
   const filteredCustomers = useMemo(() => {
     let filtered = [...customerList];
 
-    // Search filter (vẫn giữ, bổ sung thêm cho chắc)
+    // Search filter
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -192,7 +186,6 @@ const CustomerStaffList = () => {
                 {currentPage + 1} / {totalPages || 1}
               </p>
             </div>
-            <Tag className="w-12 h-12 text-green-200" />
           </div>
         </div>
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white shadow-lg">
@@ -308,7 +301,10 @@ const CustomerStaffList = () => {
                   Mã KH
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Liên hệ
+                  Số điện thoại
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Email
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Địa chỉ
@@ -339,8 +335,10 @@ const CustomerStaffList = () => {
                         <div className="h-3 w-24 bg-gray-200 rounded" />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="h-3 w-28 bg-gray-200 rounded mb-2" />
-                        <div className="h-3 w-40 bg-gray-100 rounded" />
+                        <div className="h-3 w-28 bg-gray-200 rounded" />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-3 w-40 bg-gray-200 rounded" />
                       </td>
                       <td className="px-6 py-4">
                         <div className="h-3 w-64 bg-gray-200 rounded" />
@@ -349,101 +347,100 @@ const CustomerStaffList = () => {
                         <div className="h-5 w-20 bg-gray-200 rounded-full" />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="h-3 w-28 bg-gray-200 rounded" />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="h-4 w-8 bg-gray-200 rounded" />
                       </td>
                     </tr>
                   ))
-                : filteredCustomers.map((customer, index) => (
-                    <tr
-                      key={
-                        customer.accountId ??
-                        customer.customerCode ??
-                        `customer-${index}`
-                      }
-                      className="hover:bg-blue-50 transition-colors"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                            <span className="text-white font-semibold text-sm">
-                              {customer.name?.charAt(0).toUpperCase() || "?"}
-                            </span>
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {customer.name}
+                : filteredCustomers.map((customer, index) => {
+                    const mainAddress =
+                      customer.addresses?.[0]?.addressName || "-";
+
+                    return (
+                      <tr
+                        key={
+                          customer.accountId ??
+                          customer.customerCode ??
+                          `customer-${index}`
+                        }
+                        className="hover:bg-blue-50 transition-colors"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                              <span className="text-white font-semibold text-sm">
+                                {customer.name?.charAt(0).toUpperCase() || "?"}
+                              </span>
                             </div>
-                            <div className="text-xs text-gray-500">
-                              {customer.username}
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {customer.name}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {customer.username}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm font-medium text-blue-600">
-                          {customer.customerCode}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex flex-col gap-1">
+                        </td>
+
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="text-sm font-medium text-blue-600">
+                            {customer.customerCode}
+                          </span>
+                        </td>
+
+                        {/* SĐT */}
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-1 text-sm text-gray-900">
-                            <Phone className="w-3 h-3 text-gray-400" />
                             {customer.phone}
                           </div>
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <Mail className="w-3 h-3 text-gray-400" />
-                            {customer.email}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-start gap-1 text-sm text-gray-900 max-w-xs">
-                          <MapPin className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
-                          <span className="line-clamp-2">
-                            {customer.addresses?.length > 0
-                              ? customer.addresses
-                                  .map((a) => a.addressName)
-                                  .join(", ")
-                              : "-"}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {customer.source ? (
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${getSourceColor(
-                              customer.source
-                            )}`}
-                          >
-                            <Tag className="w-3 h-3" />
-                            {customer.source}
-                          </span>
-                        ) : (
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${getSourceColor(
-                              EMPTY_SOURCE_VALUE
-                            )}`}
-                          >
-                            <Tag className="w-3 h-3" />
-                            {getSourceLabel(EMPTY_SOURCE_VALUE)}
-                          </span>
-                        )}
-                      </td>
+                        </td>
 
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <button
-                          title="Xem chi tiết"
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          onClick={() => handleViewCustomer(customer)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        {/* Email */}
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-1 text-sm text-gray-900 max-w-xs">
+                            <span className="truncate">{customer.email}</span>
+                          </div>
+                        </td>
+
+                        {/* Địa chỉ: chỉ lấy địa chỉ đầu tiên, truncate nếu dài */}
+                        <td className="px-6 py-4">
+                          <div className="flex items-start gap-1 text-sm text-gray-900 max-w-xs">
+                            <span className="truncate">{mainAddress}</span>
+                          </div>
+                        </td>
+
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {customer.source ? (
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${getSourceColor(
+                                customer.source
+                              )}`}
+                            >
+                              {customer.source}
+                            </span>
+                          ) : (
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${getSourceColor(
+                                EMPTY_SOURCE_VALUE
+                              )}`}
+                            >
+                              {getSourceLabel(EMPTY_SOURCE_VALUE)}
+                            </span>
+                          )}
+                        </td>
+
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <button
+                            title="Xem chi tiết"
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            onClick={() => handleViewCustomer(customer)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
             </tbody>
           </table>
         </div>
@@ -543,7 +540,6 @@ const CustomerStaffList = () => {
 
                 {/* SĐT */}
                 <div className="p-4 border rounded-xl bg-gray-50 flex gap-3">
-                  <Phone className="w-5 h-5 text-green-600 mt-1" />
                   <div>
                     <p className="text-sm text-gray-500">Số điện thoại</p>
                     <p className="font-semibold text-gray-900">
@@ -554,7 +550,6 @@ const CustomerStaffList = () => {
 
                 {/* Email */}
                 <div className="p-4 border rounded-xl bg-gray-50 flex gap-3">
-                  <Mail className="w-5 h-5 text-purple-600 mt-1" />
                   <div className="w-full">
                     <p className="text-sm text-gray-500">Email</p>
                     <p className="text-gray-900 break-words">
@@ -565,7 +560,6 @@ const CustomerStaffList = () => {
 
                 {/* Trạng thái */}
                 <div className="p-4 border rounded-xl bg-gray-50 flex gap-3">
-                  <Tag className="w-5 h-5 text-blue-600 mt-1" />
                   <div>
                     <p className="text-sm text-gray-500">Trạng thái</p>
                     <p
@@ -593,7 +587,6 @@ const CustomerStaffList = () => {
                   {selectedCustomer.addresses?.length > 0 ? (
                     selectedCustomer.addresses.map((a, i) => (
                       <div key={i} className="flex gap-2">
-                        <MapPin className="w-5 h-5 text-gray-500 mt-1" />
                         <span className="text-gray-900 break-words">
                           {a.addressName}
                         </span>
@@ -601,7 +594,6 @@ const CustomerStaffList = () => {
                     ))
                   ) : (
                     <div className="flex gap-2">
-                      <MapPin className="w-5 h-5 text-gray-500 mt-1" />
                       <span>-</span>
                     </div>
                   )}

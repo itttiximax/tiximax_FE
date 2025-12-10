@@ -459,7 +459,6 @@ const CreateAccountUser = () => {
                 {/* Email */}
                 <div className="border border-gray-200 rounded-lg">
                   <div className="bg-gray-50 px-4 py-2 flex items-center">
-                    <FiMail className="w-4 h-4 mr-2" />
                     <span className="text-sm font-semibold text-gray-700">
                       Email
                     </span>
@@ -472,7 +471,6 @@ const CreateAccountUser = () => {
                 {/* Phone */}
                 <div className="border border-gray-200 rounded-lg">
                   <div className="bg-gray-50 px-4 py-2 flex items-center">
-                    <FiPhone className="w-4 h-4 mr-2" />
                     <span className="text-sm font-semibold text-gray-700">
                       Số điện thoại
                     </span>
