@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Search,
   Warehouse,
-  Package,
   ChevronLeft,
   ChevronRight,
   Calendar,
@@ -10,6 +9,7 @@ import {
   Eye,
   ImageIcon,
   Edit,
+  X,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import warehouseService from "../../Services/Warehouse/warehouseService";
@@ -24,7 +24,6 @@ const WarehouseList = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterDate, setFilterDate] = useState("");
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailId, setDetailId] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
@@ -36,14 +35,19 @@ const WarehouseList = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, pageSize]);
 
-  const fetchWarehouses = async () => {
+  const fetchWarehouses = async (term = "") => {
     try {
       setLoading(true);
       setError(null);
+
+      const searchParams = term.trim() ? { trackingCode: term.trim() } : {};
+
       const data = await warehouseService.getReadyWarehouses(
         currentPage,
-        pageSize
+        pageSize,
+        searchParams
       );
+
       setWarehouses(data?.content || []);
       setTotalPages(data?.totalPages || 0);
     } catch (e) {
@@ -52,6 +56,23 @@ const WarehouseList = () => {
       toast.error(errorMsg);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSearch = () => {
+    setCurrentPage(0);
+    fetchWarehouses(searchTerm);
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm("");
+    setCurrentPage(0);
+    fetchWarehouses("");
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
     }
   };
 
@@ -83,31 +104,6 @@ const WarehouseList = () => {
     });
   };
 
-  const filteredWarehouses = useMemo(() => {
-    const term = (searchTerm || "").toLowerCase().trim();
-    const dateFilter = (filterDate || "").trim();
-
-    return (warehouses || []).filter((w) => {
-      const matchTerm =
-        !term ||
-        (w?.trackingCode || "").toLowerCase().includes(term) ||
-        (w?.orderCode || "").toLowerCase().includes(term);
-
-      if (!matchTerm) return false;
-      if (!dateFilter) return true;
-
-      const created = w?.createdAt ? new Date(w.createdAt) : null;
-      if (!created || Number.isNaN(created.getTime())) return false;
-
-      const yyyy = created.getFullYear();
-      const mm = String(created.getMonth() + 1).padStart(2, "0");
-      const dd = String(created.getDate()).padStart(2, "0");
-      const createdDateOnly = `${yyyy}-${mm}-${dd}`;
-
-      return createdDateOnly === dateFilter;
-    });
-  }, [warehouses, searchTerm, filterDate]);
-
   const openDetail = (id) => {
     setDetailId(id);
     setDetailOpen(true);
@@ -130,12 +126,7 @@ const WarehouseList = () => {
 
   const handleUpdateSuccess = () => {
     toast.success("Cập nhật thành công!");
-    fetchWarehouses();
-  };
-
-  const clearFilters = () => {
-    setSearchTerm("");
-    setFilterDate("");
+    fetchWarehouses(searchTerm);
   };
 
   const openImagePreview = (imageUrl) => {
@@ -178,25 +169,28 @@ const WarehouseList = () => {
               />
               <input
                 type="text"
-                placeholder="Search by tracking code or order code..."
+                placeholder="Search by shipment code..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                onKeyPress={handleKeyPress}
+                className="w-full pl-8 pr-10 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
+              {searchTerm && (
+                <button
+                  onClick={handleClearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
 
-            <div className="relative">
-              <Calendar
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400"
-                size={18}
-              />
-              <input
-                type="date"
-                value={filterDate}
-                onChange={(e) => setFilterDate(e.target.value)}
-                className="pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              />
-            </div>
+            <button
+              onClick={handleSearch}
+              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              Search
+            </button>
 
             <select
               value={pageSize}
@@ -210,15 +204,6 @@ const WarehouseList = () => {
               <option value={50}>50 / page</option>
               <option value={100}>100 / page</option>
             </select>
-
-            {(searchTerm || filterDate) && (
-              <button
-                onClick={clearFilters}
-                className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Clear filters
-              </button>
-            )}
           </div>
         </div>
 
@@ -234,35 +219,35 @@ const WarehouseList = () => {
         )}
 
         {/* Empty State */}
-        {!loading && !error && filteredWarehouses.length === 0 && (
+        {!loading && !error && warehouses.length === 0 && (
           <div className="bg-white border border-gray-200 rounded-xl p-10 text-center">
             <Warehouse size={40} className="text-gray-300 mx-auto mb-3" />
             <h3 className="text-base font-semibold text-gray-800 mb-1">
               No data
             </h3>
             <p className="text-gray-500 text-sm">
-              {searchTerm || filterDate
-                ? "No matching results."
+              {searchTerm
+                ? `No results found for "${searchTerm}"`
                 : "There are no items in the warehouse yet."}
             </p>
-            {(searchTerm || filterDate) && (
+            {searchTerm && (
               <button
-                onClick={clearFilters}
+                onClick={handleClearSearch}
                 className="mt-3 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Clear filters
+                Clear search
               </button>
             )}
           </div>
         )}
 
         {/* Table */}
-        {filteredWarehouses.length > 0 && (
+        {warehouses.length > 0 && (
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div className="px-6 py-3 bg-blue-200 border-b border-blue-100">
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium text-black-900">
-                  Total: {filteredWarehouses.length} items
+                  Total: {warehouses.length} items
                 </span>
                 <span className="text-blue-700">
                   Page {currentPage + 1} / {totalPages}
@@ -290,6 +275,9 @@ const WarehouseList = () => {
                       Order Code
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Customer Code
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Weight
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -307,7 +295,7 @@ const WarehouseList = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
-                  {filteredWarehouses.map((item, index) => (
+                  {warehouses.map((item, index) => (
                     <tr
                       key={item.warehouseId ?? `${item.trackingCode}-${index}`}
                       className="hover:bg-blue-50/60 transition-colors"
@@ -331,7 +319,7 @@ const WarehouseList = () => {
                           )}
                         </div>
                       </td>
-                       <td className="px-4 py-3 text-gray-900 font-medium">
+                      <td className="px-4 py-3 text-center text-gray-900 font-medium">
                         {item.destination || "-"}
                       </td>
                       <td className="px-4 py-3 text-gray-900 font-medium">
@@ -339,6 +327,9 @@ const WarehouseList = () => {
                       </td>
                       <td className="px-4 py-3 text-gray-700">
                         {item.orderCode || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-gray-700">
+                        {item.customerCode || "-"}
                       </td>
                       <td className="px-4 py-3 text-gray-900">
                         {item.weight} kg

@@ -22,6 +22,8 @@ const managerOrderService = {
         "DANG_XU_LY",
         "DA_GIAO",
         "DA_HOAN_THANH",
+        "CHO_GIAO",
+        "DA_DU_HANG",
         "DA_HUY",
       ];
 
@@ -119,7 +121,7 @@ const managerOrderService = {
       const url = `/orders/order-link/cancel/${orderId}/${linkId}`;
       console.log("cancelOrderLink URL:", url);
 
-      // 🔥 Dùng PUT đúng như curl
+      // Dùng PUT đúng như curl
       const response = await api.put(url); // ⬅️ ĐỔI từ post → put
 
       if (response.data?.error) {
@@ -173,7 +175,7 @@ const managerOrderService = {
     { key: "CHO_NHAP_KHO_NN", label: "Đang về kho NN", color: "cyan" },
     { key: "CHO_DONG_GOI", label: "Đã về kho NN", color: "purple" },
     { key: "DANG_XU_LY", label: "Đang về kho VN", color: "indigo" },
-    { key: "DA_DU_HANG ", label: "Đã về kho VN", color: "lime" },
+    { key: "DA_DU_HANG", label: "Đã về kho VN", color: "lime" },
     { key: "CHO_THANH_TOAN_SHIP", label: "Chờ thanh toán ship", color: "teal" },
     { key: "CHO_GIAO", label: "Đang giao hàng", color: "amber" },
     { key: "DA_GIAO", label: "Hoàn thành đơn hàng", color: "amber" },
