@@ -96,32 +96,31 @@ const UpdateShipmentCodeList = () => {
     return Number(num).toLocaleString("en-US");
   };
 
-  
   const fetchData = useCallback(
-  async (p = page, s = size) => {
-    setLoading(true);
-    setErr(null);
-    try {
-      // luôn fix status
-      const res = await orderlinkService.getPurchasesShipmentCode(
-        p,
-        s,
-        "DA_MUA"
-      );
-      setData(res);
-    } catch (e) {
-      const msg =
-        e?.response?.data?.message ||
-        e?.response?.data?.error ||
-        e?.message ||
-        "Failed to load data.";
-      setErr(msg);
-    } finally {
-      setLoading(false);
-    }
-  },
-  [page, size]
-);
+    async (p = page, s = size) => {
+      setLoading(true);
+      setErr(null);
+      try {
+        // luôn fix status
+        const res = await orderlinkService.getPurchasesShipmentCode(
+          p,
+          s,
+          "DA_MUA"
+        );
+        setData(res);
+      } catch (e) {
+        const msg =
+          e?.response?.data?.message ||
+          e?.response?.data?.error ||
+          e?.message ||
+          "Failed to load data.";
+        setErr(msg);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [page, size]
+  );
 
   useEffect(() => {
     setPage(0);
@@ -279,8 +278,6 @@ const UpdateShipmentCodeList = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              
-
               <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5">
                 <Package className="h-4 w-4 text-slate-500" />
                 <select
@@ -428,7 +425,7 @@ const UpdateShipmentCodeList = () => {
                               className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 transition-colors"
                             >
                               <Truck className="h-4 w-4" />
-                              Update shipping
+                              Add Tracking Number
                             </button>
                           ) : (
                             <button
@@ -436,7 +433,7 @@ const UpdateShipmentCodeList = () => {
                               className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
                             >
                               <Package className="h-4 w-4" />
-                              Update shipment
+                              Add Tracking Number
                             </button>
                           )}
                         </div>
