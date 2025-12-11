@@ -451,7 +451,7 @@ const DividePaymentOrder = () => {
                           </div>
                           <div className="text-gray-600">
                             <span className="font-medium">Cân nặng:</span>{" "}
-                            {item.dim} kg
+                            {item.netWeight} kg
                           </div>
                           <div className="text-gray-600">
                             <span className="font-medium">Phí vận chuyển:</span>{" "}
@@ -495,7 +495,7 @@ const DividePaymentOrder = () => {
                     {/* Total Amount */}
                     <div className="text-right ml-6">
                       <div className="text-2xl font-bold text-gray-900">
-                        {formatCurrency(item.finalPriceVnd)}
+                        {formatCurrency(item.finalPriceShip)}
                       </div>
                       <div className="text-sm text-gray-500 mt-1">
                         Thành tiền
