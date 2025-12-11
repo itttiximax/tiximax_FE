@@ -617,10 +617,10 @@ function WarehouseDomestic() {
                               </span>
                               <span className="text-gray-600">
                                 <span className="font-medium">
-                                  NV phụ trách:
+                                  Tên Khách hàng:
                                 </span>{" "}
                                 <span className="text-gray-900">
-                                  {order.staffName || "-"}
+                                  {order.customerName || "-"}
                                 </span>
                               </span>
                             </div>
@@ -747,7 +747,7 @@ function WarehouseDomestic() {
 
                                   <div className="bg-white p-3 rounded-lg border border-gray-200">
                                     <p className="text-xs text-gray-500 mb-1 font-medium">
-                                      Mã lô hàng
+                                      Mã vận đơn
                                     </p>
                                     <p className="font-mono text-gray-900 text-xs font-semibold">
                                       {link.shipmentCode || "-"}
