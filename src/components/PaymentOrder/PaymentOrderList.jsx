@@ -95,7 +95,7 @@ const PaymentOrderList = () => {
   // Search theo mã đơn + mã giao dịch
   const [searchTerm, setSearchTerm] = useState("");
 
-  const PAGE_SIZE = 50; // default 50 / trang
+  const PAGE_SIZE = 100;
 
   const fetchOrders = async (status, page = 0) => {
     setLoading(true);
