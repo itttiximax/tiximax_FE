@@ -617,10 +617,10 @@ function WarehouseDomestic() {
                               </span>
                               <span className="text-gray-600">
                                 <span className="font-medium">
-                                  Tên Khách hàng:
+                                  Tên Nhân Viên:
                                 </span>{" "}
                                 <span className="text-gray-900">
-                                  {order.customerName || "-"}
+                                  {order.staffName || "-"}
                                 </span>
                               </span>
                             </div>
