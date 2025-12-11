@@ -12,6 +12,7 @@ import {
   FileText,
   Loader2,
   Search,
+  X,
 } from "lucide-react";
 import ConfirmPayment from "./ConfirmPayment";
 
@@ -91,20 +92,24 @@ const PaymentOrderList = () => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-
-  // Search theo mã đơn + mã giao dịch
   const [searchTerm, setSearchTerm] = useState("");
 
   const PAGE_SIZE = 100;
 
-  const fetchOrders = async (status, page = 0) => {
+  // Gọi API lấy list theo status + search
+  const fetchOrders = async (status, page = 0, term = "") => {
     setLoading(true);
     try {
+      const trimmed = term.trim();
+      const searchParams = trimmed ? { orderCode: trimmed } : {};
+
       const response = await createOrderPaymentService.getOrdersByStatus(
         status,
         page,
-        PAGE_SIZE
+        PAGE_SIZE,
+        searchParams
       );
+
       setOrders(response.content || []);
       setTotalPages(response.totalPages || 0);
       setCurrentPage(page);
@@ -119,12 +124,36 @@ const PaymentOrderList = () => {
 
   useEffect(() => {
     localStorage.setItem("activeTab", activeTab);
-    fetchOrders(activeTab, 0);
+    setCurrentPage(0);
+    fetchOrders(activeTab, 0, searchTerm);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   const refreshAll = async () => {
-    await fetchOrders(activeTab, currentPage);
+    await fetchOrders(activeTab, currentPage, searchTerm);
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      fetchOrders(activeTab, newPage, searchTerm);
+    }
+  };
+
+  const handleSearch = () => {
+    setCurrentPage(0);
+    fetchOrders(activeTab, 0, searchTerm);
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm("");
+    setCurrentPage(0);
+    fetchOrders(activeTab, 0, "");
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
   };
 
   const tabConfigs = [
@@ -185,61 +214,40 @@ const PaymentOrderList = () => {
     return colors[color];
   };
 
-  const handlePageChange = (newPage) => {
-    if (newPage >= 0 && newPage < totalPages) {
-      fetchOrders(activeTab, newPage);
-    }
-  };
-
   const orderTypeLabel = (t) => {
-    switch (t) {
-      case "MUA_HO":
-        return "Mua hộ";
-      case "KY_GUI":
-        return "Ký gửi";
-      case "DAU_GIA":
-        return "Đấu giá";
-
-      case "SHOPPING":
-        return "Mua hộ";
-      case "SHIP":
-        return "Ký gửi";
-      case "AUCTION":
-        return "Đấu giá";
-
-      default:
-        return t || "—";
-    }
+    const types = {
+      MUA_HO: "Mua hộ",
+      KY_GUI: "Ký gửi",
+      DAU_GIA: "Đấu giá",
+      SHOPPING: "Mua hộ",
+      SHIP: "Ký gửi",
+      AUCTION: "Đấu giá",
+    };
+    return types[t] || t || "—";
   };
 
   const getHeaderColumns = () => {
-    if (activeTab === "CHO_THANH_TOAN") {
-      return [
-        { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
-        { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" },
-        { key: "paymentCode", label: "Mã giao dịch", colSpan: "col-span-2" },
-        { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
-        { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
-        { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-1" },
-        { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-1" },
-        { key: "actions", label: "Thao tác", colSpan: "col-span-2" },
-      ];
-    }
+    const baseColumns = [
+      { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
+      { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" },
+    ];
 
-    if (activeTab === "CHO_THANH_TOAN_DAU_GIA") {
+    if (activeTab.includes("CHO_THANH_TOAN")) {
       return [
-        { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
-        { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" },
+        ...baseColumns,
         {
           key: "paymentCode",
-          label: "Mã giao dịch ship",
+          label:
+            activeTab === "CHO_THANH_TOAN_SHIP"
+              ? "Mã giao dịch ship"
+              : "Mã giao dịch",
           colSpan: "col-span-2",
         },
         { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
         { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
         {
-          key: "paymentAfterAuction",
-          label: "Tổng tiền",
+          key: "finalPrice",
+          label: activeTab === "CHO_THANH_TOAN_SHIP" ? "Phí ship" : "Tổng tiền",
           colSpan: "col-span-1",
         },
         { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-1" },
@@ -247,26 +255,8 @@ const PaymentOrderList = () => {
       ];
     }
 
-    if (activeTab === "CHO_THANH_TOAN_SHIP") {
-      return [
-        { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
-        { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" },
-        {
-          key: "paymentCode",
-          label: "Mã giao dịch ship",
-          colSpan: "col-span-2",
-        },
-        { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
-        { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
-        { key: "finalPrice", label: "Phí ship", colSpan: "col-span-1" },
-        { key: "createdAt", label: "Ngày tạo", colSpan: "col-span-1" },
-        { key: "actions", label: "Thao tác", colSpan: "col-span-2" },
-      ];
-    }
-
     return [
-      { key: "orderCode", label: "Mã đơn hàng", colSpan: "col-span-2" },
-      { key: "customerName", label: "Khách hàng", colSpan: "col-span-2" },
+      ...baseColumns,
       { key: "orderType", label: "Loại đơn", colSpan: "col-span-1" },
       { key: "status", label: "Trạng thái", colSpan: "col-span-1" },
       { key: "finalPrice", label: "Tổng tiền", colSpan: "col-span-2" },
@@ -276,22 +266,7 @@ const PaymentOrderList = () => {
   };
 
   const renderRows = () => {
-    const term = searchTerm.trim().toLowerCase();
-
-    const filteredOrders = (orders || []).filter((order) => {
-      if (!term) return true;
-
-      const code = (order?.code || order?.orderCode || "").toLowerCase();
-      const payCode = (
-        order?.paymentCode ||
-        order?.transactionCode ||
-        ""
-      ).toLowerCase();
-
-      return code.includes(term) || payCode.includes(term);
-    });
-
-    return filteredOrders.map((order) => {
+    return orders.map((order) => {
       const customerName = order?.customer?.name || "N/A";
       const code = order?.code || order?.orderCode || "—";
       const payCode = order?.paymentCode || order?.transactionCode || "—";
@@ -311,13 +286,16 @@ const PaymentOrderList = () => {
         >
           <div className="col-span-2 font-semibold text-gray-900">{code}</div>
           <div className="col-span-2 text-gray-900">{customerName}</div>
+
           {activeTab.includes("CHO_THANH_TOAN") && (
             <div className="col-span-2 text-blue-600 truncate">{payCode}</div>
           )}
+
           <div className="col-span-1">{typeLabel}</div>
           <div className="col-span-1">{badge}</div>
           <div className="col-span-1 font-semibold">{price} đ</div>
           <div className="col-span-1 text-gray-600 text-sm">{created}</div>
+
           <div className="col-span-2 flex justify-end">
             {activeTab === "CHO_THANH_TOAN" && (
               <ConfirmPayment order={order} mode="order" onDone={refreshAll} />
@@ -342,12 +320,12 @@ const PaymentOrderList = () => {
   return (
     <div className="min-h-screen py-6 px-4">
       <div className="mx-auto">
+        {/* Header với Search */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <h1 className="text-3xl font-bold text-gray-900">
             Quản lý thanh toán đơn hàng
           </h1>
 
-          {/* Search mã đơn + mã giao dịch */}
           <div className="flex items-center gap-2">
             <div className="relative">
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -355,16 +333,31 @@ const PaymentOrderList = () => {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Tìm mã đơn hoặc mã giao dịch..."
-                className="pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-72"
+                onKeyPress={handleKeyPress}
+                placeholder="Tìm theo mã đơn hàng..."
+                className="pl-9 pr-10 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-72"
               />
+              {searchTerm && (
+                <button
+                  onClick={handleClearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
+            <button
+              onClick={handleSearch}
+              className="px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            >
+              Tìm kiếm
+            </button>
           </div>
         </div>
 
         {/* Tabs */}
         <div className="bg-white rounded-lg shadow border border-gray-200 mb-6">
-          <div className="grid grid-cols-4 gap-px bg-gray-200">
+          <div className="grid grid-cols-5 gap-px bg-gray-200">
             {tabConfigs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.key;
@@ -374,22 +367,20 @@ const PaymentOrderList = () => {
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`relative px-6 py-4 text-left border 
+                  className={`relative px-6 py-4 text-left border transition-colors
                     ${
                       isActive
                         ? `${color.activeBg} ${color.activeText} ${color.activeBorder}`
                         : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
                     }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Icon
-                        className={`w-5 h-5 ${
-                          isActive ? "text-white" : color.icon
-                        }`}
-                      />
-                      <span className="text-sm font-semibold">{tab.label}</span>
-                    </div>
+                  <div className="flex items-center gap-3">
+                    <Icon
+                      className={`w-5 h-5 ${
+                        isActive ? "text-white" : color.icon
+                      }`}
+                    />
+                    <span className="text-sm font-semibold">{tab.label}</span>
                   </div>
                 </button>
               );
@@ -412,7 +403,9 @@ const PaymentOrderList = () => {
               Không có đơn hàng
             </h3>
             <p className="text-sm text-gray-500">
-              Chưa có đơn hàng nào với trạng thái này
+              {searchTerm
+                ? `Không tìm thấy đơn hàng với mã "${searchTerm}"`
+                : "Chưa có đơn hàng nào với trạng thái này"}
             </p>
           </div>
         ) : (
@@ -437,7 +430,7 @@ const PaymentOrderList = () => {
               Trang <span className="font-semibold">{currentPage + 1}</span> /{" "}
               <span className="font-semibold">{totalPages}</span>
               <span className="ml-2 text-xs text-gray-500">
-                ({PAGE_SIZE} đơn / trang)
+                ({orders.length} / {PAGE_SIZE} đơn)
               </span>
             </div>
             <div className="flex gap-2">
