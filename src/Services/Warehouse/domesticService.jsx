@@ -23,6 +23,54 @@ class DomesticService {
       throw error;
     }
   }
+  // Get warehouse link orders by status with pagination and filters
+  async getWarehouseLinkOrders(page = 0, limit = 20, filters = {}) {
+    try {
+      const params = {};
+
+      // Add status filter (default: DA_NHAP_KHO_VN)
+      if (filters.status) {
+        params.status = filters.status;
+      }
+
+      // Add shipmentCode filter if provided
+      if (filters.shipmentCode) {
+        params.shipmentCode = filters.shipmentCode;
+      }
+
+      // Add customerCode filter if provided
+      if (filters.customerCode) {
+        params.customerCode = filters.customerCode;
+      }
+
+      const response = await api.get(
+        `/orders/warehouse-links/${page}/${limit}`,
+        { params }
+      );
+
+      if (response.data?.error) {
+        throw new Error(`API Error: ${response.data.error}`);
+      }
+
+      // Handle response structure (might be paginated or array)
+      if (response.data?.content) {
+        return response.data;
+      }
+
+      return {
+        content: Array.isArray(response.data) ? response.data : [],
+        totalElements:
+          response.data?.totalElements ||
+          (Array.isArray(response.data) ? response.data.length : 0),
+        totalPages: response.data?.totalPages || 1,
+        currentPage: page,
+        size: limit,
+      };
+    } catch (error) {
+      console.error(`Error fetching warehouse link orders:`, error);
+      throw error;
+    }
+  }
 
   // Get all domestic orders (fetch all pages)
   async getAllDomesticOrders(limit = 10) {

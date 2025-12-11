@@ -29,7 +29,7 @@ import SearchWebsite from "../components/Order/SearchWebsite";
 
 //StaffWarehouseForeign components
 import StaffWarehouseForeignLayout from "../components/WarehouseForeign/StaffWarehouseForeignLayout";
-import StaffWarehouseForeignPage from "../components/WarehouseForeign/StaffWarehouseForeignPage";
+// import StaffWarehouseForeignPage from "../components/WarehouseForeign/StaffWarehouseForeignPage";
 
 //StaffWarehouseDomestic components
 import StaffWarehouseDomesticLayout from "../components/WarehouseDomestic/StaffWarehouseDomesticLayout";
@@ -40,7 +40,7 @@ import ManagerPage from "../components/Manager/ManagerPage";
 import ManagerDashboard from "../components/Manager/ManagerDashboard";
 
 //StaffSale components
-import StaffSalePage from "../components/StaffSale/StaffSalePage";
+// import StaffSalePage from "../components/StaffSale/StaffSalePage";
 import StaffSaleLayout from "../components/StaffSale/StaffSaleLayout";
 import Tracking from "../components/StaffSale/Tracking";
 
@@ -132,6 +132,7 @@ import SecurityPage from "../Page/Navigattion/SecurityPage";
 import CareerPage from "../Page/Navigattion/CareerPage";
 import Question from "../Page/Navigattion/Question";
 import RelateOrder from "../components/Order/RelateOrder";
+import WarehouseDomestic from "../components/WarehouseDomestic/WarehouseDomestic";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -403,7 +404,7 @@ const Router = createBrowserRouter([
       { index: true, element: <StaffWarehouseDomesticPage /> },
       { path: "profile", element: <StaffProfile /> },
       { path: "dashboard", element: <DashboardWarehouse /> },
-      { path: "inventory", element: <WarehouseList /> },
+      { path: "inventory", element: <WarehouseDomestic /> },
       { path: "imports", element: <PackingFlyingList /> },
       { path: "exports", element: <ExportList /> },
       { path: "eligible-packings", element: <PackingEligibleList /> },
