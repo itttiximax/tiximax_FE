@@ -41,6 +41,11 @@ const ManagerSidebar = () => {
           path: "/manager/order",
         },
         {
+          text: t("Hủy đơn hàng"),
+          icon: <ShoppingCart />,
+          path: "/manager/cancelorder",
+        },
+        {
           text: t("Danh sách nhân viên"),
           icon: <List />,
           path: "/manager/team",

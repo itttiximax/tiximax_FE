@@ -50,31 +50,31 @@ const managerOrderService = {
   },
 
   // Get order detail by ID
-  getOrderDetail: async (orderId) => {
-    try {
-      // Validate order ID
-      if (!orderId || isNaN(orderId) || orderId <= 0) {
-        throw new Error("Invalid order ID");
-      }
+  // getOrderDetail: async (orderId) => {
+  //   try {
+  //     // Validate order ID
+  //     if (!orderId || isNaN(orderId) || orderId <= 0) {
+  //       throw new Error("Invalid order ID");
+  //     }
 
-      const response = await api.get(`/orders/detail/${orderId}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching order detail for ID ${orderId}:`, error);
+  //     const response = await api.get(`/orders/detail/${orderId}`);
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error(`Error fetching order detail for ID ${orderId}:`, error);
 
-      if (error.response?.status === 404) {
-        throw new Error("Order not found");
-      } else if (error.response?.status === 400) {
-        throw new Error("Invalid order ID");
-      } else if (error.response?.status === 403) {
-        throw new Error("Access denied");
-      } else if (error.response?.status === 500) {
-        throw new Error("Server error");
-      }
+  //     if (error.response?.status === 404) {
+  //       throw new Error("Order not found");
+  //     } else if (error.response?.status === 400) {
+  //       throw new Error("Invalid order ID");
+  //     } else if (error.response?.status === 403) {
+  //       throw new Error("Access denied");
+  //     } else if (error.response?.status === 500) {
+  //       throw new Error("Server error");
+  //     }
 
-      throw error;
-    }
-  },
+  //     throw error;
+  //   }
+  // },
   // Get all orders without pagination
   getOrdersPaginated: async (page = 0, size = 10) => {
     try {
@@ -99,6 +99,41 @@ const managerOrderService = {
   // Get orders by specific status
   getOrdersByStatus: async (status, page = 0, size = 20) => {
     return await managerOrderService.getOrdersPaging(page, size, status);
+  },
+  getOrderDetail: async (orderId) => {
+    try {
+      const response = await api.get(`/orders/detail/${orderId}`);
+
+      if (response.data?.error) {
+        throw new Error(`API Error: ${response.data.error}`);
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching order detail ${orderId}:`, error);
+      throw error;
+    }
+  },
+  cancelOrderLink: async (orderId, linkId) => {
+    try {
+      const url = `/orders/order-link/cancel/${orderId}/${linkId}`;
+      console.log("cancelOrderLink URL:", url);
+
+      // 🔥 Dùng PUT đúng như curl
+      const response = await api.put(url); // ⬅️ ĐỔI từ post → put
+
+      if (response.data?.error) {
+        throw new Error(`API Error: ${response.data.error}`);
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        `Error canceling order link orderId=${orderId}, linkId=${linkId}:`,
+        error
+      );
+      throw error;
+    }
   },
 
   // Status configuration - Updated with new statuses

@@ -133,6 +133,8 @@ import CareerPage from "../Page/Navigattion/CareerPage";
 import Question from "../Page/Navigattion/Question";
 import RelateOrder from "../components/Order/RelateOrder";
 import WarehouseDomestic from "../components/WarehouseDomestic/WarehouseDomestic";
+import OrderListCancel from "../components/Manager/OrderListCancel";
+import PendingReceive from "../components/WarehouseForeign/PendingReceive";
 const Router = createBrowserRouter([
   {
     path: "/",
@@ -252,6 +254,7 @@ const Router = createBrowserRouter([
       { path: "dashboard", element: <DashboardManager /> },
       { path: "producttype", element: <ManagerProductType /> },
       { path: "order", element: <ManagerOrder /> },
+      { path: "cancelorder", element: <OrderListCancel /> },
       { path: "website", element: <ManagerWebsite /> },
       { path: "promotion", element: <ManagerPromotion /> },
       { path: "notifications", element: <NotFound /> },
@@ -375,7 +378,8 @@ const Router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardWarehouse /> },
       { path: "profile", element: <StaffProfile /> },
-      { path: "dashboard", element: <DashboardWarehouse /> },
+      // { path: "dashboard", element: <DashboardWarehouse /> },
+      { path: "dashboard", element: <PendingReceive /> },
       { path: "warehouse", element: <WarehouseList /> },
       { path: "importproduct", element: <ImportPacking /> },
       { path: "imports", element: <WarehouseShipment /> },

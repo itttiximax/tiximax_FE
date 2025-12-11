@@ -149,6 +149,23 @@ const warehouseService = {
       throw error;
     }
   },
+  getWarehouseForeignLinks: async (page = 0, size = 20, filters = {}) => {
+    const params = new URLSearchParams();
+
+    if (filters.shipmentCode) {
+      params.append("shipmentCode", filters.shipmentCode);
+    }
+
+    if (filters.customerCode) {
+      params.append("customerCode", filters.customerCode);
+    }
+
+    const response = await api.get(
+      `/orders/warehouse-foreign-links/${page}/${size}?${params.toString()}`
+    );
+
+    return response.data;
+  },
 };
 
 export default warehouseService;
