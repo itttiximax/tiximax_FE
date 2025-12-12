@@ -245,7 +245,7 @@ const PendingReceive = () => {
               <PackageSearch className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-              Quản lý hàng Nước ngoài chờ nhận
+              Managing overseas shipments awaiting receipt.
             </h1>
           </div>
         </div>
@@ -256,7 +256,7 @@ const PendingReceive = () => {
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-3">
             <h2 className="text-lg font-semibold text-white flex items-center gap-2">
               <Search className="w-5 h-5" />
-              Bộ lọc tìm kiếm
+              Filter
             </h2>
           </div>
 
