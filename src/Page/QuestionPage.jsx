@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 const QuestionPage = () => {
   const [formData, setFormData] = useState({
@@ -15,20 +16,68 @@ const QuestionPage = () => {
     {
       id: 1,
       question: "Thời gian vận chuyển hàng hóa là bao lâu?",
-      answer:
-        "Tùy thuộc vào từng tuyến mà thời gian vận chuyển hàng có thể từ từ 7 - 15 ngày. Hãy liên hệ với Tiximax để được tư vấn rõ thời gian xử lý đơn hàng của bạn.",
+      answer: (
+        <>
+          Tùy thuộc vào từng tuyến mà thời gian vận chuyển hàng có thể từ 7 - 15
+          ngày. Hãy{" "}
+          <Link
+            to="/services/shipping"
+            className="text-yellow-600 hover:text-yellow-700 font-semibold underline"
+          >
+            liên hệ với Tiximax
+          </Link>{" "}
+          để được tư vấn rõ thời gian xử lý đơn hàng của bạn.
+        </>
+      ),
     },
     {
       id: 2,
       question: "Chi phí vận chuyển được tính như thế nào?",
-      answer:
-        "Với mỗi một tuyến, Tiximax sẽ có một mức chi phí khác nhau. Dao động từ 145.000 VNĐ đến 245.000 VNĐ/KG, để tìm hiểu chi tiết hãy nhắn tin để nhân viên chúng tôi hỗ trợ tư vấn.",
+      answer: (
+        <>
+          Với mỗi một tuyến, Tiximax sẽ có một mức chi phí khác nhau. Dao động
+          từ 145.000 VNĐ đến 245.000 VNĐ/KG, để{" "}
+          <Link
+            to="/services/shipping"
+            className="text-yellow-600 hover:text-yellow-700 font-semibold underline"
+          >
+            tìm hiểu chi tiết
+          </Link>{" "}
+          hãy nhắn tin để nhân viên chúng tôi hỗ trợ tư vấn.
+        </>
+      ),
     },
     {
       id: 3,
       question: "Hàng hóa có được bảo hiểm không?",
-      answer:
-        "Tiximax có cung cấp gói bảo hiểm hàng hóa với mức đền bù lên đến 100% cho khách hàng. Nếu mua sắm các hàng hóa giá trị cao, hàng dễ vỡ, chúng tôi khuyên bạn nên lựa chọn gói bảo hiểm này để được đảm bảo.",
+      answer: (
+        <>
+          Tiximax có cung cấp gói bảo hiểm hàng hóa với mức đền bù lên đến 100%
+          cho khách hàng. Nếu mua sắm các hàng hóa giá trị cao, hàng dễ vỡ thông
+          qua dịch vụ{" "}
+          <Link
+            to="/services/auction"
+            className="text-yellow-600 hover:text-yellow-700 font-semibold underline"
+          >
+            đấu giá
+          </Link>
+          ,{" "}
+          <Link
+            to="/services/purchase"
+            className="text-yellow-600 hover:text-yellow-700 font-semibold underline"
+          >
+            mua hộ
+          </Link>{" "}
+          hoặc{" "}
+          <Link
+            to="/services/storage"
+            className="text-yellow-600 hover:text-yellow-700 font-semibold underline"
+          >
+            kho hàng
+          </Link>
+          , chúng tôi khuyên bạn nên lựa chọn gói bảo hiểm này để được đảm bảo.
+        </>
+      ),
     },
     {
       id: 4,
@@ -198,6 +247,11 @@ const QuestionPage = () => {
 
                 {/* Submit Button */}
                 <div>
+                  <p className="text-gray-700 mb-4 leading-relaxed px-4">
+                    Lưu ý: Để được tư vấn chính xác nhất, hãy điền đầy đủ thông
+                    tin
+                  </p>
+                  <div className="flex items-center justify-center gap-3 mb-4"></div>
                   <button
                     onClick={handleSubmit}
                     className="w-full md:w-auto px-12 py-4 bg-gray-900 text-white font-bold uppercase rounded-lg hover:bg-gray-800 transition-colors duration-300 shadow-lg"
@@ -277,9 +331,12 @@ const QuestionPage = () => {
                   <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
                   <div className="w-8 h-0.5 bg-yellow-400"></div>
                 </div>
-                <button className="px-10 py-3 bg-yellow-400 text-gray-900 font-bold uppercase rounded-lg hover:bg-yellow-500 transition-colors duration-300 shadow-lg">
+                <Link
+                  to="/service"
+                  className="inline-block px-10 py-3 bg-yellow-400 text-gray-900 font-bold uppercase rounded-lg hover:bg-yellow-500 transition-colors duration-300 shadow-lg"
+                >
                   Liên hệ ngay
-                </button>
+                </Link>
               </div>
             </div>
           </div>

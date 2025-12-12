@@ -24,13 +24,14 @@ const Vision = () => {
         variants={fadeUp}
         initial="hidden"
         animate="show"
-        className="max-w-3xl mx-auto text-center mt-6 text-gray-600 text-lg leading-relaxed"
+        className="max-w-4xl mx-auto text-center mt-6 text-gray-600 text-lg leading-relaxed"
       >
         Chúng tôi tin rằng một doanh nghiệp bền vững không chỉ dựa vào lợi
-        nhuận, mà dựa vào con người và những giá trị cốt lõi.
+        nhuận, mà dựa vào con người và những giá trị cốt lõi. Tiximax mang sứ
+        mệnh kết nối thế giới bằng logistics, thanh toán và mua bán toàn cầu.
         <br />
-        Tiximax mang sứ mệnh kết nối thế giới bằng logistics, thanh toán và mua
-        bán toàn cầu.
+        {/* Tiximax mang sứ mệnh kết nối thế giới bằng logistics, thanh toán và mua
+        bán toàn cầu. */}
       </motion.p>
 
       {/* PROFILE + TEXT AROUND */}

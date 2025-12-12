@@ -97,7 +97,7 @@ const leaders = [
   },
   {
     name: "Trần Minh Đức",
-    role: "Phó Giám đốc Kinh doanh Tiximax",
+    role: "Giám đốc phát triển thị trường Tiximax",
     bio: "Email: ductm@tiximax.net",
     initials: "DT",
     image: DUNGLE,
@@ -702,12 +702,15 @@ const AboutUs = () => {
                     <p className="font-bold text-white text-xl mb-1">
                       {p.name}
                     </p>
-                    <p className="text-base text-amber-300 font-medium">
+                    {/* <p className="text-base text-amber-300 font-medium">
                       {p.role}
-                    </p>
+                    </p> */}
                   </div>
                 </div>
                 <div className="p-6">
+                  <p className="text-base text-gray-800 font-medium">
+                    {p.role}
+                  </p>
                   <p className="text-base font-medium text-gray-700">{p.bio}</p>
                 </div>
               </motion.div>

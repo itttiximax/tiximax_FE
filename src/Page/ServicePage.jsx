@@ -17,7 +17,7 @@ const services = [
     domain: "tiximaxindo.com",
     country:
       "https://upload.wikimedia.org/wikipedia/commons/9/9f/Flag_of_Indonesia.svg",
-    market: "Indonesia",
+    market: "Indonesia - VietNam",
     description:
       "Cung cấp dịch vụ vận chuyển - đấu giá - mua hộ 2 chiều Indonesia - Việt Nam.",
     specialties: [

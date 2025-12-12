@@ -74,23 +74,23 @@ const RAW_PROMOS = [
     cta: { label: "Đặt tuyến SEA", href: "/booking?route=sea" },
     img: "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?q=80&w=1600&auto=format&fit=crop",
   },
-  {
-    id: "express-weekend",
-    title: "Express Weekend",
-    subtitle: "Thứ 6–CN: -12% cước nhanh JP/KR",
-    tag: "Nội địa & Quốc tế",
-    type: "deal",
-    badge: "-12%",
-    startAt: "2025-11-07T00:00:00Z",
-    endAt: "2026-02-28T00:00:00Z",
-    conditions: [
-      "Áp dụng khi tạo đơn trong 3 ngày cuối tuần",
-      "Không cộng dồn mã khác",
-    ],
-    code: "WEEKEND12",
-    cta: { label: "Tạo đơn cuối tuần", href: "/create-order?speed=express" },
-    img: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600&auto=format&fit=crop",
-  },
+  // {
+  //   id: "express-weekend",
+  //   title: "Express Weekend",
+  //   subtitle: "Thứ 6–CN: -12% cước nhanh JP/KR",
+  //   tag: "Nội địa & Quốc tế",
+  //   type: "deal",
+  //   badge: "-12%",
+  //   startAt: "2025-11-07T00:00:00Z",
+  //   endAt: "2026-02-28T00:00:00Z",
+  //   conditions: [
+  //     "Áp dụng khi tạo đơn trong 3 ngày cuối tuần",
+  //     "Không cộng dồn mã khác",
+  //   ],
+  //   code: "WEEKEND12",
+  //   cta: { label: "Tạo đơn cuối tuần", href: "/create-order?speed=express" },
+  //   img: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600&auto=format&fit=crop",
+  // },
 
   /** (Bạn có thể bổ sung thêm các promo khác nếu cần) */
 ];

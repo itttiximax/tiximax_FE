@@ -6,7 +6,7 @@ import ServicePage from "./ServicePage";
 import Feedback from "./Feedback";
 import QuestionPage from "./QuestionPage";
 import ReasonPage from "./ReasonPage";
-import ProcessPage from "./ProcessPage";
+// import ProcessPage from "./ProcessPage";
 import Service from "./Service";
 import PartnerPage from "./PartnerPage";
 import PromotionPage from "./PromotionPage";

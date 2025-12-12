@@ -31,7 +31,7 @@ const services = [
       "Cần mua hộ hàng Mỹ, Nhật, Hàn, Indonesia? Đội ngũ Tiximax giúp bạn mua sắm tại mọi website. Cam kết mua đúng link, đúng sản phẩm với mức phí ưu đãi nhất. Sử dụng dịch vụ mua hộ để tiếp cận hàng hóa toàn cầu chính hãng mà không cần thẻ quốc tế phức tạp.",
     image:
       "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500&q=80",
-    brands: ["Amazon", "eBay", "Walmart", "Zara"],
+    // brands: ["Amazon", "eBay", "Walmart", "Zara"],
   },
   {
     id: 3,
@@ -159,7 +159,7 @@ const Service = () => {
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 uppercase">
-            Ship Hàng Uy Tín
+            CÁC DỊCH VỤ CỦA TIXIMAX
           </h2>
 
           {/* Decorative underline */}
