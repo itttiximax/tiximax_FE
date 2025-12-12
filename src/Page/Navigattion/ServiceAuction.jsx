@@ -93,15 +93,6 @@ const ServiceAuction = () => {
 
             {/* Line dưới H1 */}
             <div className="h-[3px] w-24 mx-auto bg-amber-500 rounded-full" />
-
-            {/* Mô tả ngắn giống AboutUs (2–3 dòng) */}
-            <p className="max-w-3xl mx-auto text-center text-base sm:text-lg md:text-xl text-gray-200 leading-relaxed">
-              Hỗ trợ khách hàng Việt tham gia đấu giá trên Yahoo Auction, eBay
-              và các sàn quốc tế, từ đặt bid, thanh toán nội địa đến vận chuyển
-              hàng ngoại về Việt Nam một cách an toàn, minh bạch và tối ưu chi
-              phí.
-            </p>
-
             {/* CTA */}
             <div className="mt-4 flex flex-wrap gap-4 justify-center">
               <Link
@@ -122,11 +113,7 @@ const ServiceAuction = () => {
       </section>
 
       {/* ĐƯA NỘI DUNG H1 XUỐNG DƯỚI HEADER — KHÔNG HIỆU ỨNG */}
-      <Section
-        title="Dịch vụ đấu giá Tiximax – Dịch vụ đấu giá hàng quốc tế uy tín, đấu giá hàng ngoại ship về Việt Nam"
-        bg="white"
-        noMotion
-      >
+      <Section bg="white" noMotion>
         <>
           <p>
             Dịch vụ đấu giá Tiximax hỗ trợ người dùng Việt tham gia đấu giá trên

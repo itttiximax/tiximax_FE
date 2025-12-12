@@ -84,14 +84,6 @@ const ServicesStorage = () => {
 
             {/* line */}
             <div className="h-[3px] w-24 mx-auto bg-amber-500 rounded-full" />
-
-            {/* mô tả ngắn giống AboutUs */}
-            <p className="max-w-3xl mx-auto text-center text-base sm:text-lg md:text-xl text-gray-200 leading-relaxed">
-              Cho mượn địa chỉ và kho quốc tế tại Mỹ, Nhật, Hàn, Indonesia để
-              bạn tự order, Tiximax lo toàn bộ phần nhận – lưu – gom – gửi hàng
-              về Việt Nam với quy trình minh bạch và dễ theo dõi.
-            </p>
-
             {/* CTA */}
             <div className="mt-4 flex flex-wrap gap-4 justify-center">
               <Link
@@ -112,11 +104,7 @@ const ServicesStorage = () => {
       </section>
 
       {/* GIỚI THIỆU DỊCH VỤ – KHÔNG HIỆU ỨNG */}
-      <Section
-        title="Giới thiệu dịch vụ Tiximax ký gửi kho"
-        bg="white"
-        noMotion
-      >
+      <Section bg="white" noMotion>
         <>
           <p>
             Dịch vụ <strong>Tiximax ký gửi kho</strong> là giải pháp toàn diện

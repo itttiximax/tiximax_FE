@@ -1,23 +1,37 @@
 import React from "react";
+import { motion } from "framer-motion";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+};
 
 const GuideOrder = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-10 to-white py-0 px-6">
-      {/* HEADER HERO MÀU VÀNG */}
-      <section className="relative overflow-hidden mb-12">
-        {/* Nền gradient vàng */}
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-300 via-amber-400 to-amber-500" />
-        {/* Overlay sáng nhẹ */}
-        <div className="absolute inset-0 bg-white/10 mix-blend-overlay" />
+    <main className="min-h-screen bg-gradient-to-b from-white to-amber-50/40">
+      {/* HEADER HERO ĐỒNG BỘ VỚI ServiceList */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500/25 via-transparent to-transparent" />
 
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 text-center">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 uppercase tracking-wide drop-shadow">
-            HƯỚNG DẪN SỬ DỤNG DỊCH VỤ
-          </h1>
-          <p className="mt-4 text-lg sm:text-2xl text-gray-800 font-medium">
-            TIXIMAX LOGISTICS – Dịch vụ logistics trọn gói, minh bạch và tối ưu
-            cho khách hàng.
-          </p>
+        <div className="relative max-w-5xl mx-auto px-6 lg:px-10 py-16 lg:py-24">
+          <motion.div
+            initial="hidden"
+            animate="show"
+            variants={fadeUp}
+            className="space-y-5 text-white"
+          >
+            <p className="text-xs md:text-sm font-semibold tracking-[0.25em] text-amber-300 uppercase">
+              Hướng dẫn Tiximax
+            </p>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight">
+              Hướng dẫn sử dụng dịch vụ &amp; tra cứu đơn hàng
+            </h1>
+            <p className="text-sm md:text-base text-gray-200 max-w-2xl leading-relaxed">
+              Từng bước đặt hàng, thanh toán và theo dõi đơn với TIXIMAX
+              Logistics – quy trình rõ ràng, chi phí minh bạch, dễ hiểu cho cả
+              khách lẻ và chủ shop.
+            </p>
+          </motion.div>
         </div>
       </section>
 
@@ -101,7 +115,7 @@ const GuideOrder = () => {
             <div className="mb-10">
               <div className="bg-yellow-100 border-l-4 border-yellow-500 p-6 mb-6">
                 <h4 className="text-2xl font-bold text-gray-900">
-                  Bước 2: TIXIMAX kiểm tra & báo giá
+                  Bước 2: TIXIMAX kiểm tra &amp; báo giá
                 </h4>
               </div>
               <div className="pl-8">
@@ -126,7 +140,7 @@ const GuideOrder = () => {
                       </li>
                       <li>
                         <span className="bg-yellow-200 px-3 py-1 font-semibold rounded">
-                          Phí vận chuyển quốc tế & nội địa
+                          Phí vận chuyển quốc tế &amp; nội địa
                         </span>
                       </li>
                       <li>
@@ -156,7 +170,7 @@ const GuideOrder = () => {
             <div className="mb-10">
               <div className="bg-yellow-100 border-l-4 border-yellow-500 p-6 mb-6">
                 <h4 className="text-2xl font-bold text-gray-900">
-                  Bước 3: Xác nhận & thanh toán
+                  Bước 3: Xác nhận &amp; thanh toán
                 </h4>
               </div>
               <div className="pl-8">
@@ -188,7 +202,7 @@ const GuideOrder = () => {
             <div className="mb-10">
               <div className="bg-yellow-100 border-l-4 border-yellow-500 p-6 mb-6">
                 <h4 className="text-2xl font-bold text-gray-900">
-                  Bước 4: Vận chuyển & giao hàng tận tay
+                  Bước 4: Vận chuyển &amp; giao hàng tận tay
                 </h4>
               </div>
               <div className="pl-8">
@@ -284,7 +298,7 @@ const GuideOrder = () => {
                   Quy trình đơn giản
                 </h4>
                 <p className="text-lg text-gray-700 leading-relaxed">
-                  Gửi yêu cầu – nhận báo giá – xác nhận & thanh toán – nhận
+                  Gửi yêu cầu – nhận báo giá – xác nhận &amp; thanh toán – nhận
                   hàng. Bạn không cần hiểu quá sâu về thủ tục logistics, TIXIMAX
                   đã làm thay bạn.
                 </p>
@@ -311,7 +325,7 @@ const GuideOrder = () => {
             {/* Negative margin để vượt ra ngoài padding */}
             <div className="bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-xl p-8">
               <h2 className="text-4xl font-bold text-gray-900 text-center">
-                TRA CỨU & THEO DÕI ĐƠN HÀNG
+                TRA CỨU &amp; THEO DÕI ĐƠN HÀNG
               </h2>
             </div>
           </div>
@@ -563,7 +577,7 @@ const GuideOrder = () => {
             </p>
             <ul className="list-disc pl-8 space-y-2 text-lg text-gray-700">
               <li>Mã đơn / mã vận đơn (nếu có)</li>
-              <li>Họ tên & số điện thoại đã dùng khi đặt hàng</li>
+              <li>Họ tên &amp; số điện thoại đã dùng khi đặt hàng</li>
             </ul>
             <p className="mt-5 text-lg text-gray-700">
               Đội ngũ TIXIMAX sẽ kiểm tra trên hệ thống và phản hồi chi tiết cho
@@ -595,7 +609,7 @@ const GuideOrder = () => {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

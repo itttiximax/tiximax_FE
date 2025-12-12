@@ -137,6 +137,11 @@ const STATUS_META = {
   },
 };
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+};
+
 const percentageFromStatus = (code) => {
   const idx = STATUS_ORDER.indexOf(code);
   const pct = ((idx + 1) / STATUS_ORDER.length) * 100;
@@ -175,22 +180,43 @@ const GuideTracking = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-white">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-yellow-400 to-yellow-300 py-24 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-10">
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-5 leading-tight">
-              TRA CỨU TÌNH TRẠNG ĐƠN HÀNG
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-800">
-              Nhập mã kiện/mã vận đơn TIXIMAX để xem trạng thái chi tiết
-            </p>
-          </div>
+    <main className="min-h-screen bg-gradient-to-b from-white to-amber-50/40">
+      {/* HEADER HERO – ĐỒNG BỘ VỚI ServiceList & GuideOrder */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500/25 via-transparent to-transparent" />
 
-          {/* Search Box */}
-          <form onSubmit={onSearch} className="max-w-3xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-xl p-4 flex gap-4">
+        <div className="relative max-w-5xl mx-auto px-6 lg:px-10 py-16 lg:py-24">
+          <motion.div
+            initial="hidden"
+            animate="show"
+            variants={fadeUp}
+            className="space-y-5 text-white"
+          >
+            <p className="text-xs md:text-sm font-semibold tracking-[0.25em] text-amber-300 uppercase">
+              Hướng dẫn Tiximax
+            </p>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight">
+              Tra cứu tình trạng đơn hàng
+            </h1>
+            <p className="text-sm md:text-base text-gray-200 max-w-2xl leading-relaxed">
+              Nhập mã kiện hoặc mã vận đơn TIXIMAX để xem lộ trình vận chuyển,
+              trạng thái thông quan và tiến độ giao hàng một cách rõ ràng, dễ
+              hiểu.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* SEARCH BOX SECTION */}
+      <section className="pt-20 lg:pt-28 pb-4 px-6">
+        {" "}
+        {/* tăng khoảng cách */}
+        <div className="max-w-7xl mx-auto">
+          <form
+            onSubmit={onSearch}
+            className="max-w-3xl mx-auto -mt-6 md:-mt-12" // vẫn giữ search box kéo lên nhẹ
+          >
+            <div className="bg-gray-50 rounded-2xl shadow-xl p-4 flex flex-col md:flex-row gap-4">
               <div className="flex-1 flex items-center gap-3 px-3">
                 <Barcode className="w-7 h-7 text-yellow-600" />
                 <input
@@ -202,11 +228,12 @@ const GuideTracking = () => {
               </div>
               <button
                 type="submit"
-                className="px-8 py-4 rounded-xl text-white font-bold text-lg bg-gray-900 hover:bg-gray-800 transition-colors"
+                className="w-full md:w-auto px-8 py-4 rounded-xl text-white font-bold text-lg bg-yellow-400 hover:bg-yeloow-600 transition-colors"
               >
                 Tra cứu
               </button>
             </div>
+
             {error && (
               <div className="mt-4 text-base md:text-lg text-red-700 flex items-center gap-2 justify-center">
                 <CircleAlert className="w-5 h-5" /> {error}
@@ -216,8 +243,8 @@ const GuideTracking = () => {
         </div>
       </section>
 
-      {/* Result Section */}
-      <section className="py-20">
+      {/* RESULT SECTION */}
+      <section className="py-16">
         <div className="max-w-7xl mx-auto px-6">
           {!result ? (
             <div className="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-10 text-center min-h-[100px]" />
@@ -413,7 +440,7 @@ const GuideTracking = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
+      {/* FAQ SECTION */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6">
           <div className="bg-white rounded-2xl shadow-xl p-16">
@@ -497,7 +524,7 @@ const GuideTracking = () => {
           </div>
         </div>
       </section>
-    </div>
+    </main>
   );
 };
 

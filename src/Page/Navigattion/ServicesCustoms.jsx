@@ -100,11 +100,7 @@ const ServicesCustoms = () => {
       </section>
 
       {/* SECTION NÀY: KHÔNG HIỆU ỨNG (nội dung trùng H1) */}
-      <Section
-        title="Tiximax Thông Quan Hộ – Giải pháp xử lý hải quan nhanh, chính xác & minh bạch"
-        bg="white"
-        noMotion
-      >
+      <Section bg="white" noMotion>
         <>
           <p>
             Trong bối cảnh vận chuyển hàng quốc tế ngày càng phổ biến, thủ tục

@@ -140,20 +140,37 @@ const New = () => {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white to-amber-50/30">
-      {/* ===================== HEADER VÀNG ===================== */}
-      <section className="relative overflow-hidden mb-12 lg:mb-16">
-        {/* Nền gradient vàng */}
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-300 via-amber-400 to-amber-500" />
-        {/* Overlay nhẹ cho dịu mắt */}
-        <div className="absolute inset-0 bg-white/10 mix-blend-overlay" />
-        <div className="relative max-w-5xl mx-auto px-6 py-16 lg:py-20 text-center">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 uppercase drop-shadow">
-            Tin tức & Bản tin Tiximax
-          </h1>
-          <p className="mt-5 text-lg sm:text-xl text-gray-800 max-w-3xl mx-auto leading-relaxed font-medium">
-            Cập nhật lịch bay, case thực tế và insight logistics đa quốc gia
-            giúp bạn tối ưu dòng hàng & chi phí.
-          </p>
+      {/* ===================== HEADER ĐỒNG BỘ ===================== */}
+      <section className="relative overflow-hidden mb-12 lg:mb-16 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+        {/* Highlight amber giống các page khác */}
+        <div
+          className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] 
+    from-amber-500/25 via-transparent to-transparent"
+        />
+
+        <div className="relative max-w-5xl mx-auto px-6 py-16 lg:py-24">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="space-y-5 text-white text-left"
+          >
+            {/* Eyebrow label */}
+            <p className="text-xs md:text-sm font-semibold tracking-[0.25em] text-amber-300 uppercase">
+              Tiximax Logistics
+            </p>
+
+            {/* Main Heading */}
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight">
+              Tin tức & Bản tin Tiximax
+            </h1>
+
+            {/* Sub description */}
+            <p className="text-sm sm:text-base text-gray-200 max-w-3xl leading-relaxed">
+              Cập nhật lịch bay, case thực tế và insight logistics đa quốc gia
+              giúp bạn tối ưu dòng hàng & chi phí vận hành.
+            </p>
+          </motion.div>
         </div>
       </section>
       {/* ===================================================== */}

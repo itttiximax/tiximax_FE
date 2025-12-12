@@ -56,35 +56,32 @@ const Contact = () => {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white to-amber-50/30 text-gray-900">
-      {/* ========= HEADER WITH COLOR BACKGROUND ========= */}
-      {/* ========= HEADER – YELLOW VERSION ========= */}
-      <section className="relative overflow-hidden">
-        {/* Nền vàng */}
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-300 via-amber-400 to-amber-500"></div>
+      {/* ========= HEADER – ĐỒNG BỘ VỚI CÁC PAGE KHÁC ========= */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+        {/* Vệt sáng amber giống các page khác */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500/25 via-transparent to-transparent" />
 
-        {/* Hiệu ứng sáng nhẹ */}
-        <div className="absolute inset-0 bg-white/10 mix-blend-overlay"></div>
-
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 text-center">
-          <motion.h1
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+          <motion.div
             variants={fadeUp}
             initial="hidden"
             animate="show"
-            className="text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-wide text-gray-900 drop-shadow"
+            className="space-y-5 text-white"
           >
-            Liên hệ với chúng tôi
-          </motion.h1>
+            <p className="text-xs md:text-sm font-semibold tracking-[0.25em] text-amber-300 uppercase">
+              Tiximax Logistics
+            </p>
 
-          <motion.p
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            transition={{ delay: 0.15 }}
-            className="mt-5 max-w-2xl mx-auto text-base sm:text-lg text-gray-800 leading-relaxed font-medium"
-          >
-            Tiximax luôn sẵn sàng hỗ trợ — tư vấn vận chuyển, mua hộ quốc tế và
-            mọi yêu cầu của bạn.
-          </motion.p>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight">
+              Liên hệ với Tiximax
+            </h1>
+
+            <p className="text-sm sm:text-base text-gray-200 max-w-2xl leading-relaxed">
+              Tiximax luôn sẵn sàng hỗ trợ — tư vấn vận chuyển, mua hộ quốc tế
+              và giải đáp mọi yêu cầu của bạn qua điện thoại, email hoặc form
+              liên hệ.
+            </p>
+          </motion.div>
         </div>
       </section>
 

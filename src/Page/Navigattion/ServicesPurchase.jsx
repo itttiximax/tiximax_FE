@@ -80,13 +80,6 @@ const ServicesPurchase = () => {
             </h1>
 
             <div className="mt-2 mb-2 h-[3px] w-24 mx-auto bg-amber-500 rounded-full" />
-
-            <p className="max-w-3xl mx-auto text-sm sm:text-base md:text-lg text-gray-200 leading-relaxed text-center">
-              Dịch vụ <strong>Tiximax mua hộ</strong> hỗ trợ người dùng Việt mua
-              hàng quốc tế về nhanh, an toàn và minh bạch với đa dạng tuyến, quy
-              trình rõ ràng và nhiều ưu điểm vượt trội.
-            </p>
-
             <div className="mt-4 flex flex-wrap gap-4 justify-center">
               <Link
                 to="/contact"
@@ -106,7 +99,7 @@ const ServicesPurchase = () => {
       </section>
 
       {/* GIỚI THIỆU DỊCH VỤ – trắng, KHÔNG hiệu ứng */}
-      <Section title="Giới thiệu dịch vụ mua hộ Tiximax" bg="white" noMotion>
+      <Section bg="white" noMotion>
         <>
           <p>
             Tiximax là đơn vị cung cấp dịch vụ mua hộ chuyên tuyến giữa Việt Nam

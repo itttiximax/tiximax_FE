@@ -92,11 +92,7 @@ const ServicesShipping = () => {
       </section>
 
       {/* SECTION NÀY: KHÔNG HIỆU ỨNG */}
-      <Section
-        title="Tiximax vận chuyển hàng quốc tế – Giải pháp chuyên biệt cho SME và cá nhân"
-        bg="white"
-        noMotion
-      >
+      <Section bg="white" noMotion>
         <>
           <p>
             Bạn là SME nhập hàng hoặc cá nhân cần gửi hàng quốc tế nhưng ngại

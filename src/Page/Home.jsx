@@ -21,12 +21,11 @@ const Home = () => {
       {/* About section */}
       <About />
 
-      {/* About section */}
-      <Vision />
-
       {/* Service Page section - Dịch vụ quốc tế */}
       <ServicePage />
 
+      {/* About section */}
+      <Vision />
       {/* Sẻvice Page section - Quy trình 5 bước */}
       <Service />
 

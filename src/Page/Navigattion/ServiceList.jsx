@@ -111,7 +111,7 @@ const orderSteps = [
 const ServiceList = () => {
   return (
     <main className="min-h-screen bg-gradient-to-b from-white to-amber-50/40">
-      {/* Hero / Title Page – style giống AboutUs */}
+      {/* ================= HERO ================= */}
       <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500/25 via-transparent to-transparent" />
         <div className="max-w-5xl mx-auto px-6 lg:px-10 py-16 lg:py-24 relative">
@@ -129,21 +129,21 @@ const ServiceList = () => {
             </h1>
             <p className="text-sm md:text-base text-gray-200 max-w-2xl leading-relaxed">
               Mua hộ, đấu giá, vận chuyển, thông quan và ký gửi kho từ Nhật,
-              Hàn, Mỹ, Indonesia về Việt Nam với quy trình minh bạch, tối ưu chi
-              phí và trải nghiệm tử tế cho khách hàng.
+              Hàn, Mỹ, Indonesia về Việt Nam với quy trình minh bạch và tối ưu
+              chi phí cho khách hàng.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* TOP SERVICES – KHÔNG HIỆU ỨNG */}
+      {/* ================= TOP SERVICES ================= */}
       <section className="bg-gray-50 py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="text-center mb-12">
             <p className="text-xs md:text-sm font-semibold tracking-[0.25em] text-amber-600 uppercase">
               Tiximax
             </p>
-            <h2 className="mt-3 text-2xl md:text-3xl font-extrabold text-gray-900">
+            <h2 className="mt-3 text-xl md:text-3xl font-extrabold text-gray-900">
               Dịch vụ vận chuyển & mua hộ quốc tế
             </h2>
             <div className="mt-4 mx-auto h-[2px] w-16 bg-amber-500 rounded-full" />
@@ -156,10 +156,10 @@ const ServiceList = () => {
                 className="bg-amber-100 rounded-2xl shadow-sm border border-amber-200 px-8 py-9 text-center hover:shadow-md hover:-translate-y-1 transition-all duration-200"
               >
                 <div className="flex justify-center mb-4">{s.icon}</div>
-                <h3 className="text-base md:text-lg font-bold tracking-wide text-gray-900">
+                <h3 className="text-lg md:text-xl font-bold tracking-wide text-gray-900">
                   {s.title}
                 </h3>
-                <p className="mt-4 text-base text-gray-700 leading-relaxed">
+                <p className="mt-4 text-base md:text-lg text-gray-700 leading-relaxed">
                   {s.desc}
                 </p>
               </div>
@@ -168,7 +168,7 @@ const ServiceList = () => {
         </div>
       </section>
 
-      {/* Services List – BG TRẮNG, vẫn có hiệu ứng */}
+      {/* ================= SERVICES LIST ================= */}
       <motion.section
         className="py-16 lg:py-20 bg-white"
         initial="hidden"
@@ -213,7 +213,7 @@ const ServiceList = () => {
                 </div>
                 <div className="p-7 space-y-3">
                   <h3 className="text-xl font-bold text-gray-900">{s.title}</h3>
-                  <p className="text-base text-gray-700 leading-relaxed">
+                  <p className="text-base md:text-lg text-gray-700 leading-relaxed">
                     {s.desc}
                   </p>
                   <ul className="mt-3 space-y-2 text-base text-gray-800">
@@ -231,7 +231,7 @@ const ServiceList = () => {
         </div>
       </motion.section>
 
-      {/* Quy trình đơn hàng – vẫn hiệu ứng */}
+      {/* ================= ORDER STEPS ================= */}
       <motion.section
         className="py-16 lg:py-20 bg-gray-50"
         initial="hidden"
@@ -265,7 +265,7 @@ const ServiceList = () => {
                   <span className="flex justify-center mb-4">
                     <Icon className="w-8 h-8 text-amber-600" />
                   </span>
-                  <p className="font-bold text-base md:text-lg text-gray-900 tracking-wide">
+                  <p className="font-bold text-lg md:text-xl text-gray-900 tracking-wide">
                     {step.title}
                   </p>
                   <p className="text-gray-700 text-sm md:text-base mt-3 leading-relaxed">
