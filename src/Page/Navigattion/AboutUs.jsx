@@ -187,7 +187,7 @@ const AboutUs = () => {
       </section>
 
       {/* Vision - List Style */}
-      <section className="py-12 lg:py-16">
+      <section id="vision" className="py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="bg-white shadow-lg hover:shadow-xl transition-shadow rounded-2xl p-6 lg:p-12">
             {/* Title Section */}
@@ -273,7 +273,7 @@ const AboutUs = () => {
       </section>
 
       {/* Mission - List Style */}
-      <section className="py-12 lg:py-16">
+      <section id="mission" className="py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="bg-white shadow-lg hover:shadow-xl transition-shadow rounded-2xl p-6 lg:p-12">
             {/* Title Section */}
@@ -437,7 +437,7 @@ const AboutUs = () => {
       </section>
 
       {/* Core Values - List Style */}
-      <section className="py-12 lg:py-16">
+      <section id="core-values" className="py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="bg-white shadow-lg hover:shadow-xl transition-shadow rounded-2xl p-6 lg:p-12">
             {/* Title Section */}
@@ -512,7 +512,10 @@ const AboutUs = () => {
       </section>
 
       {/* Commitments */}
-      <section className="py-12 lg:py-16 bg-gradient-to-br from-gray-50 to-amber-50/30">
+      <section
+        id="commitments"
+        className="py-12 lg:py-16 bg-gradient-to-br from-gray-50 to-amber-50/30"
+      >
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-700 px-4 py-2 rounded-full mb-4">

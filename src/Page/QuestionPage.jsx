@@ -82,8 +82,26 @@ const QuestionPage = () => {
     {
       id: 4,
       question: "Làm thế nào để theo dõi đơn hàng của tôi?",
-      answer:
-        "Hiện Tiximax có hệ thống Tracking - cho phép khách hàng theo dõi đơn hàng dựa trên mã vận đơn của mình. Bạn có thể truy cập vào website tiximax.net và nhấn nút '' Tracking đơn hàng '' trên thanh menu để tiến hành tra cứu thông tin.",
+      answer: (
+        <>
+          Hiện Tiximax có{" "}
+          <Link
+            to="/tracking"
+            className="text-yellow-600 hover:text-yellow-700 font-semibold underline"
+          >
+            hệ thống Tracking
+          </Link>{" "}
+          - cho phép khách hàng theo dõi đơn hàng dựa trên mã vận đơn của mình.
+          Bạn có thể truy cập vào website tiximax.net và nhấn nút{" "}
+          <Link
+            to="/tracking"
+            className="text-yellow-600 hover:text-yellow-700 font-semibold underline"
+          >
+            Tracking đơn hàng
+          </Link>{" "}
+          trên thanh menu để tiến hành tra cứu thông tin.
+        </>
+      ),
     },
   ];
 
@@ -247,11 +265,6 @@ const QuestionPage = () => {
 
                 {/* Submit Button */}
                 <div>
-                  <p className="text-gray-700 mb-4 leading-relaxed px-4">
-                    Lưu ý: Để được tư vấn chính xác nhất, hãy điền đầy đủ thông
-                    tin
-                  </p>
-                  <div className="flex items-center justify-center gap-3 mb-4"></div>
                   <button
                     onClick={handleSubmit}
                     className="w-full md:w-auto px-12 py-4 bg-gray-900 text-white font-bold uppercase rounded-lg hover:bg-gray-800 transition-colors duration-300 shadow-lg"

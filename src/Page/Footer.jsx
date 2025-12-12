@@ -8,6 +8,7 @@ import {
   MessageCircle,
   Instagram,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -119,35 +120,58 @@ const Footer = () => {
           </div>
 
           {/* --- Cột 4: Dịch vụ --- */}
+          {/* --- Cột 4: Dịch vụ --- */}
           <div>
             <div className="relative mb-6 inline-block">
-              <h3 className=" text-xl font-bold text-yellow-500  px-3 py-1">
+              <h3 className="text-xl font-bold text-yellow-500 px-3 py-1">
                 Dịch vụ
               </h3>
               <div className="absolute -bottom-2 left-0 w-8 h-0.5 bg-yellow-400"></div>
             </div>
 
             {/* Nội dung dịch vụ - nền đen */}
-            <div className="text-gray-200 ">
-              <ul className="space-y-3 mt-1">
-                {[
-                  "Dịch vụ vận chuyển",
-                  "Dịch vụ mua hộ",
-                  "Dịch vụ đấu giá",
-                  "Dịch vụ thông quan hộ",
-                  "Dịch vụ ký gửi kho",
-                ].map((service, index) => (
-                  <li key={index}>
-                    <a
-                      href="#"
-                      className="group flex items-center text-gray-300 hover:text-yellow-400 transition-all duration-300 text-sm"
-                    >
-                      <span className="group-hover:translate-x-1 transition-transform duration-300">
-                        {service}
-                      </span>
-                    </a>
-                  </li>
-                ))}
+            <div className="text-gray-200">
+              <ul className="space-y-3 text-sm mt-1">
+                <li>
+                  <a
+                    href="/services/shipping"
+                    className="hover:text-yellow-400 transition-colors"
+                  >
+                    Dịch vụ vận chuyển
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/services/purchase"
+                    className="hover:text-yellow-400 transition-colors"
+                  >
+                    Dịch vụ mua hộ
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/services/auction"
+                    className="hover:text-yellow-400 transition-colors"
+                  >
+                    Dịch vụ đấu giá
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/services/customs"
+                    className="hover:text-yellow-400 transition-colors"
+                  >
+                    Dịch vụ thông quan hộ
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/services/storage"
+                    className="hover:text-yellow-400 transition-colors"
+                  >
+                    Dịch vụ ký gửi kho
+                  </a>
+                </li>
               </ul>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import PICCEO from "../../assets/PICCEO.png";
 
 const fadeUp = {
@@ -30,85 +31,92 @@ const Vision = () => {
         nhuận, mà dựa vào con người và những giá trị cốt lõi. Tiximax mang sứ
         mệnh kết nối thế giới bằng logistics, thanh toán và mua bán toàn cầu.
         <br />
-        {/* Tiximax mang sứ mệnh kết nối thế giới bằng logistics, thanh toán và mua
-        bán toàn cầu. */}
       </motion.p>
 
       {/* PROFILE + TEXT AROUND */}
       <div className="relative max-w-4xl mx-auto mt-20">
-        {/* PROFILE IMAGE */}
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-          className="flex justify-center"
-        >
+        {/* PROFILE IMAGE - Bỏ animation */}
+        <div className="flex justify-center">
           <img
             src={PICCEO}
             alt="CEO"
             className="w-[430px] h-[430px] object-cover rounded-full"
-            // Nếu không muốn bo tròn: className="w-[430px] h-[430px] object-cover"
           />
-        </motion.div>
+        </div>
 
         {/* TEXT LABELS AROUND IMAGE */}
-        {/* Top Left */}
+        {/* Top Left - Tầm Nhìn */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="absolute left-0 top-0 transform -translate-x-10 -translate-y-6 text-center"
         >
-          <h3 className="font-bold text-gray-900 text-lg uppercase">
+          <h3 className="font-bold text-gray-900 text-2xl uppercase">
             Tầm Nhìn
           </h3>
-          <span className="text-amber-600 font-semibold text-sm cursor-pointer hover:text-amber-700">
+
+          <a
+            href="/about#vision"
+            className="text-amber-600 font-semibold text-base inline-block hover:text-amber-700 transition-colors"
+          >
             Xem thêm &gt;&gt;
-          </span>
+          </a>
         </motion.div>
 
-        {/* Top Right */}
+        {/* Top Right - Sứ Mệnh */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="absolute right-0 top-0 transform translate-x-10 -translate-y-6 text-center"
         >
-          <h3 className="font-bold text-gray-900 text-lg uppercase">Sứ Mệnh</h3>
-          <span className="text-amber-600 font-semibold text-sm cursor-pointer hover:text-amber-700">
+          <h3 className="font-bold text-gray-900 text-2xl uppercase">
+            Sứ Mệnh
+          </h3>
+          <Link
+            to="/about#mission"
+            className="text-amber-600 font-semibold text-base inline-block hover:text-amber-700 transition-colors"
+          >
             Xem thêm &gt;&gt;
-          </span>
+          </Link>
         </motion.div>
 
-        {/* Bottom Left */}
+        {/* Bottom Left - Giá Trị Cốt Lõi */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="absolute left-0 bottom-0 transform -translate-x-10 translate-y-6 text-center"
         >
-          <h3 className="font-bold text-gray-900 text-lg uppercase">
+          <h3 className="font-bold text-gray-900 text-2xl uppercase">
             Giá Trị Cốt Lõi
           </h3>
-          <span className="text-amber-600 font-semibold text-sm cursor-pointer hover:text-amber-700">
+          <Link
+            to="/about#core-values"
+            className="text-amber-600 font-semibold text-base inline-block hover:text-amber-700 transition-colors"
+          >
             Xem thêm &gt;&gt;
-          </span>
+          </Link>
         </motion.div>
 
-        {/* Bottom Right */}
+        {/* Bottom Right - Cam Kết */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="absolute right-0 bottom-0 transform translate-x-10 translate-y-6 text-center"
         >
-          <h3 className="font-bold text-gray-900 text-lg uppercase">
-            Quy Tắc Ứng Xử
+          <h3 className="font-bold text-gray-900 text-2xl uppercase">
+            Cam Kết
           </h3>
-          <span className="text-amber-600 font-semibold text-sm cursor-pointer hover:text-amber-700">
+
+          <a
+            href="/about#commitments"
+            className="text-amber-600 font-semibold text-base inline-block hover:text-amber-700 transition-colors"
+          >
             Xem thêm &gt;&gt;
-          </span>
+          </a>
         </motion.div>
       </div>
     </main>

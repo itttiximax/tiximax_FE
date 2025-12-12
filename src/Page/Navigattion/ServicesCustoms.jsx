@@ -84,12 +84,14 @@ const ServicesCustoms = () => {
             <div className="mt-4 flex flex-wrap gap-4 justify-center">
               <Link
                 to="/contact"
+                onClick={() => window.scrollTo(0, 0)}
                 className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700"
               >
                 Liên hệ tư vấn thông quan hộ
               </Link>
               <Link
                 to="/tracking"
+                onClick={() => window.scrollTo(0, 0)}
                 className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
               >
                 Tra cứu tình trạng lô hàng
@@ -104,7 +106,7 @@ const ServicesCustoms = () => {
         <>
           <p>
             Trong bối cảnh vận chuyển hàng quốc tế ngày càng phổ biến, thủ tục
-            hải quan tại sân bay lại trở thành “nút thắt” lớn khiến nhiều khách
+            hải quan tại sân bay lại trở thành "nút thắt" lớn khiến nhiều khách
             hàng lo lắng. Chỉ cần sai 1 mã HS, thiếu 1 chữ trong hóa đơn hoặc
             đánh giá nhầm thuế suất, hàng có thể bị giữ lại, kiểm hóa kéo dài
             hoặc phát sinh phí lưu kho cao. Đó là lý do{" "}
@@ -118,7 +120,7 @@ const ServicesCustoms = () => {
             định từng nhóm hàng: hàng cá nhân, hàng thương mại, đồ điện tử, mỹ
             phẩm, thực phẩm khô, hàng mẫu, hàng giá trị cao hoặc hàng cần chứng
             từ chuyên ngành. Nhờ quy trình chuẩn hóa và kiểm tra kỹ từ đầu,
-            Tiximax giúp mọi hồ sơ “đi mượt”, ít khi bị yêu cầu bổ sung hoặc
+            Tiximax giúp mọi hồ sơ "đi mượt", ít khi bị yêu cầu bổ sung hoặc
             kiểm hóa lại. Dịch vụ phù hợp cho khách nhập hàng từ Mỹ, Nhật, Hàn
             Quốc, Indonesia cũng như các shop kinh doanh cần thông quan nhanh
             trong ngày để kịp giao đơn cho khách.
@@ -424,12 +426,14 @@ const ServicesCustoms = () => {
             <div className="flex flex-wrap gap-4 justify-center mt-2">
               <Link
                 to="/contact"
+                onClick={() => window.scrollTo(0, 0)}
                 className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold text-white bg-amber-600 hover:bg-amber-700"
               >
                 Nhận tư vấn &amp; báo giá thông quan
               </Link>
               <Link
                 to="/tracking"
+                onClick={() => window.scrollTo(0, 0)}
                 className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm sm:text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100"
               >
                 Theo dõi tình trạng lô hàng
