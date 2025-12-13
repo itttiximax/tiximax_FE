@@ -6,7 +6,6 @@ import {
   Package,
   ChevronLeft,
   ChevronRight,
-  Calendar,
   RefreshCw,
   Eye,
   Plus,
@@ -21,6 +20,8 @@ import {
   CheckSquare,
   Square,
   AlertCircle,
+  User,
+  FileText,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import orderlinkService from "../../Services/StaffPurchase/orderlinkService";
@@ -47,8 +48,10 @@ const OrderLinkList = () => {
   const [showCreatePurchase, setShowCreatePurchase] = useState(false);
   const [selectedOrderForPurchase, setSelectedOrderForPurchase] =
     useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterDate, setFilterDate] = useState("");
+
+  // Search filters
+  const [orderCodeSearch, setOrderCodeSearch] = useState("");
+  const [customerCodeSearch, setCustomerCodeSearch] = useState("");
 
   // Selected links for purchase with shop tracking
   const [selectedLinksForPurchase, setSelectedLinksForPurchase] = useState({});
@@ -80,9 +83,7 @@ const OrderLinkList = () => {
   ];
 
   const getShopColor = (shopName, orderLinks, linkId) => {
-    // Handle empty/null/undefined shop names
     if (!shopName || shopName === "string" || shopName === "N/A") {
-      // Use linkId to generate unique color for each empty shop
       let hash = linkId || 0;
       const colorIndex = Math.abs(hash) % shopColorPalette.length;
       return shopColorPalette[colorIndex];
@@ -113,7 +114,6 @@ const OrderLinkList = () => {
     return shopColorPalette[colorIndex];
   };
 
-  // Get selected shop for an order
   const getSelectedShop = (orderId, orderLinks) => {
     const selections = selectedLinksForPurchase[orderId] || {};
     const selectedLinkIds = Object.keys(selections);
@@ -127,7 +127,6 @@ const OrderLinkList = () => {
     return firstSelectedLink?.groupTag || null;
   };
 
-  // Calculate total price of selected links
   const getSelectedTotal = (orderId, orderLinks) => {
     const selections = selectedLinksForPurchase[orderId] || {};
     const selectedLinkIds = Object.keys(selections);
@@ -143,43 +142,63 @@ const OrderLinkList = () => {
     }, 0);
   };
 
-  const fetchOrders = useCallback(async (page = 0, size = 15) => {
-    try {
-      setLoading(true);
-      setError(null);
+  const fetchOrders = useCallback(
+    async (page = 0, size = 10) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const response = await orderlinkService.getOrdersWithLinks(
-        page,
-        size,
-        "MUA_HO"
-      );
+        // Build filters object
+        const filters = {
+          orderType: "MUA_HO",
+        };
 
-      if (response?.content) {
-        setOrders(response.content);
-        setPagination({
-          pageNumber: response.number ?? page,
-          pageSize: response.size ?? size,
-          totalPages: response.totalPages ?? 0,
-          totalElements: response.totalElements ?? 0,
-          first: response.first ?? page === 0,
-          last: response.last ?? true,
-        });
-      } else {
+        if (orderCodeSearch.trim()) {
+          filters.orderCode = orderCodeSearch.trim();
+        }
+
+        if (customerCodeSearch.trim()) {
+          filters.customerCode = customerCodeSearch.trim();
+        }
+
+        const response = await orderlinkService.getOrdersWithLinks(
+          page,
+          size,
+          filters
+        );
+
+        if (response?.content) {
+          setOrders(response.content);
+          setPagination({
+            pageNumber: response.number ?? page,
+            pageSize: response.size ?? size,
+            totalPages: response.totalPages ?? 0,
+            totalElements: response.totalElements ?? 0,
+            first: response.first ?? page === 0,
+            last: response.last ?? true,
+          });
+        } else {
+          setOrders([]);
+          setPagination((prev) => ({
+            ...prev,
+            totalElements: 0,
+            totalPages: 0,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        const errorMessage =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Unable to load order list.";
+        setError(errorMessage);
         setOrders([]);
-        setPagination((prev) => ({ ...prev, totalElements: 0, totalPages: 0 }));
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Unable to load order list.";
-      setError(errorMessage);
-      setOrders([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [orderCodeSearch, customerCodeSearch]
+  );
 
   useEffect(() => {
     fetchOrders();
@@ -203,6 +222,15 @@ const OrderLinkList = () => {
     ]
   );
 
+  const handleSearch = () => {
+    fetchOrders(0, pagination.pageSize);
+  };
+
+  const handleClearSearch = () => {
+    setOrderCodeSearch("");
+    setCustomerCodeSearch("");
+  };
+
   const handleViewDetail = useCallback((linkId) => {
     setSelectedLinkId(linkId);
   }, []);
@@ -218,7 +246,6 @@ const OrderLinkList = () => {
     }));
   }, []);
 
-  // Toggle select link with shop validation
   const toggleSelectLink = (
     orderId,
     linkId,
@@ -229,7 +256,6 @@ const OrderLinkList = () => {
     const currentSelections = selectedLinksForPurchase[orderId] || {};
     const isCurrentlySelected = currentSelections[linkId];
 
-    // If deselecting, just remove it
     if (isCurrentlySelected) {
       const { [linkId]: removed, ...rest } = currentSelections;
       setSelectedLinksForPurchase((prev) => ({
@@ -239,7 +265,6 @@ const OrderLinkList = () => {
       return;
     }
 
-    // If selecting, check shop constraint
     const selectedShop = getSelectedShop(orderId, orderLinks);
 
     if (selectedShop && selectedShop !== shopName) {
@@ -250,7 +275,6 @@ const OrderLinkList = () => {
       return;
     }
 
-    // Valid selection
     setSelectedLinksForPurchase((prev) => ({
       ...prev,
       [orderId]: {
@@ -260,10 +284,8 @@ const OrderLinkList = () => {
     }));
   };
 
-  // Select all links in order - only same shop
   const selectAllLinksInOrder = (order, selectAll) => {
     if (!selectAll) {
-      // Deselect all
       setSelectedLinksForPurchase((prev) => {
         const { [order.orderId]: removed, ...rest } = prev;
         return rest;
@@ -271,14 +293,12 @@ const OrderLinkList = () => {
       return;
     }
 
-    // Select all available links
     const availableLinks = order.orderLinks.filter(
       (link) => !["DA_MUA", "HUY", "DA_HUY"].includes(link.status)
     );
 
     if (availableLinks.length === 0) return;
 
-    // Group by shop
     const linksByShop = {};
     availableLinks.forEach((link) => {
       const shop = link.groupTag || "N/A";
@@ -288,7 +308,6 @@ const OrderLinkList = () => {
       linksByShop[shop].push(link);
     });
 
-    // If multiple shops, ask user to select manually
     if (Object.keys(linksByShop).length > 1) {
       toast.error(
         "This order has items from multiple shops. Please select items by each shop.",
@@ -297,7 +316,6 @@ const OrderLinkList = () => {
       return;
     }
 
-    // Select all from the only shop
     const selections = {};
     availableLinks.forEach((link) => {
       selections[link.linkId] = link.trackingCode;
@@ -322,7 +340,6 @@ const OrderLinkList = () => {
         return;
       }
 
-      // Validate same shop
       const selections = selectedLinksForPurchase[order.orderId] || {};
       const selectedLinkIds = Object.keys(selections);
       const selectedLinks = order.orderLinks.filter((link) =>
@@ -348,7 +365,6 @@ const OrderLinkList = () => {
   }, []);
 
   const handlePurchaseSuccess = useCallback(() => {
-    // Clear selections for this order
     if (selectedOrderForPurchase) {
       setSelectedLinksForPurchase((prev) => {
         const { [selectedOrderForPurchase.orderId]: removed, ...rest } = prev;
@@ -478,16 +494,6 @@ const OrderLinkList = () => {
     return texts[status] || status;
   };
 
-  const filteredOrders = orders
-    .filter((order) =>
-      order.orderCode.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .filter((order) =>
-      filterDate
-        ? new Date(order.createdAt).toISOString().slice(0, 10) === filterDate
-        : true
-    );
-
   const handlePageSizeChange = (e) => {
     const newSize = parseInt(e.target.value);
     setPagination((prev) => ({ ...prev, pageSize: newSize }));
@@ -545,28 +551,52 @@ const OrderLinkList = () => {
 
         {/* Controls Section */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
-          <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-3 flex-1">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+            <div className="flex flex-col sm:flex-row gap-3 flex-1 w-full">
+              <div className="relative flex-1">
+                <FileText className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Search by order code..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="Search by Order Code (e.g., MH-056A98)..."
+                  value={orderCodeSearch}
+                  onChange={(e) => setOrderCodeSearch(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
-              <div className="relative">
-                <Calendar className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <div className="relative flex-1">
+                <User className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
-                  type="date"
-                  value={filterDate}
-                  onChange={(e) => setFilterDate(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  type="text"
+                  placeholder="Search by Customer Code (e.g., C-0192)..."
+                  value={customerCodeSearch}
+                  onChange={(e) => setCustomerCodeSearch(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleSearch}
+                disabled={loading}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                <Search className="w-4 h-4" />
+                Search
+              </button>
+
+              {(orderCodeSearch || customerCodeSearch) && (
+                <button
+                  onClick={handleClearSearch}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Clear
+                </button>
+              )}
 
               <select
                 value={pagination.pageSize}
@@ -575,10 +605,10 @@ const OrderLinkList = () => {
                 className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100"
               >
                 <option value={10}>10 / page</option>
-                <option value={15}>15 / page</option>
                 <option value={20}>20 / page</option>
-                <option value={30}>30 / page</option>
                 <option value={50}>50 / page</option>
+                <option value={100}>100 / page</option>
+                <option value={200}>200 / page</option>
               </select>
             </div>
           </div>
@@ -595,24 +625,24 @@ const OrderLinkList = () => {
         )}
 
         {/* Empty State */}
-        {!loading && !error && filteredOrders.length === 0 && (
+        {!loading && !error && orders.length === 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
             <ShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <h3 className="text-base font-medium text-gray-900 mb-2">
               No orders found
             </h3>
             <p className="text-gray-500 text-sm">
-              {searchTerm
-                ? "No orders match your search keyword."
+              {orderCodeSearch || customerCodeSearch
+                ? "No orders match your search criteria."
                 : "There are no purchase orders in the system right now."}
             </p>
           </div>
         )}
 
         {/* Orders List */}
-        {filteredOrders.length > 0 && (
+        {orders.length > 0 && (
           <div className="space-y-3">
-            {filteredOrders.map((order, index) => {
+            {orders.map((order, index) => {
               const isPinned = !!order.pinnedAt;
               const availableLinks =
                 order.orderLinks?.filter(
@@ -1028,7 +1058,7 @@ const OrderLinkList = () => {
         )}
 
         {/* Pagination */}
-        {filteredOrders.length > 0 && (
+        {orders.length > 0 && (
           <div className="flex items-center justify-between mt-4 bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-3">
             <button
               onClick={() => handlePageChange(pagination.pageNumber - 1)}

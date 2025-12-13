@@ -18,6 +18,8 @@ import {
   CheckSquare,
   Square,
   AlertCircle,
+  FileText, // ✅ THÊM
+  User, // ✅ THÊM (đã có sẵn nhưng chưa dùng cho search)
 } from "lucide-react";
 import toast from "react-hot-toast";
 import orderlinkService from "../../Services/StaffPurchase/orderlinkService";
@@ -34,7 +36,7 @@ const OrderAuctionList = () => {
   const [expandedOrders, setExpandedOrders] = useState({});
   const [pagination, setPagination] = useState({
     pageNumber: 0,
-    pageSize: 15,
+    pageSize: 10,
     totalPages: 0,
     totalElements: 0,
     first: true,
@@ -43,8 +45,14 @@ const OrderAuctionList = () => {
   const [showCreatePurchase, setShowCreatePurchase] = useState(false);
   const [selectedOrderForPurchase, setSelectedOrderForPurchase] =
     useState(null);
+
+  // Frontend search (existing)
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState("");
+
+  // ✅ THÊM: Backend search states
+  const [orderCodeSearch, setOrderCodeSearch] = useState("");
+  const [customerCodeSearch, setCustomerCodeSearch] = useState("");
 
   // Selected links for auction purchase
   const [selectedLinksForPurchase, setSelectedLinksForPurchase] = useState({});
@@ -73,43 +81,63 @@ const OrderAuctionList = () => {
     }, 0);
   };
 
-  const fetchOrders = useCallback(async (page = 0, size = 15) => {
-    try {
-      setLoading(true);
-      setError(null);
+  const fetchOrders = useCallback(
+    async (page = 0, size = 10) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const response = await orderlinkService.getOrdersWithLinks(
-        page,
-        size,
-        "DAU_GIA"
-      );
+        // ✅ SỬA: Build filters object
+        const filters = {
+          orderType: "DAU_GIA",
+        };
 
-      if (response?.content) {
-        setOrders(response.content);
-        setPagination({
-          pageNumber: response.number ?? page,
-          pageSize: response.size ?? size,
-          totalPages: response.totalPages ?? 0,
-          totalElements: response.totalElements ?? 0,
-          first: response.first ?? page === 0,
-          last: response.last ?? true,
-        });
-      } else {
+        if (orderCodeSearch.trim()) {
+          filters.orderCode = orderCodeSearch.trim();
+        }
+
+        if (customerCodeSearch.trim()) {
+          filters.customerCode = customerCodeSearch.trim();
+        }
+
+        const response = await orderlinkService.getOrdersWithLinks(
+          page,
+          size,
+          filters // ✅ ĐÃ SỬA
+        );
+
+        if (response?.content) {
+          setOrders(response.content);
+          setPagination({
+            pageNumber: response.number ?? page,
+            pageSize: response.size ?? size,
+            totalPages: response.totalPages ?? 0,
+            totalElements: response.totalElements ?? 0,
+            first: response.first ?? page === 0,
+            last: response.last ?? true,
+          });
+        } else {
+          setOrders([]);
+          setPagination((prev) => ({
+            ...prev,
+            totalElements: 0,
+            totalPages: 0,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        const errorMessage =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Unable to load auction orders.";
+        setError(errorMessage);
         setOrders([]);
-        setPagination((prev) => ({ ...prev, totalElements: 0, totalPages: 0 }));
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Unable to load auction orders.";
-      setError(errorMessage);
-      setOrders([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [orderCodeSearch, customerCodeSearch]
+  ); // ✅ THÊM dependencies
 
   useEffect(() => {
     fetchOrders();
@@ -133,6 +161,16 @@ const OrderAuctionList = () => {
     ]
   );
 
+  // ✅ THÊM: Search handlers
+  const handleSearch = () => {
+    fetchOrders(0, pagination.pageSize);
+  };
+
+  const handleClearSearch = () => {
+    setOrderCodeSearch("");
+    setCustomerCodeSearch("");
+  };
+
   const handleViewDetail = useCallback((linkId) => {
     setSelectedLinkId(linkId);
   }, []);
@@ -153,7 +191,6 @@ const OrderAuctionList = () => {
     const currentSelections = selectedLinksForPurchase[orderId] || {};
     const isCurrentlySelected = currentSelections[linkId];
 
-    // If deselecting, just remove it
     if (isCurrentlySelected) {
       const { [linkId]: removed, ...rest } = currentSelections;
       setSelectedLinksForPurchase((prev) => ({
@@ -163,7 +200,6 @@ const OrderAuctionList = () => {
       return;
     }
 
-    // Valid selection
     setSelectedLinksForPurchase((prev) => ({
       ...prev,
       [orderId]: {
@@ -176,7 +212,6 @@ const OrderAuctionList = () => {
   // Select all links in order
   const selectAllLinksInOrder = (order, selectAll) => {
     if (!selectAll) {
-      // Deselect all
       setSelectedLinksForPurchase((prev) => {
         const { [order.orderId]: removed, ...rest } = prev;
         return rest;
@@ -184,7 +219,6 @@ const OrderAuctionList = () => {
       return;
     }
 
-    // Select all available links
     const availableLinks = order.orderLinks.filter(
       (link) => !["DA_MUA", "HUY", "DA_HUY"].includes(link.status)
     );
@@ -229,7 +263,6 @@ const OrderAuctionList = () => {
   }, []);
 
   const handlePurchaseSuccess = useCallback(() => {
-    // Clear selections for this order
     if (selectedOrderForPurchase) {
       setSelectedLinksForPurchase((prev) => {
         const { [selectedOrderForPurchase.orderId]: removed, ...rest } = prev;
@@ -336,6 +369,7 @@ const OrderAuctionList = () => {
     return texts[status] || status;
   };
 
+  // Frontend filtering (keep existing)
   const filteredOrders = orders
     .filter((order) =>
       order.orderCode.toLowerCase().includes(searchTerm.toLowerCase())
@@ -401,11 +435,65 @@ const OrderAuctionList = () => {
           </div>
         )}
 
-        {/* Controls Section */}
+        {/* ✅ THÊM: Backend Search Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
+          <div className="flex flex-col gap-3">
+            {/* Row 1: Search inputs */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <FileText className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search by Order Code (e.g., DG-001)..."
+                  value={orderCodeSearch}
+                  onChange={(e) => setOrderCodeSearch(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="relative flex-1">
+                <User className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search by Customer Code (e.g., CH-0192)..."
+                  value={customerCodeSearch}
+                  onChange={(e) => setCustomerCodeSearch(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* Row 2: Action buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleSearch}
+                disabled={loading}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                <Search className="w-4 h-4" />
+                Search
+              </button>
+
+              {(orderCodeSearch || customerCodeSearch) && (
+                <button
+                  onClick={handleClearSearch}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Controls Section (Frontend search) */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
           <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-3 flex-1">
-              <div className="relative flex-1 max-w-sm">
+              {/* <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
@@ -414,7 +502,7 @@ const OrderAuctionList = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
-              </div>
+              </div> */}
 
               <div className="relative">
                 <Calendar className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -433,7 +521,6 @@ const OrderAuctionList = () => {
                 className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100"
               >
                 <option value={10}>10 / page</option>
-                <option value={15}>15 / page</option>
                 <option value={20}>20 / page</option>
                 <option value={30}>30 / page</option>
                 <option value={50}>50 / page</option>

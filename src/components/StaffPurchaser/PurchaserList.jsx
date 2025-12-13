@@ -13,6 +13,8 @@ import {
   ShoppingCart,
   Eye,
   Edit3,
+  FileText, // ✅ THÊM
+  Ship, // ✅ THÊM
 } from "lucide-react";
 import toast from "react-hot-toast";
 import orderlinkService from "../../Services/StaffPurchase/orderlinkService";
@@ -89,13 +91,18 @@ const CardSkeleton = () => (
 const PurchaserList = () => {
   const [purchases, setPurchases] = useState([]);
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(100);
+  const [size, setSize] = useState(50);
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+
+  // ✅ THÊM: Backend search states
+  const [orderCodeSearch, setOrderCodeSearch] = useState("");
+  const [customerCodeSearch, setCustomerCodeSearch] = useState("");
+  const [shipmentCodeSearch, setShipmentCodeSearch] = useState("");
 
   const [cancelModal, setCancelModal] = useState({
     open: false,
@@ -133,7 +140,7 @@ const PurchaserList = () => {
           }
 
           if (updatedFields.imagePurchased !== undefined) {
-            updated.purchaseImage = updatedFields.imagePurchased; // ⭐ map ngược lại
+            updated.purchaseImage = updatedFields.imagePurchased;
           }
 
           return updated;
@@ -167,10 +174,30 @@ const PurchaserList = () => {
     try {
       setLoading(true);
       setError(null);
+
+      // ✅ THÊM: Build filters object
+      const filters = {};
+
+      if (customFilter) {
+        filters.status = customFilter;
+      }
+
+      if (orderCodeSearch.trim()) {
+        filters.orderCode = orderCodeSearch.trim();
+      }
+
+      if (customerCodeSearch.trim()) {
+        filters.customerCode = customerCodeSearch.trim();
+      }
+
+      if (shipmentCodeSearch.trim()) {
+        filters.shipmentCode = shipmentCodeSearch.trim();
+      }
+
       const res = await orderlinkService.getAllPurchases(
         customPage - 1,
         customSize,
-        customFilter
+        filters // ✅ THÊM: Pass filters object thay vì customFilter string
       );
 
       // Remove duplicates based on purchaseId
@@ -197,7 +224,14 @@ const PurchaserList = () => {
   useEffect(() => {
     fetchData(page, size, filter);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, filter, size]);
+  }, [
+    page,
+    filter,
+    size,
+    orderCodeSearch,
+    customerCodeSearch,
+    shipmentCodeSearch,
+  ]); // ✅ THÊM: dependencies
 
   const filteredPurchases = useMemo(() => {
     if (!searchTerm.trim()) return purchases;
@@ -251,6 +285,19 @@ const PurchaserList = () => {
     toast.success("Data refreshed.");
   };
 
+  // ✅ THÊM: Search handlers
+  const handleSearch = () => {
+    setPage(1);
+    fetchData(1, size, filter);
+  };
+
+  const handleClearSearch = () => {
+    setOrderCodeSearch("");
+    setCustomerCodeSearch("");
+    setShipmentCodeSearch("");
+    setPage(1);
+  };
+
   const openCancelModal = (purchase, link) => {
     setCancelModal({
       open: true,
@@ -286,7 +333,7 @@ const PurchaserList = () => {
         ...purchase,
         imagePurchased:
           purchase.imagePurchased ||
-          purchase.purchaseImage || // ⭐ THÊM DÒNG NÀY
+          purchase.purchaseImage ||
           purchase.pendingLinks?.[0]?.purchaseImage ||
           "",
       },
@@ -338,9 +385,77 @@ const PurchaserList = () => {
           </div>
         </div>
 
+        {/* ✅ THÊM: Backend Search Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
+          <div className="flex flex-col gap-3">
+            {/* Row 1: Search inputs */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <FileText className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search by Order Code (e.g., MH-90272)..."
+                  value={orderCodeSearch}
+                  onChange={(e) => setOrderCodeSearch(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="relative flex-1">
+                <User className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search by Customer Code (e.g., C032)..."
+                  value={customerCodeSearch}
+                  onChange={(e) => setCustomerCodeSearch(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="relative flex-1">
+                <Ship className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search by Shipment Code (e.g., SPX-90272)..."
+                  value={shipmentCodeSearch}
+                  onChange={(e) => setShipmentCodeSearch(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* Row 2: Action buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleSearch}
+                disabled={loading}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                <Search className="w-4 h-4" />
+                Search
+              </button>
+
+              {(orderCodeSearch ||
+                customerCodeSearch ||
+                shipmentCodeSearch) && (
+                <button
+                  onClick={handleClearSearch}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Search & Filter */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative flex-1 max-w-md">
+          {/* <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
@@ -349,7 +464,7 @@ const PurchaserList = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full rounded-xl border border-gray-200 bg-white pl-10 pr-4 py-2.5 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
             />
-          </div>
+          </div> */}
 
           <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
             {filters.map((f) => {
@@ -383,6 +498,7 @@ const PurchaserList = () => {
               <option value={20}>20 / page</option>
               <option value={50}>50 / page</option>
               <option value={100}>100 / page</option>
+              <option value={200}>200 / page</option>
             </select>
           </div>
         </div>
